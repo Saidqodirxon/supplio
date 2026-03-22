@@ -1,0 +1,145 @@
+# 🚀 SUPPLIO — B2B SUPPLY PLATFORM
+
+Supplio — bu distributor va dillerlar uchun Telegram orqali ishlaydigan buyurtma va boshqaruv tizimi.
+
+---
+
+# 🌐 LOYIHA TUZILMASI
+
+* 🌍 Landing: supplio.uz
+* ⚙️ Backend: api.supplio.uz
+* 📊 Dashboard: app.supplio.uz
+* 🧪 Demo: demo.supplio.uz
+
+---
+
+# 🔥 ASOSIY FUNKSIYALAR
+
+## 🤖 Telegram Bot
+
+* /start orqali ro‘yxatdan o‘tadi
+* mahsulotlarni ko‘rish
+* buyurtma berish
+* qarzni ko‘rish
+
+---
+
+## 🛒 Buyurtma tizimi
+
+* bot orqali buyurtma beriladi
+* admin panelda ko‘rinadi
+* status boshqariladi
+
+---
+
+## 👨‍💼 Diller & Distributor
+
+* diller register qiladi
+* distributor tasdiqlaydi
+* keyin buyurtma berishi mumkin
+
+---
+
+## 💰 Qarzdorlik tizimi
+
+* kim qancha qarzdor
+* qaysi mahsulot olgan
+* to‘lovlar hisoblanadi
+
+---
+
+## 🎁 Cashback & Aksiya
+
+* cashback foiz bilan ishlaydi
+* aksiya qo‘shish mumkin
+* distributor boshqaradi
+
+---
+
+## 📊 Dashboard
+
+* buyurtmalar
+* dillerlar
+* hisobotlar
+* to‘lovlar
+
+---
+
+## 📰 Yangiliklar
+
+* backenddan keladi
+* admin paneldan boshqariladi
+
+---
+
+## 🌍 Localization
+
+Tizim 5 tilni qo‘llaydi:
+
+* O‘zbek (latin)
+* O‘zbek (kiril)
+* Rus
+* Ingliz
+* Turk
+
+---
+
+# 🧪 DEMO
+
+Demo versiya:
+
+👉 demo.supplio.uz
+
+* login talab qilinmaydi
+* test data mavjud
+
+---
+
+# ⚙️ TEXNOLOGIYALAR
+
+* Frontend: Next.js
+* Backend: Node.js
+* DB: PostgreSQL
+* ORM: Prisma
+* Bot: Telegram API
+
+---
+
+# 🚀 ISHGA TUSHIRISH
+
+```bash
+npm install
+npm run dev
+```
+
+---
+
+# 🌐 DEPLOY
+
+* VPS (Hetzner tavsiya etiladi)
+* Nginx + PM2
+* SSL (Let's Encrypt)
+
+---
+
+# 📌 HOLATI
+
+✅ Telegram bot ishlaydi
+✅ Buyurtma tizimi ishlaydi
+✅ Dashboard mavjud
+✅ Localization bor
+✅ Demo mavjud
+
+---
+
+# ⚠️ REJADA
+
+* Mobile app
+* Advanced analytics
+* AI yordamchi
+
+---
+
+# 👨‍💻 MUALLIF
+
+Supplio team 🚀

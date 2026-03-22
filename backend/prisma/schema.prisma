@@ -1,0 +1,578 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SystemSettings {
+  id               String          @id @default("GLOBAL")
+  maintenanceMode  Boolean         @default(false)
+  backupFrequency  BackupFrequency @default(DAILY)
+  lastBackupAt     DateTime?
+  defaultTrialDays Int             @default(14)
+  newsEnabled      Boolean         @default(true)
+  superAdminPhone  String?
+  systemVersion    String          @default("1.0.0")
+  globalNotifyUz   String?
+  globalNotifyRu   String?
+  globalNotifyEn   String?
+  globalNotifyTr   String?
+  updatedAt        DateTime        @updatedAt
+  termsUz          String?
+  termsRu          String?
+  termsEn          String?
+  termsUzCyr       String?
+  privacyUz        String?
+  privacyRu        String?
+  privacyEn        String?
+  privacyUzCyr     String?
+}
+
+model Company {
+  id                    String                  @id @default(uuid())
+  name                  String
+  slug                  String                  @unique
+  logo                  String?
+  website               String?
+  instagram             String?
+  telegram              String?
+  siteActive            Boolean                 @default(true)
+  isDemo                Boolean                 @default(false)
+  subscriptionPlan      SubscriptionPlan        @default(FREE)
+  subscriptionStatus    SubscriptionStatus      @default(TRIAL)
+  trialExpiresAt        DateTime
+  dbConnectionUrl       String?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  deletedAt             DateTime?
+  deletedBy             String?
+  cashbackPercent       Float                   @default(0)
+  branches              Branch[]
+  categories            Category[]
+  customBots            CustomBot[]
+  customRoles           CustomRole[]
+  dealers               Dealer[]
+  dealerRequests        DealerApprovalRequest[]
+  expenses              Expense[]
+  featureFlags          FeatureFlag[]
+  transactions          LedgerTransaction[]
+  notifications         Notification[]
+  notificationLogs      NotificationLog[]
+  notificationTemplates NotificationTemplate[]
+  orders                Order[]
+  payments              Payment[]
+  products              Product[]
+  subcategories         Subcategory[]
+  subscriptions         Subscription[]
+  units                 Unit[]
+  users                 User[]
+}
+
+model Branch {
+  id           String              @id @default(uuid())
+  companyId    String
+  name         String
+  address      String?
+  phone        String?
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  deletedAt    DateTime?
+  deletedBy    String?
+  company      Company             @relation(fields: [companyId], references: [id])
+  dealers      Dealer[]
+  expenses     Expense[]
+  transactions LedgerTransaction[]
+  orders       Order[]
+  payments     Payment[]
+  users        User[]
+}
+
+model User {
+  id             String         @id @default(uuid())
+  companyId      String
+  branchId       String?
+  phone          String         @unique
+  passwordHash   String
+  fullName       String?
+  photoUrl       String?        @default("/favicon.png")
+  roleType       RoleType
+  customRoleId   String?
+  isActive       Boolean        @default(true)
+  language       String         @default("uz")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+  deletedBy      String?
+  auditLogs      AuditLog[]
+  news           News[]         @relation("NewsAuthor")
+  receivedNotifs Notification[] @relation("ReceivedByUser")
+  sentNotifs     Notification[] @relation("SentBy")
+  branch         Branch?        @relation(fields: [branchId], references: [id])
+  company        Company        @relation(fields: [companyId], references: [id])
+  customRole     CustomRole?    @relation(fields: [customRoleId], references: [id])
+}
+
+model CustomRole {
+  id          String   @id @default(uuid())
+  companyId   String
+  name        String
+  permissions Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  company     Company  @relation(fields: [companyId], references: [id])
+  users       User[]
+}
+
+model Category {
+  id            String        @id @default(uuid())
+  companyId     String
+  name          String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+  company       Company       @relation(fields: [companyId], references: [id])
+  products      Product[]
+  subcategories Subcategory[]
+}
+
+model Subcategory {
+  id         String    @id @default(uuid())
+  companyId  String
+  categoryId String
+  name       String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+  deletedBy  String?
+  products   Product[]
+  category   Category  @relation(fields: [categoryId], references: [id])
+  company    Company   @relation(fields: [companyId], references: [id])
+}
+
+model Unit {
+  id        String    @id @default(uuid())
+  companyId String?
+  name      String
+  symbol    String    @default("")
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  products  Product[]
+  company   Company?  @relation(fields: [companyId], references: [id])
+}
+
+model Dealer {
+  id               String                  @id @default(uuid())
+  companyId        String
+  branchId         String
+  name             String
+  phone            String                  @unique
+  address          String?
+  creditLimit      Float                   @default(0)
+  currentDebt      Float                   @default(0)
+  telegramChatId   String?
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+  deletedAt        DateTime?
+  deletedBy        String?
+  isApproved       Boolean                 @default(false)
+  approvedAt       DateTime?
+  approvedBy       String?
+  isBlocked        Boolean                 @default(false)
+  cashbackBalance  Float                   @default(0)
+  branch           Branch                  @relation(fields: [branchId], references: [id])
+  company          Company                 @relation(fields: [companyId], references: [id])
+  approvalRequests DealerApprovalRequest[]
+  transactions     LedgerTransaction[]
+  notifs           Notification[]          @relation("ReceivedByDealer")
+  notificationLogs NotificationLog[]
+  orders           Order[]
+  payments         Payment[]
+}
+
+model DealerApprovalRequest {
+  id          String    @id @default(uuid())
+  companyId   String
+  dealerId    String
+  status      String    @default("PENDING")
+  note        String?
+  requestedAt DateTime  @default(now())
+  reviewedAt  DateTime?
+  reviewedBy  String?
+  company     Company   @relation(fields: [companyId], references: [id])
+  dealer      Dealer    @relation(fields: [dealerId], references: [id])
+}
+
+model Product {
+  id            String       @id @default(uuid())
+  companyId     String
+  name          String
+  sku           String?
+  description   String?
+  costPrice     Float        @default(0)
+  price         Float
+  stock         Int          @default(0)
+  unit          String       @default("pcs")
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  deletedAt     DateTime?
+  deletedBy     String?
+  categoryId    String?
+  imageUrl      String?
+  isActive      Boolean      @default(true)
+  subcategoryId String?
+  unitId        String?
+  discountPrice Float?
+  isPromo       Boolean      @default(false)
+  category      Category?    @relation(fields: [categoryId], references: [id])
+  company       Company      @relation(fields: [companyId], references: [id])
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
+  unitRef       Unit?        @relation(fields: [unitId], references: [id])
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  companyId   String
+  dealerId    String
+  branchId    String
+  totalAmount Float
+  totalCost   Float       @default(0)
+  status      OrderStatus @default(PENDING)
+  items       Json
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+  deletedBy   String?
+  note        String?
+  branch      Branch      @relation(fields: [branchId], references: [id])
+  company     Company     @relation(fields: [companyId], references: [id])
+  dealer      Dealer      @relation(fields: [dealerId], references: [id])
+}
+
+model LedgerTransaction {
+  id        String    @id @default(uuid())
+  companyId String
+  branchId  String?
+  dealerId  String?
+  type      TxType
+  amount    Float
+  reference String?
+  note      String?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  deletedBy String?
+  branch    Branch?   @relation(fields: [branchId], references: [id])
+  company   Company   @relation(fields: [companyId], references: [id])
+  dealer    Dealer?   @relation(fields: [dealerId], references: [id])
+}
+
+model Payment {
+  id        String    @id @default(uuid())
+  companyId String
+  branchId  String?
+  dealerId  String
+  amount    Float
+  method    String
+  reference String?
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+  deletedBy String?
+  note      String?
+  branch    Branch?   @relation(fields: [branchId], references: [id])
+  company   Company   @relation(fields: [companyId], references: [id])
+  dealer    Dealer    @relation(fields: [dealerId], references: [id])
+}
+
+model Expense {
+  id          String    @id @default(uuid())
+  companyId   String
+  branchId    String?
+  amount      Float
+  category    String
+  description String?
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+  deletedBy   String?
+  branch      Branch?   @relation(fields: [branchId], references: [id])
+  company     Company   @relation(fields: [companyId], references: [id])
+}
+
+model Subscription {
+  id        String             @id @default(uuid())
+  companyId String
+  plan      SubscriptionPlan
+  status    SubscriptionStatus
+  amount    Float              @default(0)
+  expiresAt DateTime
+  createdAt DateTime           @default(now())
+  company   Company            @relation(fields: [companyId], references: [id])
+}
+
+model CustomBot {
+  id          String    @id @default(uuid())
+  companyId   String
+  token       String    @unique
+  username    String?
+  isActive    Boolean   @default(true)
+  hasWebApp   Boolean   @default(true)
+  watermark   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  deletedAt   DateTime?
+  botName     String?
+  description String?
+  webhookUrl  String?
+  company     Company   @relation(fields: [companyId], references: [id])
+}
+
+model TariffPlan {
+  id                 String   @id @default(uuid())
+  order              Int      @default(0)
+  nameUz             String
+  nameRu             String
+  nameEn             String
+  nameTr             String   @default("")
+  nameUzCyr          String   @default("")
+  price              String
+  featuresUz         Json
+  featuresRu         Json
+  featuresEn         Json
+  featuresTr         Json?
+  featuresUzCyr      Json?
+  isPopular          Boolean  @default(false)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  allowAnalytics     Boolean  @default(false)
+  allowBulkImport    Boolean  @default(false)
+  allowCustomBot     Boolean  @default(false)
+  allowMultiCompany  Boolean  @default(false)
+  allowNotifications Boolean  @default(true)
+  allowWebStore      Boolean  @default(true)
+  maxBranches        Int      @default(1)
+  maxDealers         Int      @default(100)
+  maxProducts        Int      @default(500)
+  maxUsers           Int      @default(5)
+  planKey            String   @unique @default("FREE")
+  priceMonthly       String   @default("0")
+  priceYearly        String   @default("0")
+  trialDays          Int      @default(14)
+}
+
+model FeatureFlag {
+  id         String            @id @default(uuid())
+  companyId  String?
+  featureKey String
+  isEnabled  Boolean           @default(false)
+  planLevel  SubscriptionPlan?
+  updatedAt  DateTime          @updatedAt
+  company    Company?          @relation(fields: [companyId], references: [id])
+
+  @@unique([featureKey, companyId])
+}
+
+model ServerMetric {
+  id          String   @id @default(uuid())
+  cpuUsage    Float
+  ramUsage    Float
+  activeUsers Int
+  timestamp   DateTime @default(now())
+}
+
+model Notification {
+  id               String    @id @default(uuid())
+  companyId        String
+  senderId         String?
+  receiverUserId   String?
+  receiverDealerId String?
+  title            String
+  message          String
+  isRead           Boolean   @default(false)
+  type             String    @default("INFO")
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
+  company          Company   @relation(fields: [companyId], references: [id])
+  receiverDealer   Dealer?   @relation("ReceivedByDealer", fields: [receiverDealerId], references: [id])
+  receiverUser     User?     @relation("ReceivedByUser", fields: [receiverUserId], references: [id])
+  sender           User?     @relation("SentBy", fields: [senderId], references: [id])
+}
+
+model NotificationTemplate {
+  id        String            @id @default(uuid())
+  companyId String
+  name      String
+  type      String
+  message   Json
+  isActive  Boolean           @default(true)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  deletedAt DateTime?
+  logs      NotificationLog[]
+  company   Company           @relation(fields: [companyId], references: [id])
+}
+
+model NotificationLog {
+  id         String                @id @default(uuid())
+  companyId  String
+  templateId String?
+  dealerId   String?
+  message    String
+  status     String
+  createdAt  DateTime              @default(now())
+  company    Company               @relation(fields: [companyId], references: [id])
+  dealer     Dealer?               @relation(fields: [dealerId], references: [id])
+  template   NotificationTemplate? @relation(fields: [templateId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  resource  String?
+  metadata  Json?
+  ip        String?
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model ReleaseNote {
+  id        String   @id @default(uuid())
+  version   String   @unique
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+}
+
+model News {
+  id           String   @id @default(uuid())
+  slugUz       String   @unique
+  slugRu       String   @unique
+  slugEn       String   @unique
+  slugUzCyr    String   @unique
+  slugTr       String   @unique @default(uuid())
+  titleUz      String
+  titleRu      String
+  titleEn      String
+  titleUzCyr   String
+  titleTr      String   @default("")
+  excerptUz    String?
+  excerptRu    String?
+  excerptEn    String?
+  excerptUzCyr String?
+  excerptTr    String?
+  contentUz    String
+  contentRu    String
+  contentEn    String
+  contentUzCyr String
+  contentTr    String   @default("")
+  image        String?
+  authorId     String?
+  isPublished  Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  author       User?    @relation("NewsAuthor", fields: [authorId], references: [id])
+}
+
+model Lead {
+  id        String    @id @default(uuid())
+  fullName  String
+  phone     String
+  info      String?
+  status    String    @default("NEW")
+  createdAt DateTime  @default(now())
+  deletedAt DateTime?
+}
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  name      String
+  company   String?
+  roleTitle String?
+  contentUz String   @default("")
+  contentRu String   @default("")
+  contentEn String   @default("")
+  contentTr String   @default("")
+  rating    Int      @default(5)
+  avatar    String?
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model LandingContent {
+  id             String   @id @default("LANDING")
+  heroTitleUz    String   @default("")
+  heroTitleRu    String   @default("")
+  heroTitleEn    String   @default("")
+  heroTitleTr    String   @default("")
+  heroSubtitleUz String   @default("")
+  heroSubtitleRu String   @default("")
+  heroSubtitleEn String   @default("")
+  heroSubtitleTr String   @default("")
+  heroBadgeUz    String   @default("")
+  heroBadgeRu    String   @default("")
+  heroBadgeEn    String   @default("")
+  heroBadgeTr    String   @default("")
+  contactPhone   String?
+  contactEmail   String?
+  socialTelegram String?
+  socialLinkedin String?
+  socialTwitter  String?
+  footerDescUz   String   @default("")
+  footerDescRu   String   @default("")
+  footerDescEn   String   @default("")
+  footerDescTr   String   @default("")
+  updatedAt      DateTime @updatedAt
+}
+
+enum RoleType {
+  SUPER_ADMIN
+  OWNER
+  MANAGER
+  SALES
+  DELIVERY
+  CUSTOM
+  SELLER
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  SHIPPED
+  DELIVERED
+  COMPLETED
+  CANCELLED
+  RETURNED
+}
+
+enum TxType {
+  ORDER
+  PAYMENT
+  ADJUSTMENT
+  EXPENSE
+  REFUND
+}
+
+enum SubscriptionPlan {
+  FREE
+  START
+  PRO
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  LOCKED
+}
+
+enum BackupFrequency {
+  HOURLY
+  DAILY
+  WEEKLY
+}

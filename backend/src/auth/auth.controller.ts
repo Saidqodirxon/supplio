@@ -1,0 +1,40 @@
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Get,
+  Patch,
+  UseGuards,
+  Request,
+} from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { LoginDto } from "./dto/login.dto";
+import { JwtAuthGuard } from "./jwt-auth.guard";
+
+@Controller("auth")
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  @HttpCode(HttpStatus.OK)
+  @Post("login")
+  async login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto.phone, loginDto.password);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get("profile")
+  async getProfile(@Request() req: { user: { id: string } }) {
+    return this.authService.getProfile(req.user.id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch("profile")
+  async updateProfile(
+    @Request() req: { user: { id: string } },
+    @Body() body: { fullName?: string; photoUrl?: string; language?: string }
+  ) {
+    return this.authService.updateProfile(req.user.id, body);
+  }
+}

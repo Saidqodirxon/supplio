@@ -1,0 +1,27 @@
+import { Controller, Get, Param, Query } from "@nestjs/common";
+import { PublicService } from "./public.service";
+
+@Controller("public")
+export class PublicController {
+  constructor(private readonly publicService: PublicService) {}
+
+  @Get("home")
+  getHome() {
+    return this.publicService.getHomeData();
+  }
+
+  @Get("tariffs")
+  getTariffs() {
+    return this.publicService.getTariffs();
+  }
+
+  @Get("content")
+  getContent() {
+    return this.publicService.getContent();
+  }
+
+  @Get("news/:slug")
+  getNews(@Param("slug") slug: string, @Query("lang") lang: string = "uz") {
+    return this.publicService.getNewsBySlug(slug, lang);
+  }
+}

@@ -1,0 +1,1150 @@
+You are a senior full-stack engineer.
+
+Supplio system has a broken order flow.
+
+Orders from Telegram bot are NOT visible in admin panel.
+
+Your task is to FIX the ENTIRE ORDER SYSTEM and make UI clear.
+
+---
+
+# 🔴 CORE PROBLEM
+
+Orders are created but not visible.
+
+---
+
+# 🧠 1. FIX TELEGRAM → DB
+
+## BOT MUST SAVE ORDER:
+
+```js id="km3j5l"
+await prisma.order.create({
+  data: {
+    dealerId: user.id,
+    productId: selectedProduct.id,
+    quantity: selectedQuantity,
+    totalAmount: selectedProduct.price * selectedQuantity,
+    status: "pending"
+  }
+});
+```
+
+---
+
+## ALSO SAVE:
+
+* createdAt
+* unit (kg/dona)
+
+---
+
+# 🧠 2. FIX BACKEND API
+
+## GET /api/orders
+
+MUST return:
+
+```json id="p5j8b1"
+{
+  "orders": [
+    {
+      "id": "...",
+      "dealer": { "name": "Ali" },
+      "product": { "name": "Un" },
+      "quantity": 10,
+      "totalAmount": 100000,
+      "status": "pending"
+    }
+  ]
+}
+```
+
+---
+
+## IMPORTANT:
+
+* include relations (dealer, product)
+* no nested weird structure
+
+---
+
+# 🧠 3. FIX FRONTEND
+
+## FETCH:
+
+```ts id="n4qk7c"
+const { data } = useQuery({
+  queryKey: ['orders'],
+  queryFn: () => fetch('/api/orders').then(res => res.json())
+});
+
+const orders = Array.isArray(data?.orders) ? data.orders : [];
+```
+
+---
+
+## DISPLAY TABLE:
+
+Columns:
+
+* Dealer name
+* Product
+* Quantity + unit
+* Total price
+* Status
+* Date
+
+---
+
+# 👨‍💼 4. DEALER ANALYTICS (VERY IMPORTANT)
+
+Create new section:
+
+## "Dealers"
+
+Show:
+
+* dealer name
+* total orders
+* total amount
+* current debt
+
+---
+
+## BACKEND:
+
+Aggregate:
+
+```js id="uvy07m"
+groupBy dealerId
+sum(totalAmount)
+count(orders)
+```
+
+---
+
+# 📊 5. DEALER DETAIL PAGE
+
+Route:
+/dealers/[id]
+
+Show:
+
+* all orders
+* total spent
+* debt
+* products taken
+
+---
+
+# 💰 6. PAYMENT / DEBT LINK
+
+Each order increases debt.
+
+Each payment decreases debt.
+
+---
+
+# 🎨 7. UI/UX FIX
+
+Make admin panel CLEAR:
+
+Sidebar:
+
+* Dashboard
+* Orders
+* Dealers
+* Payments
+* Products
+
+---
+
+## TABLE UX:
+
+* pagination
+* search
+* filter by dealer
+* status badges
+
+---
+
+# ⚠️ 8. REAL-TIME UPDATE
+
+After order created:
+
+* refetch orders
+* OR use polling
+
+---
+
+# 🧪 9. DEBUG CHECKLIST
+
+Check:
+
+* does order exist in DB?
+* does API return it?
+* does frontend render it?
+
+---
+
+# 🧪 10. PROOF
+
+Show:
+
+1. order in DB
+2. API response
+3. order visible in UI
+4. dealer stats correct
+
+---
+
+# ⚡ FINAL RESULT
+
+System MUST:
+
+* show orders instantly
+* show dealer analytics
+* have clean UI
+* be easy to understand
+
+---
+
+DO NOT SKIP
+FIX FULL FLOW
+
+
+
+
+
+
+
+
+You are a senior full-stack engineer.
+
+Supplio system has a broken order flow.
+
+Orders from Telegram bot are NOT visible in admin panel.
+
+Your task is to FIX the ENTIRE ORDER SYSTEM and make UI clear.
+
+---
+
+# 🔴 CORE PROBLEM
+
+Orders are created but not visible.
+
+---
+
+# 🧠 1. FIX TELEGRAM → DB
+
+## BOT MUST SAVE ORDER:
+
+```js id="km3j5l"
+await prisma.order.create({
+  data: {
+    dealerId: user.id,
+    productId: selectedProduct.id,
+    quantity: selectedQuantity,
+    totalAmount: selectedProduct.price * selectedQuantity,
+    status: "pending"
+  }
+});
+```
+
+---
+
+## ALSO SAVE:
+
+* createdAt
+* unit (kg/dona)
+
+---
+
+# 🧠 2. FIX BACKEND API
+
+## GET /api/orders
+
+MUST return:
+
+```json id="p5j8b1"
+{
+  "orders": [
+    {
+      "id": "...",
+      "dealer": { "name": "Ali" },
+      "product": { "name": "Un" },
+      "quantity": 10,
+      "totalAmount": 100000,
+      "status": "pending"
+    }
+  ]
+}
+```
+
+---
+
+## IMPORTANT:
+
+* include relations (dealer, product)
+* no nested weird structure
+
+---
+
+# 🧠 3. FIX FRONTEND
+
+## FETCH:
+
+```ts id="n4qk7c"
+const { data } = useQuery({
+  queryKey: ['orders'],
+  queryFn: () => fetch('/api/orders').then(res => res.json())
+});
+
+const orders = Array.isArray(data?.orders) ? data.orders : [];
+```
+
+---
+
+## DISPLAY TABLE:
+
+Columns:
+
+* Dealer name
+* Product
+* Quantity + unit
+* Total price
+* Status
+* Date
+
+---
+
+# 👨‍💼 4. DEALER ANALYTICS (VERY IMPORTANT)
+
+Create new section:
+
+## "Dealers"
+
+Show:
+
+* dealer name
+* total orders
+* total amount
+* current debt
+
+---
+
+## BACKEND:
+
+Aggregate:
+
+```js id="uvy07m"
+groupBy dealerId
+sum(totalAmount)
+count(orders)
+```
+
+---
+
+# 📊 5. DEALER DETAIL PAGE
+
+Route:
+/dealers/[id]
+
+Show:
+
+* all orders
+* total spent
+* debt
+* products taken
+
+---
+
+# 💰 6. PAYMENT / DEBT LINK
+
+Each order increases debt.
+
+Each payment decreases debt.
+
+---
+
+# 🎨 7. UI/UX FIX
+
+Make admin panel CLEAR:
+
+Sidebar:
+
+* Dashboard
+* Orders
+* Dealers
+* Payments
+* Products
+
+---
+
+## TABLE UX:
+
+* pagination
+* search
+* filter by dealer
+* status badges
+
+---
+
+# ⚠️ 8. REAL-TIME UPDATE
+
+After order created:
+
+* refetch orders
+* OR use polling
+
+---
+
+# 🧪 9. DEBUG CHECKLIST
+
+Check:
+
+* does order exist in DB?
+* does API return it?
+* does frontend render it?
+
+---
+
+# 🧪 10. PROOF
+
+Show:
+
+1. order in DB
+2. API response
+3. order visible in UI
+4. dealer stats correct
+
+---
+
+# ⚡ FINAL RESULT
+
+System MUST:
+
+* show orders instantly
+* show dealer analytics
+* have clean UI
+* be easy to understand
+
+---
+
+DO NOT SKIP
+FIX FULL FLOW
+
+
+You are a senior full-stack engineer.
+
+Supplio SaaS is mostly built but needs final fixes, demo access, and full localization cleanup.
+
+---
+
+# 🎯 GOALS
+
+1. Make demo accessible
+2. Fix all translations
+3. Ensure all pages are localized
+4. Ensure demo works without login
+
+---
+
+# 🌐 1. DEMO ACCESS
+
+Create demo route:
+
+/demo
+
+OR domain:
+https://demo.supplio.uz
+
+---
+
+## REQUIREMENTS:
+
+* No login required
+* Preloaded data (orders, dealers, products)
+* Fully working UI
+* Use separate demo API or seeded DB
+
+---
+
+# 🌍 2. FULL TRANSLATION FIX
+
+Fix ALL texts:
+
+* Uzbek (latin)
+* Uzbek Cyrillic
+* Russian
+* English
+* Turkish
+
+---
+
+## REMOVE:
+
+* hardcoded strings
+* mixed languages
+
+---
+
+## USE:
+
+central i18n system
+
+Example:
+
+```ts
+t("save") => "Saqlash"
+```
+
+---
+
+## APPLY TO:
+
+* landing
+* dashboard
+* bot messages
+* tables
+* buttons
+* errors
+
+---
+
+# 🤖 3. BOT TRANSLATION
+
+Bot must:
+
+* detect user language
+* respond in that language
+* allow switching language
+
+---
+
+# 🧪 4. DEMO DATA
+
+Seed:
+
+* 10 orders
+* 5 dealers
+* 5 products
+* 4 tariffs
+
+---
+
+# 🧪 5. PROOF
+
+Show:
+
+* demo working
+* translations applied everywhere
+* no mixed language
+
+---
+
+# ⚡ RESULT
+
+* demo.supplio.uz works
+* system fully translated
+* UI clean and consistent
+
+---
+
+DO NOT SKIP
+MAKE IT PRODUCTION READY
+
+
+You are a DevOps engineer.
+
+Help deploy Supplio SaaS to production.
+
+---
+
+# 🌐 DOMAIN STRUCTURE
+
+* supplio.uz → landing
+* api.supplio.uz → backend
+* app.supplio.uz → dashboard
+* demo.supplio.uz → demo
+
+---
+
+# 🚀 TASKS
+
+1. Setup VPS server
+2. Setup Node.js + PM2
+3. Setup Nginx reverse proxy
+4. Setup SSL (Let's Encrypt)
+5. Setup PostgreSQL
+6. Setup environment variables
+7. Deploy frontend + backend
+8. Setup auto-restart
+9. Setup logging
+
+---
+
+# 🖥 SERVER REQUIREMENTS
+
+Recommend:
+
+* 4 GB RAM minimum
+* 2 CPU
+* SSD 40GB+
+
+---
+
+# 🌍 PROVIDERS
+
+Suggest best options:
+
+* Hetzner (best price/performance)
+* DigitalOcean
+* AWS (optional)
+
+---
+
+# 🔐 SECURITY
+
+* enable firewall
+* protect API
+* use HTTPS only
+
+---
+
+# ⚡ OUTPUT
+
+* step-by-step deploy guide
+* exact commands
+* nginx config
+* pm2 config
+
+---
+
+MAKE IT SIMPLE AND CLEAR
+
+
+You are a senior frontend engineer.
+
+There is a UI bug in Supplio dashboard modal.
+
+---
+
+# 🔴 PROBLEM
+
+When modal opens:
+
+* a white gap appears at the top of the page
+* header shifts or becomes visible incorrectly
+* overlay does not fully cover screen
+
+---
+
+# 🎯 GOAL
+
+Fix modal layout so that:
+
+* NO white space at top
+* overlay fully covers screen
+* no layout shift
+* smooth UX
+
+---
+
+# 🧠 DEBUG STEPS
+
+## 1. CHECK BODY SCROLL
+
+When modal opens:
+
+```css
+body {
+  overflow: hidden;
+}
+```
+
+Ensure:
+
+* no extra margin added
+* no scroll jump
+
+---
+
+## 2. CHECK HEADER (IMPORTANT)
+
+Header is likely:
+
+```css
+position: fixed;
+top: 0;
+```
+
+---
+
+## FIX:
+
+When modal opens:
+
+* either hide header
+  OR
+* ensure overlay is ABOVE header
+
+---
+
+## 3. FIX Z-INDEX
+
+Ensure modal overlay:
+
+```css
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+```
+
+Header should be LOWER:
+
+```css
+.header {
+  z-index: 100;
+}
+```
+
+---
+
+## 4. REMOVE EXTRA TOP SPACE
+
+Check:
+
+* body margin
+* root div padding
+* layout wrapper
+
+Fix:
+
+```css
+html, body {
+  margin: 0;
+  padding: 0;
+}
+```
+
+---
+
+## 5. MODAL CENTER FIX
+
+```css
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+```
+
+---
+
+## 6. PREVENT LAYOUT SHIFT
+
+When scrollbar disappears:
+
+Add:
+
+```css
+body {
+  padding-right: 0 !important;
+}
+```
+
+OR handle scrollbar width properly
+
+---
+
+# 🧪 CHECKLIST
+
+* open modal → no white gap
+* header not visible above overlay
+* no jump
+* mobile works
+
+---
+
+# ⚡ FINAL RESULT
+
+Modal must:
+
+* cover full screen
+* be centered
+* have no top gap
+* feel smooth and professional
+
+---
+
+FIX EXISTING CODE
+DO NOT REWRITE FROM SCRATCH
+You are a senior full-stack engineer.
+
+Implement a FULL automated notification system in Supplio.
+
+---
+
+# 🔴 GOAL
+
+Send automatic Telegram notifications based on:
+
+1. Debt reminders
+2. Promotion announcements
+3. Payment reminders
+4. Custom campaigns
+
+---
+
+# 🧠 1. NOTIFICATION TYPES
+
+Create types:
+
+* DEBT_REMINDER
+* PROMOTION
+* PAYMENT_DUE
+* GENERAL
+
+---
+
+# 🗂 2. DATABASE MODELS
+
+```prisma id="m3r1sy"
+model NotificationTemplate {
+  id        String @id @default(uuid())
+  name      String
+  type      String
+  message   Json
+  isActive  Boolean @default(true)
+}
+
+model NotificationLog {
+  id        String @id @default(uuid())
+  userId    String
+  message   String
+  status    String
+  createdAt DateTime @default(now())
+}
+```
+
+---
+
+# ✉️ 3. TEMPLATE SYSTEM
+
+Messages must support multi-language:
+
+```json id="9q3m2q"
+{
+  "uz": "Sizda {debt} so‘m qarz mavjud",
+  "ru": "У вас долг {debt}",
+  "en": "You have a debt of {debt}"
+}
+```
+
+---
+
+# 🔄 4. CRON JOB SYSTEM
+
+Use:
+
+* node-cron
+
+---
+
+## RUN EVERY DAY:
+
+```js id="uv2cl9"
+cron.schedule('0 9 * * *', async () => {
+  // run notifications
+});
+```
+
+---
+
+# 💰 5. DEBT REMINDER LOGIC
+
+IF:
+
+* debt > 0
+* OR payment due date near
+
+THEN:
+
+* send message
+
+---
+
+## EXAMPLE:
+
+```js id="y4e2o7"
+if (debt > 0) {
+  sendMessage(user, template);
+}
+```
+
+---
+
+# 🎁 6. PROMOTION NOTIFICATION
+
+WHEN:
+
+* product.isPromo === true
+
+THEN:
+
+* notify all dealers
+
+---
+
+# ⏰ 7. DAYS LEFT REMINDER
+
+If:
+
+* payment deadline - today <= 2 days
+
+THEN:
+
+* send warning message
+
+---
+
+# 📩 8. TELEGRAM INTEGRATION
+
+Use existing bot:
+
+```js id="8px3pk"
+bot.sendMessage(chatId, message);
+```
+
+---
+
+# ⚙️ 9. ADMIN PANEL (NOTIFICATIONS PAGE)
+
+Create page:
+
+/dashboard/notifications
+
+---
+
+## FEATURES:
+
+* list templates
+* create/edit template
+* enable/disable
+* preview message
+
+---
+
+## FORM:
+
+* template name
+* type (dropdown)
+* message (tabs for languages)
+
+---
+
+# 🧪 10. EXAMPLE TEMPLATES
+
+Add default:
+
+---
+
+### 1. Debt Reminder
+
+"Sizda {debt} so‘m qarz bor. Iltimos to‘lov qiling."
+
+---
+
+### 2. Promotion
+
+"🔥 Aksiya! {productName} chegirma bilan!"
+
+---
+
+### 3. Payment Due
+
+"⏰ To‘lov muddati yaqin!"
+
+---
+
+# 📊 11. LOGGING
+
+Save ALL sent messages:
+
+* success
+* failed
+
+---
+
+# 🎨 12. UI/UX
+
+Make it simple:
+
+* clean cards
+* toggle ON/OFF
+* clear labels
+
+---
+
+# 🧪 13. PROOF
+
+Show:
+
+1. cron running
+2. message sent
+3. template used
+4. logs saved
+
+---
+
+# ⚡ FINAL RESULT
+
+System MUST:
+
+* send automatic messages
+* use templates
+* be manageable from admin panel
+* support multi-language
+
+---
+
+DO NOT SKIP
+BUILD FULL AUTOMATION SYSTEM
+
+You are a senior full-stack engineer.
+
+You are building Supplio — a complex SaaS system.
+
+This is a LARGE project.
+
+---
+
+# 🔴 CRITICAL RULE
+
+You MUST NOT do everything at once.
+
+You MUST split the work into SMALL CLEAR STEPS.
+
+---
+
+# 🧠 WORKFLOW
+
+## STEP 1: BREAK TASK INTO MODULES
+
+Split system into:
+
+1. Telegram Bot Core
+2. Order System
+3. Dealer & Distributor System
+4. Payment & Debt System
+5. Notification System
+6. Admin Panel UI/UX
+7. Localization (i18n)
+8. CMS (landing pages)
+9. Demo System
+10. Deployment
+
+---
+
+# 🧩 STEP 2: WORK ONE MODULE AT A TIME
+
+For EACH module:
+
+1. Explain goal (short)
+2. Implement backend
+3. Implement frontend
+4. Connect both
+5. Test
+
+---
+
+# 🛑 RULE:
+
+DO NOT go to next module until current one is FULLY WORKING
+
+---
+
+# 🧪 STEP 3: AFTER EACH MODULE
+
+Provide:
+
+* working code
+* API example
+* UI behavior
+* test result
+
+---
+
+# 🧾 STEP 4: FINAL CHECKLIST
+
+At the END create checklist:
+
+Example:
+
+* [x] Telegram bot working
+* [x] Orders saved
+* [x] Orders visible in dashboard
+* [x] Debt calculated
+* [x] Notifications sent
+
+---
+
+# ⚠️ IMPORTANT
+
+If something is broken:
+
+* STOP
+* DEBUG
+* FIX
+
+---
+
+# 🎯 FINAL GOAL
+
+System must be:
+
+* fully working
+* clean
+* understandable
+* production ready
+
+---
+
+# OUTPUT FORMAT
+
+For each step:
+
+## MODULE NAME
+
+### Goal:
+
+...
+
+### Backend:
+
+...
+
+### Frontend:
+
+...
+
+### Test:
+
+...
+
+---
+
+At the end:
+
+## FINAL CHECKLIST
+
+---
+
+DO NOT SKIP STEPS
+DO NOT RUSH
+BUILD STEP-BY-STEP

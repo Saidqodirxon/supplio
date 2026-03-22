@@ -1,0 +1,75 @@
+import { PrismaService } from "../prisma/prisma.service";
+type Period = "7d" | "30d" | "1y" | "all";
+export declare class AnalyticsService {
+    private prisma;
+    constructor(prisma: PrismaService);
+    getDashboardStats(companyId: string, period?: Period): Promise<{
+        stats: {
+            revenue: number;
+            profit: number;
+            activeDealers: number;
+            debt: number;
+            collected: number;
+            products: number;
+            periodRevenue: number;
+            periodProfit: number;
+            periodOrders: number;
+        };
+        chart: {
+            revenue: number;
+            profit: number;
+            orders: number;
+            date: string;
+        }[];
+        statusDistribution: {
+            status: import(".prisma/client").$Enums.OrderStatus;
+            count: number;
+            amount: number;
+        }[];
+        period: Period;
+    }>;
+    getTopDealers(companyId: string, limit?: number): Promise<{
+        id: string;
+        name: string;
+        totalOrders: number;
+        totalAmount: number;
+        currentDebt: number;
+        creditLimit: number;
+    }[]>;
+    getTopProducts(companyId: string, limit?: number): Promise<{
+        qty: number;
+        revenue: number;
+        name: string;
+    }[]>;
+    getDebtReport(companyId: string): Promise<{
+        dealers: {
+            id: string;
+            name: string;
+            phone: string;
+            currentDebt: number;
+            creditLimit: number;
+            utilizationPercent: number;
+            orders: {
+                id: string;
+                createdAt: Date;
+                totalAmount: number;
+                status: import(".prisma/client").$Enums.OrderStatus;
+            }[];
+        }[];
+        totalDebt: number;
+        totalCreditLimit: number;
+        overLimitCount: number;
+    }>;
+    getSuperAdminGlobalStats(): Promise<{
+        totalCompanies: number;
+        totalUsers: number;
+        activeBots: number;
+        totalOrders: number;
+        totalRevenue: number;
+        signups: {
+            month: string;
+            count: number;
+        }[];
+    }>;
+}
+export {};
