@@ -61,8 +61,8 @@ export declare class AnalyticsController {
             orders: {
                 id: string;
                 createdAt: Date;
-                totalAmount: number;
                 status: import(".prisma/client").$Enums.OrderStatus;
+                totalAmount: number;
             }[];
         }[];
         totalDebt: number;

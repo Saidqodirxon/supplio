@@ -177,6 +177,7 @@ export interface OrderItem {
   qty: number;
   price: number;
   cost: number;
+  unit?: string;
 }
 
 export interface Order {

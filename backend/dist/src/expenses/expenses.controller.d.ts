@@ -7,44 +7,44 @@ export declare class ExpensesController {
             name: string;
         };
     } & {
-        id: string;
-        createdAt: Date;
+        category: string;
         deletedAt: Date | null;
+        id: string;
+        amount: number;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
         branchId: string | null;
-        category: string;
         description: string | null;
-        amount: number;
     }>;
     findAll(req: any, branchId?: string): Promise<({
         branch: {
             name: string;
         };
     } & {
-        id: string;
-        createdAt: Date;
+        category: string;
         deletedAt: Date | null;
+        id: string;
+        amount: number;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
         branchId: string | null;
-        category: string;
         description: string | null;
-        amount: number;
     })[]>;
     getSummary(req: any): Promise<{
         total: number;
         byCategory: Record<string, number>;
     }>;
     remove(req: any, id: string): Promise<{
-        id: string;
-        createdAt: Date;
+        category: string;
         deletedAt: Date | null;
+        id: string;
+        amount: number;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
         branchId: string | null;
-        category: string;
         description: string | null;
-        amount: number;
     }>;
 }

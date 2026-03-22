@@ -6,7 +6,6 @@ import {
   Package,
   ArrowUpRight,
   CheckCircle2,
-  Clock,
   Loader2,
   ShoppingCart,
   CreditCard,

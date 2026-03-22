@@ -3,105 +3,105 @@ export declare class CategoriesController {
     private readonly categoriesService;
     constructor(categoriesService: CategoriesService);
     findAll(req: any): Promise<({
-        subcategories: {
-            id: string;
-            updatedAt: Date;
-            name: string;
-            createdAt: Date;
-            deletedAt: Date | null;
-            deletedBy: string | null;
-            companyId: string;
-            categoryId: string;
-        }[];
         _count: {
             products: number;
         };
+        subcategories: {
+            deletedAt: Date | null;
+            id: string;
+            createdAt: Date;
+            deletedBy: string | null;
+            companyId: string;
+            name: string;
+            updatedAt: Date;
+            categoryId: string;
+        }[];
     } & {
-        id: string;
-        updatedAt: Date;
-        name: string;
-        createdAt: Date;
         deletedAt: Date | null;
+        id: string;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
+        name: string;
+        updatedAt: Date;
     })[]>;
     create(req: any, name: string): Promise<{
-        id: string;
-        updatedAt: Date;
-        name: string;
-        createdAt: Date;
         deletedAt: Date | null;
+        id: string;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
+        name: string;
+        updatedAt: Date;
     }>;
     update(req: any, id: string, name: string): Promise<{
-        id: string;
-        updatedAt: Date;
-        name: string;
-        createdAt: Date;
         deletedAt: Date | null;
+        id: string;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
+        name: string;
+        updatedAt: Date;
     }>;
     remove(req: any, id: string): Promise<{
-        id: string;
-        updatedAt: Date;
-        name: string;
-        createdAt: Date;
         deletedAt: Date | null;
+        id: string;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
+        name: string;
+        updatedAt: Date;
     }>;
     restore(req: any, id: string): Promise<{
-        id: string;
-        updatedAt: Date;
-        name: string;
-        createdAt: Date;
         deletedAt: Date | null;
+        id: string;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
+        name: string;
+        updatedAt: Date;
     }>;
     createSubcategory(req: any, categoryId: string, name: string): Promise<{
-        id: string;
-        updatedAt: Date;
-        name: string;
-        createdAt: Date;
         deletedAt: Date | null;
+        id: string;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
+        name: string;
+        updatedAt: Date;
         categoryId: string;
     }>;
     updateSubcategory(req: any, id: string, body: {
         name?: string;
         categoryId?: string;
     }): Promise<{
-        id: string;
-        updatedAt: Date;
-        name: string;
-        createdAt: Date;
         deletedAt: Date | null;
+        id: string;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
+        name: string;
+        updatedAt: Date;
         categoryId: string;
     }>;
     removeSubcategory(req: any, id: string): Promise<{
-        id: string;
-        updatedAt: Date;
-        name: string;
-        createdAt: Date;
         deletedAt: Date | null;
+        id: string;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
+        name: string;
+        updatedAt: Date;
         categoryId: string;
     }>;
     restoreSubcategory(req: any, id: string): Promise<{
-        id: string;
-        updatedAt: Date;
-        name: string;
-        createdAt: Date;
         deletedAt: Date | null;
+        id: string;
+        createdAt: Date;
         deletedBy: string | null;
         companyId: string;
+        name: string;
+        updatedAt: Date;
         categoryId: string;
     }>;
 }

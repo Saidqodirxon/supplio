@@ -19,6 +19,7 @@ export const dashboardTranslations = {
       approvals: "Approvals",
       reports: "Reports",
       telegramBots: "Telegram Bots",
+      webStore: "Web Store",
     },
     superadmin: {
       overview: "Overview",
@@ -461,6 +462,7 @@ export const dashboardTranslations = {
       approvals: "Tasdiqlar",
       reports: "Hisobotlar",
       telegramBots: "Telegram Botlar",
+      webStore: "Web Do'kon",
     },
     superadmin: {
       overview: "Umumiy ko'rinish",
@@ -907,6 +909,7 @@ export const dashboardTranslations = {
       reports: "Ҳисоботлар",
       telegramBots: "Telegram Ботлар",
       leads: "Аризалар",
+      webStore: "Веб Дўкон",
     },
     superadmin: {
       overview: "Умумий кўриниш",
@@ -1350,6 +1353,7 @@ export const dashboardTranslations = {
       approvals: "Onaylar",
       reports: "Raporlar",
       telegramBots: "Telegram Botlar",
+      webStore: "Web Mağaza",
     },
     superadmin: {
       overview: "Genel Bakış",
@@ -1793,6 +1797,7 @@ export const dashboardTranslations = {
       approvals: "Одобрения",
       reports: "Отчёты",
       telegramBots: "Telegram Боты",
+      webStore: "Веб-магазин",
     },
     superadmin: {
       overview: "Обзор",

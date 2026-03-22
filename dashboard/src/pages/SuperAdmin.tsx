@@ -266,7 +266,6 @@ export default function SuperAdmin() {
   // Distributors tab
   const [distributors, setDistributors] = useState<Distributor[]>([]);
   const [distSearch, setDistSearch] = useState('');
-  const [distStatusFilter, setDistStatusFilter] = useState('');
   const [isDistModalOpen, setIsDistModalOpen] = useState(false);
   const [distForm, setDistForm] = useState<DistributorForm>(emptyDistForm);
   const [distSaving, setDistSaving] = useState(false);
@@ -1522,7 +1521,7 @@ export default function SuperAdmin() {
                   value={newsForm.image}
                   onChange={url => setNewsForm(f => ({ ...f, image: url }))}
                   onRemove={() => setNewsForm(f => ({ ...f, image: '' }))}
-                  label={t.superadmin.uploadCoverImage}
+                  label="Upload Cover Image"
                   className="h-44"
                 />
               </div>

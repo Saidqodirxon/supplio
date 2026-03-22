@@ -3,14 +3,17 @@ export declare class CompanyController {
     private readonly companyService;
     constructor(companyService: CompanyService);
     getMyCompany(req: any): Promise<{
+        deletedAt: Date | null;
+        telegram: string | null;
         id: string;
-        updatedAt: Date;
+        createdAt: Date;
+        deletedBy: string | null;
         name: string;
+        updatedAt: Date;
         slug: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
-        telegram: string | null;
         siteActive: boolean;
         isDemo: boolean;
         subscriptionPlan: import(".prisma/client").$Enums.SubscriptionPlan;
@@ -18,19 +21,19 @@ export declare class CompanyController {
         trialExpiresAt: Date;
         cashbackPercent: number;
         dbConnectionUrl: string | null;
-        createdAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
     }>;
     updateMyCompany(req: any, body: any): Promise<{
+        deletedAt: Date | null;
+        telegram: string | null;
         id: string;
-        updatedAt: Date;
+        createdAt: Date;
+        deletedBy: string | null;
         name: string;
+        updatedAt: Date;
         slug: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
-        telegram: string | null;
         siteActive: boolean;
         isDemo: boolean;
         subscriptionPlan: import(".prisma/client").$Enums.SubscriptionPlan;
@@ -38,9 +41,6 @@ export declare class CompanyController {
         trialExpiresAt: Date;
         cashbackPercent: number;
         dbConnectionUrl: string | null;
-        createdAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
     }>;
     getSubscription(req: any): Promise<{
         plan: import(".prisma/client").$Enums.SubscriptionPlan;
@@ -49,17 +49,17 @@ export declare class CompanyController {
         isTrialExpired: boolean;
         daysLeft: number;
         history: {
+            amount: number;
             createdAt: Date;
             status: import(".prisma/client").$Enums.SubscriptionStatus;
-            amount: number;
             plan: import(".prisma/client").$Enums.SubscriptionPlan;
             expiresAt: Date;
         }[];
     }>;
     getUsers(req: any): Promise<{
         id: string;
-        phone: string;
         branchId: string;
+        phone: string;
         fullName: string;
         roleType: import(".prisma/client").$Enums.RoleType;
     }[]>;

@@ -3,7 +3,6 @@ import {
   Plus, Search, MoreVertical, Building2, User, CreditCard,
   Users, X, Save, Trash2, Loader2, Edit2, ShoppingCart, TrendingUp,
 } from 'lucide-react';
-import { format } from 'date-fns';
 import api from '../services/api';
 import type { Dealer, Branch } from '../types';
 import { useAuthStore } from '../store/authStore';
