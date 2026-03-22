@@ -1004,24 +1004,24 @@ export default function SuperAdmin() {
                   <div className="w-12 h-12 rounded-2xl bg-violet-600/10 text-violet-600 flex items-center justify-center">
                     <Table className="w-6 h-6" />
                   </div>
-                  <h2 className="text-xl font-black">Yadro Muharriri</h2>
+                  <h2 className="text-xl font-black">{t.superadmin.coreEditor}</h2>
                 </div>
                 <div className="grid grid-cols-1 gap-6">
                   <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Kengaytma</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.modelLabel}</label>
                     <select
                       value={editorData.model}
                       onChange={(e) => setEditorData({ ...editorData, model: e.target.value })}
                       className="w-full px-8 py-5 bg-slate-50 dark:bg-white/5 rounded-[2rem] border-2 border-transparent focus:border-violet-500 transition-all font-black text-sm"
                     >
-                      <option value="Company">Kompaniya</option>
-                      <option value="Dealer">Diler</option>
-                      <option value="User">Foydalanuvchi</option>
-                      <option value="Order">Buyurtma</option>
+                      <option value="Company">{t.superadmin.companyCol}</option>
+                      <option value="Dealer">{t.dealers.title}</option>
+                      <option value="User">{t.superadmin.userCol}</option>
+                      <option value="Order">{t.orders.title}</option>
                     </select>
                   </div>
                   <div className="space-y-3">
-                    <label className="text-[10px) font-black text-slate-400 uppercase tracking-widest px-2">Unique Identifier (ID)</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.recordIdLabel}</label>
                     <input
                       type="text"
                       value={editorData.id}
@@ -1032,7 +1032,7 @@ export default function SuperAdmin() {
                   </div>
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Field</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.fieldLabel}</label>
                       <input
                         type="text"
                         value={editorData.field}
@@ -1042,7 +1042,7 @@ export default function SuperAdmin() {
                       />
                     </div>
                     <div className="space-y-3">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">New Value</label>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.valueLabel}</label>
                       <input
                         type="text"
                         value={editorData.value}
@@ -1055,14 +1055,14 @@ export default function SuperAdmin() {
                 </div>
                 <button
                   onClick={async () => {
-                    if (!editorData.id || !editorData.field) return toast.error('Ma\'lumotlarni kiriting');
+                    if (!editorData.id || !editorData.field) return toast.error(t.common.noData);
                     try {
                       setLoading(true);
                       await api.post('/super/patch-data', editorData);
-                      toast.success('Ma\'lumotlar muvaffaqiyatli o\'zgartirildi');
+                      toast.success(t.superadmin.saveSettingsSuccess);
                       setEditorData({ ...editorData, id: '', field: '', value: '' });
                     } catch (err: unknown) {
-                      const msg = err instanceof Error ? err.message : 'O\'zgartirishda xatolik';
+                      const msg = err instanceof Error ? err.message : t.common.error;
                       toast.error(msg);
                     } finally {
                       setLoading(false);
@@ -1070,7 +1070,7 @@ export default function SuperAdmin() {
                   }}
                   className="w-full py-5 bg-violet-600 text-white rounded-[2rem] font-black uppercase tracking-widest shadow-xl shadow-violet-600/20 active:scale-95 transition-all flex items-center justify-center gap-4"
                 >
-                  <Table className="w-5 h-5" /> Execute Update
+                  <Table className="w-5 h-5" /> {t.superadmin.execute}
                 </button>
               </div>
               <div className="bg-rose-600/10 border-2 border-rose-600/20 p-8 rounded-[2.5rem] flex gap-6 items-center">
@@ -1078,8 +1078,8 @@ export default function SuperAdmin() {
                   <AlertTriangle className="w-7 h-7" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-rose-600 uppercase tracking-widest mb-1">Xavf: To'g'ridan-to'g'ri tahrir</h3>
-                  <p className="text-xs text-rose-500/80 font-bold leading-relaxed">Ushbu vosita yordamida bazadagi ma'lumotlarni validatsiyasiz o'zgartirish mumkin. Ehtiyot bo'ling!</p>
+                  <h3 className="text-sm font-black text-rose-600 uppercase tracking-widest mb-1">{t.superadmin.dangerZone}</h3>
+                  <p className="text-xs text-rose-500/80 font-bold leading-relaxed">{t.superadmin.editorDesc}</p>
                 </div>
               </div>
             </div>
@@ -1092,17 +1092,15 @@ export default function SuperAdmin() {
                     <User className="w-6 h-6" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black">
-                      {language === 'uz' ? 'Distribyutorlar' : language === 'ru' ? 'Дистрибьюторы' : 'Distributors'}
-                    </h2>
+                    <h2 className="text-xl font-black">{t.superadmin.distributors}</h2>
                     <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
-                      {distributors.length} {language === 'uz' ? 'ta kompaniya' : language === 'ru' ? 'компаний' : 'companies'}
+                      {distributors.length} {t.superadmin.companyCol}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-3">
                   <input
-                    placeholder={language === 'uz' ? 'Qidirish...' : language === 'ru' ? 'Поиск...' : 'Search...'}
+                    placeholder={t.common.search}
                     value={distSearch}
                     onChange={e => setDistSearch(e.target.value)}
                     className="px-5 py-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-sm font-bold outline-none w-52"
@@ -1112,7 +1110,7 @@ export default function SuperAdmin() {
                     className="px-6 py-3 premium-gradient text-white rounded-2xl font-black text-sm flex items-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
                   >
                     <Plus className="w-4 h-4" />
-                    {language === 'uz' ? 'Yangi' : language === 'ru' ? 'Создать' : 'Create'}
+                    {t.superadmin.createDistributor}
                   </button>
                 </div>
               </div>
@@ -1140,15 +1138,15 @@ export default function SuperAdmin() {
                             </span>
                             {daysLeft !== null && daysLeft <= 7 && (
                               <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-amber-50 text-amber-600">
-                                {daysLeft}d left
+                                {daysLeft} {t.superadmin.daysLeftShort}
                               </span>
                             )}
                           </div>
                           <div className="flex items-center gap-4 mt-1 text-[10px] text-slate-400 font-bold">
                             <span>/{dist.slug}</span>
                             {owner && <span>👤 {owner.phone}</span>}
-                            <span>🛒 {dist._count.orders} orders</span>
-                            <span>👥 {dist._count.dealers} dealers</span>
+                            <span>🛒 {dist._count.orders} {t.superadmin.ordersCount}</span>
+                            <span>👥 {dist._count.dealers} {t.superadmin.dealersCount}</span>
                           </div>
                         </div>
                         <div className="flex gap-2 shrink-0">
@@ -1164,8 +1162,8 @@ export default function SuperAdmin() {
                               try {
                                 await api.patch(`/super/company/${dist.id}/status`, { status: newStatus });
                                 setDistributors(prev => prev.map(d => d.id === dist.id ? { ...d, subscriptionStatus: newStatus } : d));
-                                toast.success(`Status updated to ${newStatus}`);
-                              } catch { toast.error('Failed to update status'); }
+                                toast.success(t.superadmin.statusUpdated);
+                              } catch { toast.error(t.superadmin.failedUpdateStatus); }
                             }}
                             className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${dist.subscriptionStatus === 'LOCKED' ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white' : 'bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white'}`}
                           >
@@ -1177,7 +1175,7 @@ export default function SuperAdmin() {
                   })}
                 {distributors.length === 0 && (
                   <div className="text-center py-20 text-slate-400 font-bold">
-                    {language === 'uz' ? 'Distribyutorlar topilmadi' : language === 'ru' ? 'Дистрибьюторы не найдены' : 'No distributors found'}
+                    {t.superadmin.noDistributors}
                   </div>
                 )}
               </div>
@@ -1191,12 +1189,8 @@ export default function SuperAdmin() {
                   <Bell className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black">
-                    {language === 'uz' ? 'Distribyutorlarga xabarnoma' : language === 'ru' ? 'Уведомить дистрибьюторов' : 'Notify Distributors'}
-                  </h2>
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
-                    {language === 'uz' ? 'Barcha yoki tanlangan distribyutorlarga xabar yuboring' : language === 'ru' ? 'Отправить сообщение всем или выбранным' : 'Send to all or selected distributors'}
-                  </p>
+                  <h2 className="text-xl font-black">{t.superadmin.notifyTab}</h2>
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{t.superadmin.notifyTabDesc}</p>
                 </div>
               </div>
 
@@ -1204,20 +1198,20 @@ export default function SuperAdmin() {
                 {/* Target */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {language === 'uz' ? 'Kimga' : language === 'ru' ? 'Кому' : 'Recipients'}
+                    {t.superadmin.recipientsLabel}
                   </label>
                   <div className="flex gap-3">
                     <button
                       onClick={() => setNotifyAll(true)}
                       className={`px-6 py-3 rounded-2xl font-black text-sm transition-all ${notifyAll ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}
                     >
-                      {language === 'uz' ? 'Barchaga' : language === 'ru' ? 'Всем' : 'All distributors'}
+                      {t.superadmin.allDistributors}
                     </button>
                     <button
                       onClick={() => setNotifyAll(false)}
                       className={`px-6 py-3 rounded-2xl font-black text-sm transition-all ${!notifyAll ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900' : 'bg-slate-100 dark:bg-white/5 text-slate-500'}`}
                     >
-                      {language === 'uz' ? 'Tanlangan' : language === 'ru' ? 'Выбранным' : 'Selected'}
+                      {t.superadmin.selectedOnly}
                     </button>
                   </div>
 
@@ -1242,13 +1236,13 @@ export default function SuperAdmin() {
                 {/* Type */}
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {language === 'uz' ? 'Turi' : language === 'ru' ? 'Тип' : 'Type'}
+                    {t.superadmin.typeLabel}
                   </label>
                   <div className="flex gap-2 flex-wrap">
                     {[
-                      { value: 'INFO', label: language === 'uz' ? 'Ma\'lumot' : language === 'ru' ? 'Инфо' : 'Info', color: 'bg-blue-50 text-blue-600' },
-                      { value: 'WARNING', label: language === 'uz' ? 'Ogohlantirish' : language === 'ru' ? 'Предупреждение' : 'Warning', color: 'bg-amber-50 text-amber-600' },
-                      { value: 'PAYMENT_REMINDER', label: language === 'uz' ? 'To\'lov eslatmasi' : language === 'ru' ? 'Напоминание об оплате' : 'Payment reminder', color: 'bg-emerald-50 text-emerald-600' },
+                      { value: 'INFO', label: t.superadmin.infoType, color: 'bg-blue-50 text-blue-600' },
+                      { value: 'WARNING', label: t.superadmin.warningType, color: 'bg-amber-50 text-amber-600' },
+                      { value: 'PAYMENT_REMINDER', label: t.superadmin.paymentReminderType, color: 'bg-emerald-50 text-emerald-600' },
                     ].map(opt => (
                       <button
                         key={opt.value}
@@ -1264,27 +1258,27 @@ export default function SuperAdmin() {
                 {/* Title */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {language === 'uz' ? 'Sarlavha' : language === 'ru' ? 'Заголовок' : 'Title'}
+                    {t.superadmin.notifTitle}
                   </label>
                   <input
                     value={notifyForm.title}
                     onChange={e => setNotifyForm(f => ({ ...f, title: e.target.value }))}
                     className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border-2 border-transparent focus:border-blue-500 rounded-2xl font-bold text-sm outline-none"
-                    placeholder={language === 'uz' ? 'Xabar sarlavhasi...' : language === 'ru' ? 'Заголовок сообщения...' : 'Message title...'}
+                    placeholder={t.superadmin.notifTitlePlaceholder}
                   />
                 </div>
 
                 {/* Message */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {language === 'uz' ? 'Xabar matni' : language === 'ru' ? 'Текст сообщения' : 'Message body'}
+                    {t.superadmin.notifMessage}
                   </label>
                   <textarea
                     rows={5}
                     value={notifyForm.message}
                     onChange={e => setNotifyForm(f => ({ ...f, message: e.target.value }))}
                     className="w-full px-5 py-4 bg-slate-50 dark:bg-white/5 border-2 border-transparent focus:border-blue-500 rounded-2xl font-bold text-sm outline-none resize-none"
-                    placeholder={language === 'uz' ? 'Xabar matni...' : language === 'ru' ? 'Текст сообщения...' : 'Write your message...'}
+                    placeholder={t.superadmin.notifMessagePlaceholder}
                   />
                 </div>
 
@@ -1302,10 +1296,10 @@ export default function SuperAdmin() {
                         payload.companyIds = selectedDistIds;
                       }
                       const res = await api.post('/super/notify-distributors', payload);
-                      toast.success(`${language === 'uz' ? 'Yuborildi' : language === 'ru' ? 'Отправлено' : 'Sent'}: ${res.data?.count ?? 0} ${language === 'uz' ? 'ta foydalanuvchi' : language === 'ru' ? 'пользователей' : 'users'}`);
+                      toast.success(`${t.superadmin.notifSent}: ${res.data?.count ?? 0}`);
                       setNotifyForm({ title: '', message: '', type: 'INFO' });
                     } catch {
-                      toast.error(language === 'uz' ? 'Yuborishda xatolik' : 'Failed to send');
+                      toast.error(t.superadmin.failedToSend);
                     } finally {
                       setNotifySending(false);
                     }
@@ -1314,8 +1308,8 @@ export default function SuperAdmin() {
                 >
                   {notifySending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                   {notifyAll
-                    ? (language === 'uz' ? 'Barcha distribyutorlarga yuborish' : language === 'ru' ? 'Отправить всем дистрибьюторам' : 'Send to all distributors')
-                    : (language === 'uz' ? `${selectedDistIds.length} ta distribyutorga yuborish` : language === 'ru' ? `Отправить ${selectedDistIds.length} дистрибьюторам` : `Send to ${selectedDistIds.length} distributors`)}
+                    ? t.superadmin.sendToAllBtn
+                    : `${t.superadmin.sendToAllBtn} (${selectedDistIds.length})`}
                 </button>
               </div>
             </div>
@@ -1329,8 +1323,8 @@ export default function SuperAdmin() {
                     <Layout className="w-6 h-6" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black">Landing Page CMS</h2>
-                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">Dynamic content editor</p>
+                    <h2 className="text-xl font-black">{t.superadmin.landingCmsTitle}</h2>
+                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{t.superadmin.dynamicEditor}</p>
                   </div>
                 </div>
                 <button
@@ -1339,9 +1333,9 @@ export default function SuperAdmin() {
                     try {
                       setCmsLoading(true);
                       await api.patch('/super/landing', landingContent);
-                      toast.success('Landing content saved');
+                      toast.success(t.superadmin.contentSaved);
                     } catch {
-                      toast.error('Failed to save');
+                      toast.error(t.superadmin.failedToSave);
                     } finally {
                       setCmsLoading(false);
                     }
@@ -1349,13 +1343,13 @@ export default function SuperAdmin() {
                   className="px-8 py-3 premium-gradient text-white rounded-2xl font-black text-sm flex items-center gap-3 shadow-lg shadow-blue-600/20 active:scale-95 transition-all disabled:opacity-50"
                 >
                   {cmsLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                  Save Changes
+                  {t.superadmin.saveChanges}
                 </button>
               </div>
 
               {/* Hero Section */}
               <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 space-y-6">
-                <h3 className="text-sm font-black text-teal-600 uppercase tracking-widest">Hero Section</h3>
+                <h3 className="text-sm font-black text-teal-600 uppercase tracking-widest">{t.superadmin.heroSection}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {(['Uz', 'Ru', 'En', 'Tr'] as const).map(lang => (
                     <div key={lang} className="space-y-3">
@@ -1386,7 +1380,7 @@ export default function SuperAdmin() {
 
               {/* Footer Description */}
               <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 space-y-6">
-                <h3 className="text-sm font-black text-teal-600 uppercase tracking-widest">Footer Description</h3>
+                <h3 className="text-sm font-black text-teal-600 uppercase tracking-widest">{t.superadmin.footerSection}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {(['Uz', 'Ru', 'En', 'Tr'] as const).map(lang => (
                     <div key={lang} className="space-y-2">
@@ -1405,10 +1399,10 @@ export default function SuperAdmin() {
 
               {/* Contact & Social */}
               <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 space-y-6">
-                <h3 className="text-sm font-black text-teal-600 uppercase tracking-widest">Contact & Social Links</h3>
+                <h3 className="text-sm font-black text-teal-600 uppercase tracking-widest">{t.superadmin.contactSocial}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {[
-                    { key: 'contactPhone', label: 'Phone' },
+                    { key: 'contactPhone', label: t.superadmin.phone },
                     { key: 'contactEmail', label: 'Email' },
                     { key: 'socialTelegram', label: 'Telegram URL' },
                     { key: 'socialLinkedin', label: 'LinkedIn URL' },
@@ -1444,20 +1438,18 @@ export default function SuperAdmin() {
               className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[3rem] p-10 shadow-4xl space-y-6"
             >
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-black">
-                  {language === 'uz' ? 'Yangi distribyutor' : language === 'ru' ? 'Новый дистрибьютор' : 'Create Distributor'}
-                </h2>
+                <h2 className="text-2xl font-black">{t.superadmin.createDistributor}</h2>
                 <button onClick={() => setIsDistModalOpen(false)} className="p-3 bg-slate-100 dark:bg-white/10 rounded-2xl"><X className="w-6 h-6" /></button>
               </div>
 
               <div className="space-y-4">
                 {[
-                  { key: 'companyName', label: language === 'uz' ? 'Kompaniya nomi' : language === 'ru' ? 'Название компании' : 'Company name', type: 'text' },
-                  { key: 'slug', label: 'Slug (URL)', type: 'text' },
-                  { key: 'phone', label: language === 'uz' ? 'Telefon (login)' : language === 'ru' ? 'Телефон (логин)' : 'Phone (login)', type: 'text' },
-                  { key: 'fullName', label: language === 'uz' ? 'To\'liq ism' : language === 'ru' ? 'Полное имя' : 'Full name', type: 'text' },
-                  { key: 'password', label: language === 'uz' ? 'Parol' : language === 'ru' ? 'Пароль' : 'Password', type: 'password' },
-                  { key: 'trialDays', label: language === 'uz' ? 'Trial kunlar' : language === 'ru' ? 'Дней пробного периода' : 'Trial days', type: 'number' },
+                  { key: 'companyName', label: t.superadmin.companyNameLabel, type: 'text' },
+                  { key: 'slug', label: t.superadmin.slugLabel, type: 'text' },
+                  { key: 'phone', label: t.superadmin.phoneLoginLabel, type: 'text' },
+                  { key: 'fullName', label: t.superadmin.fullNameLabel, type: 'text' },
+                  { key: 'password', label: t.superadmin.passwordLabel2, type: 'password' },
+                  { key: 'trialDays', label: t.superadmin.trialDaysLabel, type: 'number' },
                 ].map(({ key, label, type }) => (
                   <div key={key} className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</label>
@@ -1472,7 +1464,7 @@ export default function SuperAdmin() {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    {language === 'uz' ? 'Tarif rejasi' : language === 'ru' ? 'Тарифный план' : 'Subscription plan'}
+                    {t.superadmin.subscriptionPlanLabel}
                   </label>
                   <select
                     value={distForm.subscriptionPlan}
@@ -1492,13 +1484,13 @@ export default function SuperAdmin() {
                   try {
                     setDistSaving(true);
                     await api.post('/super/distributors', distForm);
-                    toast.success(language === 'uz' ? 'Distribyutor yaratildi' : language === 'ru' ? 'Дистрибьютор создан' : 'Distributor created');
+                    toast.success(t.superadmin.distributorCreated);
                     setIsDistModalOpen(false);
                     setDistForm(emptyDistForm);
                     const res = await api.get('/super/distributors');
                     setDistributors(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
                   } catch (err: any) {
-                    toast.error(err?.response?.data?.message ?? 'Error creating distributor');
+                    toast.error(err?.response?.data?.message ?? t.common.error);
                   } finally {
                     setDistSaving(false);
                   }
@@ -1506,7 +1498,7 @@ export default function SuperAdmin() {
                 className="w-full py-4 premium-gradient text-white rounded-2xl font-black text-sm flex items-center justify-center gap-3 active:scale-95 transition-all disabled:opacity-50"
               >
                 {distSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
-                {language === 'uz' ? 'Yaratish' : language === 'ru' ? 'Создать' : 'Create Distributor'}
+                {t.superadmin.createDistributor}
               </button>
             </motion.div>
           </div>
@@ -1519,25 +1511,25 @@ export default function SuperAdmin() {
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-6">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white dark:bg-slate-900 w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-[3rem] p-10 shadow-4xl space-y-8 no-scrollbar">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-black">{editingItem ? 'Edit Article' : 'New Article'}</h2>
+                <h2 className="text-2xl font-black">{editingItem ? t.superadmin.editArticle : t.superadmin.newArticleBtn}</h2>
                 <button onClick={() => setIsNewsModalOpen(false)} className="p-3 bg-slate-100 dark:bg-white/10 rounded-2xl"><X className="w-6 h-6" /></button>
               </div>
 
               {/* Cover image */}
               <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cover Image</label>
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.superadmin.coverImage}</label>
                 <ImageUploader
                   value={newsForm.image}
                   onChange={url => setNewsForm(f => ({ ...f, image: url }))}
                   onRemove={() => setNewsForm(f => ({ ...f, image: '' }))}
-                  label="Upload Cover Image"
+                  label={t.superadmin.uploadCoverImage}
                   className="h-44"
                 />
               </div>
 
               {/* Publish toggle */}
               <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10">
-                <span className="text-sm font-black">Publish immediately</span>
+                <span className="text-sm font-black">{t.superadmin.publishNow}</span>
                 <button
                   type="button"
                   onClick={() => setNewsForm(f => ({ ...f, isPublished: !f.isPublished }))}
@@ -1570,7 +1562,7 @@ export default function SuperAdmin() {
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Title</label>
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">{t.superadmin.titleField}</label>
                     <input
                       type="text"
                       value={((newsForm as unknown) as Record<string, string>)[`title${newsLangTab}`] || ''}
@@ -1579,7 +1571,7 @@ export default function SuperAdmin() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Slug</label>
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">{t.superadmin.slugField}</label>
                     <input
                       type="text"
                       value={((newsForm as unknown) as Record<string, string>)[`slug${newsLangTab}`] || ''}
@@ -1590,7 +1582,7 @@ export default function SuperAdmin() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Excerpt</label>
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">{t.superadmin.excerptField}</label>
                   <textarea
                     rows={2}
                     value={((newsForm as unknown) as Record<string, string>)[`excerpt${newsLangTab}`] || ''}
@@ -1599,7 +1591,7 @@ export default function SuperAdmin() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">Content (HTML or markdown)</label>
+                  <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">{t.superadmin.contentField}</label>
                   <textarea
                     rows={7}
                     value={((newsForm as unknown) as Record<string, string>)[`content${newsLangTab}`] || ''}
@@ -1611,7 +1603,7 @@ export default function SuperAdmin() {
 
               <div className="flex justify-end gap-4 pt-2">
                 <button onClick={() => setIsNewsModalOpen(false)} className="px-8 py-4 bg-slate-100 dark:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-xs">
-                  Cancel
+                  {t.common.cancel}
                 </button>
                 <button
                   onClick={async () => {
@@ -1619,15 +1611,15 @@ export default function SuperAdmin() {
                       setLoading(true);
                       if (editingItem) await api.patch(`/super/news/${editingItem.id}`, newsForm);
                       else await api.post('/super/news', newsForm);
-                      toast.success('Article saved');
+                      toast.success(t.superadmin.articleSaved);
                       setIsNewsModalOpen(false);
                       fetchData();
-                    } catch { toast.error('Failed to save'); }
+                    } catch { toast.error(t.superadmin.failedToSave); }
                     finally { setLoading(false); }
                   }}
                   className="px-12 py-4 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20 active:scale-95 transition-all"
                 >
-                  Save Article
+                  {t.common.save}
                 </button>
               </div>
             </motion.div>
@@ -1641,25 +1633,25 @@ export default function SuperAdmin() {
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-6">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[3rem] p-12 shadow-4xl space-y-8">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-black">{editingItem ? 'Tarifni Tahrirlash' : 'Yangi Tarif'}</h2>
+                <h2 className="text-2xl font-black">{editingItem ? t.superadmin.editTariff : t.superadmin.newTariffBtn}</h2>
                 <button onClick={() => setIsTariffModalOpen(false)} className="p-3 bg-slate-100 dark:bg-white/10 rounded-2xl"><X className="w-6 h-6" /></button>
               </div>
               <div className="grid grid-cols-2 gap-6 max-h-[50vh] overflow-y-auto px-2 no-scrollbar">
                 {['Uz', 'Ru', 'En', 'Tr', 'UzCyr'].map(langKey => (
                   <div key={langKey} className="col-span-2 space-y-4 pt-4 border-t border-slate-100 dark:border-white/5 first:border-0 first:pt-0">
-                    <h4 className="text-[10px] font-black text-cyan-600 uppercase tracking-widest">{langKey} Translation</h4>
+                    <h4 className="text-[10px] font-black text-cyan-600 uppercase tracking-widest">{langKey}</h4>
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">Name ({langKey})</label>
+                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.fullNameLabel} ({langKey})</label>
                         <input type="text" value={((tariffForm as unknown) as Record<string, string>)[`name${langKey}`] || ''} onChange={e => setTariffForm({ ...tariffForm, [`name${langKey}`]: e.target.value })} className="w-full px-5 py-3 rounded-xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold text-sm" />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">Features ({langKey}) — bir qatorda bittadan</label>
-                        <textarea 
+                        <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.featureFlags} ({langKey}) — {t.superadmin.featuresHint}</label>
+                        <textarea
                           rows={3}
-                          value={(((tariffForm as unknown) as Record<string, string[]>)[`features${langKey}`] || []).join('\n')} 
-                          onChange={e => setTariffForm({ ...tariffForm, [`features${langKey}`]: e.target.value.split('\n').filter(x => x.trim()) })} 
-                          className="w-full px-5 py-3 rounded-xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold text-sm" 
+                          value={(((tariffForm as unknown) as Record<string, string[]>)[`features${langKey}`] || []).join('\n')}
+                          onChange={e => setTariffForm({ ...tariffForm, [`features${langKey}`]: e.target.value.split('\n').filter(x => x.trim()) })}
+                          className="w-full px-5 py-3 rounded-xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold text-sm"
                           placeholder="Premium Support&#10;Unlimited Dealers&#10;..."
                         />
                       </div>
@@ -1667,42 +1659,42 @@ export default function SuperAdmin() {
                   </div>
                 ))}
                 <div className="col-span-2 space-y-4 pt-4 border-t border-slate-100 dark:border-white/5">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pricing & Plan Key</h4>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.superadmin.pricingSection}</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">Plan Key (FREE/START/PRO/PREMIUM)</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.tarifName} (FREE/START/PRO/PREMIUM)</label>
                       <input type="text" value={tariffForm.planKey || ''} onChange={e => setTariffForm({ ...tariffForm, planKey: e.target.value.toUpperCase() })} className="w-full px-5 py-3 rounded-xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold text-sm uppercase" placeholder="FREE" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">Order Index</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.orderIndex}</label>
                       <input type="number" value={tariffForm.order} onChange={e => setTariffForm({ ...tariffForm, order: +e.target.value })} className="w-full px-5 py-3 rounded-xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold text-sm" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">Monthly Price (UZS)</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.monthlyPrice2}</label>
                       <input type="number" value={tariffForm.priceMonthly || 0} onChange={e => setTariffForm({ ...tariffForm, priceMonthly: e.target.value })} className="w-full px-5 py-3 rounded-xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold text-sm" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">Yearly Price (UZS)</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.yearlyPrice}</label>
                       <input type="number" value={tariffForm.priceYearly || 0} onChange={e => setTariffForm({ ...tariffForm, priceYearly: e.target.value })} className="w-full px-5 py-3 rounded-xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold text-sm" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">Trial Days</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.trialDays2}</label>
                       <input type="number" value={tariffForm.trialDays || 14} onChange={e => setTariffForm({ ...tariffForm, trialDays: +e.target.value })} className="w-full px-5 py-3 rounded-xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold text-sm" />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">Price Display String</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.priceDisplay}</label>
                       <input type="text" value={tariffForm.price || ''} onChange={e => setTariffForm({ ...tariffForm, price: e.target.value })} className="w-full px-5 py-3 rounded-xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold text-sm" placeholder="Free / 99,000 UZS" />
                     </div>
                   </div>
                 </div>
                 <div className="col-span-2 space-y-4 pt-4 border-t border-slate-100 dark:border-white/5">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Limits</h4>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.superadmin.limits}</h4>
                   <div className="grid grid-cols-2 gap-4">
                     {[
-                      { key: 'maxBranches', label: 'Max Branches' },
-                      { key: 'maxUsers', label: 'Max Users' },
-                      { key: 'maxDealers', label: 'Max Dealers' },
-                      { key: 'maxProducts', label: 'Max Products' },
+                      { key: 'maxBranches', label: t.superadmin.maxBranches },
+                      { key: 'maxUsers', label: t.superadmin.maxUsers },
+                      { key: 'maxDealers', label: t.superadmin.maxDealers },
+                      { key: 'maxProducts', label: t.superadmin.maxProducts },
                     ].map(({ key, label }) => (
                       <div key={key} className="space-y-2">
                         <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">{label}</label>
@@ -1712,16 +1704,16 @@ export default function SuperAdmin() {
                   </div>
                 </div>
                 <div className="col-span-2 space-y-4 pt-4 border-t border-slate-100 dark:border-white/5">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Feature Flags</h4>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.superadmin.featureFlags}</h4>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { key: 'isPopular', label: 'Popular', color: 'accent-blue-600' },
-                      { key: 'isActive', label: 'Active', color: 'accent-emerald-600' },
-                      { key: 'allowAnalytics', label: 'Analytics', color: 'accent-indigo-600' },
+                      { key: 'isPopular', label: t.superadmin.popularBadge, color: 'accent-blue-600' },
+                      { key: 'isActive', label: t.superadmin.activeBadge, color: 'accent-emerald-600' },
+                      { key: 'allowAnalytics', label: t.sidebar.analytics, color: 'accent-indigo-600' },
                       { key: 'allowCustomBot', label: 'Custom Bot', color: 'accent-emerald-600' },
                       { key: 'allowWebStore', label: 'Web Store', color: 'accent-blue-600' },
                       { key: 'allowBulkImport', label: 'Bulk Import', color: 'accent-violet-600' },
-                      { key: 'allowNotifications', label: 'Notifications', color: 'accent-amber-600' },
+                      { key: 'allowNotifications', label: t.superadmin.notifyTab, color: 'accent-amber-600' },
                       { key: 'allowMultiCompany', label: 'Multi Company', color: 'accent-rose-600' },
                     ].map(({ key, label, color }) => (
                       <div key={key} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-xl">
@@ -1733,22 +1725,22 @@ export default function SuperAdmin() {
                 </div>
               </div>
               <div className="flex justify-end gap-4 pt-4">
-                <button onClick={() => setIsTariffModalOpen(false)} className="px-8 py-4 bg-slate-100 dark:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-xs">Bekor qilish</button>
+                <button onClick={() => setIsTariffModalOpen(false)} className="px-8 py-4 bg-slate-100 dark:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-xs">{t.common.cancel}</button>
                 <button
                   onClick={async () => {
                     try {
                       setLoading(true);
                       if (editingItem) await api.patch(`/super/tariffs/${editingItem.id}`, tariffForm);
                       else await api.post('/super/tariffs', tariffForm);
-                      toast.success('Tarif saqlandi');
+                      toast.success(t.superadmin.tariffSaved);
                       setIsTariffModalOpen(false);
                       fetchData();
-                    } catch { toast.error('Xatolik yuz berdi'); }
+                    } catch { toast.error(t.common.error); }
                     finally { setLoading(false); }
                   }}
                   className="px-12 py-4 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20"
                 >
-                  Saqlash
+                  {t.common.save}
                 </button>
               </div>
             </motion.div>
@@ -1762,30 +1754,30 @@ export default function SuperAdmin() {
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-6">
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-white dark:bg-slate-900 w-full max-w-lg rounded-[3rem] p-12 shadow-4xl space-y-8">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-black">{editingItem ? 'Lidni Tahrirlash' : 'Yangi Lid'}</h2>
+                <h2 className="text-2xl font-black">{editingItem ? t.superadmin.editLead : t.superadmin.newLeadBtn}</h2>
                 <button onClick={() => setIsLeadModalOpen(false)} className="p-3 bg-slate-100 dark:bg-white/10 rounded-2xl"><X className="w-6 h-6" /></button>
               </div>
               <div className="space-y-6">
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Toliq Ism</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.fullNameLabel}</label>
                   <input type="text" value={leadForm.fullName} onChange={e => setLeadForm({ ...leadForm, fullName: e.target.value })} className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold" />
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Telefon</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.phone}</label>
                   <input type="text" value={leadForm.phone} onChange={e => setLeadForm({ ...leadForm, phone: formatPhoneNumber(e.target.value) })} className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold" />
                 </div>
                 <div className="space-y-3">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">Status</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">{t.superadmin.leadStatus}</label>
                   <select value={leadForm.status} onChange={e => setLeadForm({ ...leadForm, status: e.target.value })} className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-black uppercase tracking-widest text-xs">
-                    <option value="NEW">New</option>
-                    <option value="CONTACTED">Contacted</option>
-                    <option value="CONVERTED">Converted</option>
-                    <option value="REJECTED">Rejected</option>
+                    <option value="NEW">{t.superadmin.leadNew}</option>
+                    <option value="CONTACTED">{t.superadmin.leadContacted}</option>
+                    <option value="CONVERTED">{t.superadmin.leadConverted}</option>
+                    <option value="REJECTED">{t.superadmin.leadRejected}</option>
                   </select>
                 </div>
               </div>
               <div className="flex justify-end gap-4 pt-4">
-                <button onClick={() => setIsLeadModalOpen(false)} className="px-8 py-4 bg-slate-100 dark:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-xs">Bekor qilish</button>
+                <button onClick={() => setIsLeadModalOpen(false)} className="px-8 py-4 bg-slate-100 dark:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-xs">{t.common.cancel}</button>
                 <button
                   onClick={async () => {
                     try {
@@ -1793,15 +1785,15 @@ export default function SuperAdmin() {
                       const finalForm = { ...leadForm, phone: unformatPhoneNumber(leadForm.phone || '') };
                       if (editingItem) await api.patch(`/super/leads/${editingItem.id}`, finalForm);
                       else await api.post('/super/leads', finalForm);
-                      toast.success('Lid saqlandi');
+                      toast.success(t.superadmin.leadSaved);
                       setIsLeadModalOpen(false);
                       fetchData();
-                    } catch { toast.error('Xatolik yuz berdi'); }
+                    } catch { toast.error(t.common.error); }
                     finally { setLoading(false); }
                   }}
                   className="px-12 py-4 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20"
                 >
-                  Saqlash
+                  {t.common.save}
                 </button>
               </div>
             </motion.div>
@@ -1817,20 +1809,20 @@ export default function SuperAdmin() {
                 <ShieldCheck className="w-10 h-10" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-2xl font-black tracking-tight">Xavfsizlikni Tasdiqlash</h3>
-                <p className="text-slate-500 dark:text-slate-400 font-bold text-sm">Ushbu amalni bajarish uchun administrator parolini kiriting</p>
+                <h3 className="text-2xl font-black tracking-tight">{t.superadmin.securityConfirm}</h3>
+                <p className="text-slate-500 dark:text-slate-400 font-bold text-sm">{t.superadmin.adminPasswordDesc}</p>
               </div>
               <input
                 type="password"
-                placeholder="Parol"
+                placeholder={t.superadmin.passwordLabel}
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleConfirmAction()}
                 className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-800 border-2 border-slate-100 dark:border-white/5 rounded-2xl text-center text-xl font-black tracking-widest focus:border-blue-600 outline-none transition-all"
               />
               <div className="flex gap-4">
-                <button onClick={() => setIsConfirmModalOpen(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black text-xs uppercase tracking-widest transition-all">Bekor Qilish</button>
-                <button onClick={handleConfirmAction} className="flex-1 py-4 premium-gradient text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20">Tasdiqlash</button>
+                <button onClick={() => setIsConfirmModalOpen(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl font-black text-xs uppercase tracking-widest transition-all">{t.common.cancel}</button>
+                <button onClick={handleConfirmAction} className="flex-1 py-4 premium-gradient text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-blue-600/20">{t.common.confirm}</button>
               </div>
             </motion.div>
           </div>
