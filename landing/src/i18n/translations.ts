@@ -1,0 +1,730 @@
+export const translations = {
+  en: {
+    nav: {
+      features: "Features",
+      pricing: "Pricing",
+      about: "About",
+      news: "Blog",
+      contact: "Contact",
+      login: "Sign In",
+      register: "Get Started",
+    },
+    common: {
+      uzs: "UZS",
+      leadForm: {
+        title: "Request a Demo",
+        subtitle: "See how Supplio can transform your distribution business.",
+        name: "Full Name",
+        phone: "Phone Number",
+        info: "Tell us about your business",
+        submit: "Send Request",
+        success: "Thank you! Our team will reach out to you shortly.",
+      },
+    },
+    stats: {
+      uptime: "Uptime SLA",
+      isolation: "Data Isolation",
+      isolationValue: "Per tenant",
+      response: "Avg Response",
+      audit: "Audit Trail",
+    },
+    footer: {
+      desc: "All-in-one B2B distribution platform. Manage dealers, track credit, automate orders through Telegram.",
+      product: "Product",
+      resources: "Resources",
+      company: "Company",
+      demo: "Demo",
+      docs: "Documentation",
+      api: "API Reference",
+      privacy: "Privacy",
+      terms: "Terms",
+      copyright: "© 2026 Supplio. All rights reserved.",
+    },
+    hero: {
+      badge: "B2B Distribution Platform",
+      title: "Smart Distribution Starts Here",
+      subtitle:
+        "All-in-one SaaS platform for manufacturers and distributors. Manage dealers, track credit limits, and streamline your entire supply chain.",
+      cta: "Start Free Trial",
+      secondary: "Try Live Demo",
+    },
+    features: {
+      title: "Built for Distribution",
+      subtitle:
+        "Everything you need to manage your dealer network and grow your business.",
+      item1: "Telegram Bot Integration",
+      item1Desc:
+        "Give each branch its own branded Telegram bot — dealers order directly through chat, no app needed.",
+      item2: "Credit & Debt Control",
+      item2Desc:
+        "Set credit limits per dealer, track debts in real-time, and get alerts when limits are exceeded.",
+      item3: "Multi-Tenant Architecture",
+      item3Desc:
+        "Each company gets isolated data, custom branding, and separate access controls — fully secure.",
+    },
+    pricing: {
+      title: "Simple Pricing",
+      subtitle: "Choose the plan that fits your business. Upgrade anytime.",
+      trial: "14-day free trial included",
+      month: "/ month",
+      cta: "Get Started",
+      plans: [
+        {
+          name: "Starter",
+          price: "249,000",
+          features: [
+            "1 Branch",
+            "Up to 50 dealers",
+            "1 Telegram bot",
+            "Basic analytics",
+          ],
+        },
+        {
+          name: "Business",
+          price: "749,000",
+          features: [
+            "Up to 3 branches",
+            "Unlimited dealers",
+            "3 Telegram bots",
+            "Real-time credit monitoring",
+            "Priority support",
+          ],
+        },
+        {
+          name: "Enterprise",
+          price: "1,990,000",
+          features: [
+            "Unlimited branches",
+            "Custom branded bots",
+            "API access",
+            "Custom roles & permissions",
+            "Dedicated account manager",
+          ],
+        },
+      ],
+    },
+    news: {
+      title: "Latest Updates",
+      subtitle: "News and insights from the Supplio team.",
+      more: "Read More",
+    },
+    about: {
+      heroTitle: "Built for the Future of B2B Distribution",
+      heroSubtitle: "Supplio is a next-generation SaaS platform that helps manufacturers and distributors manage their dealer networks, credit limits, and supply chains with unprecedented clarity.",
+      missionTitle: "Our Mission",
+      missionBody: "We believe every distributor deserves enterprise-grade tools. Our mission is to give manufacturers and wholesalers in Central Asia and beyond the technology to run their operations smarter — without the complexity or cost of legacy ERP systems.",
+      valuesTitle: "Our Values",
+      values: [
+        { title: "Simplicity First", desc: "Every feature starts with the question: is this the simplest way to solve the problem?" },
+        { title: "Real-Time Accuracy", desc: "Decisions are only as good as the data behind them. We obsess over data consistency." },
+        { title: "Dealer-Centric", desc: "If dealers can't use it on a slow Telegram connection, it doesn't ship." },
+        { title: "Trust by Default", desc: "Security, multi-tenancy, and audit trails are not features — they are foundations." },
+      ],
+      teamTitle: "The Team",
+      teamSubtitle: "A focused team of engineers and product designers building the distribution stack of the future.",
+      statsLabel: "Platform in Numbers",
+      stats: [
+        { value: "99.9%", label: "Uptime SLA" },
+        { value: "14 days", label: "Free Trial" },
+        { value: "5 langs", label: "Supported" },
+        { value: "< 100ms", label: "API Response" },
+      ],
+      ctaTitle: "Ready to transform your distribution business?",
+      ctaBtn: "Start Free Trial",
+    },
+  },
+  uz: {
+    nav: {
+      features: "Imkoniyatlar",
+      pricing: "Narxlar",
+      about: "Biz haqimizda",
+      news: "Yangiliklar",
+      contact: "Aloqa",
+      login: "Kirish",
+      register: "Boshlash",
+    },
+    common: {
+      uzs: "so'm",
+      leadForm: {
+        title: "Demo so'rovi",
+        subtitle:
+          "Supplio sizning distributsiya biznesingizni qanday o'zgartira olishini ko'ring.",
+        name: "To'liq ismingiz",
+        phone: "Telefon raqamingiz",
+        info: "Biznesingiz haqida qisqacha yozing",
+        submit: "So'rov yuborish",
+        success: "Rahmat! Jamoamiz siz bilan tez orada bog'lanadi.",
+      },
+    },
+    stats: {
+      uptime: "Ishlash vaqti",
+      isolation: "Ma'lumotlar izolyatsiyasi",
+      isolationValue: "Har bir ijarachi",
+      response: "O'rtacha javob",
+      audit: "Audit treki",
+    },
+    footer: {
+      desc: "B2B distributsiya uchun yagona platforma. Dilerlarni boshqaring, kreditni kuzating, Telegram orqali buyurtmalarni avtomatlashtiring.",
+      product: "Mahsulot",
+      resources: "Resurslar",
+      company: "Kompaniya",
+      demo: "Demo",
+      docs: "Hujjatlar",
+      api: "API ma'lumot",
+      privacy: "Maxfiylik",
+      terms: "Shartlar",
+      copyright: "© 2026 Supplio. Barcha huquqlar himoyalangan.",
+    },
+    hero: {
+      badge: "B2B Distributsiya Platformasi",
+      title: "Aqlli Distributsiya Shu Yerdan Boshlanadi",
+      subtitle:
+        "Ishlab chiqaruvchilar va distribyutorlar uchun yagona SaaS platforma. Dilerlarni boshqaring, kredit limitlarini kuzating va ta'minot zanjiringizni soddalashtiring.",
+      cta: "Bepul sinab ko'ring",
+      secondary: "Demo ko'rish",
+    },
+    features: {
+      title: "Distributsiya Uchun Yaratilgan",
+      subtitle:
+        "Dilerlar tarmog'ini boshqarish va biznesingizni o'stirish uchun kerak bo'lgan hamma narsa.",
+      item1: "Telegram Bot Integratsiyasi",
+      item1Desc:
+        "Har bir filialga o'zining brendlangan Telegram botini bering — dilerlar to'g'ridan-to'g'ri chat orqali buyurtma berishadi.",
+      item2: "Kredit va Qarz Nazorati",
+      item2Desc:
+        "Har bir diler uchun kredit limitini belgilang, qarzlarni real vaqtda kuzating va limit oshganda ogohlantirish oling.",
+      item3: "Ko'p Foydalanuvchi Arxitekturasi",
+      item3Desc:
+        "Har bir kompaniya izolyatsiya qilingan ma'lumotlar, individual brending va alohida kirish huquqlariga ega.",
+    },
+    pricing: {
+      title: "Oddiy Narxlar",
+      subtitle: "Biznesingizga mos tarifni tanlang. Istalgan vaqtda yangilang.",
+      trial: "14 kunlik bepul sinov",
+      month: "/ oyiga",
+      cta: "Boshlash",
+      plans: [
+        {
+          name: "Boshlang'ich",
+          price: "249,000",
+          features: [
+            "1 ta filial",
+            "50 tagacha diler",
+            "1 ta Telegram bot",
+            "Asosiy tahlillar",
+          ],
+        },
+        {
+          name: "Biznes",
+          price: "749,000",
+          features: [
+            "3 tagacha filial",
+            "Cheksiz diler",
+            "3 ta Telegram bot",
+            "Real vaqt kredit nazorati",
+            "Ustuvor qo'llab-quvvatlash",
+          ],
+        },
+        {
+          name: "Korporativ",
+          price: "1,990,000",
+          features: [
+            "Cheksiz filiallar",
+            "Maxsus brendlangan botlar",
+            "API kirish huquqi",
+            "Foydalanuvchi rollari va ruxsatlari",
+            "Shaxsiy menejer",
+          ],
+        },
+      ],
+    },
+    news: {
+      title: "So'nggi Yangiliklar",
+      subtitle: "Supplio jamoasidan yangiliklar va foydali ma'lumotlar.",
+      more: "Batafsil o'qish",
+    },
+    about: {
+      heroTitle: "B2B Distributsiyaning Kelajagi Uchun Yaratildi",
+      heroSubtitle: "Supplio — ishlab chiqaruvchilar va distribyutorlarga dilerlar tarmog'ini, kredit limitlarini va ta'minot zanjirlarini boshqarish imkonini beruvchi yangi avlod SaaS platformasi.",
+      missionTitle: "Bizning Maqsadimiz",
+      missionBody: "Har bir distribyutor korporativ darajadagi vositalarga loyiq deb hisoblaymiz. Bizning maqsadimiz — Markaziy Osiyo va undan tashqaridagi ishlab chiqaruvchilar va ulgurji savdogarlarga operatsiyalarini aqlli boshqarish imkoniyatini berish.",
+      valuesTitle: "Qadriyatlarimiz",
+      values: [
+        { title: "Soddalik — Birinchi", desc: "Har bir funksiya ushbu savoldan boshlanadi: bu muammoni hal qilishning eng sodda yo'li shumi?" },
+        { title: "Real Vaqt Aniqligi", desc: "Qarorlar faqat ularning ortidagi ma'lumotlar kabi ishonchli bo'ladi. Biz ma'lumotlar izchilligiga e'tibor qaratamiz." },
+        { title: "Dilerga Yo'naltirilgan", desc: "Agar dilerlar buni sekin Telegram ulanishida ishlata olmasalar — bu funksiya jo'natilmaydi." },
+        { title: "Sukut bo'yicha Ishonch", desc: "Xavfsizlik, ko'p ijarachilik va audit izlari — funksiyalar emas, balki asosdir." },
+      ],
+      teamTitle: "Jamoa",
+      teamSubtitle: "Kelajakning distributsiya texnologiyasini qurayotgan muhandislar va mahsulot dizaynerlarining kichik jamoasi.",
+      statsLabel: "Platforma Raqamda",
+      stats: [
+        { value: "99.9%", label: "Ishlash Kafolati" },
+        { value: "14 kun", label: "Bepul Sinov" },
+        { value: "5 til", label: "Qo'llab-quvvatlanadi" },
+        { value: "< 100ms", label: "API Javobi" },
+      ],
+      ctaTitle: "Distributsiya biznesingizni o'zgartirishga tayyormisiz?",
+      ctaBtn: "Bepul Boshlash",
+    },
+  },
+  tr: {
+    nav: {
+      features: "Özellikler",
+      pricing: "Fiyatlar",
+      about: "Hakkımızda",
+      news: "Blog",
+      contact: "İletişim",
+      login: "Giriş Yap",
+      register: "Başlayın",
+    },
+    common: {
+      uzs: "UZS",
+      leadForm: {
+        title: "Demo Talep Edin",
+        subtitle:
+          "Supplio'nun dağıtım işinizi nasıl dönüştürebileceğini görün.",
+        name: "Ad Soyad",
+        phone: "Telefon Numarası",
+        info: "İşletmeniz hakkında kısaca bilgi verin",
+        submit: "Talep Gönder",
+        success:
+          "Teşekkürler! Ekibimiz en kısa sürede sizinle iletişime geçecek.",
+      },
+    },
+    stats: {
+      uptime: "Çalışma Süresi",
+      isolation: "Veri İzolasyonu",
+      isolationValue: "Kiracı başına",
+      response: "Ort. Yanıt",
+      audit: "Denetim İzi",
+    },
+    footer: {
+      desc: "Hepsi bir arada B2B dağıtım platformu. Bayileri yönetin, krediyi takip edin, Telegram ile siparişleri otomatikleştirin.",
+      product: "Ürün",
+      resources: "Kaynaklar",
+      company: "Şirket",
+      demo: "Demo",
+      docs: "Dokümantasyon",
+      api: "API Referansı",
+      privacy: "Gizlilik",
+      terms: "Koşullar",
+      copyright: "© 2026 Supplio. Tüm hakları saklıdır.",
+    },
+    hero: {
+      badge: "B2B Dağıtım Platformu",
+      title: "Akıllı Dağıtım Burada Başlar",
+      subtitle:
+        "Üreticiler ve distribütörler için hepsi bir arada SaaS platform. Bayileri yönetin, kredi limitlerini takip edin ve tedarik zincirinizi optimize edin.",
+      cta: "Ücretsiz Deneyin",
+      secondary: "Canlı Demo",
+    },
+    features: {
+      title: "Dağıtım İçin Tasarlandı",
+      subtitle:
+        "Bayi ağınızı yönetmek ve işinizi büyütmek için ihtiyacınız olan her şey.",
+      item1: "Telegram Bot Entegrasyonu",
+      item1Desc:
+        "Her şubeye kendi markalı Telegram botunu verin — bayiler doğrudan sohbet üzerinden sipariş verir.",
+      item2: "Kredi ve Borç Kontrolü",
+      item2Desc:
+        "Her bayi için kredi limiti belirleyin, borçları gerçek zamanlı takip edin ve limit aşıldığında uyarı alın.",
+      item3: "Çoklu Kiracı Mimarisi",
+      item3Desc:
+        "Her şirket izole verilere, özel markalamaya ve ayrı erişim kontrollerine sahiptir — tamamen güvenli.",
+    },
+    pricing: {
+      title: "Basit Fiyatlandırma",
+      subtitle: "İşletmenize uygun planı seçin. İstediğiniz zaman yükseltin.",
+      trial: "14 günlük ücretsiz deneme dahil",
+      month: "/ aylık",
+      cta: "Başlayın",
+      plans: [
+        {
+          name: "Başlangıç",
+          price: "249,000",
+          features: [
+            "1 Şube",
+            "50'ye kadar bayi",
+            "1 Telegram botu",
+            "Temel analizler",
+          ],
+        },
+        {
+          name: "İşletme",
+          price: "749,000",
+          features: [
+            "3'e kadar şube",
+            "Sınırsız bayi",
+            "3 Telegram botu",
+            "Gerçek zamanlı kredi takibi",
+            "Öncelikli destek",
+          ],
+        },
+        {
+          name: "Kurumsal",
+          price: "1,990,000",
+          features: [
+            "Sınırsız şube",
+            "Özel markalı botlar",
+            "API erişimi",
+            "Özel roller ve izinler",
+            "Özel hesap yöneticisi",
+          ],
+        },
+      ],
+    },
+    news: {
+      title: "Son Gelişmeler",
+      subtitle: "Supplio ekibinden haberler ve içgörüler.",
+      more: "Devamını Oku",
+    },
+    about: {
+      heroTitle: "B2B Dağıtımın Geleceği İçin İnşa Edildi",
+      heroSubtitle: "Supplio, üreticilerin ve distribütörlerin bayi ağlarını, kredi limitlerini ve tedarik zincirlerini yönetmesine olanak tanıyan yeni nesil bir SaaS platformudur.",
+      missionTitle: "Misyonumuz",
+      missionBody: "Her distribütörün kurumsal düzeyde araçlara hakkı olduğuna inanıyoruz. Misyonumuz, Orta Asya'daki ve ötesindeki üreticilere ve toptancılara operasyonlarını daha akıllı yönetme imkânı sunmaktır.",
+      valuesTitle: "Değerlerimiz",
+      values: [
+        { title: "Önce Sadelik", desc: "Her özellik şu soruyla başlar: bu problemi çözmenin en basit yolu bu mu?" },
+        { title: "Gerçek Zamanlı Doğruluk", desc: "Kararlar ancak arkasındaki veriler kadar iyidir. Veri tutarlılığına takıntılıyız." },
+        { title: "Bayi Odaklı", desc: "Bayiler bunu yavaş bir Telegram bağlantısında kullanamıyorsa, gönderilmez." },
+        { title: "Varsayılan Güven", desc: "Güvenlik, çok kiracılılık ve denetim izleri özellik değil — temeldir." },
+      ],
+      teamTitle: "Takım",
+      teamSubtitle: "Geleceğin dağıtım teknoloji yığınını inşa eden odaklı bir mühendisler ve ürün tasarımcıları ekibi.",
+      statsLabel: "Platform Rakamlarla",
+      stats: [
+        { value: "99.9%", label: "Çalışma Süresi" },
+        { value: "14 gün", label: "Ücretsiz Deneme" },
+        { value: "5 dil", label: "Desteklenen" },
+        { value: "< 100ms", label: "API Yanıtı" },
+      ],
+      ctaTitle: "Dağıtım işinizi dönüştürmeye hazır mısınız?",
+      ctaBtn: "Ücretsiz Başlayın",
+    },
+  },
+  ru: {
+    nav: {
+      features: "Возможности",
+      pricing: "Тарифы",
+      about: "О нас",
+      news: "Блог",
+      contact: "Контакты",
+      login: "Войти",
+      register: "Начать",
+    },
+    common: {
+      uzs: "сум",
+      leadForm: {
+        title: "Запросить демо",
+        subtitle: "Узнайте, как Supplio может улучшить ваш бизнес дистрибуции.",
+        name: "Полное имя",
+        phone: "Номер телефона",
+        info: "Расскажите о вашем бизнесе",
+        submit: "Отправить заявку",
+        success: "Спасибо! Наша команда свяжется с вами в ближайшее время.",
+      },
+    },
+    stats: {
+      uptime: "Время работы",
+      isolation: "Изоляция данных",
+      isolationValue: "По арендатору",
+      response: "Ср. ответ",
+      audit: "Аудит",
+    },
+    footer: {
+      desc: "Универсальная B2B платформа дистрибуции. Управляйте дилерами, контролируйте кредиты, автоматизируйте заказы через Telegram.",
+      product: "Продукт",
+      resources: "Ресурсы",
+      company: "Компания",
+      demo: "Демо",
+      docs: "Документация",
+      api: "API справка",
+      privacy: "Конфиденциальность",
+      terms: "Условия",
+      copyright: "© 2026 Supplio. Все права защищены.",
+    },
+    hero: {
+      badge: "B2B платформа дистрибуции",
+      title: "Умная дистрибуция начинается здесь",
+      subtitle:
+        "Единая SaaS-платформа для производителей и дистрибьюторов. Управляйте дилерами, контролируйте кредитные лимиты и оптимизируйте цепочку поставок.",
+      cta: "Попробовать бесплатно",
+      secondary: "Смотреть демо",
+    },
+    features: {
+      title: "Создано для дистрибуции",
+      subtitle:
+        "Всё необходимое для управления дилерской сетью и роста вашего бизнеса.",
+      item1: "Интеграция Telegram-ботов",
+      item1Desc:
+        "У каждого филиала свой брендированный Telegram-бот — дилеры заказывают прямо в чате, без приложений.",
+      item2: "Контроль кредитов и долгов",
+      item2Desc:
+        "Устанавливайте кредитные лимиты, отслеживайте долги в реальном времени и получайте оповещения при превышении.",
+      item3: "Мультитенантная архитектура",
+      item3Desc:
+        "Каждая компания получает изолированные данные, собственный бренд и отдельные настройки доступа.",
+    },
+    pricing: {
+      title: "Простые тарифы",
+      subtitle: "Выберите подходящий план. Обновите в любой момент.",
+      trial: "14 дней бесплатного пробного периода",
+      month: "/ в месяц",
+      cta: "Начать",
+      plans: [
+        {
+          name: "Стартовый",
+          price: "249,000",
+          features: [
+            "1 филиал",
+            "До 50 дилеров",
+            "1 Telegram-бот",
+            "Базовая аналитика",
+          ],
+        },
+        {
+          name: "Бизнес",
+          price: "749,000",
+          features: [
+            "До 3 филиалов",
+            "Безлимитные дилеры",
+            "3 Telegram-бота",
+            "Мониторинг кредитов в реальном времени",
+            "Приоритетная поддержка",
+          ],
+        },
+        {
+          name: "Корпоративный",
+          price: "1,990,000",
+          features: [
+            "Безлимитные филиалы",
+            "Брендированные боты",
+            "Доступ к API",
+            "Настраиваемые роли и разрешения",
+            "Персональный менеджер",
+          ],
+        },
+      ],
+    },
+    news: {
+      title: "Последние обновления",
+      subtitle: "Новости и полезные материалы от команды Supplio.",
+      more: "Читать далее",
+    },
+    about: {
+      heroTitle: "Создано для будущего B2B дистрибуции",
+      heroSubtitle: "Supplio — SaaS-платформа нового поколения, которая помогает производителям и дистрибьюторам управлять дилерскими сетями, кредитными лимитами и цепочками поставок.",
+      missionTitle: "Наша Миссия",
+      missionBody: "Мы убеждены, что каждый дистрибьютор заслуживает инструментов корпоративного уровня. Наша миссия — дать производителям и оптовикам Центральной Азии и мира технологии для умного управления операциями.",
+      valuesTitle: "Наши Ценности",
+      values: [
+        { title: "Простота Прежде Всего", desc: "Каждая функция начинается с вопроса: это простейший способ решить проблему?" },
+        { title: "Точность в Реальном Времени", desc: "Решения настолько хороши, насколько хороши данные за ними. Мы одержимы согласованностью данных." },
+        { title: "Ориентация на Дилера", desc: "Если дилеры не могут использовать это при медленном Telegram — функция не выпускается." },
+        { title: "Доверие по Умолчанию", desc: "Безопасность, мультиарендность и журналы аудита — не функции, а основа." },
+      ],
+      teamTitle: "Команда",
+      teamSubtitle: "Сфокусированная команда инженеров и дизайнеров продукта, строящих дистрибуционный стек будущего.",
+      statsLabel: "Платформа в Цифрах",
+      stats: [
+        { value: "99.9%", label: "Гарантия Работы" },
+        { value: "14 дней", label: "Бесплатный Пробник" },
+        { value: "5 языков", label: "Поддерживается" },
+        { value: "< 100ms", label: "Ответ API" },
+      ],
+      ctaTitle: "Готовы трансформировать свой дистрибуционный бизнес?",
+      ctaBtn: "Начать Бесплатно",
+    },
+  },
+  oz: {
+    nav: {
+      features: "Имкониятлар",
+      pricing: "Нархлар",
+      about: "Биз ҳақимизда",
+      news: "Янгиликлар",
+      contact: "Алоқа",
+      login: "Кириш",
+      register: "Бошлаш",
+    },
+    common: {
+      uzs: "сўм",
+      leadForm: {
+        title: "Демо сўрови",
+        subtitle: "Supplio сизнинг дистрибуция бизнесингизни қандай ўзгартира олишини кўринг.",
+        name: "Тўлиқ исмингиз",
+        phone: "Телефон рақамингиз",
+        info: "Бизнесингиз ҳақида қисқача ёзинг",
+        submit: "Сўров юбориш",
+        success: "Раҳмат! Жамоамиз сиз билан тез орада боғланади.",
+      },
+    },
+    stats: {
+      uptime: "Ишлаш вақти",
+      isolation: "Маълумотлар изоляцияси",
+      isolationValue: "Ҳар бир ижарачи",
+      response: "Ўртача жавоб",
+      audit: "Аудит треки",
+    },
+    footer: {
+      desc: "B2B дистрибуция учун ягона платформа. Диллерларни бошқаринг, кредитни кузатинг, Telegram орқали буюртмаларни автоматлаштиринг.",
+      product: "Маҳсулот",
+      resources: "Ресурслар",
+      company: "Компания",
+      demo: "Демо",
+      docs: "Ҳужжатлар",
+      api: "API маълумот",
+      privacy: "Махфийлик",
+      terms: "Шартлар",
+      copyright: "© 2026 Supplio. Барча ҳуқуқлар ҳимояланган.",
+    },
+    hero: {
+      badge: "B2B Дистрибуция Платформаси",
+      title: "Ақлли Дистрибуция Шу Ердан Бошланади",
+      subtitle: "Ишлаб чиқарувчилар ва дистрибуторлар учун ягона SaaS платформа. Диллерларни бошқаринг, кредит лимитларини кузатинг ва таъминот занжирингизни соддалаштиринг.",
+      cta: "Бепул синаб кўринг",
+      secondary: "Демо кўриш",
+    },
+    features: {
+      title: "Дистрибуция Учун Яратилган",
+      subtitle: "Диллерлар тармоғини бошқариш ва бизнесингизни ўстириш учун керак бўлган ҳамма нарса.",
+      item1: "Telegram Bot Интеграцияси",
+      item1Desc: "Ҳар бир филиалга ўзининг брендланган Telegram ботини беринг — диллерлар тўғридан-тўғри чат орқали буюртма беришади.",
+      item2: "Кредит ва Қарз Назорати",
+      item2Desc: "Ҳар бир диллер учун кредит лимитини белгиланг, қарзларни реал вақтда кузатинг ва лимит ошганда огоҳлантириш олинг.",
+      item3: "Кўп Фойдаланувчи Архитектураси",
+      item3Desc: "Ҳар бир компания изоляция қилинган маълумотлар, индивидуал брендинг ва алоҳида кириш ҳуқуқларига эга.",
+    },
+    pricing: {
+      title: "Оддий Нархлар",
+      subtitle: "Бизнесингизга мос тарифни танланг. Истаган вақтда янгиланг.",
+      trial: "14 кунлик бепул синов",
+      month: "/ ойига",
+      cta: "Бошлаш",
+      plans: [
+        {
+          name: "Бошланғич",
+          price: "249,000",
+          features: ["1 та филиал", "50 тагача диллер", "1 та Telegram бот", "Асосий таҳлиллар"],
+        },
+        {
+          name: "Бизнес",
+          price: "749,000",
+          features: ["3 тагача филиал", "Чексиз диллер", "3 та Telegram бот", "Реал вақт кредит назорати", "Устувор қўллаб-қувватлаш"],
+        },
+        {
+          name: "Корпоратив",
+          price: "1,990,000",
+          features: ["Чексиз филиаллар", "Махсус брендланган ботлар", "API кириш ҳуқуқи", "Фойдаланувчи роллари ва рухсатлари", "Шахсий менежер"],
+        },
+      ],
+    },
+    news: {
+      title: "Сўнгги Янгиликлар",
+      subtitle: "Supplio жамоасидан янгиликлар ва фойдали маълумотлар.",
+      more: "Батафсил ўқиш",
+    },
+    about: {
+      heroTitle: "B2B Дистрибуциянинг Келажаги Учун Яратилди",
+      heroSubtitle: "Supplio — ишлаб чиқарувчилар ва дистрибуторларга диллерлар тармоғини, кредит лимитларини ва таъминот занжирларини бошқариш имконини берувчи янги авлод SaaS платформаси.",
+      missionTitle: "Бизнинг Мақсадимиз",
+      missionBody: "Ҳар бир дистрибутор корпоратив даражадаги воситаларга лойиқ деб ҳисоблаймиз. Бизнинг мақсадимиз — Марказий Осиё ва ундан ташқаридаги ишлаб чиқарувчилар ва улгурчи савдогарларга операцияларини ақлли бошқариш имкониятини бериш.",
+      valuesTitle: "Қадриятларимиз",
+      values: [
+        { title: "Соддалик — Биринчи", desc: "Ҳар бир функция ушбу саволдан бошланади: бу муаммони ҳал қилишнинг энг содда йўли шуми?" },
+        { title: "Реал Вақт Аниқлиги", desc: "Қарорлар фақат уларнинг ортидаги маълумотлар каби ишончли бўлади. Биз маълумотлар изчиллигига эътибор қаратамиз." },
+        { title: "Диллерга Йўналтирилган", desc: "Агар диллерлар буни секин Telegram уланишида ишлата олмасалар — бу функция жўнатилмайди." },
+        { title: "Сукут бўйича Ишонч", desc: "Хавфсизлик, кўп ижарачилик ва аудит излари — функциялар эмас, балки асосдир." },
+      ],
+      teamTitle: "Жамоа",
+      teamSubtitle: "Келажакнинг дистрибуция технологиясини қураётган муҳандислар ва маҳсулот дизайнерларининг кичик жамоаси.",
+      statsLabel: "Платформа Рақамда",
+      stats: [
+        { value: "99.9%", label: "Ишлаш Кафолати" },
+        { value: "14 кун", label: "Бепул Синов" },
+        { value: "5 тил", label: "Қўллаб-қувватланади" },
+        { value: "< 100ms", label: "API Жавоби" },
+      ],
+      ctaTitle: "Дистрибуция бизнесингизни ўзгартиришга тайёрмисиз?",
+      ctaBtn: "Бепул Бошлаш",
+    },
+  },
+} as const;
+
+export const howItWorksTranslations: Record<string, { title: string; subtitle: string; steps: { num: string; title: string; desc: string }[] }> = {
+  en: {
+    title: "How It Works",
+    subtitle: "Get up and running in minutes, not months.",
+    steps: [
+      { num: "01", title: "Create Your Company", desc: "Sign up, set up your branches, add team members, and configure your catalog in under 10 minutes." },
+      { num: "02", title: "Connect Your Dealers", desc: "Add dealers with credit limits. Each dealer gets a Telegram bot login — no app installation needed." },
+      { num: "03", title: "Automate Orders & Payments", desc: "Orders come in via bot or web store. Track payments, debts, and analytics in real-time from your dashboard." },
+    ],
+  },
+  uz: {
+    title: "Qanday ishlaydi",
+    subtitle: "Bir necha daqiqada ishga tushiring.",
+    steps: [
+      { num: "01", title: "Kompaniyangizni yarating", desc: "Ro'yxatdan o'ting, filiallar, xodimlar va katalogni 10 daqiqada sozlang." },
+      { num: "02", title: "Dilerlarni ulang", desc: "Dilerlarni kredit limiti bilan qo'shing. Har bir diler Telegram orqali kiradi." },
+      { num: "03", title: "Buyurtma va to'lovlarni avtomatlashtiring", desc: "Buyurtmalar bot yoki veb-do'kon orqali keladi. To'lov va analitikani real vaqtda kuzating." },
+    ],
+  },
+  ru: {
+    title: "Как это работает",
+    subtitle: "Запуск за минуты, а не за месяцы.",
+    steps: [
+      { num: "01", title: "Создайте компанию", desc: "Зарегистрируйтесь, настройте филиалы, добавьте сотрудников и каталог за 10 минут." },
+      { num: "02", title: "Подключите дилеров", desc: "Добавьте дилеров с кредитными лимитами. Каждый дилер входит через Telegram." },
+      { num: "03", title: "Автоматизируйте заказы", desc: "Заказы поступают через бота или веб-магазин. Отслеживайте долги и аналитику в реальном времени." },
+    ],
+  },
+  tr: {
+    title: "Nasıl Çalışır",
+    subtitle: "Aylar değil, dakikalar içinde başlayın.",
+    steps: [
+      { num: "01", title: "Şirketinizi Oluşturun", desc: "Kaydolun, şubeleri ve ekibi 10 dakikada kurun." },
+      { num: "02", title: "Bayilerinizi Bağlayın", desc: "Kredi limitleriyle bayi ekleyin. Her bayi Telegram üzerinden giriş yapar." },
+      { num: "03", title: "Siparişleri Otomatikleştirin", desc: "Siparişler bot veya web mağazasından gelir. Borçları ve analitiği gerçek zamanlı izleyin." },
+    ],
+  },
+  oz: {
+    title: "Қандай Ишлайди",
+    subtitle: "Бир неча дақиқада ишга туширинг.",
+    steps: [
+      { num: "01", title: "Компанияни яратинг", desc: "Рўйхатдан ўтинг, филиаллар, ходимлар ва каталогни 10 дақиқада созланг." },
+      { num: "02", title: "Диллерларни уланг", desc: "Диллерларни кредит лимити билан қўшинг. Ҳар бир диллер Telegram орқали киради." },
+      { num: "03", title: "Буюртма ва тўловларни автоматлаштиринг", desc: "Буюртмалар бот ёки веб-дўкон орқали келади. Тўлов ва аналитикани реал вақтда кузатинг." },
+    ],
+  },
+};
+
+export const testimonialsLabel: Record<string, string> = {
+  en: "What Our Customers Say",
+  uz: "Mijozlarimiz nima deydi",
+  ru: "Что говорят наши клиенты",
+  tr: "Müşterilerimiz Ne Diyor",
+  oz: "Мижозларимиз нима дейди",
+};
+
+export type Language = keyof typeof translations;
+
+export const languageSlugs: Record<string, Language> = {
+  uz: "uz",
+  oz: "oz",
+  ru: "ru",
+  en: "en",
+  tr: "tr",
+};
+
+export const langToSlug = (lang: Language): string => {
+  const entry = Object.entries(languageSlugs).find(
+    (entry) => entry[1] === lang
+  );
+  return entry ? entry[0] : "en";
+};
+
+export const slugToLang = (slug: string): Language => {
+  return languageSlugs[slug] || "en";
+};
