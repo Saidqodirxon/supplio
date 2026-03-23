@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  SUPPLIO — Automated Deploy Script (Robust Version)
+#  SUPPLIO — Deployment Engine (V3 - Stable)
 # ============================================================
 
 set -e
@@ -15,127 +15,99 @@ RESET="\033[0m"
 
 log()  { echo -e "${CYAN}[DEPLOY]${RESET} $1"; }
 ok()   { echo -e "${GREEN}[OK]${RESET}    $1"; }
-warn() { echo -e "${YELLOW}[SKIP]${RESET}  $1"; }
+warn() { echo -e "${YELLOW}[WARN]${RESET}  $1"; }
 fail() { echo -e "${RED}[ERROR]${RESET} $1"; exit 1; }
 
 cd "$REPO_DIR" || fail "Papka topilmadi: $REPO_DIR"
 
-# RAM/CPU limitini oshirish (Build vaqtida crash bo'lmasligi uchun)
+# RAM build vaqtida crash bo'lmasligi uchun
 export NODE_OPTIONS="--max-old-space-size=2048"
 
-# ── 1. Git yangilash ──────────────────────────────────────────
-log "Git fetch qilinmoqda..."
+# ── 1. Git pull ───────────────────────────────────────────────
+log "Kodni GitHub'dan yangilamoqdamiz..."
 git fetch origin main
 
-CHANGED=$(git diff origin/main --name-only)
-
-if [ -z "$CHANGED" ]; then
-    log "Hech qanday o'zgarish yo'q. Baribir davom etamiz (Force Deploy)..."
-fi
-
-log "Git pull boshlandi..."
+# Majburan pull qilish
 if git pull origin main; then
-    ok "Git pull muvaffaqiyatli yakunlandi"
+    ok "Kodni yangilash muvaffaqiyatli yakunlandi."
 else
-    fail "Git pull'da xatolik! Ehtimol .env fayllarida konflikt bor."
+    fail "Git pull'da xatolik! Ehtimol konflikt bor."
 fi
 
-# ── 2. Build va Restart funksiyalari ──────────────────────────
+# ── 2. Xizmatlarni yangilash funksiyalari ──────────────────────
 
-has_changes() {
-    [ -z "$CHANGED" ] || echo "$CHANGED" | grep -q "^$1/"
-}
-
-# Backend (NestJS + Prisma)
-build_backend() {
-    log "${BOLD}BACKEND${RESET} yangilanmoqda (NestJS + .env.production)..."
+# BACKEND
+update_backend() {
+    log "${BOLD}BACKEND (NestJS)${RESET} yangilanmoqda..."
     cd "$REPO_DIR/backend"
     
-    rm -rf dist
-    
+    rm -rf dist node_modules
     npm install --silent --legacy-peer-deps
     
-    # .env.production ni .env ga nusxalaymiz
-    if [ -f ".env.production" ]; then
-        cp .env.production .env
-        ok ".env.production nusxalandi."
-    fi
-
+    [ -f ".env.production" ] && cp .env.production .env && ok "Backend: .env.production nusxalandi."
+    
     if [ -f "prisma/schema.prisma" ]; then
         npx prisma generate
     fi
 
     npx nest build
     
-    # PM2 ni tozalab qayta ishga tushiramiz (to'liq push uchun)
     if pm2 describe Backend5050 > /dev/null 2>&1; then
-        pm2 stop Backend5050
-        pm2 delete Backend5050
+        pm2 restart Backend5050 --update-env
+    else
+        pm2 start dist/src/main.js --name Backend5050
     fi
-    
-    # Node orqali bevosita ishga tushirish (env-file bilan)
-    pm2 start dist/src/main.js --name Backend5050 --node-args="--max-old-space-size=2048"
-    
-    ok "Backend yangilandi va PM2'ga qo'shildi."
+    ok "Backend yangilandi."
     cd "$REPO_DIR"
 }
 
-# Dashboard (Vite/React/PM2)
-build_dashboard() {
-    log "${BOLD}DASHBOARD${RESET} yangilanmoqda..."
+# DASHBOARD
+update_dashboard() {
+    log "${BOLD}DASHBOARD (Vite)${RESET} yangilanmoqda..."
     cd "$REPO_DIR/dashboard"
     
+    rm -rf dist node_modules
     npm install --silent --legacy-peer-deps
+    
     npm run build
     
-    pm2 restart Dashboard3030 || pm2 start npm --name Dashboard3030 -- start
+    if pm2 describe Dashboard3030 > /dev/null 2>&1; then
+        pm2 restart Dashboard3030 --update-env
+    else
+        pm2 start npm --name Dashboard3030 -- preview
+    fi
     ok "Dashboard yangilandi."
     cd "$REPO_DIR"
 }
 
-# Landing (Next.js)
-build_landing() {
-    log "${BOLD}LANDING${RESET} yangilanmoqda..."
+# LANDING
+update_landing() {
+    log "${BOLD}LANDING (Next.js)${RESET} yangilanmoqda..."
     cd "$REPO_DIR/landing"
     
+    rm -rf .next node_modules
     npm install --silent --legacy-peer-deps
+    
     npm run build
     
-    pm2 restart Landing3040 || pm2 start npm --name Landing3040 -- start
+    if pm2 describe Landing3040 > /dev/null 2>&1; then
+        pm2 restart Landing3040 --update-env
+    else
+        pm2 start npm --name Landing3040 -- start
+    fi
     ok "Landing yangilandi."
     cd "$REPO_DIR"
 }
 
-# ── 3. Ishga tushirish ────────────────────────────────────────
+# ── 3. Hammasini yangilash boshlandi ──────────────────────────
 
-DEPLOYED_COUNT=0
+update_backend
+update_dashboard
+update_landing
 
-if has_changes "backend"; then
-    build_backend
-    ((DEPLOYED_COUNT++))
-fi
-
-if has_changes "dashboard"; then
-    build_dashboard
-    ((DEPLOYED_COUNT++))
-fi
-
-if has_changes "landing"; then
-    build_landing
-    ((DEPLOYED_COUNT++))
-fi
-
-# ── 4. Natija ─────────────────────────────────────────────────
-
+# ── 4. Natijani ko'rsatish ────────────────────────────────────
 echo ""
-if [ $DEPLOYED_COUNT -gt 0 ]; then
-    ok "======================================"
-    ok " $DEPLOYED_COUNT ta xizmat yangilandi ✅"
-    ok "======================================"
-    pm2 list
-else
-    warn "Hech qanday o'zgarish aniqlanmadi (Skip)."
-fi
-
-
-
+ok "==============================================="
+ok " BARCHA XIZMATLAR MUVAFFAQIYATLI YANGILANDI ✅"
+ok "==============================================="
+pm2 list
