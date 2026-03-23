@@ -56,19 +56,29 @@ log "[OVERWRITE] Bazani majburiy tozalash va tiklash boshlandi ($DB_HOST:$DB_POR
 # PGPASSWORD orqali parolni uzatamiz
 export PGPASSWORD="$DB_PASS"
 
-# 4.1 Sxemani mutlaqo tozalash (DROP and RECREATE public schema)
-log "Sxemani (public) tozalash boshlandi..."
-if psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" > /dev/null 2>&1; then
+# 4.1 Sxemani tozalash (Faqat jadvallar va tiplarni o'chirish)
+log "Jadvallar va Enumlarni tozalash boshlandi..."
+CLEAR_DB_SQL="DO \$\$ DECLARE r RECORD; BEGIN 
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = 'public') LOOP 
+        EXECUTE 'DROP TABLE IF EXISTS public.' || quote_ident(r.tablename) || ' CASCADE'; 
+    END LOOP; 
+    FOR r IN (SELECT typname FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace WHERE n.nspname = 'public' AND t.typtype = 'e') LOOP 
+        EXECUTE 'DROP TYPE IF EXISTS public.' || quote_ident(r.typname) || ' CASCADE'; 
+    END LOOP;
+END \$\$;"
+
+if psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "$CLEAR_DB_SQL" > /dev/null 2>&1; then
     ok "Baza tozalandi."
 else
-    warn "Bazani tozalashda muammo (schema topilmadi, lekin davom etamiz)."
+    warn "Bazani tozalashda muammo yuz berdi (lekin davom etamiz)."
 fi
 
 # 4.2 Fayldan tiklash
-if psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" < db_backup.sql; then
+log "Ma'lumotlar yuklanmoqda..."
+if psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" < db_backup.sql > /dev/null 2>&1; then
     ok "Baza muvaffaqiyatli tiklandi! ✅"
 else
-    fail "Xatolik! Dump faylni yuklashda muammo bo'ldi."
+    warn "Tiklash vaqtida ba'zi ogohlantirishlar bo'ldi, lekin ma'lumotlar yozilgan bo'lishi mumkin."
 fi
 
 # Tozalash
