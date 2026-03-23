@@ -56,6 +56,15 @@ log "[OVERWRITE] Bazani majburiy tozalash va tiklash boshlandi ($DB_HOST:$DB_POR
 # PGPASSWORD orqali parolni uzatamiz
 export PGPASSWORD="$DB_PASS"
 
+# Ruxsatnomalarni tekshirish va to'g'irlash (Agar sudo imkoniyati bo'lsa)
+if command -v sudo > /dev/null 2>&1; then
+    log "Ruxsatnomalarni tekshirish (Granting permissions)..."
+    sudo -u postgres psql -d "$DB_NAME" -c "GRANT ALL ON SCHEMA public TO \"$DB_USER\"; GRANT ALL ON SCHEMA public TO public; ALTER SCHEMA public OWNER TO \"$DB_USER\";" > /dev/null 2>&1 || warn "Ruxsatlarni sudo orqali berib bo'lmadi (Odatiy xolat)."
+fi
+
+# PGPASSWORD orqali parolni uzatamiz
+export PGPASSWORD="$DB_PASS"
+
 # 4.1 Sxemani tozalash (Faqat jadvallar va tiplarni o'chirish)
 log "Jadvallar va Enumlarni tozalash boshlandi..."
 CLEAR_DB_SQL="DO \$\$ DECLARE r RECORD; BEGIN 
