@@ -26,9 +26,9 @@ fi
 
 # 2. .env faylidan DATABASE_URL ni olish
 if [ -f "backend/.env.production" ]; then
-    DB_URL=$(grep DATABASE_URL backend/.env.production | cut -d '"' -f 2)
+    DB_URL=$(grep DATABASE_URL backend/.env.production | cut -d '"' -f 2 | cut -d '?' -f 1)
 elif [ -f "backend/.env" ]; then
-    DB_URL=$(grep DATABASE_URL backend/.env | cut -d '"' -f 2)
+    DB_URL=$(grep DATABASE_URL backend/.env | cut -d '"' -f 2 | cut -d '?' -f 1)
 fi
 
 if [ -z "$DB_URL" ]; then
