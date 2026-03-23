@@ -1,8 +1,7 @@
 import { Injectable, OnModuleInit, Logger, BadRequestException } from "@nestjs/common";
-import { Telegraf, Context } from "telegraf";
+import { Telegraf, Context, Telegram } from "telegraf";
 import { PrismaService } from "../prisma/prisma.service";
 import { TelegramLoggerService } from "./telegram-logger.service";
-import * as https from "https";
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
@@ -765,24 +764,21 @@ export class TelegramService implements OnModuleInit {
   }
 
   async validateToken(token: string): Promise<{ valid: boolean; botInfo?: { id: number; username: string; first_name: string } }> {
-    return new Promise((resolve) => {
-      https.get(`https://api.telegram.org/bot${token}/getMe`, (res) => {
-        let data = '';
-        res.on('data', chunk => data += chunk);
-        res.on('end', () => {
-          try {
-            const parsed = JSON.parse(data);
-            if (parsed.ok) {
-              resolve({ valid: true, botInfo: { id: parsed.result.id, username: parsed.result.username, first_name: parsed.result.first_name } });
-            } else {
-              resolve({ valid: false });
-            }
-          } catch {
-            resolve({ valid: false });
-          }
-        });
-      }).on('error', () => resolve({ valid: false }));
-    });
+    try {
+      const tempBot = new Telegram(token);
+      const botInfo = await tempBot.getMe();
+      return { 
+        valid: true, 
+        botInfo: { 
+          id: botInfo.id, 
+          username: botInfo.username || '', 
+          first_name: botInfo.first_name 
+        } 
+      };
+    } catch (err: any) {
+      this.logger.warn(`Token validation failed for token ${token.slice(0, 5)}...: ${err.message}`);
+      return { valid: false };
+    }
   }
 
   getBotStatus(companyId: string): 'connected' | 'stopped' | 'not_found' {
@@ -808,17 +804,41 @@ export class TelegramService implements OnModuleInit {
     const resolvedName = data.botName || validation.botInfo?.first_name || 'Store Bot';
 
     try {
+      this.logger.log(`Creating bot for company: ${companyId}`);
       const bot = await this.prisma.customBot.create({
-        data: { companyId, token: data.token, botName: resolvedName, username, description: data.description },
+        data: { 
+          companyId, 
+          token: data.token, 
+          botName: resolvedName, 
+          username, 
+          description: data.description,
+          isActive: true
+        },
       });
-      if (bot.isActive) {
+      
+      this.logger.log(`Bot record created in DB: ${bot.id}. Initializing instance...`);
+      
+      try {
         const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-        await this.initBot(companyId, bot.token, company?.name ?? companyId);
+        if (!company) {
+          this.logger.error(`Company not found after creating bot record! ID: ${companyId}`);
+        } else {
+          await this.initBot(companyId, bot.token, company.name);
+        }
+      } catch (initErr: any) {
+        this.logger.error(`Failed to execute initBot during creation: ${initErr.message}`);
+        // We don't throw here, the record is already created. 
+        // Admin can re-enable later if init failed.
       }
+      
       return { ...bot, botInfo: validation.botInfo };
     } catch (e: any) {
+      this.logger.error(`Error in createBot: ${e.message}`, e.stack);
       if (e.code === 'P2002') {
         throw new BadRequestException('This bot token is already registered to another company.');
+      }
+      if (e.code === 'P2003') {
+        throw new BadRequestException('Foreign key constraint failed. Check if companyId is valid.');
       }
       throw e;
     }
