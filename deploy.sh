@@ -27,6 +27,9 @@ export NODE_OPTIONS="--max-old-space-size=2048"
 log "Kodni GitHub'dan yangilamoqdamiz..."
 git fetch origin main
 
+# Qaysi fayllar o'zgarganini aniqlash (Pull qilishdan oldin)
+CHANGED=$(git diff main origin/main --name-only)
+
 # Majburan pull qilish
 if git pull origin main; then
     ok "Kodni yangilash muvaffaqiyatli yakunlandi."
@@ -35,6 +38,10 @@ else
 fi
 
 # ── 2. Xizmatlarni yangilash funksiyalari ──────────────────────
+
+has_changes() {
+    [ "$1" == "force" ] || echo "$CHANGED" | grep -q "^$1/"
+}
 
 # BACKEND
 update_backend() {
@@ -101,13 +108,41 @@ update_landing() {
 
 # ── 3. Hammasini yangilash boshlandi ──────────────────────────
 
-update_backend
-update_dashboard
-update_landing
+DEPLOY_ALL=0
+[ "$1" == "all" ] && DEPLOY_ALL="force"
+
+DEPLOYED=0
+
+if has_changes "backend" || [ "$DEPLOY_ALL" == "force" ]; then
+    update_backend
+    DEPLOYED=1
+else
+    warn "Backend o'zgarmadi, o'tkazib yuborildi."
+fi
+
+if has_changes "dashboard" || [ "$DEPLOY_ALL" == "force" ]; then
+    update_dashboard
+    DEPLOYED=1
+else
+    warn "Dashboard o'zgarmadi, o'tkazib yuborildi."
+fi
+
+if has_changes "landing" || [ "$DEPLOY_ALL" == "force" ]; then
+    update_landing
+    DEPLOYED=1
+else
+    warn "Landing o'zgarmadi, o'tkazib yuborildi."
+fi
 
 # ── 4. Natijani ko'rsatish ────────────────────────────────────
-echo ""
-ok "==============================================="
-ok " BARCHA XIZMATLAR MUVAFFAQIYATLI YANGILANDI ✅"
-ok "==============================================="
-pm2 list
+
+if [ $DEPLOYED -eq 1 ]; then
+    echo ""
+    ok "==============================================="
+    ok " YANGILANISH MUVAFFAQIYATLI YAKUNLANDI ✅"
+    ok "==============================================="
+    pm2 list
+else
+    echo ""
+    warn "Hech qanday o'zgarish aniqlanmadi, hech narsa yangilanmadi."
+fi
