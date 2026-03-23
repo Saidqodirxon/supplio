@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict 27CjrkPUugefIPcQLgzs7owEmj5duZilRQ6xAanxf9MrdQkOFaxjXLGvCWSWYFa
+\restrict 11YbCfKRvunKd7KgP5XdL7ThZGmGMOApOaLfoBM2HRv6hFiIh8ZtJv7Rk37z1r7
 
 -- Dumped from database version 18.3
 -- Dumped by pg_dump version 18.3
@@ -19,6 +19,126 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+ALTER TABLE IF EXISTS ONLY public."User" DROP CONSTRAINT IF EXISTS "User_customRoleId_fkey";
+ALTER TABLE IF EXISTS ONLY public."User" DROP CONSTRAINT IF EXISTS "User_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."User" DROP CONSTRAINT IF EXISTS "User_branchId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Unit" DROP CONSTRAINT IF EXISTS "Unit_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Subscription" DROP CONSTRAINT IF EXISTS "Subscription_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Subcategory" DROP CONSTRAINT IF EXISTS "Subcategory_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Subcategory" DROP CONSTRAINT IF EXISTS "Subcategory_categoryId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Product" DROP CONSTRAINT IF EXISTS "Product_unitId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Product" DROP CONSTRAINT IF EXISTS "Product_subcategoryId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Product" DROP CONSTRAINT IF EXISTS "Product_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Product" DROP CONSTRAINT IF EXISTS "Product_categoryId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Payment" DROP CONSTRAINT IF EXISTS "Payment_dealerId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Payment" DROP CONSTRAINT IF EXISTS "Payment_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Payment" DROP CONSTRAINT IF EXISTS "Payment_branchId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Order" DROP CONSTRAINT IF EXISTS "Order_dealerId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Order" DROP CONSTRAINT IF EXISTS "Order_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Order" DROP CONSTRAINT IF EXISTS "Order_branchId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Notification" DROP CONSTRAINT IF EXISTS "Notification_senderId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Notification" DROP CONSTRAINT IF EXISTS "Notification_receiverUserId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Notification" DROP CONSTRAINT IF EXISTS "Notification_receiverDealerId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Notification" DROP CONSTRAINT IF EXISTS "Notification_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."NotificationTemplate" DROP CONSTRAINT IF EXISTS "NotificationTemplate_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."NotificationLog" DROP CONSTRAINT IF EXISTS "NotificationLog_templateId_fkey";
+ALTER TABLE IF EXISTS ONLY public."NotificationLog" DROP CONSTRAINT IF EXISTS "NotificationLog_dealerId_fkey";
+ALTER TABLE IF EXISTS ONLY public."NotificationLog" DROP CONSTRAINT IF EXISTS "NotificationLog_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."News" DROP CONSTRAINT IF EXISTS "News_authorId_fkey";
+ALTER TABLE IF EXISTS ONLY public."LedgerTransaction" DROP CONSTRAINT IF EXISTS "LedgerTransaction_dealerId_fkey";
+ALTER TABLE IF EXISTS ONLY public."LedgerTransaction" DROP CONSTRAINT IF EXISTS "LedgerTransaction_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."LedgerTransaction" DROP CONSTRAINT IF EXISTS "LedgerTransaction_branchId_fkey";
+ALTER TABLE IF EXISTS ONLY public."FeatureFlag" DROP CONSTRAINT IF EXISTS "FeatureFlag_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Expense" DROP CONSTRAINT IF EXISTS "Expense_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Expense" DROP CONSTRAINT IF EXISTS "Expense_branchId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Dealer" DROP CONSTRAINT IF EXISTS "Dealer_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Dealer" DROP CONSTRAINT IF EXISTS "Dealer_branchId_fkey";
+ALTER TABLE IF EXISTS ONLY public."DealerApprovalRequest" DROP CONSTRAINT IF EXISTS "DealerApprovalRequest_dealerId_fkey";
+ALTER TABLE IF EXISTS ONLY public."DealerApprovalRequest" DROP CONSTRAINT IF EXISTS "DealerApprovalRequest_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."CustomRole" DROP CONSTRAINT IF EXISTS "CustomRole_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."CustomBot" DROP CONSTRAINT IF EXISTS "CustomBot_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Category" DROP CONSTRAINT IF EXISTS "Category_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."Branch" DROP CONSTRAINT IF EXISTS "Branch_companyId_fkey";
+ALTER TABLE IF EXISTS ONLY public."AuditLog" DROP CONSTRAINT IF EXISTS "AuditLog_userId_fkey";
+DROP INDEX IF EXISTS public."User_phone_key";
+DROP INDEX IF EXISTS public."TariffPlan_planKey_key";
+DROP INDEX IF EXISTS public."ReleaseNote_version_key";
+DROP INDEX IF EXISTS public."News_slugUz_key";
+DROP INDEX IF EXISTS public."News_slugUzCyr_key";
+DROP INDEX IF EXISTS public."News_slugTr_key";
+DROP INDEX IF EXISTS public."News_slugRu_key";
+DROP INDEX IF EXISTS public."News_slugEn_key";
+DROP INDEX IF EXISTS public."FeatureFlag_featureKey_companyId_key";
+DROP INDEX IF EXISTS public."Dealer_phone_key";
+DROP INDEX IF EXISTS public."CustomBot_token_key";
+DROP INDEX IF EXISTS public."Company_slug_key";
+ALTER TABLE IF EXISTS ONLY public._prisma_migrations DROP CONSTRAINT IF EXISTS _prisma_migrations_pkey;
+ALTER TABLE IF EXISTS ONLY public."User" DROP CONSTRAINT IF EXISTS "User_pkey";
+ALTER TABLE IF EXISTS ONLY public."Unit" DROP CONSTRAINT IF EXISTS "Unit_pkey";
+ALTER TABLE IF EXISTS ONLY public."Testimonial" DROP CONSTRAINT IF EXISTS "Testimonial_pkey";
+ALTER TABLE IF EXISTS ONLY public."TariffPlan" DROP CONSTRAINT IF EXISTS "TariffPlan_pkey";
+ALTER TABLE IF EXISTS ONLY public."SystemSettings" DROP CONSTRAINT IF EXISTS "SystemSettings_pkey";
+ALTER TABLE IF EXISTS ONLY public."Subscription" DROP CONSTRAINT IF EXISTS "Subscription_pkey";
+ALTER TABLE IF EXISTS ONLY public."Subcategory" DROP CONSTRAINT IF EXISTS "Subcategory_pkey";
+ALTER TABLE IF EXISTS ONLY public."ServerMetric" DROP CONSTRAINT IF EXISTS "ServerMetric_pkey";
+ALTER TABLE IF EXISTS ONLY public."ReleaseNote" DROP CONSTRAINT IF EXISTS "ReleaseNote_pkey";
+ALTER TABLE IF EXISTS ONLY public."Product" DROP CONSTRAINT IF EXISTS "Product_pkey";
+ALTER TABLE IF EXISTS ONLY public."Payment" DROP CONSTRAINT IF EXISTS "Payment_pkey";
+ALTER TABLE IF EXISTS ONLY public."Order" DROP CONSTRAINT IF EXISTS "Order_pkey";
+ALTER TABLE IF EXISTS ONLY public."Notification" DROP CONSTRAINT IF EXISTS "Notification_pkey";
+ALTER TABLE IF EXISTS ONLY public."NotificationTemplate" DROP CONSTRAINT IF EXISTS "NotificationTemplate_pkey";
+ALTER TABLE IF EXISTS ONLY public."NotificationLog" DROP CONSTRAINT IF EXISTS "NotificationLog_pkey";
+ALTER TABLE IF EXISTS ONLY public."News" DROP CONSTRAINT IF EXISTS "News_pkey";
+ALTER TABLE IF EXISTS ONLY public."LedgerTransaction" DROP CONSTRAINT IF EXISTS "LedgerTransaction_pkey";
+ALTER TABLE IF EXISTS ONLY public."Lead" DROP CONSTRAINT IF EXISTS "Lead_pkey";
+ALTER TABLE IF EXISTS ONLY public."LandingContent" DROP CONSTRAINT IF EXISTS "LandingContent_pkey";
+ALTER TABLE IF EXISTS ONLY public."FeatureFlag" DROP CONSTRAINT IF EXISTS "FeatureFlag_pkey";
+ALTER TABLE IF EXISTS ONLY public."Expense" DROP CONSTRAINT IF EXISTS "Expense_pkey";
+ALTER TABLE IF EXISTS ONLY public."Dealer" DROP CONSTRAINT IF EXISTS "Dealer_pkey";
+ALTER TABLE IF EXISTS ONLY public."DealerApprovalRequest" DROP CONSTRAINT IF EXISTS "DealerApprovalRequest_pkey";
+ALTER TABLE IF EXISTS ONLY public."CustomRole" DROP CONSTRAINT IF EXISTS "CustomRole_pkey";
+ALTER TABLE IF EXISTS ONLY public."CustomBot" DROP CONSTRAINT IF EXISTS "CustomBot_pkey";
+ALTER TABLE IF EXISTS ONLY public."Company" DROP CONSTRAINT IF EXISTS "Company_pkey";
+ALTER TABLE IF EXISTS ONLY public."Category" DROP CONSTRAINT IF EXISTS "Category_pkey";
+ALTER TABLE IF EXISTS ONLY public."Branch" DROP CONSTRAINT IF EXISTS "Branch_pkey";
+ALTER TABLE IF EXISTS ONLY public."AuditLog" DROP CONSTRAINT IF EXISTS "AuditLog_pkey";
+DROP TABLE IF EXISTS public._prisma_migrations;
+DROP TABLE IF EXISTS public."User";
+DROP TABLE IF EXISTS public."Unit";
+DROP TABLE IF EXISTS public."Testimonial";
+DROP TABLE IF EXISTS public."TariffPlan";
+DROP TABLE IF EXISTS public."SystemSettings";
+DROP TABLE IF EXISTS public."Subscription";
+DROP TABLE IF EXISTS public."Subcategory";
+DROP TABLE IF EXISTS public."ServerMetric";
+DROP TABLE IF EXISTS public."ReleaseNote";
+DROP TABLE IF EXISTS public."Product";
+DROP TABLE IF EXISTS public."Payment";
+DROP TABLE IF EXISTS public."Order";
+DROP TABLE IF EXISTS public."NotificationTemplate";
+DROP TABLE IF EXISTS public."NotificationLog";
+DROP TABLE IF EXISTS public."Notification";
+DROP TABLE IF EXISTS public."News";
+DROP TABLE IF EXISTS public."LedgerTransaction";
+DROP TABLE IF EXISTS public."Lead";
+DROP TABLE IF EXISTS public."LandingContent";
+DROP TABLE IF EXISTS public."FeatureFlag";
+DROP TABLE IF EXISTS public."Expense";
+DROP TABLE IF EXISTS public."DealerApprovalRequest";
+DROP TABLE IF EXISTS public."Dealer";
+DROP TABLE IF EXISTS public."CustomRole";
+DROP TABLE IF EXISTS public."CustomBot";
+DROP TABLE IF EXISTS public."Company";
+DROP TABLE IF EXISTS public."Category";
+DROP TABLE IF EXISTS public."Branch";
+DROP TABLE IF EXISTS public."AuditLog";
+DROP TYPE IF EXISTS public."TxType";
+DROP TYPE IF EXISTS public."SubscriptionStatus";
+DROP TYPE IF EXISTS public."SubscriptionPlan";
+DROP TYPE IF EXISTS public."RoleType";
+DROP TYPE IF EXISTS public."OrderStatus";
+DROP TYPE IF EXISTS public."BackupFrequency";
+-- *not* dropping schema, since initdb creates it
 --
 -- Name: public; Type: SCHEMA; Schema: -; Owner: postgres
 --
@@ -1751,5 +1871,5 @@ REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 27CjrkPUugefIPcQLgzs7owEmj5duZilRQ6xAanxf9MrdQkOFaxjXLGvCWSWYFa
+\unrestrict 11YbCfKRvunKd7KgP5XdL7ThZGmGMOApOaLfoBM2HRv6hFiIh8ZtJv7Rk37z1r7
 
