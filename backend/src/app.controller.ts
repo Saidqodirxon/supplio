@@ -12,5 +12,4 @@ export class AppController {
       health: "/health",
     };
   }
-  
 }
