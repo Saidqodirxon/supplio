@@ -244,8 +244,10 @@ export class TelegramService implements OnModuleInit {
 
       bot.on("callback_query", async (ctx) => await this.handleCallback(ctx, companyId));
 
-      if (process.env.NODE_ENV === "production" && process.env.BOT_WEBHOOK_URL) {
-        const webhookUrl = `${process.env.BOT_WEBHOOK_URL}/api/webhook/${companyId}`;
+      if (process.env.NODE_ENV === "production" && (process.env.BOT_WEBHOOK_URL || process.env.APP_URL)) {
+        const baseUrl = process.env.BOT_WEBHOOK_URL || (process.env.APP_URL + "/webhook");
+        // Ensure the URL is properly formed: {baseUrl}/{companyId}
+        const webhookUrl = baseUrl.endsWith("/") ? `${baseUrl}${companyId}` : `${baseUrl}/${companyId}`;
         await bot.telegram.setWebhook(webhookUrl);
         this.logger.log(`✅ Webhook set for ${companyName}: ${webhookUrl}`);
       } else {
@@ -805,14 +807,21 @@ export class TelegramService implements OnModuleInit {
     const username = validation.botInfo?.username;
     const resolvedName = data.botName || validation.botInfo?.first_name || 'Store Bot';
 
-    const bot = await this.prisma.customBot.create({
-      data: { companyId, token: data.token, botName: resolvedName, username, description: data.description },
-    });
-    if (bot.isActive) {
-      const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-      await this.initBot(companyId, bot.token, company?.name ?? companyId);
+    try {
+      const bot = await this.prisma.customBot.create({
+        data: { companyId, token: data.token, botName: resolvedName, username, description: data.description },
+      });
+      if (bot.isActive) {
+        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+        await this.initBot(companyId, bot.token, company?.name ?? companyId);
+      }
+      return { ...bot, botInfo: validation.botInfo };
+    } catch (e: any) {
+      if (e.code === 'P2002') {
+        throw new BadRequestException('This bot token is already registered to another company.');
+      }
+      throw e;
     }
-    return { ...bot, botInfo: validation.botInfo };
   }
 
   async updateBot(id: string, companyId: string, data: { token?: string; botName?: string; description?: string; isActive?: boolean }) {

@@ -12,7 +12,8 @@
     "dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "seed:super": "ts-node prisma/seed_super.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
