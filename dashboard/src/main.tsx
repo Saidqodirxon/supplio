@@ -6,6 +6,7 @@ import { initTheme } from './store/themeStore'
 
 import { HelmetProvider } from 'react-helmet-async'
 
+
 initTheme();
 
 if ('serviceWorker' in navigator) {
