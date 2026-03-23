@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  SUPPLIO — Automated Deploy Script (Final Version)
+#  SUPPLIO — Automated Deploy Script (Robust Version)
 # ============================================================
 
 set -e
@@ -37,6 +37,8 @@ log "Git pull boshlandi..."
 if git pull origin main; then
     ok "Git pull muvaffaqiyatli yakunlandi"
 else
+    # Agar .env konfliktlari bo'lsa, majburan yengib o'tish uchun:
+    # git checkout dashboard/.env (yoki boshqa fayl)
     fail "Git pull'da xatolik! Ehtimol .env fayllarida konflikt bor."
 fi
 
@@ -46,28 +48,40 @@ has_changes() {
     [ -z "$CHANGED" ] || echo "$CHANGED" | grep -q "^$1/"
 }
 
-# Backend (Node.js/NestJS)
+# Backend (NestJS + Prisma)
 build_backend() {
-    log "${BOLD}BACKEND${RESET} yangilanmoqda (Port: 8999/5050)..."
+    log "${BOLD}BACKEND${RESET} yangilanmoqda (NestJS)..."
     cd "$REPO_DIR/backend"
     
-    npm install --silent
-    npm run build
+    # --legacy-peer-deps versiya konfliktlarini chetlab o'tish uchun
+    npm install --silent --legacy-peer-deps
     
-    pm2 restart Backend5050 || pm2 start dist/main.js --name Backend5050
+    # Prisma ishlatilsa generate qilinishi shart
+    if [ -f "prisma/schema.prisma" ]; then
+        npx prisma generate
+    fi
+
+    npx nest build
+    
+    # PM2 restart (fayl path: dist/src/main.js)
+    if pm2 describe Backend5050 > /dev/null 2>&1; then
+        pm2 restart Backend5050
+    else
+        pm2 start dist/src/main.js --name Backend5050
+    fi
+    
     ok "Backend yangilandi."
     cd "$REPO_DIR"
 }
 
-# Dashboard (React/Vue/Static)
+# Dashboard (Vite/React/PM2)
 build_dashboard() {
-    log "${BOLD}DASHBOARD${RESET} yangilanmoqda (Port: 3030)..."
+    log "${BOLD}DASHBOARD${RESET} yangilanmoqda..."
     cd "$REPO_DIR/dashboard"
     
-    npm install --silent
+    npm install --silent --legacy-peer-deps
     npm run build
     
-    # Dashboard PM2'da bo'lgani uchun restart qilamiz
     pm2 restart Dashboard3030 || pm2 start npm --name Dashboard3030 -- start
     ok "Dashboard yangilandi."
     cd "$REPO_DIR"
@@ -75,13 +89,12 @@ build_dashboard() {
 
 # Landing (Next.js)
 build_landing() {
-    log "${BOLD}LANDING${RESET} yangilanmoqda (Port: 3040)..."
+    log "${BOLD}LANDING${RESET} yangilanmoqda..."
     cd "$REPO_DIR/landing"
     
-    npm install --silent
+    npm install --silent --legacy-peer-deps
     npm run build
     
-    # Next.js bo'lgani uchun PM2 orqali restart
     pm2 restart Landing3040 || pm2 start npm --name Landing3040 -- start
     ok "Landing yangilandi."
     cd "$REPO_DIR"
@@ -117,5 +130,6 @@ if [ $DEPLOYED_COUNT -gt 0 ]; then
 else
     warn "Hech qanday o'zgarish aniqlanmadi (Skip)."
 fi
+
 
 
