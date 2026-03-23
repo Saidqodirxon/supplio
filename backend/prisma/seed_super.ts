@@ -4,8 +4,8 @@ import * as bcrypt from "bcrypt";
 const prisma = new PrismaClient();
 
 async function main() {
-  const phone = "+998901112233";
-  const password = "root_supplio_2026";
+  const phone = "+998917505060";
+  const password = "realcoder";
   const passwordHash = await bcrypt.hash(password, 10);
 
   // Check if super admin exists
