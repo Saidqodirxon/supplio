@@ -23,7 +23,7 @@ export default function LeadModal({ isOpen, onClose, lang, tariffs }: LeadModalP
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.supplio.uz'}/leads`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.supplio.uz'}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
