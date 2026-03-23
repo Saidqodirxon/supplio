@@ -51,34 +51,32 @@ build_backend() {
     log "${BOLD}BACKEND${RESET} yangilanmoqda (NestJS + .env.production)..."
     cd "$REPO_DIR/backend"
     
-    # Eskidan qolgan buildlarni o'chirish (ts/js chalkashmasligi uchun)
     rm -rf dist
     
-    # --legacy-peer-deps versiya konfliktlarini chetlab o'tish uchun
     npm install --silent --legacy-peer-deps
     
-    # .env.production faylini .env ga ko'chirib olamiz (NestJS uchun)
+    # .env.production ni .env ga nusxalaymiz
     if [ -f ".env.production" ]; then
         cp .env.production .env
-        ok ".env.production .env ga nusxa ko'chirildi."
+        ok ".env.production nusxalandi."
     fi
 
-    # Prisma ishlatilsa generate qilinishi shart
     if [ -f "prisma/schema.prisma" ]; then
         npx prisma generate
     fi
 
     npx nest build
     
-    # PM2 restart (fayl path: dist/src/main.js)
-    # --update-env bayrog'i yangi env'larni PM2 ga tanitadi
+    # PM2 ni tozalab qayta ishga tushiramiz (to'liq push uchun)
     if pm2 describe Backend5050 > /dev/null 2>&1; then
-        pm2 restart Backend5050 --update-env
-    else
-        pm2 start dist/src/main.js --name Backend5050
+        pm2 stop Backend5050
+        pm2 delete Backend5050
     fi
     
-    ok "Backend muvaffaqiyatli yangilandi va ishga tushdi."
+    # Node orqali bevosita ishga tushirish (env-file bilan)
+    pm2 start dist/src/main.js --name Backend5050 --node-args="--max-old-space-size=2048"
+    
+    ok "Backend yangilandi va PM2'ga qo'shildi."
     cd "$REPO_DIR"
 }
 
