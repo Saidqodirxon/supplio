@@ -59,6 +59,12 @@ export default function Expenses() {
   const [form, setForm] = useState({ amount: '', category: 'OTHER', description: '', branchId: '' });
   const { language } = useAuthStore();
   const t = dashboardTranslations[language];
+  const CAT_LABEL_MAP: Record<string, string> = {
+    RENT: 'catRent', SALARY: 'catSalary', UTILITIES: 'catUtilities',
+    TRANSPORT: 'catTransport', MARKETING: 'catMarketing', SUPPLIES: 'catSupplies',
+    MAINTENANCE: 'catMaintenance', TAXES: 'catTaxes', INSURANCE: 'catInsurance', OTHER: 'catOther',
+  };
+  const getCatLabel = (cat: string) => (t.expenses as Record<string, string>)[CAT_LABEL_MAP[cat]] ?? cat;
 
   useScrollLock(showModal);
 
@@ -211,7 +217,7 @@ export default function Expenses() {
                   <tr key={expense.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                     <td className="px-8 py-5">
                       <span className={clsx("px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest", CATEGORY_COLORS[expense.category] || CATEGORY_COLORS.OTHER)}>
-                        {expense.category}
+                        {getCatLabel(expense.category)}
                       </span>
                     </td>
                     <td className="px-8 py-5 text-sm text-slate-600 dark:text-slate-400">{expense.description || '—'}</td>
@@ -282,7 +288,7 @@ export default function Expenses() {
                     onChange={e => setForm(f => ({...f, category: e.target.value}))}
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
                   >
-                    {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    {CATEGORIES.map(c => <option key={c} value={c}>{getCatLabel(c)}</option>)}
                   </select>
                 </div>
                 <div>

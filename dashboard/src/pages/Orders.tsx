@@ -19,15 +19,15 @@ const PAGE_SIZE = 10;
 const STATUS_FILTERS = ['ALL', 'PENDING', 'ACCEPTED', 'PREPARING', 'SHIPPED', 'DELIVERED', 'COMPLETED', 'CANCELLED'] as const;
 type StatusFilter = typeof STATUS_FILTERS[number];
 
-const STATUS_LABELS: Record<string, string> = {
-  PENDING: 'Kutilmoqda',
-  ACCEPTED: 'Qabul qilindi',
-  PREPARING: 'Tayyorlanmoqda',
-  SHIPPED: 'Yo\'lda',
-  DELIVERED: 'Yetkazildi',
-  COMPLETED: 'Bajarildi',
-  CANCELLED: 'Bekor qilindi',
-  RETURNED: 'Qaytarildi',
+const STATUS_KEY_MAP: Record<string, string> = {
+  PENDING: 'statusPending',
+  ACCEPTED: 'statusAccepted',
+  PREPARING: 'statusPreparing',
+  SHIPPED: 'statusShipped',
+  DELIVERED: 'statusDelivered',
+  COMPLETED: 'statusCompleted',
+  CANCELLED: 'statusCancelled',
+  RETURNED: 'statusReturned',
 };
 
 const ORDER_STATUSES = [
@@ -96,6 +96,7 @@ export default function Orders() {
 
   const { language } = useAuthStore();
   const t = dashboardTranslations[language];
+  const getStatusLabel = (status: string) => (t.orders as Record<string, string>)[STATUS_KEY_MAP[status]] ?? status;
 
   useScrollLock(showCreate || showDetail);
 
@@ -312,7 +313,7 @@ export default function Orders() {
                   : 'bg-white text-slate-500 border-slate-200 hover:border-slate-400'
               }`}
             >
-              {s === 'ALL' ? (t.common.all ?? 'Barchasi') : (STATUS_LABELS[s] ?? s)}
+              {s === 'ALL' ? (t.common.all ?? 'Barchasi') : (getStatusLabel(s))}
             </button>
           ))}
         </div>
@@ -383,7 +384,7 @@ export default function Orders() {
                   <td className="px-10 py-6">
                     <span className={`inline-flex items-center rounded-xl px-4 py-1.5 text-[10px] font-black uppercase tracking-widest shadow-sm ${STATUS_COLORS[order.status] ?? 'bg-slate-50 text-slate-600'}`}>
                       <div className={`w-1.5 h-1.5 rounded-full mr-2 ${order.status === OrderStatus.PENDING ? 'bg-amber-500 animate-pulse' : 'bg-current'}`} />
-                      {STATUS_LABELS[order.status] ?? order.status}
+                      {getStatusLabel(order.status)}
                     </span>
                   </td>
                   <td className="px-10 py-6 text-center">
@@ -636,7 +637,7 @@ export default function Orders() {
                       className="flex-1 px-5 py-4 bg-slate-50 rounded-2xl border-2 border-transparent focus:border-blue-500 outline-none font-bold text-sm transition-all disabled:opacity-50"
                     >
                       {ORDER_STATUSES.map((s) => (
-                        <option key={s} value={s}>{STATUS_LABELS[s] ?? s}</option>
+                        <option key={s} value={s}>{getStatusLabel(s)}</option>
                       ))}
                     </select>
                     {updatingStatus && <Loader2 className="w-5 h-5 animate-spin text-blue-500 shrink-0" />}

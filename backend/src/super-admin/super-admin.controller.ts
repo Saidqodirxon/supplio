@@ -40,6 +40,12 @@ export class SuperAdminController {
     return this.backupService.createBackup();
   }
 
+  @Post("backups/send")
+  @Roles("SUPER_ADMIN")
+  async sendBackupToTelegram() {
+    return this.backupService.createBackupAndSend();
+  }
+
   // ── Settings ──────────────────────────────────────────────────────────────
 
   @Get("settings")

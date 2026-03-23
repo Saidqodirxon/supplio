@@ -741,13 +741,21 @@ export default function SuperAdmin() {
           )}
 
           {activeTab === 'backups' && (
+            <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div onClick={() => toast.success(t.superadmin.backupStarted)} className="bg-white dark:bg-white/5 p-10 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-white/10 hover:border-blue-500 transition-all group flex flex-col items-center justify-center text-center cursor-pointer gap-4">
+              <div onClick={async () => { try { await api.post('/super/backups/trigger'); toast.success(t.superadmin.backupStarted); } catch { toast.error(t.common.error); } }} className="bg-white dark:bg-white/5 p-10 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-white/10 hover:border-blue-500 transition-all group flex flex-col items-center justify-center text-center cursor-pointer gap-4">
                 <div className="w-16 h-16 rounded-3xl bg-blue-600/10 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Plus className="w-8 h-8" />
                 </div>
                 <h3 className="text-sm font-black uppercase tracking-widest">{t.superadmin.newBackupBtn}</h3>
                 <p className="text-xs text-slate-500 font-bold max-w-[200px]">{t.superadmin.backupsDesc}</p>
+              </div>
+              <div onClick={async () => { try { await api.post('/super/backups/send'); toast.success(t.superadmin.backupSent); } catch { toast.error(t.common.error); } }} className="bg-white dark:bg-white/5 p-10 rounded-[3rem] border-2 border-dashed border-emerald-200 dark:border-emerald-900/30 hover:border-emerald-500 transition-all group flex flex-col items-center justify-center text-center cursor-pointer gap-4">
+                <div className="w-16 h-16 rounded-3xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Send className="w-8 h-8" />
+                </div>
+                <h3 className="text-sm font-black uppercase tracking-widest">{t.superadmin.sendBackupNow}</h3>
+                <p className="text-xs text-slate-500 font-bold max-w-[200px]">Zip → Telegram bot</p>
               </div>
               {backups.map((b) => (
                 <div key={b.name} className="bg-white dark:bg-white/5 p-8 rounded-[3rem] border border-slate-100 dark:border-white/5 flex items-center justify-between group hover:shadow-2xl transition-all">
@@ -765,6 +773,7 @@ export default function SuperAdmin() {
                   </button>
                 </div>
               ))}
+            </div>
             </div>
           )}
 

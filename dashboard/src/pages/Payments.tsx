@@ -63,7 +63,7 @@ export default function Payments() {
       });
       setIsAdjOpen(false);
       setAdjForm({ dealerId: '', amount: '', note: '' });
-      toast.success('Adjustment saved');
+      toast.success(t.payments.adjustmentSaved);
       fetchPayments();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : (t.common?.error || 'Error');
@@ -141,7 +141,7 @@ export default function Payments() {
             className="px-6 py-4 bg-amber-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all flex items-center gap-2"
           >
             <ArrowDownLeft className="h-4 w-4" />
-            Adjustment
+            {t.payments.adjustment}
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
@@ -221,28 +221,28 @@ export default function Payments() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
             <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white dark:bg-slate-900 p-10 rounded-2xl max-w-lg w-full shadow-4xl space-y-8">
               <div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">Debt Adjustment</h3>
-                <p className="text-xs text-slate-400 mt-1 font-bold">Positive = add credit (reduce debt) · Negative = add debt</p>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{t.payments.adjustmentTitle}</h3>
+                <p className="text-xs text-slate-400 mt-1 font-bold">{t.payments.adjustmentDesc}</p>
               </div>
               <form onSubmit={handleCreateAdjustment} className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dealer</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.adjustmentDealer}</label>
                   <select required className="input-field w-full" value={adjForm.dealerId} onChange={e => setAdjForm({ ...adjForm, dealerId: e.target.value })}>
-                    <option value="">Select dealer...</option>
+                    <option value="">{t.payments.adjustmentDealerPlaceholder}</option>
                     {dealers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Amount (positive = credit, negative = debit)</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.adjustmentAmount}</label>
                   <input type="number" required className="input-field w-full" value={adjForm.amount} onChange={e => setAdjForm({ ...adjForm, amount: e.target.value })} placeholder="e.g. 50000 or -25000" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Reason / Note</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.adjustmentNote}</label>
                   <input type="text" required className="input-field w-full" value={adjForm.note} onChange={e => setAdjForm({ ...adjForm, note: e.target.value })} placeholder="Refund, correction, etc." />
                 </div>
                 <div className="flex gap-4 pt-4">
                   <button type="button" onClick={() => setIsAdjOpen(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs">{t.common.cancel}</button>
-                  <button type="submit" className="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl">Save Adjustment</button>
+                  <button type="submit" className="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl">{t.payments.saveAdjustment}</button>
                 </div>
               </form>
             </motion.div>

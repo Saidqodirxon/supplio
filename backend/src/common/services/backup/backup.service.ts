@@ -3,7 +3,8 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import * as fs from "fs";
 import * as path from "path";
-import { Cron, CronExpression } from "@nestjs/schedule";
+import * as https from "https";
+import { Cron } from "@nestjs/schedule";
 import { PrismaService } from "../../../prisma/prisma.service";
 
 const execPromise = promisify(exec);
@@ -20,30 +21,22 @@ export class BackupService {
   }
 
   /**
-   * Enterprise Role 6: Automated 03:00AM Backup Job
+   * Automated 01:00 AM Daily Backup + Telegram Send
    */
-  @Cron(CronExpression.EVERY_DAY_AT_3AM)
+  @Cron('0 1 * * *')
   async handleDailyBackup() {
-    this.logger.log(
-      "Enterprise Backup System Triggered: Process ID 03:00 (G6)"
-    );
-    const companies = await this.prisma.company.findMany({
-      where: { deletedAt: null },
-      select: { id: true, name: true, slug: true, dbConnectionUrl: true },
-    });
-
-    for (const company of companies) {
-      try {
-        await this.dumpCompanyDatabase(company.id, company.slug);
-      } catch (err) {
-        this.logger.error(`❌ FAILED Backup for Tenant: ${company.name}`, err);
-      }
+    this.logger.log("Daily Backup Triggered: 01:00 AM");
+    try {
+      const result = await this.createBackup();
+      await this.sendBackupToTelegram(result.path, result.name);
+    } catch (err) {
+      this.logger.error("Daily backup failed", err);
     }
 
     await this.prisma.systemSettings.update({
       where: { id: "GLOBAL" },
       data: { lastBackupAt: new Date() },
-    });
+    }).catch(() => {});
   }
 
   async createBackup() {
@@ -54,22 +47,87 @@ export class BackupService {
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) throw new Error("DATABASE_URL not found");
 
+    this.logger.log(`Starting backup: ${fileName}`);
     try {
-      this.logger.log(`Starting manual backup: ${fileName}`);
-      try {
-        await execPromise(`pg_dump "${dbUrl}" > "${filePath}"`);
-      } catch (e) {
-        this.logger.warn("pg_dump failed, generating mock for dev.");
-        fs.writeFileSync(
-          filePath,
-          `-- Mock backup\n-- Date: ${new Date().toISOString()}`
-        );
-      }
-      return { name: fileName, path: filePath, createdAt: new Date() };
-    } catch (err) {
-      this.logger.error(`Backup failed: ${err.message}`);
-      throw err;
+      await execPromise(`pg_dump "${dbUrl}" > "${filePath}"`);
+    } catch {
+      this.logger.warn("pg_dump failed, generating placeholder for dev.");
+      fs.writeFileSync(filePath, `-- Mock backup\n-- Date: ${new Date().toISOString()}`);
     }
+    return { name: fileName, path: filePath, createdAt: new Date() };
+  }
+
+  async createBackupAndSend() {
+    const result = await this.createBackup();
+    await this.sendBackupToTelegram(result.path, result.name);
+    return result;
+  }
+
+  async sendBackupToTelegram(filePath: string, fileName: string): Promise<void> {
+    const token = process.env.LOG_BOT_TOKEN;
+    const chatId = process.env.LOG_CHAT_ID;
+    if (!token || !chatId) {
+      this.logger.warn("LOG_BOT_TOKEN or LOG_CHAT_ID not set — skipping Telegram send");
+      return;
+    }
+    if (!fs.existsSync(filePath)) {
+      this.logger.warn(`Backup file not found: ${filePath}`);
+      return;
+    }
+
+    // Zip the file
+    const zipPath = filePath.replace(/\.sql$/, '.zip');
+    try {
+      await execPromise(`powershell -Command "Compress-Archive -Path '${filePath}' -DestinationPath '${zipPath}' -Force"`);
+    } catch {
+      try {
+        await execPromise(`zip -j "${zipPath}" "${filePath}"`);
+      } catch {
+        this.logger.warn("zip failed, sending .sql directly");
+      }
+    }
+
+    const sendPath = fs.existsSync(zipPath) ? zipPath : filePath;
+    const sendName = path.basename(sendPath);
+    const fileStream = fs.createReadStream(sendPath);
+    const stats = fs.statSync(sendPath);
+
+    // Upload via multipart form using native https
+    await new Promise<void>((resolve, reject) => {
+      const boundary = `----FormBoundary${Date.now()}`;
+      const caption = `📦 *Supplio DB Backup*\n📅 ${new Date().toLocaleString('uz-UZ')}\n📁 ${sendName}\n💾 ${(stats.size / 1024).toFixed(1)} KB`;
+      const metadata = Buffer.from(
+        `--${boundary}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n${chatId}\r\n` +
+        `--${boundary}\r\nContent-Disposition: form-data; name="caption"\r\n\r\n${caption}\r\n` +
+        `--${boundary}\r\nContent-Disposition: form-data; name="parse_mode"\r\n\r\nMarkdown\r\n` +
+        `--${boundary}\r\nContent-Disposition: form-data; name="document"; filename="${sendName}"\r\nContent-Type: application/octet-stream\r\n\r\n`
+      );
+      const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+
+      const req = https.request({
+        hostname: 'api.telegram.org',
+        path: `/bot${token}/sendDocument`,
+        method: 'POST',
+        headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` },
+      }, (res) => {
+        let body = '';
+        res.on('data', d => body += d);
+        res.on('end', () => {
+          if (res.statusCode === 200) {
+            this.logger.log(`✅ Backup sent to Telegram: ${sendName}`);
+            resolve();
+          } else {
+            this.logger.error(`Telegram send failed: ${body}`);
+            resolve(); // Don't fail the backup process
+          }
+        });
+      });
+      req.on('error', (e) => { this.logger.error('Telegram request error: ' + e.message); resolve(); });
+      req.write(metadata);
+      fileStream.on('data', chunk => req.write(chunk));
+      fileStream.on('end', () => { req.write(tail); req.end(); });
+      fileStream.on('error', () => { req.end(); resolve(); });
+    });
   }
 
   async dumpCompanyDatabase(companyId: string, slug: string): Promise<string> {
