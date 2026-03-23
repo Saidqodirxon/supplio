@@ -4,7 +4,7 @@ import { promisify } from "util";
 import * as fs from "fs";
 import * as path from "path";
 import * as https from "https";
-import { Cron } from "@nestjs/schedule";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import { PrismaService } from "../../../prisma/prisma.service";
 
 const execPromise = promisify(exec);

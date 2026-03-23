@@ -37,8 +37,6 @@ log "Git pull boshlandi..."
 if git pull origin main; then
     ok "Git pull muvaffaqiyatli yakunlandi"
 else
-    # Agar .env konfliktlari bo'lsa, majburan yengib o'tish uchun:
-    # git checkout dashboard/.env (yoki boshqa fayl)
     fail "Git pull'da xatolik! Ehtimol .env fayllarida konflikt bor."
 fi
 
