@@ -8,13 +8,13 @@ export class TelegramController {
 
   constructor(private readonly telegramService: TelegramService) {}
 
-  @Post(":companyId")
+  @Post(":id")
   async handleWebhook(
-    @Param("companyId") companyId: string,
+    @Param("id") id: string,
     @Body() update: Update
   ) {
-    this.logger.log(`Received update for company: ${companyId}`);
-    const bot = this.telegramService.getBot(companyId);
+    this.logger.log(`Received update for bot ID: ${id}`);
+    const bot = this.telegramService.getBot(id);
     if (bot) {
       await bot.handleUpdate(update);
     }

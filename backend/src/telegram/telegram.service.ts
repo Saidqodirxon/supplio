@@ -6,7 +6,7 @@ import { TelegramLoggerService } from "./telegram-logger.service";
 @Injectable()
 export class TelegramService implements OnModuleInit {
   private readonly logger = new Logger(TelegramService.name);
-  private bots: Map<string, Telegraf> = new Map();
+  private bots: Map<string, Telegraf> = new Map(); // Key is botId (UUID)
   // carts[companyId][chatId][productId] = qty
   private carts: Map<string, Map<string, Map<string, number>>> = new Map();
 
@@ -31,7 +31,7 @@ export class TelegramService implements OnModuleInit {
     });
     this.logger.log("Found " + bots.length + " active bots to initialize");
     for (const bot of bots) {
-      await this.initBot(bot.companyId, bot.token, bot.company.name);
+      await this.initBot(bot.id, bot.companyId, bot.token, bot.company.name);
     }
   }
 
@@ -129,12 +129,12 @@ export class TelegramService implements OnModuleInit {
     return this.translations[lang] ?? this.translations['uz'];
   }
 
-  async initBot(companyId: string, token: string, companyName: string) {
+  async initBot(botId: string, companyId: string, token: string, companyName: string) {
     try {
-      const existing = this.bots.get(companyId);
+      const existing = this.bots.get(botId);
       if (existing) {
-        existing.stop("reinitializing");
-        this.bots.delete(companyId);
+        try { existing.stop(); } catch {}
+        this.bots.delete(botId);
       }
 
       const bot = new Telegraf(token);
@@ -245,19 +245,19 @@ export class TelegramService implements OnModuleInit {
 
       if (process.env.NODE_ENV === "production" && (process.env.BOT_WEBHOOK_URL || process.env.APP_URL)) {
         const baseUrl = process.env.BOT_WEBHOOK_URL || (process.env.APP_URL + "/webhook");
-        // Ensure the URL is properly formed: {baseUrl}/{companyId}
-        const webhookUrl = baseUrl.endsWith("/") ? `${baseUrl}${companyId}` : `${baseUrl}/${companyId}`;
+        // Use botId for the webhook to support multiple bots
+        const webhookUrl = baseUrl.endsWith("/") ? `${baseUrl}${botId}` : `${baseUrl}/${botId}`;
         await bot.telegram.setWebhook(webhookUrl);
-        this.logger.log(`✅ Webhook set for ${companyName}: ${webhookUrl}`);
+        this.logger.log(`✅ Webhook set for ${companyName} (Bot: ${botId}): ${webhookUrl}`);
       } else {
         bot.launch().catch((e) => this.logger.warn(`Polling launch failed for ${companyName}: ${e.message}`));
         this.logger.log(`✅ Bot launched (polling) for ${companyName}`);
       }
 
-      this.bots.set(companyId, bot);
+      this.bots.set(botId, bot);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
-      this.logger.error(`❌ Bot init failed for ${companyId}: ${message}`);
+      this.logger.error(`❌ Bot init failed for ${botId}: ${message}`);
     }
   }
 
@@ -649,20 +649,26 @@ export class TelegramService implements OnModuleInit {
 
   // ──────────────────────────────────────────────────────────────────────────
 
-  async sendMessage(companyId: string, chatId: string, message: string) {
-    const bot = this.bots.get(companyId);
+  async sendMessage(botId: string, chatId: string, message: string) {
+    const bot = this.bots.get(botId);
     if (!bot) return;
 
     try {
       await bot.telegram.sendMessage(chatId, message, { parse_mode: "Markdown" });
-    } catch (e) {
-      this.logger.error(`Failed to send external message for ${companyId}: ${e.message}`);
+    } catch (e: any) {
+      this.logger.error(`Failed to send external message for bot ${botId}: ${e.message}`);
     }
   }
 
   /** Broadcast a message to all dealers in a company that have a Telegram chatId */
   async broadcast(companyId: string, message: string): Promise<{ sent: number; failed: number }> {
-    const bot = this.bots.get(companyId);
+    // For broadcast, we use the first active bot found for this company
+    const botRecord = await this.prisma.customBot.findFirst({
+      where: { companyId, isActive: true, deletedAt: null }
+    });
+    if (!botRecord) return { sent: 0, failed: 0 };
+    
+    const bot = this.bots.get(botRecord.id);
     if (!bot) return { sent: 0, failed: 0 };
 
     const dealers = await this.prisma.dealer.findMany({
@@ -686,7 +692,12 @@ export class TelegramService implements OnModuleInit {
 
   /** Send order status update notification to the dealer */
   async sendOrderStatusUpdate(companyId: string, orderId: string, newStatus: string, dealerId: string) {
-    const bot = this.bots.get(companyId);
+    const botRecord = await this.prisma.customBot.findFirst({
+      where: { companyId, isActive: true, deletedAt: null }
+    });
+    if (!botRecord) return;
+
+    const bot = this.bots.get(botRecord.id);
     if (!bot) return;
 
     const dealer = await this.prisma.dealer.findFirst({
@@ -759,8 +770,8 @@ export class TelegramService implements OnModuleInit {
     return "█".repeat(filled) + "░".repeat(empty);
   }
 
-  getBot(companyId: string): Telegraf | undefined {
-    return this.bots.get(companyId);
+  getBot(botId: string): Telegraf | undefined {
+    return this.bots.get(botId);
   }
 
   async validateToken(token: string): Promise<{ valid: boolean; botInfo?: { id: number; username: string; first_name: string } }> {
@@ -781,9 +792,9 @@ export class TelegramService implements OnModuleInit {
     }
   }
 
-  getBotStatus(companyId: string): 'connected' | 'stopped' | 'not_found' {
-    const bot = this.bots.get(companyId);
-    if (!bot) return 'not_found';
+  getBotStatus(botId: string): 'connected' | 'stopped' | 'not_found' {
+    const bot = this.bots.get(botId);
+    if (!bot) return 'stopped';
     return 'connected';
   }
 
@@ -823,7 +834,7 @@ export class TelegramService implements OnModuleInit {
         if (!company) {
           this.logger.error(`Company not found after creating bot record! ID: ${companyId}`);
         } else {
-          await this.initBot(companyId, bot.token, company.name);
+          await this.initBot(bot.id, companyId, bot.token, company.name);
         }
       } catch (initErr: any) {
         this.logger.error(`Failed to execute initBot during creation: ${initErr.message}`);
@@ -850,10 +861,10 @@ export class TelegramService implements OnModuleInit {
     const updated = await this.prisma.customBot.update({ where: { id }, data });
     if (data.isActive === true || data.token) {
       const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-      await this.initBot(companyId, updated.token, company?.name ?? companyId);
+      await this.initBot(updated.id, companyId, updated.token, company?.name ?? companyId);
     } else if (data.isActive === false) {
-      const existing = this.bots.get(companyId);
-      if (existing) { existing.stop("disabled"); this.bots.delete(companyId); }
+      const existing = this.bots.get(id);
+      if (existing) { try { existing.stop(); } catch {} this.bots.delete(id); }
     }
     return updated;
   }
@@ -861,9 +872,9 @@ export class TelegramService implements OnModuleInit {
   async removeBot(id: string, companyId: string) {
     const bot = await this.prisma.customBot.findFirst({ where: { id, companyId, deletedAt: null } });
     if (!bot) throw new Error("Bot not found");
-    const existing = this.bots.get(companyId);
-    if (existing) { existing.stop("deleted"); this.bots.delete(companyId); }
-    return this.prisma.customBot.update({ where: { id }, data: { deletedAt: new Date() } });
+    const existing = this.bots.get(id);
+    if (existing) { try { existing.stop(); } catch {} this.bots.delete(id); }
+    return this.prisma.customBot.update({ where: { id }, data: { deletedAt: new Date(), isActive: false } });
   }
 
   async stopAll() {

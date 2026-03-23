@@ -14,7 +14,7 @@ export class BotsController {
   @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
   async getBots(@Req() req: any) {
     const bots = await this.telegramService.getBotsForCompany(req.companyId);
-    return bots.map(b => ({ ...b, status: this.telegramService.getBotStatus(req.companyId) }));
+    return bots.map(b => ({ ...b, status: this.telegramService.getBotStatus(b.id) }));
   }
 
   @Post("bots/validate")
@@ -26,7 +26,10 @@ export class BotsController {
   @Get("bots/status")
   @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
   async getBotStatus(@Req() req: any) {
-    return { status: this.telegramService.getBotStatus(req.companyId) };
+    const bots = await this.telegramService.getBotsForCompany(req.companyId);
+    const firstBot = bots.find(b => b.isActive);
+    if (!firstBot) return { status: 'not_found' };
+    return { status: this.telegramService.getBotStatus(firstBot.id) };
   }
 
   @Post("bots")
