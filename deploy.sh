@@ -48,12 +48,21 @@ has_changes() {
 
 # Backend (NestJS + Prisma)
 build_backend() {
-    log "${BOLD}BACKEND${RESET} yangilanmoqda (NestJS)..."
+    log "${BOLD}BACKEND${RESET} yangilanmoqda (NestJS + .env.production)..."
     cd "$REPO_DIR/backend"
+    
+    # Eskidan qolgan buildlarni o'chirish (ts/js chalkashmasligi uchun)
+    rm -rf dist
     
     # --legacy-peer-deps versiya konfliktlarini chetlab o'tish uchun
     npm install --silent --legacy-peer-deps
     
+    # .env.production faylini .env ga ko'chirib olamiz (NestJS uchun)
+    if [ -f ".env.production" ]; then
+        cp .env.production .env
+        ok ".env.production .env ga nusxa ko'chirildi."
+    fi
+
     # Prisma ishlatilsa generate qilinishi shart
     if [ -f "prisma/schema.prisma" ]; then
         npx prisma generate
@@ -62,13 +71,14 @@ build_backend() {
     npx nest build
     
     # PM2 restart (fayl path: dist/src/main.js)
+    # --update-env bayrog'i yangi env'larni PM2 ga tanitadi
     if pm2 describe Backend5050 > /dev/null 2>&1; then
-        pm2 restart Backend5050
+        pm2 restart Backend5050 --update-env
     else
         pm2 start dist/src/main.js --name Backend5050
     fi
     
-    ok "Backend yangilandi."
+    ok "Backend muvaffaqiyatli yangilandi va ishga tushdi."
     cd "$REPO_DIR"
 }
 
