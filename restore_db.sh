@@ -24,19 +24,25 @@ if [ ! -f "db_backup.sql" ]; then
     fail "db_backup.sql fayli topilmadi! Oldin 'bash db_sync.sh' qiling."
 fi
 
-# 2. .env faylidan DATABASE_URL ni olish
+# 2. .env faylidan ma'lumotlarni olish
 if [ -f "backend/.env.production" ]; then
-    DB_URL=$(grep DATABASE_URL backend/.env.production | cut -d '"' -f 2 | cut -d '?' -f 1)
+    URL=$(grep DATABASE_URL backend/.env.production | cut -d '"' -f 2 | cut -d '?' -f 1)
 elif [ -f "backend/.env" ]; then
-    DB_URL=$(grep DATABASE_URL backend/.env | cut -d '"' -f 2 | cut -d '?' -f 1)
+    URL=$(grep DATABASE_URL backend/.env | cut -d '"' -f 2 | cut -d '?' -f 1)
 fi
 
-if [ -z "$DB_URL" ]; then
-    fail "DATABASE_URL topilmadi! Backend .env faylini tekshiring."
+if [[ $URL =~ postgresql://([^:]+):([^@]+)@([^:/]+):?([0-9]*)?/([^/]+) ]]; then
+    DB_USER="${BASH_REMATCH[1]}"
+    DB_PASS="${BASH_REMATCH[2]}"
+    DB_HOST="${BASH_REMATCH[3]}"
+    DB_PORT="${BASH_REMATCH[4]:-5432}"
+    DB_NAME="${BASH_REMATCH[5]}"
+else
+    fail "DATABASE_URL noto'g'ri formatda yoki topilmadi!"
 fi
 
 # 3. Tiklashdan oldin tasdiqlash
-echo -e "${RED}${BOLD}DIQQAT!${RESET} Ushbu amal mavjud barcha ma'lumotlarni o'chirib yuboradi."
+echo -e "${RED}${BOLD}DIQQAT!${RESET} Ushbu amal [${DB_NAME}] bazasidagi barcha ma'lumotlarni o'chirib yuboradi."
 read -p "Davom etaylikmi? (y/n): " confirm
 
 if [[ $confirm != "y" ]]; then
@@ -45,9 +51,14 @@ if [[ $confirm != "y" ]]; then
 fi
 
 # 4. Tiklash (Restore)
-log "Bazani yangilash boshlandi..."
-if psql "$DB_URL" < db_backup.sql; then
+log "Bazani yangilash boshlandi ($DB_HOST:$DB_PORT)..."
+
+# PGPASSWORD orqali parolni uzatamiz (Xavfsiz va ishonchli usul)
+if export PGPASSWORD="$DB_PASS" && psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" < db_backup.sql; then
     ok "Baza muvaffaqiyatli tiklandi! ✅"
 else
-    fail "Xatolik yuz berdi. Postgres auth yoki DB_URL noto'g'ri."
+    fail "Xatolik! Ehtimol Postgres auth noto'g'ri yoki 'supplio' bazasi mavjud emas."
 fi
+
+# Tozalash
+unset PGPASSWORD
