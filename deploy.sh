@@ -1,8 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  SUPPLIO — Manual Deploy Script
-#  Usage: bash deploy.sh
-#  /root/supplio da ishga tushiring
+#  SUPPLIO — Automated Deploy Script (Final Version)
 # ============================================================
 
 set -e
@@ -22,113 +20,102 @@ fail() { echo -e "${RED}[ERROR]${RESET} $1"; exit 1; }
 
 cd "$REPO_DIR" || fail "Papka topilmadi: $REPO_DIR"
 
-# ── 1. Git pull ───────────────────────────────────────────────
-log "Git pull boshlandi..."
+# RAM/CPU limitini oshirish (Build vaqtida crash bo'lmasligi uchun)
+export NODE_OPTIONS="--max-old-space-size=2048"
+
+# ── 1. Git yangilash ──────────────────────────────────────────
+log "Git fetch qilinmoqda..."
 git fetch origin main
 
 CHANGED=$(git diff origin/main --name-only)
 
 if [ -z "$CHANGED" ]; then
-  ok "Hech qanday o'zgarish yo'q. Deploy kerak emas."
-  exit 0
+    log "Hech qanday o'zgarish yo'q. Baribir davom etamiz (Force Deploy)..."
 fi
 
-log "O'zgargan fayllar:"
-echo "$CHANGED" | sed 's/^/  → /'
+log "Git pull boshlandi..."
+if git pull origin main; then
+    ok "Git pull muvaffaqiyatli yakunlandi"
+else
+    fail "Git pull'da xatolik! Ehtimol .env fayllarida konflikt bor."
+fi
 
-git pull origin main
-ok "Git pull bajarildi"
-
-# ── 2. Funksiyalar ────────────────────────────────────────────
+# ── 2. Build va Restart funksiyalari ──────────────────────────
 
 has_changes() {
-  echo "$CHANGED" | grep -q "^$1/"
+    [ -z "$CHANGED" ] || echo "$CHANGED" | grep -q "^$1/"
 }
 
+# Backend (Node.js/NestJS)
 build_backend() {
-  log "${BOLD}BACKEND${RESET} yangilanmoqda..."
-  cd "$REPO_DIR/backend"
-
-  npm install --silent
-  npm run build
-
-  # PM2 bilan restart
-  if pm2 describe supplio-backend > /dev/null 2>&1; then
-    pm2 restart supplio-backend
-    ok "Backend PM2 restart bajarildi"
-  else
-    pm2 start dist/src/main.js --name supplio-backend
-    pm2 save
-    ok "Backend PM2 ishga tushirildi"
-  fi
-
-  cd "$REPO_DIR"
+    log "${BOLD}BACKEND${RESET} yangilanmoqda (Port: 8999/5050)..."
+    cd "$REPO_DIR/backend"
+    
+    npm install --silent
+    npm run build
+    
+    pm2 restart Backend5050 || pm2 start dist/main.js --name Backend5050
+    ok "Backend yangilandi."
+    cd "$REPO_DIR"
 }
 
+# Dashboard (React/Vue/Static)
 build_dashboard() {
-  log "${BOLD}DASHBOARD${RESET} yangilanmoqda..."
-  cd "$REPO_DIR/dashboard"
-
-  npm install --silent
-  npm run build
-
-  # Nginx uchun statik fayllar dist/ ga tushadi, nginx qayta start shart emas
-  ok "Dashboard build bajarildi (dist/ tayyor)"
-
-  cd "$REPO_DIR"
+    log "${BOLD}DASHBOARD${RESET} yangilanmoqda (Port: 3030)..."
+    cd "$REPO_DIR/dashboard"
+    
+    npm install --silent
+    npm run build
+    
+    # Dashboard PM2'da bo'lgani uchun restart qilamiz
+    pm2 restart Dashboard3030 || pm2 start npm --name Dashboard3030 -- start
+    ok "Dashboard yangilandi."
+    cd "$REPO_DIR"
 }
 
+# Landing (Next.js)
 build_landing() {
-  log "${BOLD}LANDING${RESET} yangilanmoqda..."
-  cd "$REPO_DIR/landing"
-
-  npm install --silent
-  npm run build
-
-  if pm2 describe supplio-landing > /dev/null 2>&1; then
-    pm2 restart supplio-landing
-    ok "Landing PM2 restart bajarildi"
-  else
-    pm2 start npm --name supplio-landing -- start
-    pm2 save
-    ok "Landing PM2 ishga tushirildi"
-  fi
-
-  cd "$REPO_DIR"
+    log "${BOLD}LANDING${RESET} yangilanmoqda (Port: 3040)..."
+    cd "$REPO_DIR/landing"
+    
+    npm install --silent
+    npm run build
+    
+    # Next.js bo'lgani uchun PM2 orqali restart
+    pm2 restart Landing3040 || pm2 start npm --name Landing3040 -- start
+    ok "Landing yangilandi."
+    cd "$REPO_DIR"
 }
 
-# ── 3. Qaysi papka o'zgardi? ──────────────────────────────────
+# ── 3. Ishga tushirish ────────────────────────────────────────
 
-DEPLOYED=0
+DEPLOYED_COUNT=0
 
 if has_changes "backend"; then
-  build_backend
-  DEPLOYED=1
-else
-  warn "backend/ da o'zgarish yo'q — skip"
+    build_backend
+    ((DEPLOYED_COUNT++))
 fi
 
 if has_changes "dashboard"; then
-  build_dashboard
-  DEPLOYED=1
-else
-  warn "dashboard/ da o'zgarish yo'q — skip"
+    build_dashboard
+    ((DEPLOYED_COUNT++))
 fi
 
 if has_changes "landing"; then
-  build_landing
-  DEPLOYED=1
-else
-  warn "landing/ da o'zgarish yo'q — skip"
+    build_landing
+    ((DEPLOYED_COUNT++))
 fi
 
-# ── 4. Yakuniy holat ──────────────────────────────────────────
+# ── 4. Natija ─────────────────────────────────────────────────
+
 echo ""
-if [ $DEPLOYED -eq 1 ]; then
-  ok "======================================"
-  ok " DEPLOY MUVAFFAQIYATLI BAJARILDI ✅"
-  ok "======================================"
-  pm2 list
+if [ $DEPLOYED_COUNT -gt 0 ]; then
+    ok "======================================"
+    ok " $DEPLOYED_COUNT ta xizmat yangilandi ✅"
+    ok "======================================"
+    pm2 list
 else
-  warn "Hech narsa deploy qilinmadi."
+    warn "Hech qanday o'zgarish aniqlanmadi (Skip)."
 fi
+
+
