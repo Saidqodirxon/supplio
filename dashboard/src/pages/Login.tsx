@@ -86,8 +86,8 @@ export default function Login() {
       <div className="w-full max-w-md relative z-10">
         <div className="glass-card bg-white dark:!bg-white/[0.03] border-slate-200 dark:!border-white/10 rounded-[2.5rem] p-10 md:p-12 shadow-2xl dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-blue-600 shadow-[0_0_40px_rgba(37,99,235,0.4)] mb-6 transform hover:rotate-6 transition-transform">
-              <ShieldCheck className="w-10 h-10 text-white" />
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-3xl mb-6 transform hover:scale-105 transition-transform">
+              <img src="/logo.png" alt="Supplio" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">{t.welcomeBack}</h1>
             <p className="text-slate-500 dark:text-slate-400 font-medium">{t.signInSubtitle}</p>
