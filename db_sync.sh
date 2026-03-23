@@ -9,9 +9,9 @@ BACKUP_FILE="db_backup.sql"
 
 echo "[DB-SYNC] Ma'lumotlar bazasini saqlash boshlandi..."
 
-# Ma'lumotlarni faylga yuklash
-if pg_dump -d "$DB_URL" > "$BACKUP_FILE"; then
-    echo "[OK] Ma'lumotlar $BACKUP_FILE fayliga saqlandi."
+# Ma'lumotlarni faylga yuklash (--clean --if-exists bilan, eski datalarni ochirib yozish uchun)
+if pg_dump --clean --if-exists -d "$DB_URL" > "$BACKUP_FILE"; then
+    echo "[OK] Ma'lumotlar $BACKUP_FILE fayliga saqlandi (Overwrite mode)."
 else
     echo "[ERROR] Dump qilishda xatolik yuz berdi!"
     exit 1

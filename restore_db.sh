@@ -51,13 +51,24 @@ if [[ $confirm != "y" ]]; then
 fi
 
 # 4. Tiklash (Restore)
-log "Bazani yangilash boshlandi ($DB_HOST:$DB_PORT)..."
+log "[OVERWRITE] Bazani majburiy tozalash va tiklash boshlandi ($DB_HOST:$DB_PORT)..."
 
-# PGPASSWORD orqali parolni uzatamiz (Xavfsiz va ishonchli usul)
-if export PGPASSWORD="$DB_PASS" && psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" < db_backup.sql; then
+# PGPASSWORD orqali parolni uzatamiz
+export PGPASSWORD="$DB_PASS"
+
+# 4.1 Sxemani mutlaqo tozalash (DROP and RECREATE public schema)
+log "Sxemani (public) tozalash boshlandi..."
+if psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" > /dev/null 2>&1; then
+    ok "Baza tozalandi."
+else
+    warn "Bazani tozalashda muammo (schema topilmadi, lekin davom etamiz)."
+fi
+
+# 4.2 Fayldan tiklash
+if psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" < db_backup.sql; then
     ok "Baza muvaffaqiyatli tiklandi! ✅"
 else
-    fail "Xatolik! Ehtimol Postgres auth noto'g'ri yoki 'supplio' bazasi mavjud emas."
+    fail "Xatolik! Dump faylni yuklashda muammo bo'ldi."
 fi
 
 # Tozalash
