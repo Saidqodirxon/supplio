@@ -4,14 +4,20 @@ const client_1 = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const prisma = new client_1.PrismaClient();
 async function main() {
-    const phone = "+998901112233";
-    const password = "root_supplio_2026";
+    const phone = "+998917505060";
+    const password = "realcoder";
     const passwordHash = await bcrypt.hash(password, 10);
     const existing = await prisma.user.findUnique({
         where: { phone },
     });
     if (existing) {
-        console.log("Super Admin already exists.");
+        await prisma.user.update({
+            where: { phone },
+            data: { passwordHash, fullName: "Super Admin", roleType: client_1.RoleType.SUPER_ADMIN },
+        });
+        console.log("Super Admin already exists — password updated!");
+        console.log("Phone:", phone);
+        console.log("Password:", password);
         return;
     }
     const company = await prisma.company.upsert({

@@ -26,7 +26,7 @@ export class AnalyticsService {
     const since = getPeriodStart(period);
     const dateFilter = since ? { gte: since } : undefined;
 
-    const [allOrders, periodOrders, payments, activeDealers, orderStatusGroups, products] =
+    const [allOrders, periodOrders, payments, activeDealers, orderStatusGroups, products, expensesAgg] =
       await Promise.all([
         this.prisma.order.findMany({
           where: { companyId, deletedAt: null },
@@ -48,11 +48,17 @@ export class AnalyticsService {
           _sum: { totalAmount: true },
         }),
         this.prisma.product.count({ where: { companyId, deletedAt: null } }),
+        this.prisma.expense.aggregate({
+          where: { companyId, deletedAt: null },
+          _sum: { amount: true },
+        }),
       ]);
 
     const totalRevenue = allOrders.reduce((s, o) => s + o.totalAmount, 0);
     const totalCost = allOrders.reduce((s, o) => s + o.totalCost, 0);
-    const totalProfit = totalRevenue - totalCost;
+    const grossProfit = totalRevenue - totalCost;
+    const totalExpenses = expensesAgg._sum.amount ?? 0;
+    const totalProfit = grossProfit - totalExpenses;
     const totalCollected = payments.reduce((s, p) => s + p.amount, 0);
     const totalDebt = totalRevenue - totalCollected;
 
@@ -101,6 +107,8 @@ export class AnalyticsService {
       stats: {
         revenue: totalRevenue,
         profit: totalProfit,
+        grossProfit,
+        totalExpenses,
         activeDealers,
         debt: totalDebt,
         collected: totalCollected,

@@ -32,6 +32,9 @@ let SuperAdminController = class SuperAdminController {
     async triggerBackup() {
         return this.backupService.createBackup();
     }
+    async sendBackupToTelegram() {
+        return this.backupService.createBackupAndSend();
+    }
     async getSettings() {
         return this.superAdminService.getGlobalSettings();
     }
@@ -164,6 +167,15 @@ let SuperAdminController = class SuperAdminController {
     async deleteReleaseNote(id) {
         return this.superAdminService.deleteReleaseNote(id);
     }
+    async createUpgradeRequest(body, req) {
+        return this.superAdminService.createUpgradeRequest(req.user.companyId, body);
+    }
+    async getUpgradeRequests() {
+        return this.superAdminService.getUpgradeRequests();
+    }
+    async updateUpgradeRequest(id, body) {
+        return this.superAdminService.updateUpgradeRequest(id, body);
+    }
 };
 exports.SuperAdminController = SuperAdminController;
 __decorate([
@@ -180,6 +192,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "triggerBackup", null);
+__decorate([
+    (0, common_1.Post)("backups/send"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "sendBackupToTelegram", null);
 __decorate([
     (0, common_1.Get)("settings"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
@@ -485,6 +504,31 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "deleteReleaseNote", null);
+__decorate([
+    (0, common_1.Post)("upgrade-requests"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "createUpgradeRequest", null);
+__decorate([
+    (0, common_1.Get)("upgrade-requests"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "getUpgradeRequests", null);
+__decorate([
+    (0, common_1.Patch)("upgrade-requests/:id"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "updateUpgradeRequest", null);
 exports.SuperAdminController = SuperAdminController = __decorate([
     (0, common_1.Controller)("super"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

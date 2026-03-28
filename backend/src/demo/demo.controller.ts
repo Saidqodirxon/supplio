@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Logger } from "@nestjs/common";
+import { Controller, Post, Get, Body, Logger } from "@nestjs/common";
 import { DemoService } from "./demo.service";
 
 @Controller("demo")
@@ -30,6 +30,12 @@ export class DemoController {
   @Get("data")
   async getDemoData() {
     return this.demoService.getDemoData();
+  }
+
+  /** Request demo access — creates lead and returns demo credentials */
+  @Post("access")
+  async requestDemoAccess(@Body() body: { fullName: string; phone: string; company?: string }) {
+    return this.demoService.requestDemoAccess(body);
   }
 
   @Get("news")

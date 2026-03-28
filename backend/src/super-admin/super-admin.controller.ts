@@ -358,4 +358,24 @@ export class SuperAdminController {
   async deleteReleaseNote(@Param("id") id: string) {
     return this.superAdminService.deleteReleaseNote(id);
   }
+
+  // ── Upgrade Requests ──────────────────────────────────────────────────────
+
+  @Post("upgrade-requests")
+  @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
+  async createUpgradeRequest(@Body() body: any, @Request() req: any) {
+    return this.superAdminService.createUpgradeRequest(req.user.companyId, body);
+  }
+
+  @Get("upgrade-requests")
+  @Roles("SUPER_ADMIN")
+  async getUpgradeRequests() {
+    return this.superAdminService.getUpgradeRequests();
+  }
+
+  @Patch("upgrade-requests/:id")
+  @Roles("SUPER_ADMIN")
+  async updateUpgradeRequest(@Param("id") id: string, @Body() body: { status: string; note?: string }) {
+    return this.superAdminService.updateUpgradeRequest(id, body);
+  }
 }

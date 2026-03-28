@@ -4,23 +4,24 @@ export declare class BotsController {
     constructor(telegramService: TelegramService);
     getBots(req: any): Promise<{
         status: "connected" | "stopped" | "not_found";
-        deletedAt: Date | null;
         id: string;
-        createdAt: Date;
         companyId: string;
-        description: string | null;
         token: string;
         username: string | null;
-        botName: string | null;
         isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }[]>;
     validateToken(body: {
         token: string;
     }): Promise<{
         valid: boolean;
+        networkError?: boolean;
         botInfo?: {
             id: number;
             username: string;
@@ -28,7 +29,7 @@ export declare class BotsController {
         };
     }>;
     getBotStatus(req: any): Promise<{
-        status: "connected" | "stopped" | "not_found";
+        status: string;
     }>;
     createBot(req: any, body: {
         token: string;
@@ -40,17 +41,17 @@ export declare class BotsController {
             username: string;
             first_name: string;
         };
-        deletedAt: Date | null;
         id: string;
-        createdAt: Date;
         companyId: string;
-        description: string | null;
         token: string;
         username: string | null;
-        botName: string | null;
         isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }>;
     updateBot(req: any, id: string, body: {
@@ -59,31 +60,31 @@ export declare class BotsController {
         description?: string;
         isActive?: boolean;
     }): Promise<{
-        deletedAt: Date | null;
         id: string;
-        createdAt: Date;
         companyId: string;
-        description: string | null;
         token: string;
         username: string | null;
-        botName: string | null;
         isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }>;
     removeBot(req: any, id: string): Promise<{
-        deletedAt: Date | null;
         id: string;
-        createdAt: Date;
         companyId: string;
-        description: string | null;
         token: string;
         username: string | null;
-        botName: string | null;
         isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }>;
     broadcast(req: any, body: {

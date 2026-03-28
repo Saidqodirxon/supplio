@@ -15,8 +15,8 @@ export declare class AuthService {
     }>;
     getProfile(userId: string): Promise<{
         id: string;
-        phone: string;
         isActive: boolean;
+        phone: string;
         fullName: string;
         photoUrl: string;
         roleType: import(".prisma/client").$Enums.RoleType;
@@ -28,14 +28,14 @@ export declare class AuthService {
         language?: string;
     }): Promise<{
         id: string;
-        updatedAt: Date;
+        companyId: string;
+        isActive: boolean;
         createdAt: Date;
         deletedAt: Date | null;
+        updatedAt: Date;
         deletedBy: string | null;
         phone: string;
-        companyId: string;
         branchId: string | null;
-        isActive: boolean;
         passwordHash: string;
         fullName: string | null;
         photoUrl: string | null;

@@ -24,14 +24,14 @@ export declare class AuditLogService {
     }): Promise<({
         user: {
             id: string;
-            updatedAt: Date;
+            companyId: string;
+            isActive: boolean;
             createdAt: Date;
             deletedAt: Date | null;
+            updatedAt: Date;
             deletedBy: string | null;
             phone: string;
-            companyId: string;
             branchId: string | null;
-            isActive: boolean;
             passwordHash: string;
             fullName: string | null;
             photoUrl: string | null;

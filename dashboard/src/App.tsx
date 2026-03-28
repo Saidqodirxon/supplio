@@ -19,6 +19,8 @@ import TelegramBots from './pages/TelegramBots';
 import Approvals from './pages/Approvals';
 import Reports from './pages/Reports';
 import OwnerDemo from './pages/OwnerDemo';
+import Staff from './pages/Staff';
+import DemoLanding from './pages/DemoLanding';
 import { NotFound, SubscriptionExpired, AccountLocked } from './pages/Error';
 import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
@@ -95,8 +97,48 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Detect if running on demo subdomain
+const IS_DEMO_DOMAIN =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'demo.supplio.uz' ||
+    window.location.hostname.startsWith('demo.'));
+
 function App() {
   const { isDark } = useThemeStore();
+
+  // On demo domain: show demo landing if not on /login path
+  if (IS_DEMO_DOMAIN) {
+    return (
+      <ErrorBoundary>
+        <Router>
+          <Toaster position="top-right" theme={isDark ? 'dark' : 'light'} richColors closeButton toastOptions={{ duration: 4000, style: { borderRadius: '1rem', fontFamily: 'Outfit, sans-serif', fontWeight: 700 } }} />
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <RequireAuth>
+                <Layout />
+              </RequireAuth>
+            }>
+              <Route index element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="dealers" element={<Dealers />} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="payments" element={<Payments />} />
+              <Route path="branches" element={<Branches />} />
+              <Route path="analytics" element={<Analytics />} />
+              <Route path="products" element={<Products />} />
+              <Route path="expenses" element={<Expenses />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="settings" element={<Settings />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+            {/* Catch-all for demo domain shows demo landing */}
+            <Route path="*" element={<DemoLanding />} />
+          </Routes>
+        </Router>
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>
@@ -118,6 +160,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/demo" element={<OwnerDemo />} />
+          <Route path="/demo-landing" element={<DemoLanding />} />
           <Route path="/expired" element={<SubscriptionExpired />} />
           <Route path="/locked" element={<AccountLocked />} />
 
@@ -141,6 +184,7 @@ function App() {
             <Route path="approvals" element={<Approvals />} />
             <Route path="reports" element={<Reports />} />
             <Route path="telegram-bots" element={<TelegramBots />} />
+            <Route path="staff" element={<Staff />} />
             <Route path="settings" element={<Settings />} />
             <Route path="demo-owner" element={<OwnerDemo />} />
             <Route path="*" element={<NotFound />} />

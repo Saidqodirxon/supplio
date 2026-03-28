@@ -16,6 +16,8 @@ export declare class AnalyticsController {
         stats: {
             revenue: number;
             profit: number;
+            grossProfit: number;
+            totalExpenses: number;
             activeDealers: number;
             debt: number;
             collected: number;
@@ -61,8 +63,8 @@ export declare class AnalyticsController {
             orders: {
                 id: string;
                 createdAt: Date;
-                status: import(".prisma/client").$Enums.OrderStatus;
                 totalAmount: number;
+                status: import(".prisma/client").$Enums.OrderStatus;
             }[];
         }[];
         totalDebt: number;

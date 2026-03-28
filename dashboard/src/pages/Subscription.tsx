@@ -19,6 +19,8 @@ import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
+import UpgradeModal from '../components/UpgradeModal';
+import { usePlanLimits } from '../hooks/usePlanLimits';
 
 interface TariffPlan {
   id: string;
@@ -113,6 +115,7 @@ export default function Subscription() {
   const [tariffs, setTariffs] = useState<TariffPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const { language } = useAuthStore();
+  const { showUpgrade, setShowUpgrade, upgradeReason, triggerUpgrade } = usePlanLimits();
   const t = dashboardTranslations[language];
 
   useEffect(() => {
@@ -424,10 +427,13 @@ export default function Subscription() {
                   )}
 
                   {isUpgrade && (
-                    <button className={clsx(
-                      "w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-gradient-to-r text-white",
-                      gradient
-                    )}>
+                    <button
+                      onClick={() => triggerUpgrade()}
+                      className={clsx(
+                        "w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-gradient-to-r text-white active:scale-95",
+                        gradient
+                      )}
+                    >
                       <Zap className="w-3 h-3 inline mr-1" />
                       {t.subscription?.upgrade || 'Upgrade'}
                     </button>
@@ -475,6 +481,14 @@ export default function Subscription() {
           </div>
         </div>
       )}
+
+      <UpgradeModal
+        isOpen={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        reason={upgradeReason}
+        currentPlan={info?.plan}
+        language={language}
+      />
     </div>
   );
 }

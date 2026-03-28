@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Calendar, DollarSign, ArrowUpRight, Activity, Plus, Search, ChevronLeft, ChevronRight, ArrowDownLeft } from 'lucide-react';
+import { Calendar, DollarSign, ArrowUpRight, Activity, Plus, Search, ChevronLeft, ChevronRight, ArrowDownLeft, AlertCircle } from 'lucide-react';
 import api from '../services/api';
 import type { Payment } from '../types';
 import { format } from 'date-fns';
@@ -9,6 +9,8 @@ import { TableSkeleton } from '../components/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useScrollLock } from '../utils/useScrollLock';
+import { CustomSelect } from '../components/CustomSelect';
+import type { SelectOption } from '../components/CustomSelect';
 
 const PAGE_SIZE = 10;
 
@@ -29,6 +31,13 @@ export default function Payments() {
     reference: ''
   });
   const [dealers, setDealers] = useState<{ id: string; name: string }[]>([]);
+  const dealerOptions: SelectOption[] = dealers.map(d => ({ value: d.id, label: d.name }));
+  const methodOptions: SelectOption[] = [
+    { value: 'CASH', label: 'Cash' },
+    { value: 'BANK', label: 'Bank' },
+    { value: 'CLICK', label: 'Click' },
+    { value: 'PAYME', label: 'Payme' },
+  ];
 
   // Adjustment modal
   const [isAdjOpen, setIsAdjOpen] = useState(false);
@@ -161,15 +170,20 @@ export default function Payments() {
               <form onSubmit={handleCreatePayment} className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.selectDealer}</label>
-                  <select
-                    required
-                    className="input-field w-full"
-                    value={newPayment.dealerId}
-                    onChange={e => setNewPayment({ ...newPayment, dealerId: e.target.value })}
-                  >
-                    <option value="">{t.payments.chooseDealerPlaceholder}</option>
-                    {dealers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                  </select>
+                  {dealerOptions.length === 0 ? (
+                    <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      {t.dealers?.noDealers || 'No dealers found'}
+                    </div>
+                  ) : (
+                    <CustomSelect
+                      options={dealerOptions}
+                      value={newPayment.dealerId}
+                      onChange={v => setNewPayment({ ...newPayment, dealerId: v })}
+                      placeholder={t.payments.chooseDealerPlaceholder}
+                      searchable
+                    />
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -184,16 +198,11 @@ export default function Payments() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.method}</label>
-                    <select
-                      className="input-field w-full"
+                    <CustomSelect
+                      options={methodOptions}
                       value={newPayment.method}
-                      onChange={e => setNewPayment({ ...newPayment, method: e.target.value })}
-                    >
-                      <option>CASH</option>
-                      <option>BANK</option>
-                      <option>CLICK</option>
-                      <option>PAYME</option>
-                    </select>
+                      onChange={v => setNewPayment({ ...newPayment, method: v })}
+                    />
                   </div>
                 </div>
                 <div className="space-y-2">
@@ -207,7 +216,7 @@ export default function Payments() {
                 </div>
                 <div className="flex gap-4 pt-4">
                   <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs">{t.common.cancel}</button>
-                  <button type="submit" className="flex-1 py-4 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl">{t.payments.confirmReceipt}</button>
+                  <button type="submit" disabled={dealerOptions.length === 0} className="flex-1 py-4 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-40 disabled:cursor-not-allowed">{t.payments.confirmReceipt}</button>
                 </div>
               </form>
             </motion.div>
@@ -227,10 +236,20 @@ export default function Payments() {
               <form onSubmit={handleCreateAdjustment} className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.adjustmentDealer}</label>
-                  <select required className="input-field w-full" value={adjForm.dealerId} onChange={e => setAdjForm({ ...adjForm, dealerId: e.target.value })}>
-                    <option value="">{t.payments.adjustmentDealerPlaceholder}</option>
-                    {dealers.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-                  </select>
+                  {dealerOptions.length === 0 ? (
+                    <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-xs font-semibold">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      {t.dealers?.noDealers || 'No dealers found'}
+                    </div>
+                  ) : (
+                    <CustomSelect
+                      options={dealerOptions}
+                      value={adjForm.dealerId}
+                      onChange={v => setAdjForm({ ...adjForm, dealerId: v })}
+                      placeholder={t.payments.adjustmentDealerPlaceholder}
+                      searchable
+                    />
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.adjustmentAmount}</label>
@@ -242,7 +261,7 @@ export default function Payments() {
                 </div>
                 <div className="flex gap-4 pt-4">
                   <button type="button" onClick={() => setIsAdjOpen(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs">{t.common.cancel}</button>
-                  <button type="submit" className="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl">{t.payments.saveAdjustment}</button>
+                  <button type="submit" disabled={dealerOptions.length === 0} className="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-40 disabled:cursor-not-allowed">{t.payments.saveAdjustment}</button>
                 </div>
               </form>
             </motion.div>

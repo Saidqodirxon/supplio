@@ -16,36 +16,136 @@ const child_process_1 = require("child_process");
 const util_1 = require("util");
 const fs = require("fs");
 const path = require("path");
+const https = require("https");
 const schedule_1 = require("@nestjs/schedule");
 const prisma_service_1 = require("../../../prisma/prisma.service");
 const execPromise = (0, util_1.promisify)(child_process_1.exec);
+function escVal(val) {
+    if (val === null || val === undefined)
+        return "NULL";
+    if (typeof val === "number")
+        return String(val);
+    if (typeof val === "boolean")
+        return val ? "TRUE" : "FALSE";
+    if (val instanceof Date)
+        return `'${val.toISOString()}'`;
+    if (typeof val === "object")
+        return `'${JSON.stringify(val).replace(/'/g, "''")}'`;
+    return `'${String(val).replace(/'/g, "''")}'`;
+}
+function toInserts(tableName, rows) {
+    if (!rows.length)
+        return `-- ${tableName}: empty\n`;
+    const cols = Object.keys(rows[0]);
+    const header = `-- ${tableName} (${rows.length} rows)\n`;
+    const stmts = rows
+        .map((r) => {
+        const vals = cols.map((c) => escVal(r[c])).join(", ");
+        return `INSERT INTO "${tableName}" (${cols.map((c) => `"${c}"`).join(", ")}) VALUES (${vals}) ON CONFLICT DO NOTHING;`;
+    })
+        .join("\n");
+    return header + stmts + "\n\n";
+}
 let BackupService = BackupService_1 = class BackupService {
     constructor(prisma) {
         this.prisma = prisma;
         this.logger = new common_1.Logger(BackupService_1.name);
         this.backupDir = path.join(process.cwd(), "backups");
-        if (!fs.existsSync(this.backupDir)) {
-            fs.mkdirSync(this.backupDir);
-        }
+        if (!fs.existsSync(this.backupDir))
+            fs.mkdirSync(this.backupDir, { recursive: true });
     }
     async handleDailyBackup() {
-        this.logger.log("Enterprise Backup System Triggered: Process ID 03:00 (G6)");
+        this.logger.log("Daily Backup Triggered: 01:00 AM");
+        try {
+            const result = await this.createFullBackup();
+            await this.sendToTelegram(result.zipPath, path.basename(result.zipPath), process.env.LOG_BOT_TOKEN, process.env.BACKUP_CHAT_ID || process.env.LOG_CHAT_ID);
+            this.logger.log("Daily backup complete");
+        }
+        catch (err) {
+            this.logger.error("Daily backup failed: " + (err?.message || err));
+        }
+        await this.prisma.systemSettings
+            .update({ where: { id: "GLOBAL" }, data: { lastBackupAt: new Date() } })
+            .catch(() => { });
+    }
+    async createFullBackup() {
+        const dateStr = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+        const sessionDir = path.join(this.backupDir, `backup-${dateStr}`);
+        fs.mkdirSync(sessionDir, { recursive: true });
+        const systemSqlPath = path.join(sessionDir, "system_full.sql");
+        const dbUrl = process.env.DATABASE_URL;
+        if (!dbUrl)
+            throw new Error("DATABASE_URL not set");
+        this.logger.log("Running pg_dump for full system backup...");
+        await execPromise(`pg_dump -f "${systemSqlPath}" "${dbUrl}"`);
+        this.logger.log(`System dump done: ${(fs.statSync(systemSqlPath).size / 1024).toFixed(1)} KB`);
         const companies = await this.prisma.company.findMany({
             where: { deletedAt: null },
-            select: { id: true, name: true, slug: true, dbConnectionUrl: true },
+            select: { id: true, name: true, slug: true },
         });
         for (const company of companies) {
-            try {
-                await this.dumpCompanyDatabase(company.id, company.slug);
-            }
-            catch (err) {
-                this.logger.error(`❌ FAILED Backup for Tenant: ${company.name}`, err);
-            }
+            const safeName = company.name.replace(/[^a-zA-Z0-9_\-]/g, "_").slice(0, 40);
+            const companyDir = path.join(sessionDir, safeName);
+            fs.mkdirSync(companyDir, { recursive: true });
+            const sqlPath = path.join(companyDir, `${safeName}.sql`);
+            const sql = await this.exportCompanyToSql(company.id, company.name);
+            fs.writeFileSync(sqlPath, sql, "utf8");
+            this.logger.log(`Exported ${company.name}: ${(fs.statSync(sqlPath).size / 1024).toFixed(1)} KB`);
         }
-        await this.prisma.systemSettings.update({
-            where: { id: "GLOBAL" },
-            data: { lastBackupAt: new Date() },
-        });
+        const zipPath = sessionDir + ".zip";
+        await this.zipFolder(sessionDir, zipPath);
+        this.logger.log(`Zip created: ${(fs.statSync(zipPath).size / 1024).toFixed(1)} KB`);
+        return { zipPath, dir: sessionDir };
+    }
+    async exportCompanyToSql(companyId, companyName) {
+        const now = new Date().toISOString();
+        let sql = `-- Supplio Company Export\n-- Company: ${companyName}\n-- Exported: ${now}\n-- ID: ${companyId}\n\n`;
+        const [branches, dealers, products, orders, payments, expenses, users] = await Promise.all([
+            this.prisma.branch.findMany({ where: { companyId } }),
+            this.prisma.dealer.findMany({ where: { companyId } }),
+            this.prisma.product.findMany({ where: { companyId } }),
+            this.prisma.order.findMany({ where: { companyId } }),
+            this.prisma.payment.findMany({ where: { companyId } }),
+            this.prisma.expense.findMany({ where: { companyId } }),
+            this.prisma.user.findMany({
+                where: { companyId },
+                select: { id: true, companyId: true, branchId: true, phone: true, fullName: true, roleType: true, isActive: true, createdAt: true },
+            }),
+        ]);
+        sql += toInserts("Branch", branches);
+        sql += toInserts("Dealer", dealers);
+        sql += toInserts("Product", products);
+        sql += toInserts("Order", orders);
+        sql += toInserts("Payment", payments);
+        sql += toInserts("Expense", expenses);
+        sql += toInserts("User", users);
+        return sql;
+    }
+    async zipFolder(folderPath, zipPath) {
+        try {
+            await execPromise(`zip -r "${zipPath}" "${path.basename(folderPath)}"`, { cwd: path.dirname(folderPath) });
+            if (fs.existsSync(zipPath))
+                return;
+        }
+        catch { }
+        try {
+            await execPromise(`powershell -Command "Compress-Archive -Path '${folderPath}' -DestinationPath '${zipPath}' -Force"`);
+            if (fs.existsSync(zipPath))
+                return;
+        }
+        catch { }
+        const tgzPath = zipPath.replace(/\.zip$/, ".tar.gz");
+        await execPromise(`tar -czf "${tgzPath}" -C "${path.dirname(folderPath)}" "${path.basename(folderPath)}"`);
+        if (fs.existsSync(tgzPath)) {
+            fs.renameSync(tgzPath, zipPath.replace(/\.zip$/, ".tar.gz"));
+            throw new Error("zip not available; created .tar.gz instead");
+        }
+    }
+    async createBackupAndSend() {
+        const result = await this.createFullBackup();
+        await this.sendToTelegram(result.zipPath, path.basename(result.zipPath), process.env.LOG_BOT_TOKEN, process.env.BACKUP_CHAT_ID || process.env.LOG_CHAT_ID);
+        const stats = fs.statSync(result.zipPath);
+        return { name: path.basename(result.zipPath), size: stats.size, createdAt: new Date() };
     }
     async createBackup() {
         const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
@@ -54,47 +154,74 @@ let BackupService = BackupService_1 = class BackupService {
         const dbUrl = process.env.DATABASE_URL;
         if (!dbUrl)
             throw new Error("DATABASE_URL not found");
-        try {
-            this.logger.log(`Starting manual backup: ${fileName}`);
-            try {
-                await execPromise(`pg_dump "${dbUrl}" > "${filePath}"`);
-            }
-            catch (e) {
-                this.logger.warn("pg_dump failed, generating mock for dev.");
-                fs.writeFileSync(filePath, `-- Mock backup\n-- Date: ${new Date().toISOString()}`);
-            }
-            return { name: fileName, path: filePath, createdAt: new Date() };
+        await execPromise(`pg_dump -f "${filePath}" "${dbUrl}"`);
+        return { name: fileName, path: filePath, createdAt: new Date() };
+    }
+    async sendToTelegram(filePath, fileName, token, chatId) {
+        const tok = token || process.env.LOG_BOT_TOKEN;
+        const chat = chatId || process.env.LOG_CHAT_ID;
+        if (!tok || !chat) {
+            this.logger.warn("Telegram credentials not set — skipping send");
+            return;
         }
-        catch (err) {
-            this.logger.error(`Backup failed: ${err.message}`);
-            throw err;
+        if (!fs.existsSync(filePath)) {
+            this.logger.warn(`File not found: ${filePath}`);
+            return;
         }
+        const stats = fs.statSync(filePath);
+        const fileStream = fs.createReadStream(filePath);
+        const caption = `📦 *Supplio Backup*\n📅 ${new Date().toLocaleString("uz-UZ")}\n📁 ${fileName}\n💾 ${(stats.size / 1024).toFixed(1)} KB`;
+        await new Promise((resolve) => {
+            const boundary = `----FormBoundary${Date.now()}`;
+            const metadata = Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n${chat}\r\n` +
+                `--${boundary}\r\nContent-Disposition: form-data; name="caption"\r\n\r\n${caption}\r\n` +
+                `--${boundary}\r\nContent-Disposition: form-data; name="parse_mode"\r\n\r\nMarkdown\r\n` +
+                `--${boundary}\r\nContent-Disposition: form-data; name="document"; filename="${fileName}"\r\nContent-Type: application/octet-stream\r\n\r\n`);
+            const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
+            const req = https.request({
+                hostname: "api.telegram.org",
+                path: `/bot${tok}/sendDocument`,
+                method: "POST",
+                headers: { "Content-Type": `multipart/form-data; boundary=${boundary}` },
+            }, (res) => {
+                let body = "";
+                res.on("data", (d) => (body += d));
+                res.on("end", () => {
+                    if (res.statusCode === 200)
+                        this.logger.log(`✅ Backup sent to Telegram: ${fileName}`);
+                    else
+                        this.logger.error(`Telegram send failed (${res.statusCode}): ${body}`);
+                    resolve();
+                });
+            });
+            req.on("error", (e) => { this.logger.error("Telegram request error: " + e.message); resolve(); });
+            req.write(metadata);
+            fileStream.on("data", (chunk) => req.write(chunk));
+            fileStream.on("end", () => { req.write(tail); req.end(); });
+            fileStream.on("error", () => { req.end(); resolve(); });
+        });
     }
     async dumpCompanyDatabase(companyId, slug) {
-        const filename = `SUPPLIO_${slug.toUpperCase()}_${new Date().toISOString().split("T")[0]}.sql`;
-        const outputPath = path.join(this.backupDir, filename);
-        const company = await this.prisma.company.findUnique({
-            where: { id: companyId },
-        });
-        const connectionUri = company?.dbConnectionUrl || process.env.DATABASE_URL;
-        const command = `pg_dump "${connectionUri}" -f "${outputPath}"`;
-        await execPromise(command).catch(() => {
-            fs.writeFileSync(outputPath, `-- Mock Tenant Backup\n-- Company: ${slug}`);
-        });
+        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+        const safeName = `SUPPLIO_${slug.toUpperCase()}_${new Date().toISOString().split("T")[0]}`;
+        const outputPath = path.join(this.backupDir, `${safeName}.sql`);
+        if (company?.dbConnectionUrl) {
+            await execPromise(`pg_dump -f "${outputPath}" "${company.dbConnectionUrl}"`);
+        }
+        else {
+            const sql = await this.exportCompanyToSql(companyId, company?.name || slug);
+            fs.writeFileSync(outputPath, sql, "utf8");
+        }
         return outputPath;
     }
     async listBackups() {
         if (!fs.existsSync(this.backupDir))
             return [];
-        const files = fs.readdirSync(this.backupDir);
-        return files
+        return fs
+            .readdirSync(this.backupDir)
             .map((file) => {
             const stats = fs.statSync(path.join(this.backupDir, file));
-            return {
-                name: file,
-                size: stats.size,
-                createdAt: stats.birthtime,
-            };
+            return { name: file, size: stats.size, createdAt: stats.birthtime };
         })
             .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
     }
@@ -109,7 +236,7 @@ let BackupService = BackupService_1 = class BackupService {
 };
 exports.BackupService = BackupService;
 __decorate([
-    (0, schedule_1.Cron)(schedule_1.CronExpression.EVERY_DAY_AT_3AM),
+    (0, schedule_1.Cron)("0 1 * * *"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

@@ -774,27 +774,38 @@ export class TelegramService implements OnModuleInit {
     return this.bots.get(botId);
   }
 
-  async validateToken(token: string): Promise<{ valid: boolean; botInfo?: { id: number; username: string; first_name: string } }> {
+  async validateToken(token: string): Promise<{ valid: boolean; networkError?: boolean; botInfo?: { id: number; username: string; first_name: string } }> {
     try {
       const tempBot = new Telegram(token);
-      const botInfo = await tempBot.getMe();
-      return { 
-        valid: true, 
-        botInfo: { 
-          id: botInfo.id, 
-          username: botInfo.username || '', 
-          first_name: botInfo.first_name 
-        } 
+      const botInfo = await Promise.race([
+        tempBot.getMe(),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('TIMEOUT')), 10000)
+        ),
+      ]);
+      return {
+        valid: true,
+        botInfo: {
+          id: botInfo.id,
+          username: botInfo.username || '',
+          first_name: botInfo.first_name,
+        },
       };
     } catch (err: any) {
       this.logger.warn(`Token validation failed for token ${token.slice(0, 5)}...: ${err.message}`);
-      return { valid: false };
+      const isNetworkError =
+        err.message === 'TIMEOUT' ||
+        !err.response ||
+        err.code === 'ECONNREFUSED' ||
+        err.code === 'ETIMEDOUT' ||
+        err.code === 'ENOTFOUND';
+      return { valid: false, networkError: isNetworkError };
     }
   }
 
   getBotStatus(botId: string): 'connected' | 'stopped' | 'not_found' {
     const bot = this.bots.get(botId);
-    if (!bot) return 'stopped';
+    if (!bot) return 'not_found';
     return 'connected';
   }
 
@@ -806,10 +817,18 @@ export class TelegramService implements OnModuleInit {
   }
 
   async createBot(companyId: string, data: { token: string; botName?: string; description?: string }) {
+    if (!data.token?.trim()) {
+      throw new BadRequestException('Bot token is required.');
+    }
     // Validate token before saving
-    const validation = await this.validateToken(data.token);
+    const validation = await this.validateToken(data.token.trim());
     if (!validation.valid) {
-      throw new BadRequestException('Invalid Telegram bot token. Please check the token from @BotFather.');
+      if (validation.networkError) {
+        throw new BadRequestException(
+          'Cannot reach Telegram API to verify this token. Check server internet connectivity, then try again.',
+        );
+      }
+      throw new BadRequestException('Invalid Telegram bot token. Please get a valid token from @BotFather.');
     }
     const username = validation.botInfo?.username;
     const resolvedName = data.botName || validation.botInfo?.first_name || 'Store Bot';

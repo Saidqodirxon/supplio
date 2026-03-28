@@ -19,18 +19,18 @@ export declare class StoreController {
     }[]>;
     getProducts(slug: string, categoryId?: string, search?: string): Promise<{
         id: string;
+        description: string;
         name: string;
         category: {
             id: string;
             name: string;
         };
-        categoryId: string;
         sku: string;
-        description: string;
-        imageUrl: string;
         price: number;
         stock: number;
         unit: string;
+        categoryId: string;
+        imageUrl: string;
     }[]>;
     identifyDealer(slug: string, phone: string): Promise<{
         id: string;
@@ -48,11 +48,11 @@ export declare class StoreController {
         }[];
     }): Promise<{
         id: string;
-        updatedAt: Date;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;

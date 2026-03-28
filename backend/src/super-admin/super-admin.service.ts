@@ -569,6 +569,55 @@ export class SuperAdminService {
     return this.prisma.releaseNote.delete({ where: { id } });
   }
 
+  // ── Upgrade Requests ──────────────────────────────────────────────────────
+
+  async createUpgradeRequest(companyId: string, data: Record<string, unknown>) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      include: {
+        _count: { select: { dealers: true, users: true, branches: true, products: true } },
+        users: { where: { deletedAt: null, roleType: "OWNER" }, select: { phone: true, fullName: true }, take: 1 },
+      },
+    });
+    if (!company) throw new Error("Company not found");
+
+    // Avoid duplicate pending requests
+    const existing = await (this.prisma as any).upgradeRequest.findFirst({
+      where: { companyId, status: "PENDING" },
+    });
+    if (existing) return existing;
+
+    return (this.prisma as any).upgradeRequest.create({
+      data: {
+        companyId,
+        companyName: company.name,
+        currentPlan: company.subscriptionPlan,
+        requestedPlan: (data.requestedPlan as string) || null,
+        ownerPhone: company.users[0]?.phone || "",
+        ownerName: company.users[0]?.fullName || null,
+        dealersCount: company._count.dealers,
+        usersCount: company._count.users,
+        branchesCount: company._count.branches,
+        productsCount: company._count.products,
+        status: "PENDING",
+      },
+    });
+  }
+
+  async getUpgradeRequests() {
+    return (this.prisma as any).upgradeRequest.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { company: { select: { name: true, slug: true, subscriptionPlan: true, subscriptionStatus: true } } },
+    });
+  }
+
+  async updateUpgradeRequest(id: string, data: { status: string; note?: string }) {
+    return (this.prisma as any).upgradeRequest.update({
+      where: { id },
+      data: { status: data.status, note: data.note },
+    });
+  }
+
   // ── Misc ──────────────────────────────────────────────────────────────────
 
   async fixUsers() {

@@ -517,6 +517,49 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
     async deleteReleaseNote(id) {
         return this.prisma.releaseNote.delete({ where: { id } });
     }
+    async createUpgradeRequest(companyId, data) {
+        const company = await this.prisma.company.findUnique({
+            where: { id: companyId },
+            include: {
+                _count: { select: { dealers: true, users: true, branches: true, products: true } },
+                users: { where: { deletedAt: null, roleType: "OWNER" }, select: { phone: true, fullName: true }, take: 1 },
+            },
+        });
+        if (!company)
+            throw new Error("Company not found");
+        const existing = await this.prisma.upgradeRequest.findFirst({
+            where: { companyId, status: "PENDING" },
+        });
+        if (existing)
+            return existing;
+        return this.prisma.upgradeRequest.create({
+            data: {
+                companyId,
+                companyName: company.name,
+                currentPlan: company.subscriptionPlan,
+                requestedPlan: data.requestedPlan || null,
+                ownerPhone: company.users[0]?.phone || "",
+                ownerName: company.users[0]?.fullName || null,
+                dealersCount: company._count.dealers,
+                usersCount: company._count.users,
+                branchesCount: company._count.branches,
+                productsCount: company._count.products,
+                status: "PENDING",
+            },
+        });
+    }
+    async getUpgradeRequests() {
+        return this.prisma.upgradeRequest.findMany({
+            orderBy: { createdAt: "desc" },
+            include: { company: { select: { name: true, slug: true, subscriptionPlan: true, subscriptionStatus: true } } },
+        });
+    }
+    async updateUpgradeRequest(id, data) {
+        return this.prisma.upgradeRequest.update({
+            where: { id },
+            data: { status: data.status, note: data.note },
+        });
+    }
     async fixUsers() {
         return this.prisma.user.updateMany({
             where: { OR: [{ photoUrl: null }, { photoUrl: "" }] },

@@ -20,6 +20,7 @@ export const dashboardTranslations = {
       reports: "Reports",
       telegramBots: "Telegram Bots",
       webStore: "Web Store",
+      staff: "Staff",
     },
     superadmin: {
       overview: "Overview",
@@ -357,6 +358,11 @@ export const dashboardTranslations = {
       accountStatusDesc:
         "Your account is in good standing. Premium features unlocked.",
       verified: "Verified",
+      fullName: "Full Name",
+      phone: "Phone Number",
+      password: "Password",
+      role: "Role",
+      deactivateConfirm: "Are you sure you want to deactivate this staff member?",
     },
     products: {
       title: "Products",
@@ -401,6 +407,10 @@ export const dashboardTranslations = {
       catTaxes: "Taxes",
       catInsurance: "Insurance",
       catOther: "Other",
+      netProfit: "Net Profit",
+      afterExpenses: "after expenses",
+      allCategories: "All",
+      allExpenses: "All Expenses",
     },
     notifications: {
       title: "Notifications",
@@ -493,6 +503,7 @@ export const dashboardTranslations = {
       reports: "Hisobotlar",
       telegramBots: "Telegram Botlar",
       webStore: "Web Do'kon",
+      staff: "Xodimlar",
     },
     superadmin: {
       overview: "Umumiy ko'rinish",
@@ -834,6 +845,11 @@ export const dashboardTranslations = {
       accountStatusDesc:
         "Akkauntingiz yaxshi holatda. Premium funksiyalar faol.",
       verified: "Tasdiqlangan",
+      fullName: "To'liq ism",
+      phone: "Telefon raqam",
+      password: "Parol",
+      role: "Rol",
+      deactivateConfirm: "Bu xodimni o'chirishni xohlaysizmi?",
     },
     products: {
       title: "Mahsulotlar",
@@ -878,6 +894,10 @@ export const dashboardTranslations = {
       catTaxes: "Soliqlar",
       catInsurance: "Sug'urta",
       catOther: "Boshqa",
+      netProfit: "Sof foyda",
+      afterExpenses: "xarajatlardan keyin",
+      allCategories: "Barchasi",
+      allExpenses: "Barcha xarajatlar",
     },
     notifications: {
       title: "Bildirishnomalar",
@@ -970,6 +990,7 @@ export const dashboardTranslations = {
       telegramBots: "Telegram Ботлар",
       leads: "Аризалар",
       webStore: "Веб Дўкон",
+      staff: "Ходимлар",
     },
     superadmin: {
       overview: "Умумий кўриниш",
@@ -1309,6 +1330,11 @@ export const dashboardTranslations = {
       accountStatus: "Аккаунт ҳолати",
       accountStatusDesc: "Аккаунтингиз яхши ҳолатда. Премиум функциялар фаол.",
       verified: "Тасдиқланган",
+      fullName: "Тўлиқ исм",
+      phone: "Телефон рақам",
+      password: "Парол",
+      role: "Рол",
+      deactivateConfirm: "Бу ходимни ўчиришни хоҳлайсизми?",
     },
     products: {
       title: "Маҳсулотлар",
@@ -1353,6 +1379,10 @@ export const dashboardTranslations = {
       catTaxes: "Солиқлар",
       catInsurance: "Суғурта",
       catOther: "Бошқа",
+      netProfit: "Соф фойда",
+      afterExpenses: "харажатлардан кейин",
+      allCategories: "Барчаси",
+      allExpenses: "Барча харажатлар",
     },
     notifications: {
       title: "Билдиришномалар",
@@ -1444,6 +1474,7 @@ export const dashboardTranslations = {
       reports: "Raporlar",
       telegramBots: "Telegram Botlar",
       webStore: "Web Mağaza",
+      staff: "Personel",
     },
     superadmin: {
       overview: "Genel Bakış",
@@ -1782,6 +1813,11 @@ export const dashboardTranslations = {
       accountStatus: "Hesap Durumu",
       accountStatusDesc: "Hesabınız iyi durumda. Premium özellikler aktif.",
       verified: "Doğrulandı",
+      fullName: "Ad Soyad",
+      phone: "Telefon Numarası",
+      password: "Şifre",
+      role: "Rol",
+      deactivateConfirm: "Bu personeli devre dışı bırakmak istediğinizden emin misiniz?",
     },
     products: {
       title: "Ürünler",
@@ -1826,6 +1862,10 @@ export const dashboardTranslations = {
       catTaxes: "Vergiler",
       catInsurance: "Sigorta",
       catOther: "Diğer",
+      netProfit: "Net Kâr",
+      afterExpenses: "giderlerden sonra",
+      allCategories: "Tümü",
+      allExpenses: "Tüm Giderler",
     },
     notifications: {
       title: "Bildirimler",
@@ -1918,6 +1958,7 @@ export const dashboardTranslations = {
       reports: "Отчёты",
       telegramBots: "Telegram Боты",
       webStore: "Веб-магазин",
+      staff: "Сотрудники",
     },
     superadmin: {
       overview: "Обзор",
@@ -2243,6 +2284,11 @@ export const dashboardTranslations = {
       accountStatusDesc:
         "Ваш аккаунт в хорошем состоянии. Премиум функции активны.",
       verified: "Подтверждено",
+      fullName: "Полное имя",
+      phone: "Номер телефона",
+      password: "Пароль",
+      role: "Роль",
+      deactivateConfirm: "Вы уверены, что хотите деактивировать этого сотрудника?",
     },
     login: {
       welcomeBack: "С возвращением",
@@ -2300,6 +2346,10 @@ export const dashboardTranslations = {
       catTaxes: "Налоги",
       catInsurance: "Страховка",
       catOther: "Прочее",
+      netProfit: "Чистая прибыль",
+      afterExpenses: "после расходов",
+      allCategories: "Все",
+      allExpenses: "Все расходы",
     },
     notifications: {
       title: "Уведомления",

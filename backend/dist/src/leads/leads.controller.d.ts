@@ -8,27 +8,27 @@ export declare class LeadsController {
         info?: string;
     }): Promise<{
         info: string | null;
-        deletedAt: Date | null;
         id: string;
         createdAt: Date;
+        deletedAt: Date | null;
         phone: string;
         status: string;
         fullName: string;
     }>;
     findAll(): Promise<{
         info: string | null;
-        deletedAt: Date | null;
         id: string;
         createdAt: Date;
+        deletedAt: Date | null;
         phone: string;
         status: string;
         fullName: string;
     }[]>;
     updateStatus(id: string, status: string): Promise<{
         info: string | null;
-        deletedAt: Date | null;
         id: string;
         createdAt: Date;
+        deletedAt: Date | null;
         phone: string;
         status: string;
         fullName: string;

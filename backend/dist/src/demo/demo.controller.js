@@ -8,6 +8,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var DemoController_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DemoController = void 0;
@@ -33,6 +36,9 @@ let DemoController = DemoController_1 = class DemoController {
     }
     async getDemoData() {
         return this.demoService.getDemoData();
+    }
+    async requestDemoAccess(body) {
+        return this.demoService.requestDemoAccess(body);
     }
     async getDemoNews() {
         return this.demoService.getDemoNews();
@@ -63,6 +69,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], DemoController.prototype, "getDemoData", null);
+__decorate([
+    (0, common_1.Post)("access"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DemoController.prototype, "requestDemoAccess", null);
 __decorate([
     (0, common_1.Get)("news"),
     __metadata("design:type", Function),

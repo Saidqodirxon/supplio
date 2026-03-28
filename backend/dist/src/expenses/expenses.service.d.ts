@@ -13,13 +13,13 @@ export declare class ExpensesService {
         };
     } & {
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        description: string | null;
         deletedBy: string | null;
-        companyId: string;
         branchId: string | null;
         category: string;
-        description: string | null;
         amount: number;
     }>;
     findAll(companyId: string, branchId?: string): Promise<({
@@ -28,13 +28,13 @@ export declare class ExpensesService {
         };
     } & {
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        description: string | null;
         deletedBy: string | null;
-        companyId: string;
         branchId: string | null;
         category: string;
-        description: string | null;
         amount: number;
     })[]>;
     findOne(id: string, companyId: string): Promise<{
@@ -43,24 +43,24 @@ export declare class ExpensesService {
         };
     } & {
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        description: string | null;
         deletedBy: string | null;
-        companyId: string;
         branchId: string | null;
         category: string;
-        description: string | null;
         amount: number;
     }>;
     remove(id: string, companyId: string, deletedBy: string): Promise<{
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        description: string | null;
         deletedBy: string | null;
-        companyId: string;
         branchId: string | null;
         category: string;
-        description: string | null;
         amount: number;
     }>;
     getSummary(companyId: string): Promise<{

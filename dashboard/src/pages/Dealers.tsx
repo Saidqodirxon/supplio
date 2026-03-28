@@ -13,6 +13,8 @@ import { formatPhoneNumber } from '../utils/formatters';
 import PhoneInput from '../components/PhoneInput';
 import { toast } from 'sonner';
 import { useScrollLock } from '../utils/useScrollLock';
+import UpgradeModal from '../components/UpgradeModal';
+import { usePlanLimits } from '../hooks/usePlanLimits';
 
 const LIMIT_OPTIONS = [
   { label: '1,000,000', value: 1000000 },
@@ -34,6 +36,7 @@ interface DealerForm {
 const emptyForm: DealerForm = { name: '', phone: '', branchId: '', creditLimit: 10000000 };
 
 export default function Dealers() {
+  const { showUpgrade, setShowUpgrade, upgradeReason, handleApiError } = usePlanLimits();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'HEALTHY' | 'HAS_DEBT' | 'LIMIT_REACHED'>('ALL');
   const [dealers, setDealers] = useState<Dealer[]>([]);
@@ -128,8 +131,11 @@ export default function Dealers() {
       }
       setModalOpen(false);
       fetchDealers();
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? 'Xatolik yuz berdi');
+    } catch (e: unknown) {
+      if (!handleApiError(e)) {
+        const msg = (e as any)?.response?.data?.message ?? 'Xatolik yuz berdi';
+        toast.error(msg);
+      }
     } finally {
       setSaving(false);
     }
@@ -615,6 +621,13 @@ export default function Dealers() {
           </div>
         )}
       </AnimatePresence>
+
+      <UpgradeModal
+        isOpen={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        reason={upgradeReason}
+        language={language}
+      />
     </div>
   );
 }

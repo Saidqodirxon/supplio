@@ -69,6 +69,7 @@ model Company {
   subscriptions         Subscription[]
   units                 Unit[]
   users                 User[]
+  upgradeRequests       UpgradeRequest[]
 }
 
 model Branch {
@@ -525,6 +526,25 @@ model LandingContent {
   footerDescEn   String   @default("")
   footerDescTr   String   @default("")
   updatedAt      DateTime @updatedAt
+}
+
+model UpgradeRequest {
+  id              String   @id @default(uuid())
+  companyId       String
+  companyName     String
+  currentPlan     String
+  requestedPlan   String?
+  ownerPhone      String
+  ownerName       String?
+  dealersCount    Int      @default(0)
+  usersCount      Int      @default(0)
+  branchesCount   Int      @default(0)
+  productsCount   Int      @default(0)
+  status          String   @default("PENDING")
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  company         Company  @relation(fields: [companyId], references: [id])
 }
 
 enum RoleType {

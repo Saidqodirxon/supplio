@@ -17,10 +17,10 @@ export declare class NotificationService {
         companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        title: string;
-        message: string;
-        isRead: boolean;
         type: string;
+        message: string;
+        title: string;
+        isRead: boolean;
         senderId: string | null;
         receiverUserId: string | null;
         receiverDealerId: string | null;
@@ -37,10 +37,10 @@ export declare class NotificationService {
         companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        title: string;
-        message: string;
-        isRead: boolean;
         type: string;
+        message: string;
+        title: string;
+        isRead: boolean;
         senderId: string | null;
         receiverUserId: string | null;
         receiverDealerId: string | null;
@@ -63,10 +63,10 @@ export declare class NotificationService {
             companyId: string;
             createdAt: Date;
             deletedAt: Date | null;
-            title: string;
-            message: string;
-            isRead: boolean;
             type: string;
+            message: string;
+            title: string;
+            isRead: boolean;
             senderId: string | null;
             receiverUserId: string | null;
             receiverDealerId: string | null;
@@ -86,9 +86,9 @@ export declare class NotificationService {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        message: import("@prisma/client/runtime/library").JsonValue;
-        type: string;
         updatedAt: Date;
+        type: string;
+        message: import("@prisma/client/runtime/library").JsonValue;
     }[]>;
     createTemplate(companyId: string, body: {
         name: string;
@@ -102,9 +102,9 @@ export declare class NotificationService {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        message: import("@prisma/client/runtime/library").JsonValue;
-        type: string;
         updatedAt: Date;
+        type: string;
+        message: import("@prisma/client/runtime/library").JsonValue;
     }>;
     updateTemplate(companyId: string, id: string, body: {
         name?: string;
@@ -121,10 +121,10 @@ export declare class NotificationService {
         id: string;
         companyId: string;
         createdAt: Date;
+        status: string;
+        dealerId: string | null;
         message: string;
         templateId: string | null;
-        dealerId: string | null;
-        status: string;
     })[]>;
     runDebtReminders(): Promise<void>;
     runPromoNotifications(): Promise<void>;

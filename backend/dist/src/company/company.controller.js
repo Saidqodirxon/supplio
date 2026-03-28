@@ -34,8 +34,26 @@ let CompanyController = class CompanyController {
     async getUsers(req) {
         return this.companyService.getUsers(req.user.companyId);
     }
+    async createStaff(req, body) {
+        return this.companyService.createStaff(req.user.companyId, body);
+    }
+    async deactivateStaff(req, id) {
+        return this.companyService.deactivateStaff(req.user.companyId, id);
+    }
     async getFeatures(req) {
         return this.companyService.getFeatureFlags(req.user.companyId);
+    }
+    async getCustomRoles(req) {
+        return this.companyService.getCustomRoles(req.user.companyId);
+    }
+    async createCustomRole(req, body) {
+        return this.companyService.createCustomRole(req.user.companyId, body);
+    }
+    async updateCustomRole(req, id, body) {
+        return this.companyService.updateCustomRole(req.user.companyId, id, body);
+    }
+    async deleteCustomRole(req, id) {
+        return this.companyService.deleteCustomRole(req.user.companyId, id);
     }
 };
 exports.CompanyController = CompanyController;
@@ -58,7 +76,7 @@ __decorate([
 ], CompanyController.prototype, "updateMyCompany", null);
 __decorate([
     (0, common_1.Get)("subscription"),
-    (0, roles_decorator_1.Roles)("OWNER", "MANAGER"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
@@ -73,6 +91,24 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], CompanyController.prototype, "getUsers", null);
 __decorate([
+    (0, common_1.Post)("users"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], CompanyController.prototype, "createStaff", null);
+__decorate([
+    (0, common_1.Delete)("users/:id"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], CompanyController.prototype, "deactivateStaff", null);
+__decorate([
     (0, common_1.Get)("features"),
     (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SALES"),
     __param(0, (0, common_1.Req)()),
@@ -80,6 +116,42 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], CompanyController.prototype, "getFeatures", null);
+__decorate([
+    (0, common_1.Get)("roles"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CompanyController.prototype, "getCustomRoles", null);
+__decorate([
+    (0, common_1.Post)("roles"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], CompanyController.prototype, "createCustomRole", null);
+__decorate([
+    (0, common_1.Patch)("roles/:id"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], CompanyController.prototype, "updateCustomRole", null);
+__decorate([
+    (0, common_1.Delete)("roles/:id"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], CompanyController.prototype, "deleteCustomRole", null);
 exports.CompanyController = CompanyController = __decorate([
     (0, common_1.Controller)("company"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

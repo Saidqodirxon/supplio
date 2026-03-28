@@ -21,9 +21,9 @@ let TelegramController = TelegramController_1 = class TelegramController {
         this.telegramService = telegramService;
         this.logger = new common_1.Logger(TelegramController_1.name);
     }
-    async handleWebhook(companyId, update) {
-        this.logger.log(`Received update for company: ${companyId}`);
-        const bot = this.telegramService.getBot(companyId);
+    async handleWebhook(id, update) {
+        this.logger.log(`Received update for bot ID: ${id}`);
+        const bot = this.telegramService.getBot(id);
         if (bot) {
             await bot.handleUpdate(update);
         }
@@ -32,8 +32,8 @@ let TelegramController = TelegramController_1 = class TelegramController {
 };
 exports.TelegramController = TelegramController;
 __decorate([
-    (0, common_1.Post)(":companyId"),
-    __param(0, (0, common_1.Param)("companyId")),
+    (0, common_1.Post)(":id"),
+    __param(0, (0, common_1.Param)("id")),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String, Object]),

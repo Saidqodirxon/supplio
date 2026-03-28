@@ -9,170 +9,269 @@ import { PrismaService } from "../../../prisma/prisma.service";
 
 const execPromise = promisify(exec);
 
+// ── SQL helpers ─────────────────────────────────────────────────────────────
+
+function escVal(val: unknown): string {
+  if (val === null || val === undefined) return "NULL";
+  if (typeof val === "number") return String(val);
+  if (typeof val === "boolean") return val ? "TRUE" : "FALSE";
+  if (val instanceof Date) return `'${val.toISOString()}'`;
+  if (typeof val === "object") return `'${JSON.stringify(val).replace(/'/g, "''")}'`;
+  return `'${String(val).replace(/'/g, "''")}'`;
+}
+
+function toInserts(tableName: string, rows: Record<string, unknown>[]): string {
+  if (!rows.length) return `-- ${tableName}: empty\n`;
+  const cols = Object.keys(rows[0]);
+  const header = `-- ${tableName} (${rows.length} rows)\n`;
+  const stmts = rows
+    .map((r) => {
+      const vals = cols.map((c) => escVal(r[c])).join(", ");
+      return `INSERT INTO "${tableName}" (${cols.map((c) => `"${c}"`).join(", ")}) VALUES (${vals}) ON CONFLICT DO NOTHING;`;
+    })
+    .join("\n");
+  return header + stmts + "\n\n";
+}
+
+// ── Service ──────────────────────────────────────────────────────────────────
+
 @Injectable()
 export class BackupService {
   private readonly logger = new Logger(BackupService.name);
   private readonly backupDir = path.join(process.cwd(), "backups");
 
   constructor(private prisma: PrismaService) {
-    if (!fs.existsSync(this.backupDir)) {
-      fs.mkdirSync(this.backupDir);
-    }
+    if (!fs.existsSync(this.backupDir)) fs.mkdirSync(this.backupDir, { recursive: true });
   }
 
-  /**
-   * Automated 01:00 AM Daily Backup + Telegram Send
-   */
-  @Cron('0 1 * * *')
+  // ── Cron: Daily 01:00 full backup ────────────────────────────────────────
+
+  @Cron("0 1 * * *")
   async handleDailyBackup() {
     this.logger.log("Daily Backup Triggered: 01:00 AM");
     try {
-      const result = await this.createBackup();
-      await this.sendBackupToTelegram(result.path, result.name);
-    } catch (err) {
-      this.logger.error("Daily backup failed", err);
+      const result = await this.createFullBackup();
+      await this.sendToTelegram(result.zipPath, path.basename(result.zipPath),
+        process.env.LOG_BOT_TOKEN,
+        process.env.BACKUP_CHAT_ID || process.env.LOG_CHAT_ID
+      );
+      this.logger.log("Daily backup complete");
+    } catch (err: any) {
+      this.logger.error("Daily backup failed: " + (err?.message || err));
     }
 
-    await this.prisma.systemSettings.update({
-      where: { id: "GLOBAL" },
-      data: { lastBackupAt: new Date() },
-    }).catch(() => {});
+    await this.prisma.systemSettings
+      .update({ where: { id: "GLOBAL" }, data: { lastBackupAt: new Date() } })
+      .catch(() => {});
   }
 
-  async createBackup() {
+  // ── Full backup: system pg_dump + per-company SQL + zip ──────────────────
+
+  async createFullBackup(): Promise<{ zipPath: string; dir: string }> {
+    const dateStr = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+    const sessionDir = path.join(this.backupDir, `backup-${dateStr}`);
+    fs.mkdirSync(sessionDir, { recursive: true });
+
+    // 1. Full system pg_dump
+    const systemSqlPath = path.join(sessionDir, "system_full.sql");
+    const dbUrl = process.env.DATABASE_URL;
+    if (!dbUrl) throw new Error("DATABASE_URL not set");
+    this.logger.log("Running pg_dump for full system backup...");
+    await execPromise(`pg_dump -f "${systemSqlPath}" "${dbUrl}"`);
+    this.logger.log(`System dump done: ${(fs.statSync(systemSqlPath).size / 1024).toFixed(1)} KB`);
+
+    // 2. Per-company exports
+    const companies = await this.prisma.company.findMany({
+      where: { deletedAt: null },
+      select: { id: true, name: true, slug: true },
+    });
+
+    for (const company of companies) {
+      const safeName = company.name.replace(/[^a-zA-Z0-9_\-]/g, "_").slice(0, 40);
+      const companyDir = path.join(sessionDir, safeName);
+      fs.mkdirSync(companyDir, { recursive: true });
+      const sqlPath = path.join(companyDir, `${safeName}.sql`);
+      const sql = await this.exportCompanyToSql(company.id, company.name);
+      fs.writeFileSync(sqlPath, sql, "utf8");
+      this.logger.log(`Exported ${company.name}: ${(fs.statSync(sqlPath).size / 1024).toFixed(1)} KB`);
+    }
+
+    // 3. Zip the session folder
+    const zipPath = sessionDir + ".zip";
+    await this.zipFolder(sessionDir, zipPath);
+    this.logger.log(`Zip created: ${(fs.statSync(zipPath).size / 1024).toFixed(1)} KB`);
+
+    return { zipPath, dir: sessionDir };
+  }
+
+  // ── Export single company data as SQL INSERT statements ──────────────────
+
+  async exportCompanyToSql(companyId: string, companyName: string): Promise<string> {
+    const now = new Date().toISOString();
+    let sql = `-- Supplio Company Export\n-- Company: ${companyName}\n-- Exported: ${now}\n-- ID: ${companyId}\n\n`;
+
+    const [branches, dealers, products, orders, payments, expenses, users] = await Promise.all([
+      this.prisma.branch.findMany({ where: { companyId } }),
+      this.prisma.dealer.findMany({ where: { companyId } }),
+      this.prisma.product.findMany({ where: { companyId } }),
+      this.prisma.order.findMany({ where: { companyId } }),
+      this.prisma.payment.findMany({ where: { companyId } }),
+      this.prisma.expense.findMany({ where: { companyId } }),
+      this.prisma.user.findMany({
+        where: { companyId },
+        select: { id: true, companyId: true, branchId: true, phone: true, fullName: true, roleType: true, isActive: true, createdAt: true },
+      }),
+    ]);
+
+    sql += toInserts("Branch", branches as any[]);
+    sql += toInserts("Dealer", dealers as any[]);
+    sql += toInserts("Product", products as any[]);
+    sql += toInserts("Order", orders as any[]);
+    sql += toInserts("Payment", payments as any[]);
+    sql += toInserts("Expense", expenses as any[]);
+    sql += toInserts("User", users as any[]);
+
+    return sql;
+  }
+
+  // ── Zip a folder ─────────────────────────────────────────────────────────
+
+  private async zipFolder(folderPath: string, zipPath: string): Promise<void> {
+    // Try zip (Linux), then PowerShell (Windows)
+    try {
+      await execPromise(`zip -r "${zipPath}" "${path.basename(folderPath)}"`, { cwd: path.dirname(folderPath) });
+      if (fs.existsSync(zipPath)) return;
+    } catch { /* fall through */ }
+
+    try {
+      await execPromise(
+        `powershell -Command "Compress-Archive -Path '${folderPath}' -DestinationPath '${zipPath}' -Force"`
+      );
+      if (fs.existsSync(zipPath)) return;
+    } catch { /* fall through */ }
+
+    // Last resort: tar.gz
+    const tgzPath = zipPath.replace(/\.zip$/, ".tar.gz");
+    await execPromise(`tar -czf "${tgzPath}" -C "${path.dirname(folderPath)}" "${path.basename(folderPath)}"`);
+    if (fs.existsSync(tgzPath)) {
+      // rename to .zip path so caller still finds it
+      fs.renameSync(tgzPath, zipPath.replace(/\.zip$/, ".tar.gz"));
+      throw new Error("zip not available; created .tar.gz instead");
+    }
+  }
+
+  // ── Manual trigger (called from super-admin or endpoint) ─────────────────
+
+  async createBackupAndSend(): Promise<{ name: string; size: number; createdAt: Date }> {
+    const result = await this.createFullBackup();
+    await this.sendToTelegram(
+      result.zipPath,
+      path.basename(result.zipPath),
+      process.env.LOG_BOT_TOKEN,
+      process.env.BACKUP_CHAT_ID || process.env.LOG_CHAT_ID
+    );
+    const stats = fs.statSync(result.zipPath);
+    return { name: path.basename(result.zipPath), size: stats.size, createdAt: new Date() };
+  }
+
+  // ── Legacy method kept for compatibility ─────────────────────────────────
+
+  async createBackup(): Promise<{ name: string; path: string; createdAt: Date }> {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const fileName = `backup-${timestamp}.sql`;
     const filePath = path.join(this.backupDir, fileName);
-
     const dbUrl = process.env.DATABASE_URL;
     if (!dbUrl) throw new Error("DATABASE_URL not found");
-
-    this.logger.log(`Starting backup: ${fileName}`);
-    try {
-      await execPromise(`pg_dump "${dbUrl}" > "${filePath}"`);
-    } catch {
-      this.logger.warn("pg_dump failed, generating placeholder for dev.");
-      fs.writeFileSync(filePath, `-- Mock backup\n-- Date: ${new Date().toISOString()}`);
-    }
+    await execPromise(`pg_dump -f "${filePath}" "${dbUrl}"`);
     return { name: fileName, path: filePath, createdAt: new Date() };
   }
 
-  async createBackupAndSend() {
-    const result = await this.createBackup();
-    await this.sendBackupToTelegram(result.path, result.name);
-    return result;
-  }
+  // ── Send file to Telegram ─────────────────────────────────────────────────
 
-  async sendBackupToTelegram(filePath: string, fileName: string): Promise<void> {
-    const token = process.env.LOG_BOT_TOKEN;
-    const chatId = process.env.LOG_CHAT_ID;
-    if (!token || !chatId) {
-      this.logger.warn("LOG_BOT_TOKEN or LOG_CHAT_ID not set — skipping Telegram send");
+  async sendToTelegram(filePath: string, fileName: string, token?: string, chatId?: string): Promise<void> {
+    const tok = token || process.env.LOG_BOT_TOKEN;
+    const chat = chatId || process.env.LOG_CHAT_ID;
+    if (!tok || !chat) {
+      this.logger.warn("Telegram credentials not set — skipping send");
       return;
     }
     if (!fs.existsSync(filePath)) {
-      this.logger.warn(`Backup file not found: ${filePath}`);
+      this.logger.warn(`File not found: ${filePath}`);
       return;
     }
 
-    // Zip the file
-    const zipPath = filePath.replace(/\.sql$/, '.zip');
-    try {
-      await execPromise(`powershell -Command "Compress-Archive -Path '${filePath}' -DestinationPath '${zipPath}' -Force"`);
-    } catch {
-      try {
-        await execPromise(`zip -j "${zipPath}" "${filePath}"`);
-      } catch {
-        this.logger.warn("zip failed, sending .sql directly");
-      }
-    }
+    const stats = fs.statSync(filePath);
+    const fileStream = fs.createReadStream(filePath);
+    const caption = `📦 *Supplio Backup*\n📅 ${new Date().toLocaleString("uz-UZ")}\n📁 ${fileName}\n💾 ${(stats.size / 1024).toFixed(1)} KB`;
 
-    const sendPath = fs.existsSync(zipPath) ? zipPath : filePath;
-    const sendName = path.basename(sendPath);
-    const fileStream = fs.createReadStream(sendPath);
-    const stats = fs.statSync(sendPath);
-
-    // Upload via multipart form using native https
-    await new Promise<void>((resolve, reject) => {
+    await new Promise<void>((resolve) => {
       const boundary = `----FormBoundary${Date.now()}`;
-      const caption = `📦 *Supplio DB Backup*\n📅 ${new Date().toLocaleString('uz-UZ')}\n📁 ${sendName}\n💾 ${(stats.size / 1024).toFixed(1)} KB`;
       const metadata = Buffer.from(
-        `--${boundary}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n${chatId}\r\n` +
+        `--${boundary}\r\nContent-Disposition: form-data; name="chat_id"\r\n\r\n${chat}\r\n` +
         `--${boundary}\r\nContent-Disposition: form-data; name="caption"\r\n\r\n${caption}\r\n` +
         `--${boundary}\r\nContent-Disposition: form-data; name="parse_mode"\r\n\r\nMarkdown\r\n` +
-        `--${boundary}\r\nContent-Disposition: form-data; name="document"; filename="${sendName}"\r\nContent-Type: application/octet-stream\r\n\r\n`
+        `--${boundary}\r\nContent-Disposition: form-data; name="document"; filename="${fileName}"\r\nContent-Type: application/octet-stream\r\n\r\n`
       );
       const tail = Buffer.from(`\r\n--${boundary}--\r\n`);
 
       const req = https.request({
-        hostname: 'api.telegram.org',
-        path: `/bot${token}/sendDocument`,
-        method: 'POST',
-        headers: { 'Content-Type': `multipart/form-data; boundary=${boundary}` },
+        hostname: "api.telegram.org",
+        path: `/bot${tok}/sendDocument`,
+        method: "POST",
+        headers: { "Content-Type": `multipart/form-data; boundary=${boundary}` },
       }, (res) => {
-        let body = '';
-        res.on('data', d => body += d);
-        res.on('end', () => {
-          if (res.statusCode === 200) {
-            this.logger.log(`✅ Backup sent to Telegram: ${sendName}`);
-            resolve();
-          } else {
-            this.logger.error(`Telegram send failed: ${body}`);
-            resolve(); // Don't fail the backup process
-          }
+        let body = "";
+        res.on("data", (d) => (body += d));
+        res.on("end", () => {
+          if (res.statusCode === 200) this.logger.log(`✅ Backup sent to Telegram: ${fileName}`);
+          else this.logger.error(`Telegram send failed (${res.statusCode}): ${body}`);
+          resolve();
         });
       });
-      req.on('error', (e) => { this.logger.error('Telegram request error: ' + e.message); resolve(); });
+      req.on("error", (e) => { this.logger.error("Telegram request error: " + e.message); resolve(); });
       req.write(metadata);
-      fileStream.on('data', chunk => req.write(chunk));
-      fileStream.on('end', () => { req.write(tail); req.end(); });
-      fileStream.on('error', () => { req.end(); resolve(); });
+      fileStream.on("data", (chunk) => req.write(chunk));
+      fileStream.on("end", () => { req.write(tail); req.end(); });
+      fileStream.on("error", () => { req.end(); resolve(); });
     });
   }
 
+  // ── Dump single company DB (for owner download) ───────────────────────────
+
   async dumpCompanyDatabase(companyId: string, slug: string): Promise<string> {
-    const filename = `SUPPLIO_${slug.toUpperCase()}_${new Date().toISOString().split("T")[0]}.sql`;
-    const outputPath = path.join(this.backupDir, filename);
+    const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+    const safeName = `SUPPLIO_${slug.toUpperCase()}_${new Date().toISOString().split("T")[0]}`;
+    const outputPath = path.join(this.backupDir, `${safeName}.sql`);
 
-    const company = await this.prisma.company.findUnique({
-      where: { id: companyId },
-    });
-    const connectionUri = company?.dbConnectionUrl || process.env.DATABASE_URL;
-
-    const command = `pg_dump "${connectionUri}" -f "${outputPath}"`;
-    await execPromise(command).catch(() => {
-      fs.writeFileSync(
-        outputPath,
-        `-- Mock Tenant Backup\n-- Company: ${slug}`
-      );
-    });
+    if (company?.dbConnectionUrl) {
+      // Company has its own DB — do a real pg_dump
+      await execPromise(`pg_dump -f "${outputPath}" "${company.dbConnectionUrl}"`);
+    } else {
+      // Shared DB — export via Prisma
+      const sql = await this.exportCompanyToSql(companyId, company?.name || slug);
+      fs.writeFileSync(outputPath, sql, "utf8");
+    }
     return outputPath;
   }
 
   async listBackups() {
     if (!fs.existsSync(this.backupDir)) return [];
-    const files = fs.readdirSync(this.backupDir);
-    return files
+    return fs
+      .readdirSync(this.backupDir)
       .map((file) => {
         const stats = fs.statSync(path.join(this.backupDir, file));
-        return {
-          name: file,
-          size: stats.size,
-          createdAt: stats.birthtime,
-        };
+        return { name: file, size: stats.size, createdAt: stats.birthtime };
       })
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
-  /**
-   * Enterprise Rule 13: Retention Purge
-   */
+  // ── Enterprise Rule 13: Retention Purge ──────────────────────────────────
+
   @Cron(CronExpression.EVERY_WEEKEND)
   async purgeSoftDeletedRecords() {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const target = { where: { deletedAt: { lt: thirtyDaysAgo } } };
-
     await this.prisma.lead.deleteMany(target);
     await this.prisma.order.deleteMany(target);
     this.logger.log("Enterprise Purge: Cleanup completed.");

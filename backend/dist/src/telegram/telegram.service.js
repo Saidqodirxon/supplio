@@ -15,7 +15,6 @@ const common_1 = require("@nestjs/common");
 const telegraf_1 = require("telegraf");
 const prisma_service_1 = require("../prisma/prisma.service");
 const telegram_logger_service_1 = require("./telegram-logger.service");
-const https = require("https");
 let TelegramService = TelegramService_1 = class TelegramService {
     constructor(prisma, loggerBot) {
         this.prisma = prisma;
@@ -122,7 +121,7 @@ let TelegramService = TelegramService_1 = class TelegramService {
         });
         this.logger.log("Found " + bots.length + " active bots to initialize");
         for (const bot of bots) {
-            await this.initBot(bot.companyId, bot.token, bot.company.name);
+            await this.initBot(bot.id, bot.companyId, bot.token, bot.company.name);
         }
     }
     getT(lang = 'uz') {
@@ -133,12 +132,15 @@ let TelegramService = TelegramService_1 = class TelegramService {
         const lang = code.startsWith('ru') ? 'ru' : 'uz';
         return this.translations[lang] ?? this.translations['uz'];
     }
-    async initBot(companyId, token, companyName) {
+    async initBot(botId, companyId, token, companyName) {
         try {
-            const existing = this.bots.get(companyId);
+            const existing = this.bots.get(botId);
             if (existing) {
-                existing.stop("reinitializing");
-                this.bots.delete(companyId);
+                try {
+                    existing.stop();
+                }
+                catch { }
+                this.bots.delete(botId);
             }
             const bot = new telegraf_1.Telegraf(token);
             bot.start(async (ctx) => {
@@ -224,20 +226,21 @@ let TelegramService = TelegramService_1 = class TelegramService {
             bot.command("help", async (ctx) => await this.handleHelp(ctx, companyName));
             bot.hears(["ℹ️ Yordam", "ℹ️ Помощь"], async (ctx) => await this.handleHelp(ctx, companyName));
             bot.on("callback_query", async (ctx) => await this.handleCallback(ctx, companyId));
-            if (process.env.NODE_ENV === "production" && process.env.BOT_WEBHOOK_URL) {
-                const webhookUrl = `${process.env.BOT_WEBHOOK_URL}/api/webhook/${companyId}`;
+            if (process.env.NODE_ENV === "production" && (process.env.BOT_WEBHOOK_URL || process.env.APP_URL)) {
+                const baseUrl = process.env.BOT_WEBHOOK_URL || (process.env.APP_URL + "/webhook");
+                const webhookUrl = baseUrl.endsWith("/") ? `${baseUrl}${botId}` : `${baseUrl}/${botId}`;
                 await bot.telegram.setWebhook(webhookUrl);
-                this.logger.log(`✅ Webhook set for ${companyName}: ${webhookUrl}`);
+                this.logger.log(`✅ Webhook set for ${companyName} (Bot: ${botId}): ${webhookUrl}`);
             }
             else {
                 bot.launch().catch((e) => this.logger.warn(`Polling launch failed for ${companyName}: ${e.message}`));
                 this.logger.log(`✅ Bot launched (polling) for ${companyName}`);
             }
-            this.bots.set(companyId, bot);
+            this.bots.set(botId, bot);
         }
         catch (e) {
             const message = e instanceof Error ? e.message : String(e);
-            this.logger.error(`❌ Bot init failed for ${companyId}: ${message}`);
+            this.logger.error(`❌ Bot init failed for ${botId}: ${message}`);
         }
     }
     async handleDebt(ctx, companyId) {
@@ -557,19 +560,24 @@ let TelegramService = TelegramService_1 = class TelegramService {
             await ctx.reply(t.checkoutFail);
         }
     }
-    async sendMessage(companyId, chatId, message) {
-        const bot = this.bots.get(companyId);
+    async sendMessage(botId, chatId, message) {
+        const bot = this.bots.get(botId);
         if (!bot)
             return;
         try {
             await bot.telegram.sendMessage(chatId, message, { parse_mode: "Markdown" });
         }
         catch (e) {
-            this.logger.error(`Failed to send external message for ${companyId}: ${e.message}`);
+            this.logger.error(`Failed to send external message for bot ${botId}: ${e.message}`);
         }
     }
     async broadcast(companyId, message) {
-        const bot = this.bots.get(companyId);
+        const botRecord = await this.prisma.customBot.findFirst({
+            where: { companyId, isActive: true, deletedAt: null }
+        });
+        if (!botRecord)
+            return { sent: 0, failed: 0 };
+        const bot = this.bots.get(botRecord.id);
         if (!bot)
             return { sent: 0, failed: 0 };
         const dealers = await this.prisma.dealer.findMany({
@@ -592,7 +600,12 @@ let TelegramService = TelegramService_1 = class TelegramService {
         return { sent, failed };
     }
     async sendOrderStatusUpdate(companyId, orderId, newStatus, dealerId) {
-        const bot = this.bots.get(companyId);
+        const botRecord = await this.prisma.customBot.findFirst({
+            where: { companyId, isActive: true, deletedAt: null }
+        });
+        if (!botRecord)
+            return;
+        const bot = this.bots.get(botRecord.id);
         if (!bot)
             return;
         const dealer = await this.prisma.dealer.findFirst({
@@ -652,33 +665,37 @@ let TelegramService = TelegramService_1 = class TelegramService {
         const empty = 10 - filled;
         return "█".repeat(filled) + "░".repeat(empty);
     }
-    getBot(companyId) {
-        return this.bots.get(companyId);
+    getBot(botId) {
+        return this.bots.get(botId);
     }
     async validateToken(token) {
-        return new Promise((resolve) => {
-            https.get(`https://api.telegram.org/bot${token}/getMe`, (res) => {
-                let data = '';
-                res.on('data', chunk => data += chunk);
-                res.on('end', () => {
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed.ok) {
-                            resolve({ valid: true, botInfo: { id: parsed.result.id, username: parsed.result.username, first_name: parsed.result.first_name } });
-                        }
-                        else {
-                            resolve({ valid: false });
-                        }
-                    }
-                    catch {
-                        resolve({ valid: false });
-                    }
-                });
-            }).on('error', () => resolve({ valid: false }));
-        });
+        try {
+            const tempBot = new telegraf_1.Telegram(token);
+            const botInfo = await Promise.race([
+                tempBot.getMe(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 10000)),
+            ]);
+            return {
+                valid: true,
+                botInfo: {
+                    id: botInfo.id,
+                    username: botInfo.username || '',
+                    first_name: botInfo.first_name,
+                },
+            };
+        }
+        catch (err) {
+            this.logger.warn(`Token validation failed for token ${token.slice(0, 5)}...: ${err.message}`);
+            const isNetworkError = err.message === 'TIMEOUT' ||
+                !err.response ||
+                err.code === 'ECONNREFUSED' ||
+                err.code === 'ETIMEDOUT' ||
+                err.code === 'ENOTFOUND';
+            return { valid: false, networkError: isNetworkError };
+        }
     }
-    getBotStatus(companyId) {
-        const bot = this.bots.get(companyId);
+    getBotStatus(botId) {
+        const bot = this.bots.get(botId);
         if (!bot)
             return 'not_found';
         return 'connected';
@@ -690,20 +707,55 @@ let TelegramService = TelegramService_1 = class TelegramService {
         });
     }
     async createBot(companyId, data) {
-        const validation = await this.validateToken(data.token);
+        if (!data.token?.trim()) {
+            throw new common_1.BadRequestException('Bot token is required.');
+        }
+        const validation = await this.validateToken(data.token.trim());
         if (!validation.valid) {
-            throw new common_1.BadRequestException('Invalid Telegram bot token. Please check the token from @BotFather.');
+            if (validation.networkError) {
+                throw new common_1.BadRequestException('Cannot reach Telegram API to verify this token. Check server internet connectivity, then try again.');
+            }
+            throw new common_1.BadRequestException('Invalid Telegram bot token. Please get a valid token from @BotFather.');
         }
         const username = validation.botInfo?.username;
         const resolvedName = data.botName || validation.botInfo?.first_name || 'Store Bot';
-        const bot = await this.prisma.customBot.create({
-            data: { companyId, token: data.token, botName: resolvedName, username, description: data.description },
-        });
-        if (bot.isActive) {
-            const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-            await this.initBot(companyId, bot.token, company?.name ?? companyId);
+        try {
+            this.logger.log(`Creating bot for company: ${companyId}`);
+            const bot = await this.prisma.customBot.create({
+                data: {
+                    companyId,
+                    token: data.token,
+                    botName: resolvedName,
+                    username,
+                    description: data.description,
+                    isActive: true
+                },
+            });
+            this.logger.log(`Bot record created in DB: ${bot.id}. Initializing instance...`);
+            try {
+                const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+                if (!company) {
+                    this.logger.error(`Company not found after creating bot record! ID: ${companyId}`);
+                }
+                else {
+                    await this.initBot(bot.id, companyId, bot.token, company.name);
+                }
+            }
+            catch (initErr) {
+                this.logger.error(`Failed to execute initBot during creation: ${initErr.message}`);
+            }
+            return { ...bot, botInfo: validation.botInfo };
         }
-        return { ...bot, botInfo: validation.botInfo };
+        catch (e) {
+            this.logger.error(`Error in createBot: ${e.message}`, e.stack);
+            if (e.code === 'P2002') {
+                throw new common_1.BadRequestException('This bot token is already registered to another company.');
+            }
+            if (e.code === 'P2003') {
+                throw new common_1.BadRequestException('Foreign key constraint failed. Check if companyId is valid.');
+            }
+            throw e;
+        }
     }
     async updateBot(id, companyId, data) {
         const bot = await this.prisma.customBot.findFirst({ where: { id, companyId, deletedAt: null } });
@@ -712,13 +764,16 @@ let TelegramService = TelegramService_1 = class TelegramService {
         const updated = await this.prisma.customBot.update({ where: { id }, data });
         if (data.isActive === true || data.token) {
             const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-            await this.initBot(companyId, updated.token, company?.name ?? companyId);
+            await this.initBot(updated.id, companyId, updated.token, company?.name ?? companyId);
         }
         else if (data.isActive === false) {
-            const existing = this.bots.get(companyId);
+            const existing = this.bots.get(id);
             if (existing) {
-                existing.stop("disabled");
-                this.bots.delete(companyId);
+                try {
+                    existing.stop();
+                }
+                catch { }
+                this.bots.delete(id);
             }
         }
         return updated;
@@ -727,12 +782,15 @@ let TelegramService = TelegramService_1 = class TelegramService {
         const bot = await this.prisma.customBot.findFirst({ where: { id, companyId, deletedAt: null } });
         if (!bot)
             throw new Error("Bot not found");
-        const existing = this.bots.get(companyId);
+        const existing = this.bots.get(id);
         if (existing) {
-            existing.stop("deleted");
-            this.bots.delete(companyId);
+            try {
+                existing.stop();
+            }
+            catch { }
+            this.bots.delete(id);
         }
-        return this.prisma.customBot.update({ where: { id }, data: { deletedAt: new Date() } });
+        return this.prisma.customBot.update({ where: { id }, data: { deletedAt: new Date(), isActive: false } });
     }
     async stopAll() {
         for (const [id, bot] of this.bots) {

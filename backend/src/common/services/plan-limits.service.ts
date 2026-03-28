@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, Logger } from "@nestjs/common";
+import { Injectable, Logger, HttpException } from "@nestjs/common";
 import { PrismaService } from "../../prisma/prisma.service";
 
 interface PlanLimits {
@@ -64,69 +64,44 @@ export class PlanLimitsService {
     };
   }
 
+  private limitError(resource: string, max: number): never {
+    throw new HttpException(
+      { message: `${resource} limit reached (${max}). Upgrade your plan.`, limitReached: true, resource },
+      402,
+    );
+  }
+
   async checkBranchLimit(companyId: string) {
     const limits = await this.getLimitsForCompany(companyId);
-    const count = await this.prisma.branch.count({
-      where: { companyId, deletedAt: null },
-    });
-    if (count >= limits.maxBranches) {
-      throw new ForbiddenException(
-        `Branch limit reached (${limits.maxBranches}). Upgrade your plan.`
-      );
-    }
+    const count = await this.prisma.branch.count({ where: { companyId, deletedAt: null } });
+    if (count >= limits.maxBranches) this.limitError('branches', limits.maxBranches);
   }
 
   async checkUserLimit(companyId: string) {
     const limits = await this.getLimitsForCompany(companyId);
-    const count = await this.prisma.user.count({
-      where: { companyId, deletedAt: null },
-    });
-    if (count >= limits.maxUsers) {
-      throw new ForbiddenException(
-        `User limit reached (${limits.maxUsers}). Upgrade your plan.`
-      );
-    }
+    const count = await this.prisma.user.count({ where: { companyId, deletedAt: null } });
+    if (count >= limits.maxUsers) this.limitError('users', limits.maxUsers);
   }
 
   async checkDealerLimit(companyId: string) {
     const limits = await this.getLimitsForCompany(companyId);
-    const count = await this.prisma.dealer.count({
-      where: { companyId, deletedAt: null },
-    });
-    if (count >= limits.maxDealers) {
-      throw new ForbiddenException(
-        `Dealer limit reached (${limits.maxDealers}). Upgrade your plan.`
-      );
-    }
+    const count = await this.prisma.dealer.count({ where: { companyId, deletedAt: null } });
+    if (count >= limits.maxDealers) this.limitError('dealers', limits.maxDealers);
   }
 
   async checkProductLimit(companyId: string) {
     const limits = await this.getLimitsForCompany(companyId);
-    const count = await this.prisma.product.count({
-      where: { companyId, deletedAt: null },
-    });
-    if (count >= limits.maxProducts) {
-      throw new ForbiddenException(
-        `Product limit reached (${limits.maxProducts}). Upgrade your plan.`
-      );
-    }
+    const count = await this.prisma.product.count({ where: { companyId, deletedAt: null } });
+    if (count >= limits.maxProducts) this.limitError('products', limits.maxProducts);
   }
 
   async checkBotAllowed(companyId: string) {
     const limits = await this.getLimitsForCompany(companyId);
-    if (!limits.allowCustomBot) {
-      throw new ForbiddenException(
-        "Custom bots require PREMIUM plan. Upgrade to unlock."
-      );
-    }
+    if (!limits.allowCustomBot) this.limitError('customBot', 0);
   }
 
   async checkFeatureAllowed(companyId: string, feature: keyof PlanLimits) {
     const limits = await this.getLimitsForCompany(companyId);
-    if (!limits[feature]) {
-      throw new ForbiddenException(
-        `Feature "${feature}" is not available on your current plan. Upgrade to unlock.`
-      );
-    }
+    if (!limits[feature]) this.limitError(feature, 0);
   }
 }

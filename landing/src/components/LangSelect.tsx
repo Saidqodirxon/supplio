@@ -8,11 +8,11 @@ import { Language, langToSlug } from '../i18n/translations';
 import { useRouter } from 'next/navigation';
 
 const languages: { code: Language; label: string; flag: string }[] = [
-  { code: "uz", label: "O'zbek", flag: "https://flagcdn.com/w20/uz.png" },
-  { code: "oz", label: "Ўзбек", flag: "https://flagcdn.com/w20/uz.png" },
-  { code: "ru", label: "Русский", flag: "https://flagcdn.com/w20/ru.png" },
-  { code: "tr", label: "Türkçe", flag: "https://flagcdn.com/w20/tr.png" },
-  { code: "en", label: "English", flag: "https://flagcdn.com/w20/us.png" },
+  { code: "uz", label: "O'zbek", flag: "🇺🇿" },
+  { code: "oz", label: "Ўзбек", flag: "🇺🇿" },
+  { code: "ru", label: "Русский", flag: "🇷🇺" },
+  { code: "tr", label: "Türkçe", flag: "🇹🇷" },
+  { code: "en", label: "English", flag: "🇺🇸" },
 ];
 
 interface LangSelectProps {
@@ -36,7 +36,7 @@ export const LangSelect: React.FC<LangSelectProps> = ({ currentLang }) => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all active:scale-[0.97] group shadow-sm"
       >
-        <img src={selected.flag} alt={selected.code} width={20} height={14} className="rounded-sm object-cover shrink-0" />
+        <span className="text-lg leading-none shrink-0">{selected.flag}</span>
         <span className="text-xs font-semibold text-slate-700 hidden sm:block">
           {selected.label}
         </span>
@@ -66,7 +66,7 @@ export const LangSelect: React.FC<LangSelectProps> = ({ currentLang }) => {
                     )}
                   >
                     <div className="flex items-center gap-3">
-                      <img src={l.flag} alt={l.code} width={20} height={14} className="rounded-sm object-cover shrink-0" />
+                      <span className="text-lg leading-none shrink-0">{l.flag}</span>
                       {l.label}
                     </div>
                     {currentLang === l.code && <Check className="w-4 h-4" />}

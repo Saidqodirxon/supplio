@@ -14,7 +14,13 @@ async function main() {
   });
 
   if (existing) {
-    console.log("Super Admin already exists.");
+    await prisma.user.update({
+      where: { phone },
+      data: { passwordHash, fullName: "Super Admin", roleType: RoleType.SUPER_ADMIN },
+    });
+    console.log("Super Admin already exists — password updated!");
+    console.log("Phone:", phone);
+    console.log("Password:", password);
     return;
   }
 

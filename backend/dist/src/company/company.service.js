@@ -12,9 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CompanyService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const plan_limits_service_1 = require("../common/services/plan-limits.service");
+const client_1 = require("@prisma/client");
+const bcrypt = require("bcrypt");
 let CompanyService = class CompanyService {
-    constructor(prisma) {
+    constructor(prisma, planLimits) {
         this.prisma = prisma;
+        this.planLimits = planLimits;
     }
     async getCompany(companyId) {
         const company = await this.prisma.company.findUnique({
@@ -86,9 +90,99 @@ let CompanyService = class CompanyService {
     async getUsers(companyId) {
         return this.prisma.user.findMany({
             where: { companyId, isActive: true },
-            select: { id: true, phone: true, fullName: true, roleType: true, branchId: true },
+            select: {
+                id: true, phone: true, fullName: true, roleType: true,
+                branchId: true, customRoleId: true, createdAt: true,
+                customRole: { select: { id: true, name: true, permissions: true } },
+            },
             orderBy: { createdAt: "desc" },
         });
+    }
+    async createStaff(companyId, data) {
+        const builtInRoles = [client_1.RoleType.MANAGER, client_1.RoleType.SALES, client_1.RoleType.DELIVERY, client_1.RoleType.SELLER, client_1.RoleType.CUSTOM];
+        const isCustom = data.roleType === client_1.RoleType.CUSTOM;
+        if (!builtInRoles.includes(data.roleType)) {
+            throw new common_1.BadRequestException("Invalid role type");
+        }
+        if (isCustom && !data.customRoleId) {
+            throw new common_1.BadRequestException("customRoleId required for CUSTOM role");
+        }
+        if (data.customRoleId) {
+            const roleExists = await this.prisma.customRole.findFirst({ where: { id: data.customRoleId, companyId } });
+            if (!roleExists)
+                throw new common_1.BadRequestException("Custom role not found");
+        }
+        await this.planLimits.checkUserLimit(companyId);
+        const existing = await this.prisma.user.findUnique({ where: { phone: data.phone } });
+        if (existing)
+            throw new common_1.BadRequestException("Phone already registered");
+        const passwordHash = await bcrypt.hash(data.password, 10);
+        return this.prisma.user.create({
+            data: {
+                phone: data.phone,
+                fullName: data.fullName,
+                passwordHash,
+                roleType: isCustom ? client_1.RoleType.CUSTOM : data.roleType,
+                companyId,
+                branchId: data.branchId || null,
+                customRoleId: data.customRoleId || null,
+            },
+            select: {
+                id: true, phone: true, fullName: true, roleType: true,
+                branchId: true, customRoleId: true, createdAt: true,
+                customRole: { select: { id: true, name: true, permissions: true } },
+            },
+        });
+    }
+    async deactivateStaff(companyId, userId) {
+        const user = await this.prisma.user.findFirst({ where: { id: userId, companyId } });
+        if (!user)
+            throw new common_1.NotFoundException("User not found");
+        if (user.roleType === client_1.RoleType.OWNER || user.roleType === client_1.RoleType.SUPER_ADMIN) {
+            throw new common_1.BadRequestException("Cannot deactivate owner or super admin");
+        }
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: { isActive: false },
+        });
+    }
+    async getCustomRoles(companyId) {
+        return this.prisma.customRole.findMany({
+            where: { companyId },
+            include: { _count: { select: { users: true } } },
+            orderBy: { createdAt: "asc" },
+        });
+    }
+    async createCustomRole(companyId, data) {
+        if (!data.name?.trim())
+            throw new common_1.BadRequestException("Role name required");
+        const exists = await this.prisma.customRole.findFirst({ where: { companyId, name: data.name.trim() } });
+        if (exists)
+            throw new common_1.BadRequestException("Role with this name already exists");
+        return this.prisma.customRole.create({
+            data: {
+                companyId,
+                name: data.name.trim(),
+                permissions: data.permissions ?? {},
+            },
+        });
+    }
+    async updateCustomRole(companyId, roleId, data) {
+        const role = await this.prisma.customRole.findFirst({ where: { id: roleId, companyId } });
+        if (!role)
+            throw new common_1.NotFoundException("Role not found");
+        return this.prisma.customRole.update({
+            where: { id: roleId },
+            data: { name: data.name?.trim(), permissions: data.permissions },
+        });
+    }
+    async deleteCustomRole(companyId, roleId) {
+        const role = await this.prisma.customRole.findFirst({ where: { id: roleId, companyId }, include: { _count: { select: { users: true } } } });
+        if (!role)
+            throw new common_1.NotFoundException("Role not found");
+        if (role._count.users > 0)
+            throw new common_1.BadRequestException("Cannot delete role with assigned users");
+        return this.prisma.customRole.delete({ where: { id: roleId } });
     }
     async getFeatureFlags(companyId) {
         const company = await this.prisma.company.findUnique({
@@ -117,6 +211,7 @@ let CompanyService = class CompanyService {
 exports.CompanyService = CompanyService;
 exports.CompanyService = CompanyService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        plan_limits_service_1.PlanLimitsService])
 ], CompanyService);
 //# sourceMappingURL=company.service.js.map

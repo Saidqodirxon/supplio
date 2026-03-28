@@ -2,7 +2,23 @@ import { PrismaService } from "../prisma/prisma.service";
 export declare class DemoService {
     private prisma;
     private readonly logger;
+    private bot;
     constructor(prisma: PrismaService);
+    requestDemoAccess(data: {
+        fullName: string;
+        phone: string;
+        company?: string;
+    }): Promise<{
+        success: boolean;
+        leadId: any;
+        demo: {
+            phone: string;
+            password: string;
+            url: string;
+            note: string;
+        };
+    }>;
+    logDemoActivity(companyName: string, action: string, detail: string): Promise<void>;
     handleDailyReset(): Promise<void>;
     resetCompanyData(companyId: string): Promise<void>;
     getDemoNews(): {

@@ -30,6 +30,9 @@ import {
   Newspaper,
   Plus,
   Zap,
+  TrendingUp,
+  Clock,
+  BadgeCheck,
 } from "lucide-react";
 import clsx from "clsx";
 import { useScrollLock } from '../utils/useScrollLock';
@@ -51,9 +54,9 @@ const fadeInUp = {
   exit: { opacity: 0, y: -10 }
 };
 
-type TabId = 'overview' | 'settings' | 'backups' | 'activities' | 'editor' | 'news' | 'leads' | 'tariffs' | 'cms' | 'distributors' | 'notify';
+type TabId = 'overview' | 'settings' | 'backups' | 'activities' | 'editor' | 'news' | 'leads' | 'tariffs' | 'cms' | 'distributors' | 'notify' | 'upgrades';
 
-const validTabs: TabId[] = ['overview', 'settings', 'backups', 'activities', 'editor', 'news', 'leads', 'tariffs', 'cms', 'distributors', 'notify'];
+const validTabs: TabId[] = ['overview', 'settings', 'backups', 'activities', 'editor', 'news', 'leads', 'tariffs', 'cms', 'distributors', 'notify', 'upgrades'];
 
 interface Lead {
   id: string;
@@ -230,6 +233,11 @@ export default function SuperAdmin() {
   });
 
   const [metrics, setMetrics] = useState<ServerMetric[]>([]);
+  const [upgradeRequests, setUpgradeRequests] = useState<Array<{
+    id: string; companyId: string; companyName: string; currentPlan: string; requestedPlan?: string;
+    ownerPhone: string; ownerName?: string; dealersCount: number; usersCount: number;
+    branchesCount: number; productsCount: number; status: string; note?: string; createdAt: string;
+  }>>([]);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [pendingAction, setPendingAction] = useState<(() => Promise<void>) | null>(null);
@@ -309,6 +317,9 @@ export default function SuperAdmin() {
       } else if (activeTab === 'distributors' || activeTab === 'notify') {
         const res = await api.get('/super/distributors');
         setDistributors(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
+      } else if (activeTab === 'upgrades') {
+        const res = await api.get('/super/upgrade-requests');
+        setUpgradeRequests(Array.isArray(res.data) ? res.data : []);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Ma\'lumotlarni yuklashda xatolik';
@@ -371,32 +382,34 @@ export default function SuperAdmin() {
     });
   };
 
-  const TAB_DESC: Record<TabId, string> = {
-    overview: t.superadmin.systemStatus,
-    news: t.superadmin.newsManagement,
-    leads: t.superadmin.publicLeads,
-    tariffs: t.superadmin.tariffs,
-    activities: t.superadmin.auditLogsTitle,
-    backups: t.superadmin.backups,
-    settings: t.superadmin.globalConfig,
-    editor: t.superadmin.editor,
-    cms: t.superadmin.landingCmsTitle,
-    distributors: t.superadmin.distributors,
-    notify: t.superadmin.notifyTab,
-  };
-
-  const menuItems: { id: TabId; label: string; icon: React.ElementType; color: string }[] = [
-    { id: 'overview', label: t.superadmin.overview, icon: ShieldCheck, color: 'text-blue-600' },
-    { id: 'distributors', label: t.superadmin.distributors, icon: User, color: 'text-violet-600' },
-    { id: 'notify', label: t.superadmin.notifyTab, icon: Bell, color: 'text-orange-600' },
-    { id: 'news', label: t.superadmin.news, icon: Newspaper, color: 'text-indigo-600' },
-    { id: 'leads', label: t.superadmin.leads, icon: UserPlus, color: 'text-emerald-600' },
-    { id: 'tariffs', label: t.superadmin.tariffs, icon: CreditCard, color: 'text-cyan-600' },
-    { id: 'activities', label: t.superadmin.recentLogs, icon: Activity, color: 'text-rose-600' },
-    { id: 'backups', label: t.superadmin.backups, icon: Database, color: 'text-amber-600' },
-    { id: 'settings', label: t.superadmin.settings, icon: Globe, color: 'text-slate-600' },
-    { id: 'editor', label: t.superadmin.editor, icon: FileCode, color: 'text-violet-600' },
-    { id: 'cms', label: t.superadmin.landingCmsTitle, icon: Layout, color: 'text-teal-600' },
+  const menuGroups: { group: string; items: { id: TabId; label: string; icon: React.ElementType; color: string; bg: string; badge?: number }[] }[] = [
+    {
+      group: language === 'ru' ? 'Главное' : language === 'en' ? 'Main' : 'Asosiy',
+      items: [
+        { id: 'overview', label: t.superadmin.overview, icon: ShieldCheck, color: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+        { id: 'distributors', label: t.superadmin.distributors, icon: User, color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/20' },
+        { id: 'upgrades', label: language === 'ru' ? 'Запросы апгрейда' : language === 'en' ? 'Upgrade Requests' : 'Tarif so\'rovlari', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20', badge: upgradeRequests.filter(r => r.status === 'PENDING').length || 0 },
+        { id: 'leads', label: t.superadmin.leads, icon: UserPlus, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-900/20' },
+      ],
+    },
+    {
+      group: language === 'ru' ? 'Контент' : language === 'en' ? 'Content' : 'Kontent',
+      items: [
+        { id: 'news', label: t.superadmin.news, icon: Newspaper, color: 'text-indigo-600', bg: 'bg-indigo-50 dark:bg-indigo-900/20' },
+        { id: 'tariffs', label: t.superadmin.tariffs, icon: CreditCard, color: 'text-cyan-600', bg: 'bg-cyan-50 dark:bg-cyan-900/20' },
+        { id: 'cms', label: t.superadmin.landingCmsTitle, icon: Layout, color: 'text-teal-600', bg: 'bg-teal-50 dark:bg-teal-900/20' },
+        { id: 'notify', label: t.superadmin.notifyTab, icon: Bell, color: 'text-orange-600', bg: 'bg-orange-50 dark:bg-orange-900/20' },
+      ],
+    },
+    {
+      group: language === 'ru' ? 'Система' : language === 'en' ? 'System' : 'Tizim',
+      items: [
+        { id: 'activities', label: t.superadmin.recentLogs, icon: Activity, color: 'text-rose-600', bg: 'bg-rose-50 dark:bg-rose-900/20' },
+        { id: 'backups', label: t.superadmin.backups, icon: Database, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+        { id: 'settings', label: t.superadmin.settings, icon: Globe, color: 'text-slate-600', bg: 'bg-slate-100 dark:bg-slate-800' },
+        { id: 'editor', label: t.superadmin.editor, icon: FileCode, color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-900/20' },
+      ],
+    },
   ];
 
   if (!authorized) {
@@ -428,61 +441,114 @@ export default function SuperAdmin() {
     );
   }
 
+  const activeItem = menuGroups.flatMap(g => g.items).find(i => i.id === activeTab);
+
   return (
-    <div className="space-y-10">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <h1 className="text-4xl font-black tracking-tighter flex items-center gap-4">
-            <ShieldCheck className="w-10 h-10 text-blue-600" />
-            {t.superadmin.systemControl}
-          </h1>
-          <p className="text-slate-500 font-bold tracking-tight">{t.superadmin.systemControlDesc}</p>
+    <div className="space-y-6">
+      {/* Compact Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
+            <ShieldCheck className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-black tracking-tight">{t.superadmin.systemControl}</h1>
+            <p className="text-slate-500 text-sm font-medium">{t.superadmin.systemControlDesc}</p>
+          </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <button
             onClick={handleManualReset}
-            className="px-6 py-3 bg-rose-600/10 text-rose-600 border border-rose-600/20 rounded-2xl flex items-center gap-3 font-bold text-sm hover:bg-rose-600 hover:text-white transition-all active:scale-95"
+            className="px-4 py-2.5 bg-rose-600/10 text-rose-600 border border-rose-600/20 rounded-xl flex items-center gap-2 font-bold text-sm hover:bg-rose-600 hover:text-white transition-all active:scale-95"
           >
             <RotateCcw className="w-4 h-4" /> {t.superadmin.demoReset}
           </button>
-          <button className="px-6 py-3 premium-gradient text-white rounded-2xl flex items-center gap-3 font-bold text-sm shadow-lg shadow-blue-600/20 active:scale-95 transition-all">
+          <button className="px-4 py-2.5 premium-gradient text-white rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-blue-600/20 active:scale-95 transition-all">
             <Send className="w-4 h-4" /> {t.superadmin.globalNotifyBtn}
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-        {menuItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => { setActiveTab(item.id); setSearchParams({ tab: item.id }); }}
-            className={clsx(
-              "px-5 py-4 rounded-2xl font-black text-sm flex flex-col items-start gap-1 transition-all shrink-0 active:scale-95 min-w-[100px]",
-              activeTab === item.id
-                ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-xl"
-                : "bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-500 hover:bg-slate-50 dark:hover:bg-white/10"
-            )}
-          >
-            <item.icon className={clsx("w-4 h-4", activeTab === item.id ? "" : item.color)} />
-            <span className="leading-none">{item.label}</span>
-            <span className={clsx("text-[10px] font-bold leading-none uppercase tracking-wide", activeTab === item.id ? "opacity-60" : "text-slate-400")}>
-              {TAB_DESC[item.id]}
-            </span>
-          </button>
-        ))}
-      </div>
+      {/* Sidebar + Content */}
+      <div className="flex gap-6 items-start">
 
-      {/* Content */}
-      <AnimatePresence mode="wait">
-        <motion.div key={activeTab} {...fadeInUp} className="min-h-[500px]">
-          {loading && (
-            <div className="absolute inset-0 z-10 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm flex items-center justify-center rounded-[2.5rem]">
-              <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+        {/* Left Sidebar */}
+        <div className="w-60 shrink-0 hidden lg:block">
+          <div className="bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl p-3 space-y-4 sticky top-6">
+            {menuGroups.map((group) => (
+              <div key={group.group}>
+                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 mb-1.5">{group.group}</p>
+                <div className="space-y-0.5">
+                  {group.items.map((item) => {
+                    const isActive = activeTab === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        onClick={() => { setActiveTab(item.id); setSearchParams({ tab: item.id }); }}
+                        className={clsx(
+                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 relative",
+                          isActive
+                            ? "bg-slate-900 dark:bg-blue-600 text-white shadow-lg"
+                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
+                        )}
+                      >
+                        <div className={clsx("w-7 h-7 rounded-lg flex items-center justify-center shrink-0", isActive ? "bg-white/20" : item.bg)}>
+                          <item.icon className={clsx("w-3.5 h-3.5", isActive ? "text-white" : item.color)} />
+                        </div>
+                        <span className="truncate">{item.label}</span>
+                        {(item.badge ?? 0) > 0 && (
+                          <span className="ml-auto shrink-0 min-w-[18px] h-[18px] rounded-full bg-rose-600 text-white text-[10px] font-black flex items-center justify-center px-1">
+                            {item.badge}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile tab scroll */}
+        <div className="lg:hidden w-full flex gap-2 overflow-x-auto no-scrollbar pb-2">
+          {menuGroups.flatMap(g => g.items).map((item) => (
+            <button
+              key={item.id}
+              onClick={() => { setActiveTab(item.id); setSearchParams({ tab: item.id }); }}
+              className={clsx(
+                "px-4 py-3 rounded-2xl font-black text-xs flex flex-col items-center gap-1.5 transition-all shrink-0 active:scale-95 min-w-[80px] relative",
+                activeTab === item.id
+                  ? "bg-slate-900 dark:bg-blue-600 text-white shadow-xl"
+                  : "bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-500"
+              )}
+            >
+              <item.icon className={clsx("w-4 h-4", activeTab === item.id ? "text-white" : item.color)} />
+              <span className="leading-none text-center">{item.label}</span>
+              {(item.badge ?? 0) > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white text-[9px] font-black flex items-center justify-center">{item.badge}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 min-w-0">
+          {/* Section header */}
+          {activeItem && (
+            <div className="flex items-center gap-3 mb-6">
+              <div className={clsx("w-10 h-10 rounded-xl flex items-center justify-center", activeItem.bg)}>
+                <activeItem.icon className={clsx("w-5 h-5", activeItem.color)} />
+              </div>
+              <div>
+                <h2 className="text-xl font-black tracking-tight">{activeItem.label}</h2>
+              </div>
+              {loading && <Loader2 className="w-5 h-5 animate-spin text-blue-600 ml-auto" />}
             </div>
           )}
 
+      <AnimatePresence mode="wait">
+        <motion.div key={activeTab} {...fadeInUp} className="min-h-[500px]">
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 space-y-6">
@@ -1430,8 +1496,84 @@ export default function SuperAdmin() {
               </div>
             </div>
           )}
+
+          {/* Upgrade Requests */}
+          {activeTab === 'upgrades' && (
+            <div className="space-y-4">
+              {upgradeRequests.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5">
+                  <TrendingUp className="w-12 h-12 text-slate-300 mb-4" />
+                  <p className="text-slate-500 font-bold">{language === 'ru' ? 'Нет запросов на апгрейд' : language === 'en' ? 'No upgrade requests yet' : "Tarif so'rovlari yo'q"}</p>
+                </div>
+              ) : (
+                upgradeRequests.map((req) => (
+                  <div key={req.id} className="bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-start gap-6">
+                    <div className="flex-1 space-y-3">
+                      <div className="flex items-center gap-3">
+                        <span className={clsx(
+                          "text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-xl",
+                          req.status === 'PENDING' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                          req.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                          'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'
+                        )}>
+                          {req.status === 'PENDING' ? (language === 'ru' ? 'Ожидает' : language === 'en' ? 'Pending' : 'Kutilmoqda') :
+                           req.status === 'APPROVED' ? (language === 'ru' ? 'Одобрено' : language === 'en' ? 'Approved' : 'Tasdiqlangan') :
+                           (language === 'ru' ? 'Отклонено' : language === 'en' ? 'Rejected' : 'Rad etildi')}
+                        </span>
+                        {req.status === 'PENDING' && <Clock className="w-4 h-4 text-amber-500" />}
+                        {req.status === 'APPROVED' && <BadgeCheck className="w-4 h-4 text-emerald-500" />}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-black">{req.companyName}</h3>
+                        <p className="text-sm text-slate-500 font-medium">{req.ownerPhone}{req.ownerName ? ` · ${req.ownerName}` : ''}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-xs font-bold">
+                        <span className="px-3 py-1.5 bg-slate-100 dark:bg-white/5 rounded-xl">{language === 'ru' ? 'Текущий план' : language === 'en' ? 'Current' : 'Joriy'}: <span className="text-blue-600">{req.currentPlan}</span></span>
+                        <span className="px-3 py-1.5 bg-slate-100 dark:bg-white/5 rounded-xl">{language === 'ru' ? 'Дилеры' : language === 'en' ? 'Dealers' : 'Dilerlar'}: {req.dealersCount}</span>
+                        <span className="px-3 py-1.5 bg-slate-100 dark:bg-white/5 rounded-xl">{language === 'ru' ? 'Польз.' : language === 'en' ? 'Users' : 'Foydalanuvchi'}: {req.usersCount}</span>
+                        <span className="px-3 py-1.5 bg-slate-100 dark:bg-white/5 rounded-xl">{language === 'ru' ? 'Товары' : language === 'en' ? 'Products' : 'Mahsulot'}: {req.productsCount}</span>
+                        <span className="px-3 py-1.5 bg-slate-100 dark:bg-white/5 rounded-xl">{format(new Date(req.createdAt), 'dd.MM.yyyy HH:mm')}</span>
+                      </div>
+                    </div>
+                    {req.status === 'PENDING' && (
+                      <div className="flex gap-2 shrink-0">
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.patch(`/super/upgrade-requests/${req.id}`, { status: 'APPROVED' });
+                              toast.success(language === 'ru' ? 'Одобрено' : language === 'en' ? 'Approved' : 'Tasdiqlandi');
+                              const res = await api.get('/super/upgrade-requests');
+                              setUpgradeRequests(Array.isArray(res.data) ? res.data : []);
+                            } catch { toast.error('Error'); }
+                          }}
+                          className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all active:scale-95"
+                        >
+                          {language === 'ru' ? 'Одобрить' : language === 'en' ? 'Approve' : 'Tasdiqlash'}
+                        </button>
+                        <button
+                          onClick={async () => {
+                            try {
+                              await api.patch(`/super/upgrade-requests/${req.id}`, { status: 'REJECTED' });
+                              toast.success(language === 'ru' ? 'Отклонено' : language === 'en' ? 'Rejected' : "Rad etildi");
+                              const res = await api.get('/super/upgrade-requests');
+                              setUpgradeRequests(Array.isArray(res.data) ? res.data : []);
+                            } catch { toast.error('Error'); }
+                          }}
+                          className="px-4 py-2.5 bg-rose-600/10 text-rose-600 border border-rose-600/20 rounded-xl text-sm font-bold hover:bg-rose-600 hover:text-white transition-all active:scale-95"
+                        >
+                          {language === 'ru' ? 'Отклонить' : language === 'en' ? 'Reject' : "Rad etish"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </motion.div>
       </AnimatePresence>
+        </div>{/* /flex-1 min-w-0 */}
+      </div>{/* /flex gap-6 sidebar+content */}
 
       {/* Confirmation Modal Placeholder Removed */}
 

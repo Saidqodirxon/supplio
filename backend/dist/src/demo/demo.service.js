@@ -14,10 +14,54 @@ exports.DemoService = void 0;
 const common_1 = require("@nestjs/common");
 const schedule_1 = require("@nestjs/schedule");
 const prisma_service_1 = require("../prisma/prisma.service");
+const telegraf_1 = require("telegraf");
+const DEMO_PHONE = "+998000000000";
+const DEMO_PASSWORD = "demo1234";
 let DemoService = DemoService_1 = class DemoService {
     constructor(prisma) {
         this.prisma = prisma;
         this.logger = new common_1.Logger(DemoService_1.name);
+        this.bot = null;
+        const token = process.env.TELEGRAM_BOT_TOKEN || process.env.LOG_BOT_TOKEN;
+        if (token)
+            this.bot = new telegraf_1.Telegraf(token);
+    }
+    async requestDemoAccess(data) {
+        const lead = await this.prisma.lead.create({
+            data: {
+                fullName: data.fullName,
+                phone: data.phone,
+                info: data.company ? `Demo request — Company: ${data.company}` : "Demo request",
+            },
+        }).catch(() => null);
+        const chatId = process.env.DEMO_LOG_CHAT_ID || process.env.TELEGRAM_ADMIN_CHAT_ID;
+        if (this.bot && chatId) {
+            const msg = `🎯 *Demo Access Request*\n` +
+                `👤 ${data.fullName}\n` +
+                `📞 ${data.phone}\n` +
+                (data.company ? `🏢 ${data.company}\n` : "") +
+                `📅 ${new Date().toLocaleString("uz-UZ")}\n\n` +
+                `🔑 Demo credentials sent to user:\n` +
+                `Phone: \`${DEMO_PHONE}\`\nPassword: \`${DEMO_PASSWORD}\``;
+            await this.bot.telegram.sendMessage(chatId, msg, { parse_mode: "Markdown" }).catch(() => { });
+        }
+        return {
+            success: true,
+            leadId: lead?.id,
+            demo: {
+                phone: DEMO_PHONE,
+                password: DEMO_PASSWORD,
+                url: "https://app.supplio.uz",
+                note: "These credentials give you full access to the demo environment. Data resets daily at midnight.",
+            },
+        };
+    }
+    async logDemoActivity(companyName, action, detail) {
+        const chatId = process.env.DEMO_LOG_CHAT_ID;
+        if (!this.bot || !chatId)
+            return;
+        const msg = `📊 *Demo Activity*\n🏢 ${companyName}\n⚡ ${action}\n📝 ${detail}\n📅 ${new Date().toLocaleString("uz-UZ")}`;
+        await this.bot.telegram.sendMessage(chatId, msg, { parse_mode: "Markdown" }).catch(() => { });
     }
     async handleDailyReset() {
         this.logger.log("CRON: Starting Demo Environment Reset...");

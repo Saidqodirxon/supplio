@@ -7,6 +7,8 @@ export declare class AnalyticsService {
         stats: {
             revenue: number;
             profit: number;
+            grossProfit: number;
+            totalExpenses: number;
             activeDealers: number;
             debt: number;
             collected: number;

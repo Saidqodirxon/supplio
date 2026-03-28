@@ -4,7 +4,7 @@ export declare class TelegramController {
     private readonly telegramService;
     private readonly logger;
     constructor(telegramService: TelegramService);
-    handleWebhook(companyId: string, update: Update): Promise<{
+    handleWebhook(id: string, update: Update): Promise<{
         ok: boolean;
     }>;
 }

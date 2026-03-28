@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Receipt,
   Plus,
@@ -6,6 +6,7 @@ import {
   X,
   AlertTriangle,
   PieChart,
+  TrendingDown,
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
@@ -14,6 +15,8 @@ import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useScrollLock } from '../utils/useScrollLock';
+import { CustomSelect } from '../components/CustomSelect';
+import type { SelectOption } from '../components/CustomSelect';
 
 interface Expense {
   id: string;
@@ -57,8 +60,11 @@ export default function Expenses() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ amount: '', category: 'OTHER', description: '', branchId: '' });
+  const [filterCategory, setFilterCategory] = useState('ALL');
+  const [grossProfit, setGrossProfit] = useState<number | null>(null);
   const { language } = useAuthStore();
   const t = dashboardTranslations[language];
+
   const CAT_LABEL_MAP: Record<string, string> = {
     RENT: 'catRent', SALARY: 'catSalary', UTILITIES: 'catUtilities',
     TRANSPORT: 'catTransport', MARKETING: 'catMarketing', SUPPLIES: 'catSupplies',
@@ -66,17 +72,21 @@ export default function Expenses() {
   };
   const getCatLabel = (cat: string) => (t.expenses as Record<string, string>)[CAT_LABEL_MAP[cat]] ?? cat;
 
-  useScrollLock(showModal);
+  useScrollLock(showModal || !!deleteId);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [expRes, brRes] = await Promise.all([
+      const [expRes, brRes, statsRes] = await Promise.all([
         api.get<Expense[]>('/expenses'),
         api.get<Branch[]>('/branches'),
+        api.get('/analytics/dashboard?period=all').catch(() => null),
       ]);
       setExpenses(expRes.data);
       setBranches(brRes.data);
+      if (statsRes?.data?.stats?.profit != null) {
+        setGrossProfit(statsRes.data.stats.profit);
+      }
     } catch {
       toast.error(t.common.error);
     } finally {
@@ -121,11 +131,28 @@ export default function Expenses() {
   };
 
   const total = expenses.reduce((s, e) => s + e.amount, 0);
+  const netProfit = grossProfit != null ? grossProfit - total : null;
+
   const byCategory: Record<string, number> = {};
   expenses.forEach(e => {
     byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
   });
-  const topCategories = Object.entries(byCategory).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const topCategories = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
+
+  const filtered = useMemo(() => {
+    if (filterCategory === 'ALL') return expenses;
+    return expenses.filter(e => e.category === filterCategory);
+  }, [expenses, filterCategory]);
+
+  const categoryOptions: SelectOption[] = [
+    { value: 'OTHER', label: getCatLabel('OTHER') },
+    ...CATEGORIES.filter(c => c !== 'OTHER').map(c => ({ value: c, label: getCatLabel(c) })),
+  ];
+
+  const branchOptions: SelectOption[] = [
+    { value: '', label: t.expenses?.branch ? `${t.expenses.branch} (${t.common.noData ? t.common.noData : 'All'})` : 'All Branches' },
+    ...branches.map(b => ({ value: b.id, label: b.name })),
+  ];
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700">
@@ -148,14 +175,31 @@ export default function Expenses() {
         </button>
       </div>
 
-      {/* Stats + Category breakdown */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Total expenses */}
         <div className="glass-card p-8">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t.expenses?.totalExpenses || 'Total Expenses'}</p>
           <h3 className="text-3xl font-black text-rose-600 tracking-tight">{total.toLocaleString()}</h3>
-          <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">{t.common.uzs} • {expenses.length} records</p>
+          <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">{t.common.uzs} • {expenses.length} {t.common?.records || 'records'}</p>
         </div>
-        <div className="lg:col-span-2 glass-card p-8">
+
+        {/* Net profit after expenses */}
+        {netProfit != null && (
+          <div className={clsx('glass-card p-8', netProfit >= 0 ? 'border-emerald-100 dark:border-emerald-900/30' : 'border-rose-100 dark:border-rose-900/30')}>
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingDown className={clsx('w-4 h-4', netProfit >= 0 ? 'text-emerald-500' : 'text-rose-500')} />
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.expenses?.netProfit || 'Net Profit'}</p>
+            </div>
+            <h3 className={clsx('text-3xl font-black tracking-tight', netProfit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400')}>
+              {netProfit.toLocaleString()}
+            </h3>
+            <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">{t.common.uzs} • {t.expenses?.afterExpenses || 'after expenses'}</p>
+          </div>
+        )}
+
+        {/* Category breakdown */}
+        <div className={clsx('glass-card p-8', netProfit == null ? 'lg:col-span-2' : '')}>
           <div className="flex items-center gap-3 mb-6">
             <PieChart className="w-5 h-5 text-slate-400" />
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.expenses?.byCategory || 'By Category'}</p>
@@ -163,35 +207,74 @@ export default function Expenses() {
           <div className="space-y-3">
             {topCategories.length === 0 ? (
               <p className="text-slate-400 text-xs font-semibold">{t.common.noData}</p>
-            ) : topCategories.map(([cat, amt]) => (
+            ) : topCategories.slice(0, 5).map(([cat, amt]) => (
               <div key={cat} className="flex items-center gap-3">
-                <span className={clsx("px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest w-28 text-center", CATEGORY_COLORS[cat] || CATEGORY_COLORS.OTHER)}>{cat}</span>
+                <span className={clsx("px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest w-28 text-center shrink-0", CATEGORY_COLORS[cat] || CATEGORY_COLORS.OTHER)}>
+                  {getCatLabel(cat)}
+                </span>
                 <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <div
                     className="h-full rounded-full bg-rose-500 transition-all duration-700"
                     style={{ width: `${total > 0 ? (amt / total) * 100 : 0}%` }}
                   />
                 </div>
-                <span className="text-xs font-black text-slate-700 dark:text-slate-300 w-20 text-right">{amt.toLocaleString()}</span>
+                <span className="text-xs font-black text-slate-700 dark:text-slate-300 w-20 text-right shrink-0">{amt.toLocaleString()}</span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
+      {/* Category filter tabs */}
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={() => setFilterCategory('ALL')}
+          className={clsx(
+            'px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border',
+            filterCategory === 'ALL'
+              ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
+              : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400'
+          )}
+        >
+          {t.expenses?.allCategories || 'All'}
+          {expenses.length > 0 && <span className="ml-1.5 opacity-60">({expenses.length})</span>}
+        </button>
+        {CATEGORIES.filter(c => byCategory[c] > 0).map(c => (
+          <button
+            key={c}
+            onClick={() => setFilterCategory(c)}
+            className={clsx(
+              'px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border',
+              filterCategory === c
+                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
+                : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400'
+            )}
+          >
+            {getCatLabel(c)}
+            <span className="ml-1.5 opacity-60">({byCategory[c]?.toLocaleString()})</span>
+          </button>
+        ))}
+      </div>
+
       {/* List */}
       <div className="glass-card overflow-hidden">
-        <div className="p-8 border-b border-slate-50 dark:border-slate-800">
+        <div className="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
           <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
-            All Expenses <span className="text-slate-400 font-bold text-sm ml-2">({expenses.length})</span>
+            {filterCategory === 'ALL' ? (t.expenses?.allExpenses || 'All Expenses') : getCatLabel(filterCategory)}
+            <span className="text-slate-400 font-bold text-sm ml-2">({filtered.length})</span>
           </h3>
+          {filterCategory !== 'ALL' && (
+            <span className="text-lg font-black text-rose-600 dark:text-rose-400">
+              {filtered.reduce((s, e) => s + e.amount, 0).toLocaleString()} {t.common.uzs}
+            </span>
+          )}
         </div>
 
         {loading ? (
           <div className="p-10 space-y-4">
             {[1,2,3].map(i => <div key={i} className="h-14 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse" />)}
           </div>
-        ) : expenses.length === 0 ? (
+        ) : filtered.length === 0 ? (
           <div className="p-16 text-center">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4">
               <Receipt className="w-8 h-8 text-slate-400" />
@@ -213,7 +296,7 @@ export default function Expenses() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                {expenses.map((expense) => (
+                {filtered.map((expense) => (
                   <tr key={expense.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                     <td className="px-8 py-5">
                       <span className={clsx("px-2.5 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest", CATEGORY_COLORS[expense.category] || CATEGORY_COLORS.OTHER)}>
@@ -277,42 +360,40 @@ export default function Expenses() {
                     value={form.amount}
                     onChange={e => setForm(f => ({...f, amount: e.target.value}))}
                     required
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-slate-900 dark:text-white"
                     placeholder="0"
                   />
                 </div>
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">{t.expenses?.category || 'Category'}</label>
-                  <select
+                  <CustomSelect
+                    options={categoryOptions}
                     value={form.category}
-                    onChange={e => setForm(f => ({...f, category: e.target.value}))}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
-                  >
-                    {CATEGORIES.map(c => <option key={c} value={c}>{getCatLabel(c)}</option>)}
-                  </select>
+                    onChange={v => setForm(f => ({...f, category: v}))}
+                    searchable
+                  />
                 </div>
-                <div>
-                  <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">{t.expenses?.branch || 'Branch'}</label>
-                  <select
-                    value={form.branchId}
-                    onChange={e => setForm(f => ({...f, branchId: e.target.value}))}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
-                  >
-                    <option value="">All Branches</option>
-                    {branches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
-                  </select>
-                </div>
+                {branches.length > 0 && (
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">{t.expenses?.branch || 'Branch'}</label>
+                    <CustomSelect
+                      options={branchOptions}
+                      value={form.branchId}
+                      onChange={v => setForm(f => ({...f, branchId: v}))}
+                    />
+                  </div>
+                )}
                 <div>
                   <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">{t.expenses?.description || 'Description'}</label>
                   <input
                     value={form.description}
                     onChange={e => setForm(f => ({...f, description: e.target.value}))}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
-                    placeholder="Optional note"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all text-slate-900 dark:text-white placeholder-slate-400"
+                    placeholder={t.expenses?.description || 'Optional note'}
                   />
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                  <button type="button" onClick={() => setShowModal(false)} className="flex-1 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-700 dark:text-slate-300">
                     {t.common.cancel}
                   </button>
                   <button type="submit" disabled={saving} className="flex-1 premium-button justify-center">
@@ -345,10 +426,10 @@ export default function Expenses() {
               </div>
               <div>
                 <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">{t.common.delete}</h3>
-                <p className="text-sm text-slate-500">{t.expenses?.deleteConfirm || 'Are you sure?'}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t.expenses?.deleteConfirm || 'Are you sure?'}</p>
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setDeleteId(null)} className="flex-1 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <button onClick={() => setDeleteId(null)} className="flex-1 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-700 dark:text-slate-300">
                   {t.common.cancel}
                 </button>
                 <button onClick={handleDelete} className="flex-1 px-6 py-3 rounded-xl bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-rose-700 transition-all">

@@ -25,13 +25,17 @@ let BotsController = class BotsController {
     }
     async getBots(req) {
         const bots = await this.telegramService.getBotsForCompany(req.companyId);
-        return bots.map(b => ({ ...b, status: this.telegramService.getBotStatus(req.companyId) }));
+        return bots.map(b => ({ ...b, status: this.telegramService.getBotStatus(b.id) }));
     }
     async validateToken(body) {
         return this.telegramService.validateToken(body.token);
     }
     async getBotStatus(req) {
-        return { status: this.telegramService.getBotStatus(req.companyId) };
+        const bots = await this.telegramService.getBotsForCompany(req.companyId);
+        const firstBot = bots.find(b => b.isActive);
+        if (!firstBot)
+            return { status: 'not_found' };
+        return { status: this.telegramService.getBotStatus(firstBot.id) };
     }
     async createBot(req, body) {
         return this.telegramService.createBot(req.companyId, body);

@@ -4,22 +4,22 @@ export declare class CategoriesService {
     constructor(prisma: PrismaService);
     createCategory(companyId: string, name: string): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
     }>;
     findAllCategories(companyId: string): Promise<({
         subcategories: {
             id: string;
-            updatedAt: Date;
-            name: string;
+            companyId: string;
             createdAt: Date;
             deletedAt: Date | null;
+            name: string;
+            updatedAt: Date;
             deletedBy: string | null;
-            companyId: string;
             categoryId: string;
         }[];
         _count: {
@@ -27,68 +27,68 @@ export declare class CategoriesService {
         };
     } & {
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
     })[]>;
     findOneCategory(id: string, companyId: string): Promise<{
         subcategories: {
             id: string;
-            updatedAt: Date;
-            name: string;
+            companyId: string;
             createdAt: Date;
             deletedAt: Date | null;
+            name: string;
+            updatedAt: Date;
             deletedBy: string | null;
-            companyId: string;
             categoryId: string;
         }[];
     } & {
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
     }>;
     updateCategory(id: string, companyId: string, name: string): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
     }>;
     removeCategory(id: string, companyId: string, deletedBy: string): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
     }>;
     restoreCategory(id: string, companyId: string): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
     }>;
     createSubcategory(companyId: string, categoryId: string, name: string): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
         categoryId: string;
     }>;
     updateSubcategory(id: string, companyId: string, data: {
@@ -96,32 +96,32 @@ export declare class CategoriesService {
         categoryId?: string;
     }): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
         categoryId: string;
     }>;
     removeSubcategory(id: string, companyId: string, deletedBy: string): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
         categoryId: string;
     }>;
     restoreSubcategory(id: string, companyId: string): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         deletedBy: string | null;
-        companyId: string;
         categoryId: string;
     }>;
 }

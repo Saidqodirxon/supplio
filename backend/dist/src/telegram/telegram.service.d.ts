@@ -14,7 +14,7 @@ export declare class TelegramService implements OnModuleInit {
     private translations;
     private getT;
     private getLangFromCtx;
-    initBot(companyId: string, token: string, companyName: string): Promise<void>;
+    initBot(botId: string, companyId: string, token: string, companyName: string): Promise<void>;
     private handleDebt;
     private handleProducts;
     private handleOrders;
@@ -25,7 +25,7 @@ export declare class TelegramService implements OnModuleInit {
     private handleCart;
     private handleCheckout;
     private handleCheckoutByChat;
-    sendMessage(companyId: string, chatId: string, message: string): Promise<void>;
+    sendMessage(botId: string, chatId: string, message: string): Promise<void>;
     broadcast(companyId: string, message: string): Promise<{
         sent: number;
         failed: number;
@@ -34,29 +34,30 @@ export declare class TelegramService implements OnModuleInit {
     private handleHelp;
     private getDealerByChatId;
     private progressBar;
-    getBot(companyId: string): Telegraf | undefined;
+    getBot(botId: string): Telegraf | undefined;
     validateToken(token: string): Promise<{
         valid: boolean;
+        networkError?: boolean;
         botInfo?: {
             id: number;
             username: string;
             first_name: string;
         };
     }>;
-    getBotStatus(companyId: string): 'connected' | 'stopped' | 'not_found';
+    getBotStatus(botId: string): 'connected' | 'stopped' | 'not_found';
     getBotsForCompany(companyId: string): Promise<{
         id: string;
         companyId: string;
         token: string;
         username: string | null;
-        botName: string | null;
-        description: string | null;
         isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
-        webhookUrl: string | null;
         createdAt: Date;
         deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
+        webhookUrl: string | null;
     }[]>;
     createBot(companyId: string, data: {
         token: string;
@@ -72,14 +73,14 @@ export declare class TelegramService implements OnModuleInit {
         companyId: string;
         token: string;
         username: string | null;
-        botName: string | null;
-        description: string | null;
         isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
-        webhookUrl: string | null;
         createdAt: Date;
         deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
+        webhookUrl: string | null;
     }>;
     updateBot(id: string, companyId: string, data: {
         token?: string;
@@ -91,28 +92,28 @@ export declare class TelegramService implements OnModuleInit {
         companyId: string;
         token: string;
         username: string | null;
-        botName: string | null;
-        description: string | null;
         isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
-        webhookUrl: string | null;
         createdAt: Date;
         deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
+        webhookUrl: string | null;
     }>;
     removeBot(id: string, companyId: string): Promise<{
         id: string;
         companyId: string;
         token: string;
         username: string | null;
-        botName: string | null;
-        description: string | null;
         isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
-        webhookUrl: string | null;
         createdAt: Date;
         deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
+        webhookUrl: string | null;
     }>;
     stopAll(): Promise<void>;
 }

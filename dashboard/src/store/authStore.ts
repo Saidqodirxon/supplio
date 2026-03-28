@@ -46,10 +46,12 @@ export const useAuthStore = create<AuthState>((set) => {
       set({ language });
     },
     setActiveCompany: (companyId) => {
+      const prev = localStorage.getItem("activeCompanyId");
       localStorage.setItem("activeCompanyId", companyId);
       set({ activeCompanyId: companyId });
-      // In production, we might refresh window or re-fetch all data
-      window.location.reload();
+      if (prev && prev !== companyId) {
+        window.location.reload();
+      }
     },
     logout: () => {
       localStorage.removeItem("user");

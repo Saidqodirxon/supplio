@@ -101,6 +101,20 @@ export declare class DemoController {
             date: string;
         }[];
     }>;
+    requestDemoAccess(body: {
+        fullName: string;
+        phone: string;
+        company?: string;
+    }): Promise<{
+        success: boolean;
+        leadId: any;
+        demo: {
+            phone: string;
+            password: string;
+            url: string;
+            note: string;
+        };
+    }>;
     getDemoNews(): Promise<{
         id: string;
         slugEn: string;

@@ -15,7 +15,8 @@ import {
   Zap,
   ShieldCheck,
   MessageCircle,
-  Phone
+  Phone,
+  ChevronLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { translations, slugToLang, howItWorksTranslations, testimonialsLabel } from "@/i18n/translations";
@@ -66,12 +67,13 @@ type SafeNews = {
 
 interface DynamicSettings {
   newsEnabled: boolean;
+  defaultTrialDays?: number;
   globalNotifyUz?: string;
   globalNotifyRu?: string;
   globalNotifyEn?: string;
   globalNotifyTr?: string;
   superAdminPhone?: string;
-  [key: string]: string | boolean | undefined;
+  [key: string]: string | number | boolean | undefined;
 }
 
 interface DynamicLanding {
@@ -95,6 +97,7 @@ export default function LandingPage() {
   const [settings, setSettings] = useState<DynamicSettings | null>(null);
   const [landing, setLanding] = useState<DynamicLanding | null>(null);
   const [testimonials, setTestimonials] = useState<Array<{ id: string; name: string; company?: string; roleTitle?: string; contentUz: string; contentRu: string; contentEn: string; contentTr: string; rating: number }>>([]);
+  const [testimonialIdx, setTestimonialIdx] = useState(0);
 
   const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
 
@@ -327,7 +330,7 @@ export default function LandingPage() {
 
       {/* ===== Testimonials ===== */}
       {testimonials.length > 0 && (
-        <section className="py-24 sm:py-32 px-5 sm:px-6 bg-white text-left">
+        <section className="py-24 sm:py-32 px-5 sm:px-6 bg-white text-left overflow-hidden">
           <div className="max-w-7xl mx-auto">
             <motion.div {...fadeInUp} className="text-center max-w-2xl mx-auto mb-16">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
@@ -335,62 +338,127 @@ export default function LandingPage() {
               </h2>
             </motion.div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {testimonials.map((t, i) => {
-                const contentKey = `content${lang.charAt(0).toUpperCase() + lang.slice(1)}` as keyof typeof t;
-                const content = (t[contentKey] as string) || t.contentEn;
-                return (
-                  <motion.div
-                    key={t.id}
-                    {...fadeInUp}
-                    transition={{ delay: i * 0.1 }}
-                    className="flex flex-col gap-6 p-8 bg-slate-50 rounded-3xl border border-slate-100 hover:shadow-xl hover:border-blue-100 transition-all duration-300"
+            {testimonials.length <= 3 ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {testimonials.map((tm, i) => {
+                  const contentKey = `content${lang.charAt(0).toUpperCase() + lang.slice(1)}` as keyof typeof tm;
+                  const content = (tm[contentKey] as string) || tm.contentEn;
+                  return (
+                    <motion.div key={tm.id} {...fadeInUp} transition={{ delay: i * 0.1 }} className="flex flex-col gap-6 p-8 bg-slate-50 rounded-3xl border border-slate-100 hover:shadow-xl hover:border-blue-100 transition-all duration-300">
+                      <div className="flex gap-1">
+                        {Array.from({ length: tm.rating }).map((_, s) => (
+                          <svg key={s} className="w-5 h-5 text-amber-400 fill-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        ))}
+                      </div>
+                      <p className="text-slate-700 leading-relaxed italic flex-1">"{content}"</p>
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shrink-0">{tm.name.charAt(0)}</div>
+                        <div>
+                          <p className="font-bold text-slate-900 text-sm">{tm.name}</p>
+                          {(tm.roleTitle || tm.company) && <p className="text-slate-500 text-xs font-medium">{tm.roleTitle}{tm.roleTitle && tm.company ? " · " : ""}{tm.company}</p>}
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Slider for 4+ testimonials */
+              <div className="relative">
+                <div className="overflow-hidden">
+                  <AnimatePresence mode="wait">
+                    {(() => {
+                      const perPage = 3;
+                      const totalPages = Math.ceil(testimonials.length / perPage);
+                      const pageItems = testimonials.slice(testimonialIdx * perPage, testimonialIdx * perPage + perPage);
+                      return (
+                        <motion.div
+                          key={testimonialIdx}
+                          initial={{ opacity: 0, x: 40 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -40 }}
+                          transition={{ duration: 0.4 }}
+                          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                        >
+                          {pageItems.map((tm, i) => {
+                            const contentKey = `content${lang.charAt(0).toUpperCase() + lang.slice(1)}` as keyof typeof tm;
+                            const content = (tm[contentKey] as string) || tm.contentEn;
+                            return (
+                              <div key={tm.id} className="flex flex-col gap-6 p-8 bg-slate-50 rounded-3xl border border-slate-100 hover:shadow-xl hover:border-blue-100 transition-all duration-300">
+                                <div className="flex gap-1">
+                                  {Array.from({ length: tm.rating }).map((_, s) => (
+                                    <svg key={s} className="w-5 h-5 text-amber-400 fill-amber-400" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                  ))}
+                                </div>
+                                <p className="text-slate-700 leading-relaxed italic flex-1">"{content}"</p>
+                                <div className="flex items-center gap-4">
+                                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shrink-0">{tm.name.charAt(0)}</div>
+                                  <div>
+                                    <p className="font-bold text-slate-900 text-sm">{tm.name}</p>
+                                    {(tm.roleTitle || tm.company) && <p className="text-slate-500 text-xs font-medium">{tm.roleTitle}{tm.roleTitle && tm.company ? " · " : ""}{tm.company}</p>}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </motion.div>
+                      );
+                    })()}
+                  </AnimatePresence>
+                </div>
+
+                {/* Slider controls */}
+                <div className="flex items-center justify-center gap-4 mt-10">
+                  <button
+                    onClick={() => setTestimonialIdx(i => Math.max(0, i - 1))}
+                    disabled={testimonialIdx === 0}
+                    className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:border-blue-600 hover:text-blue-600 disabled:opacity-30 transition-all"
                   >
-                    {/* Stars */}
-                    <div className="flex gap-1">
-                      {Array.from({ length: t.rating }).map((_, s) => (
-                        <svg key={s} className="w-5 h-5 text-amber-400 fill-amber-400" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      ))}
-                    </div>
-
-                    <p className="text-slate-700 leading-relaxed italic flex-1">"{content}"</p>
-
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
-                        {t.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-bold text-slate-900 text-sm">{t.name}</p>
-                        {(t.roleTitle || t.company) && (
-                          <p className="text-slate-500 text-xs font-medium">
-                            {t.roleTitle}{t.roleTitle && t.company ? " · " : ""}{t.company}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+                    <ChevronLeft className="w-5 h-5" />
+                  </button>
+                  <div className="flex gap-2">
+                    {Array.from({ length: Math.ceil(testimonials.length / 3) }).map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setTestimonialIdx(i)}
+                        className={`w-2 h-2 rounded-full transition-all ${i === testimonialIdx ? 'bg-blue-600 w-6' : 'bg-slate-300'}`}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setTestimonialIdx(i => Math.min(Math.ceil(testimonials.length / 3) - 1, i + 1))}
+                    disabled={testimonialIdx >= Math.ceil(testimonials.length / 3) - 1}
+                    className="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:border-blue-600 hover:text-blue-600 disabled:opacity-30 transition-all"
+                  >
+                    <ChevronRight className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}
 
       {/* ===== CTA Section ===== */}
       <section className="py-24 px-5 sm:px-6 bg-blue-600 text-center">
-        <div className="max-w-3xl mx-auto">
-          <motion.h2 {...fadeInUp} className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-6">
-            {lang === 'uz' ? "Bugun boshlang" : lang === 'ru' ? "Начните сегодня" : lang === 'tr' ? "Bugün başlayın" : "Start Today"}
-          </motion.h2>
-          <motion.p {...fadeInUp} transition={{ delay: 0.1 }} className="text-blue-100 text-lg mb-10 leading-relaxed">
-            {lang === 'uz' ? "14 kunlik bepul sinov. Kredit kartasi kerak emas." : lang === 'ru' ? "14-дневный бесплатный пробный период. Без кредитной карты." : lang === 'tr' ? "14 günlük ücretsiz deneme. Kredi kartı gerekmez." : "14-day free trial. No credit card required."}
-          </motion.p>
-          <motion.button {...fadeInUp} transition={{ delay: 0.2 }} onClick={() => setIsLeadModalOpen(true)} className="px-10 py-5 bg-white text-blue-600 rounded-2xl font-bold text-base hover:bg-blue-50 transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98]">
-            {t.nav.register}
-          </motion.button>
-        </div>
+        {(() => {
+          const trialDays = settings?.defaultTrialDays || 14;
+          const ctaTitle = lang === 'uz' ? "Bugun boshlang" : lang === 'ru' ? "Начните сегодня" : lang === 'tr' ? "Bugün başlayın" : "Start Today";
+          const ctaSubtitle = lang === 'uz' ? `${trialDays} kunlik bepul sinov. Kredit kartasi kerak emas.` : lang === 'ru' ? `${trialDays}-дневный бесплатный пробный период. Без кредитной карты.` : lang === 'tr' ? `${trialDays} günlük ücretsiz deneme. Kredi kartı gerekmez.` : `${trialDays}-day free trial. No credit card required.`;
+          return (
+            <div className="max-w-3xl mx-auto">
+              <motion.h2 {...fadeInUp} className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-6">
+                {ctaTitle}
+              </motion.h2>
+              <motion.p {...fadeInUp} transition={{ delay: 0.1 }} className="text-blue-100 text-lg mb-10 leading-relaxed">
+                {ctaSubtitle}
+              </motion.p>
+              <motion.button {...fadeInUp} transition={{ delay: 0.2 }} onClick={() => setIsLeadModalOpen(true)} className="px-10 py-5 bg-white text-blue-600 rounded-2xl font-bold text-base hover:bg-blue-50 transition-all shadow-xl hover:scale-[1.02] active:scale-[0.98]">
+                {t.nav.register}
+              </motion.button>
+            </div>
+          );
+        })()}
       </section>
 
       {/* ===== Pricing ===== */}
@@ -404,18 +472,28 @@ export default function LandingPage() {
             <p className="text-slate-400 max-w-2xl mx-auto text-lg">{t.pricing.subtitle}</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-            {((dynamicTariffs.length > 0 ? dynamicTariffs : t.pricing.plans) as unknown as SafePlan[]).map((plan, i: number) => {
-              const name = dynamicTariffs.length > 0 ? String(plan[`name${lang.charAt(0).toUpperCase() + lang.slice(1)}`]) : plan.name;
+          {(() => {
+            const plans = (dynamicTariffs.length > 0 ? dynamicTariffs : t.pricing.plans) as unknown as SafePlan[];
+            const count = plans.length;
+            const gridClass = count <= 2
+              ? 'grid-cols-1 sm:grid-cols-2 max-w-2xl mx-auto'
+              : count === 3
+                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                : 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-4';
+            const isScrollable = count >= 5;
+
+            const PlanCard = ({ plan, i }: { plan: SafePlan; i: number }) => {
+              const name = dynamicTariffs.length > 0 ? String(plan[`name${lang.charAt(0).toUpperCase() + lang.slice(1)}`] || '') : plan.name;
               const features = dynamicTariffs.length > 0 ? (plan[`features${lang.charAt(0).toUpperCase() + lang.slice(1)}`] as string[]) : plan.features;
               const isPopular = plan.isPopular;
-              const price = plan.price || '0';
+              const price = (plan.priceMonthly as string) || plan.price || '0';
+              const trialDays = (plan.trialDays as number) || settings?.defaultTrialDays || 14;
 
               return (
-                <motion.div key={i} {...fadeInUp} transition={{ delay: i * 0.1 }} className={`relative flex flex-col p-7 rounded-3xl border ${isPopular ? 'bg-white border-blue-600/20 shadow-2xl ring-2 ring-blue-600/30 z-10' : 'bg-slate-800/40 border-slate-700/50 backdrop-blur-sm'}`}>
+                <motion.div {...fadeInUp} transition={{ delay: i * 0.1 }} className={`relative flex flex-col p-7 rounded-3xl border ${isScrollable ? 'min-w-75 w-75' : ''} ${isPopular ? 'bg-white border-blue-600/20 shadow-2xl ring-2 ring-blue-600/30 z-10' : 'bg-slate-800/40 border-slate-700/50 backdrop-blur-sm'}`}>
                   {isPopular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-full">
-                      {lang === 'uz' ? 'Ommabop' : lang === 'ru' ? 'Популярный' : 'Most Popular'}
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-full whitespace-nowrap">
+                      {lang === 'uz' ? 'Ommabop' : lang === 'ru' ? 'Популярный' : lang === 'tr' ? 'Popüler' : 'Most Popular'}
                     </div>
                   )}
 
@@ -425,11 +503,16 @@ export default function LandingPage() {
                       <span className={`text-4xl font-bold ${isPopular ? 'text-slate-900' : 'text-white'}`}>{price}</span>
                       <span className="text-slate-500 text-sm font-medium">{t.pricing.month}</span>
                     </div>
+                    {trialDays > 0 && (
+                      <p className={`text-xs font-semibold mt-2 ${isPopular ? 'text-blue-600' : 'text-blue-400'}`}>
+                        {lang === 'uz' ? `${trialDays} kun bepul sinov` : lang === 'ru' ? `${trialDays} дней бесплатно` : lang === 'tr' ? `${trialDays} gün ücretsiz` : `${trialDays}-day free trial`}
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-4 mb-10 flex-1 text-left">
-                    {(features || []).map((f: string) => (
-                      <div key={f} className="flex items-start gap-3">
+                    {(features || []).map((f: string, fi: number) => (
+                      <div key={fi} className="flex items-start gap-3">
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isPopular ? 'bg-blue-600 text-white' : 'bg-white/10 text-white'}`}>
                           <Check className="w-3 h-3 stroke-[3]" />
                         </div>
@@ -443,8 +526,34 @@ export default function LandingPage() {
                   </button>
                 </motion.div>
               );
-            })}
-          </div>
+            };
+
+            if (isScrollable) {
+              return (
+                <div className="relative">
+                  <div className="flex gap-6 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-none -mx-2 px-2">
+                    {plans.map((plan, i) => (
+                      <div key={i} className="snap-start shrink-0">
+                        <PlanCard plan={plan} i={i} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mt-4 text-slate-400 text-sm">
+                    <ArrowRight className="w-4 h-4 animate-bounce-x" />
+                    <span className="font-medium text-xs">{lang === 'uz' ? 'Yana tariflar bor' : lang === 'ru' ? 'Ещё тарифы' : lang === 'tr' ? 'Daha fazla plan' : 'More plans available'}</span>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className={`grid ${gridClass} gap-6`}>
+                {plans.map((plan, i) => (
+                  <PlanCard key={i} plan={plan} i={i} />
+                ))}
+              </div>
+            );
+          })()}
         </div>
       </section>
 
@@ -536,7 +645,6 @@ export default function LandingPage() {
               links: [
                 { name: t.nav.news, href: "#news" },
                 { name: t.footer.docs, href: "#" },
-                { name: t.footer.api, href: "#" }
               ]
             },
             {
@@ -565,11 +673,11 @@ export default function LandingPage() {
           </p>
           <div className="flex gap-6">
             {[
-              { label: 'Twitter', href: landing?.socialTwitter || '#' },
-              { label: 'LinkedIn', href: landing?.socialLinkedin || '#' },
-              { label: 'Telegram', href: landing?.socialTelegram || '#' },
-            ].map(social => (
-              <a key={social.label} href={social.href} target={social.href !== '#' ? '_blank' : undefined} rel="noopener noreferrer" className="text-sm text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest font-bold">{social.label}</a>
+              { label: 'Twitter', href: landing?.socialTwitter },
+              { label: 'LinkedIn', href: landing?.socialLinkedin },
+              { label: 'Telegram', href: landing?.socialTelegram },
+            ].filter(s => s.href).map(social => (
+              <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer" className="text-sm text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest font-bold">{social.label}</a>
             ))}
           </div>
         </div>

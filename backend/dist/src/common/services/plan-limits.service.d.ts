@@ -16,6 +16,7 @@ export declare class PlanLimitsService {
     private readonly logger;
     constructor(prisma: PrismaService);
     getLimitsForCompany(companyId: string): Promise<PlanLimits>;
+    private limitError;
     checkBranchLimit(companyId: string): Promise<void>;
     checkUserLimit(companyId: string): Promise<void>;
     checkDealerLimit(companyId: string): Promise<void>;
