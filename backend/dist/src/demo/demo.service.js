@@ -27,13 +27,17 @@ let DemoService = DemoService_1 = class DemoService {
             this.bot = new telegraf_1.Telegraf(token);
     }
     async requestDemoAccess(data) {
-        const lead = await this.prisma.lead.create({
+        const lead = await this.prisma.lead
+            .create({
             data: {
                 fullName: data.fullName,
                 phone: data.phone,
-                info: data.company ? `Demo request — Company: ${data.company}` : "Demo request",
+                info: data.company
+                    ? `Demo request — Company: ${data.company}`
+                    : "Demo request",
             },
-        }).catch(() => null);
+        })
+            .catch(() => null);
         const chatId = process.env.DEMO_LOG_CHAT_ID || process.env.TELEGRAM_ADMIN_CHAT_ID;
         if (this.bot && chatId) {
             const msg = `🎯 *Demo Access Request*\n` +
@@ -43,7 +47,9 @@ let DemoService = DemoService_1 = class DemoService {
                 `📅 ${new Date().toLocaleString("uz-UZ")}\n\n` +
                 `🔑 Demo credentials sent to user:\n` +
                 `Phone: \`${DEMO_PHONE}\`\nPassword: \`${DEMO_PASSWORD}\``;
-            await this.bot.telegram.sendMessage(chatId, msg, { parse_mode: "Markdown" }).catch(() => { });
+            await this.bot.telegram
+                .sendMessage(chatId, msg, { parse_mode: "Markdown" })
+                .catch(() => { });
         }
         return {
             success: true,
@@ -61,7 +67,9 @@ let DemoService = DemoService_1 = class DemoService {
         if (!this.bot || !chatId)
             return;
         const msg = `📊 *Demo Activity*\n🏢 ${companyName}\n⚡ ${action}\n📝 ${detail}\n📅 ${new Date().toLocaleString("uz-UZ")}`;
-        await this.bot.telegram.sendMessage(chatId, msg, { parse_mode: "Markdown" }).catch(() => { });
+        await this.bot.telegram
+            .sendMessage(chatId, msg, { parse_mode: "Markdown" })
+            .catch(() => { });
     }
     async handleDailyReset() {
         this.logger.log("CRON: Starting Demo Environment Reset...");
@@ -80,12 +88,18 @@ let DemoService = DemoService_1 = class DemoService {
         }
     }
     async resetCompanyData(companyId) {
-        await this.prisma.$executeRaw `DELETE FROM "Order" WHERE "companyId" = ${companyId}`;
-        await this.prisma.$executeRaw `DELETE FROM "Payment" WHERE "companyId" = ${companyId}`;
-        await this.prisma.$executeRaw `DELETE FROM "LedgerTransaction" WHERE "companyId" = ${companyId}`;
-        await this.prisma.$executeRaw `DELETE FROM "Dealer" WHERE "companyId" = ${companyId}`;
-        await this.prisma.$executeRaw `DELETE FROM "Product" WHERE "companyId" = ${companyId}`;
-        await this.prisma.$executeRaw `DELETE FROM "Expense" WHERE "companyId" = ${companyId}`;
+        await this.prisma
+            .$executeRaw `DELETE FROM "Order" WHERE "companyId" = ${companyId}`;
+        await this.prisma
+            .$executeRaw `DELETE FROM "Payment" WHERE "companyId" = ${companyId}`;
+        await this.prisma
+            .$executeRaw `DELETE FROM "LedgerTransaction" WHERE "companyId" = ${companyId}`;
+        await this.prisma
+            .$executeRaw `DELETE FROM "Dealer" WHERE "companyId" = ${companyId}`;
+        await this.prisma
+            .$executeRaw `DELETE FROM "Product" WHERE "companyId" = ${companyId}`;
+        await this.prisma
+            .$executeRaw `DELETE FROM "Expense" WHERE "companyId" = ${companyId}`;
         const branches = await this.prisma.branch.findMany({
             where: { companyId },
         });
@@ -107,20 +121,106 @@ let DemoService = DemoService_1 = class DemoService {
         const d5 = `dealer-${companyId}-5`;
         await this.prisma.dealer.createMany({
             data: [
-                { id: d1, companyId, branchId, name: "Apex Retail", phone: "+998901112233", creditLimit: 10000000, currentDebt: 4500000, isApproved: true },
-                { id: d2, companyId, branchId, name: "Global Mart", phone: "+998904445566", creditLimit: 5000000, currentDebt: 1200000, isApproved: true },
-                { id: d3, companyId, branchId, name: "City Express", phone: "+998907778899", creditLimit: 2000000, currentDebt: 2500000, isApproved: true },
-                { id: d4, companyId, branchId, name: "Metro Store", phone: "+998909990011", creditLimit: 8000000, currentDebt: 650000, isApproved: true },
-                { id: d5, companyId, branchId, name: "FastTrade", phone: "+998902223344", creditLimit: 15000000, currentDebt: 3200000, isApproved: true },
+                {
+                    id: d1,
+                    companyId,
+                    branchId,
+                    name: "Apex Retail",
+                    phone: "+998901112233",
+                    creditLimit: 10000000,
+                    currentDebt: 4500000,
+                    isApproved: true,
+                },
+                {
+                    id: d2,
+                    companyId,
+                    branchId,
+                    name: "Global Mart",
+                    phone: "+998904445566",
+                    creditLimit: 5000000,
+                    currentDebt: 1200000,
+                    isApproved: true,
+                },
+                {
+                    id: d3,
+                    companyId,
+                    branchId,
+                    name: "City Express",
+                    phone: "+998907778899",
+                    creditLimit: 2000000,
+                    currentDebt: 2500000,
+                    isApproved: true,
+                },
+                {
+                    id: d4,
+                    companyId,
+                    branchId,
+                    name: "Metro Store",
+                    phone: "+998909990011",
+                    creditLimit: 8000000,
+                    currentDebt: 650000,
+                    isApproved: true,
+                },
+                {
+                    id: d5,
+                    companyId,
+                    branchId,
+                    name: "FastTrade",
+                    phone: "+998902223344",
+                    creditLimit: 15000000,
+                    currentDebt: 3200000,
+                    isApproved: true,
+                },
             ],
         });
         await this.prisma.product.createMany({
             data: [
-                { companyId, name: "Premium Box Set", sku: "PBS-001", price: 250000, costPrice: 180000, stock: 150, unit: "box" },
-                { companyId, name: "Standard Pack", sku: "SP-002", price: 45000, costPrice: 30000, stock: 2000, unit: "pcs" },
-                { companyId, name: "Industrial Set", sku: "IS-003", price: 1200000, costPrice: 950000, stock: 45, unit: "set", isPromo: true },
-                { companyId, name: "Mini Sample", sku: "MS-004", price: 12000, costPrice: 8000, stock: 5000, unit: "pcs" },
-                { companyId, name: "Bulk Container", sku: "BC-005", price: 3500000, costPrice: 2800000, stock: 12, unit: "cnt" },
+                {
+                    companyId,
+                    name: "Premium Box Set",
+                    sku: "PBS-001",
+                    price: 250000,
+                    costPrice: 180000,
+                    stock: 150,
+                    unit: "box",
+                },
+                {
+                    companyId,
+                    name: "Standard Pack",
+                    sku: "SP-002",
+                    price: 45000,
+                    costPrice: 30000,
+                    stock: 2000,
+                    unit: "pcs",
+                },
+                {
+                    companyId,
+                    name: "Industrial Set",
+                    sku: "IS-003",
+                    price: 1200000,
+                    costPrice: 950000,
+                    stock: 45,
+                    unit: "set",
+                    isPromo: true,
+                },
+                {
+                    companyId,
+                    name: "Mini Sample",
+                    sku: "MS-004",
+                    price: 12000,
+                    costPrice: 8000,
+                    stock: 5000,
+                    unit: "pcs",
+                },
+                {
+                    companyId,
+                    name: "Bulk Container",
+                    sku: "BC-005",
+                    price: 3500000,
+                    costPrice: 2800000,
+                    stock: 12,
+                    unit: "cnt",
+                },
             ],
         });
         const now = new Date();
@@ -129,39 +229,215 @@ let DemoService = DemoService_1 = class DemoService {
             { productId: null, name, qty, unit: "pcs", price, total: price * qty },
         ]);
         const orderData = [
-            { companyId, dealerId: d1, branchId, totalAmount: 4500000, totalCost: 3240000, status: "DELIVERED", items: orderItems("Premium Box Set", 18, 250000), createdAt: day(10) },
-            { companyId, dealerId: d2, branchId, totalAmount: 1200000, totalCost: 900000, status: "PENDING", items: orderItems("Standard Pack", 27, 45000), createdAt: day(8) },
-            { companyId, dealerId: d3, branchId, totalAmount: 2500000, totalCost: 1900000, status: "COMPLETED", items: orderItems("Industrial Set", 2, 1200000), createdAt: day(7) },
-            { companyId, dealerId: d4, branchId, totalAmount: 650000, totalCost: 480000, status: "DELIVERED", items: orderItems("Mini Sample", 54, 12000), createdAt: day(6) },
-            { companyId, dealerId: d5, branchId, totalAmount: 3200000, totalCost: 2400000, status: "DELIVERED", items: orderItems("Premium Box Set", 13, 250000), createdAt: day(5) },
-            { companyId, dealerId: d1, branchId, totalAmount: 900000, totalCost: 660000, status: "ACCEPTED", items: orderItems("Standard Pack", 20, 45000), createdAt: day(4) },
-            { companyId, dealerId: d2, branchId, totalAmount: 1800000, totalCost: 1350000, status: "PREPARING", items: orderItems("Bulk Container", 1, 3500000), createdAt: day(3) },
-            { companyId, dealerId: d3, branchId, totalAmount: 360000, totalCost: 240000, status: "SHIPPED", items: orderItems("Mini Sample", 30, 12000), createdAt: day(2) },
-            { companyId, dealerId: d4, branchId, totalAmount: 2000000, totalCost: 1600000, status: "PENDING", items: orderItems("Industrial Set", 1, 1200000), createdAt: day(1) },
-            { companyId, dealerId: d5, branchId, totalAmount: 500000, totalCost: 350000, status: "CANCELLED", items: orderItems("Standard Pack", 11, 45000), createdAt: day(0) },
+            {
+                companyId,
+                dealerId: d1,
+                branchId,
+                totalAmount: 4500000,
+                totalCost: 3240000,
+                status: "DELIVERED",
+                items: orderItems("Premium Box Set", 18, 250000),
+                createdAt: day(10),
+            },
+            {
+                companyId,
+                dealerId: d2,
+                branchId,
+                totalAmount: 1200000,
+                totalCost: 900000,
+                status: "PENDING",
+                items: orderItems("Standard Pack", 27, 45000),
+                createdAt: day(8),
+            },
+            {
+                companyId,
+                dealerId: d3,
+                branchId,
+                totalAmount: 2500000,
+                totalCost: 1900000,
+                status: "COMPLETED",
+                items: orderItems("Industrial Set", 2, 1200000),
+                createdAt: day(7),
+            },
+            {
+                companyId,
+                dealerId: d4,
+                branchId,
+                totalAmount: 650000,
+                totalCost: 480000,
+                status: "DELIVERED",
+                items: orderItems("Mini Sample", 54, 12000),
+                createdAt: day(6),
+            },
+            {
+                companyId,
+                dealerId: d5,
+                branchId,
+                totalAmount: 3200000,
+                totalCost: 2400000,
+                status: "DELIVERED",
+                items: orderItems("Premium Box Set", 13, 250000),
+                createdAt: day(5),
+            },
+            {
+                companyId,
+                dealerId: d1,
+                branchId,
+                totalAmount: 900000,
+                totalCost: 660000,
+                status: "ACCEPTED",
+                items: orderItems("Standard Pack", 20, 45000),
+                createdAt: day(4),
+            },
+            {
+                companyId,
+                dealerId: d2,
+                branchId,
+                totalAmount: 1800000,
+                totalCost: 1350000,
+                status: "PREPARING",
+                items: orderItems("Bulk Container", 1, 3500000),
+                createdAt: day(3),
+            },
+            {
+                companyId,
+                dealerId: d3,
+                branchId,
+                totalAmount: 360000,
+                totalCost: 240000,
+                status: "SHIPPED",
+                items: orderItems("Mini Sample", 30, 12000),
+                createdAt: day(2),
+            },
+            {
+                companyId,
+                dealerId: d4,
+                branchId,
+                totalAmount: 2000000,
+                totalCost: 1600000,
+                status: "PENDING",
+                items: orderItems("Industrial Set", 1, 1200000),
+                createdAt: day(1),
+            },
+            {
+                companyId,
+                dealerId: d5,
+                branchId,
+                totalAmount: 500000,
+                totalCost: 350000,
+                status: "CANCELLED",
+                items: orderItems("Standard Pack", 11, 45000),
+                createdAt: day(0),
+            },
         ];
         for (const od of orderData) {
             await this.prisma.order.create({ data: od });
         }
         await this.prisma.ledgerTransaction.createMany({
             data: [
-                { companyId, dealerId: d1, type: "ORDER", amount: 4500000, createdAt: day(10) },
-                { companyId, dealerId: d2, type: "ORDER", amount: 1200000, createdAt: day(8) },
-                { companyId, dealerId: d3, type: "ORDER", amount: 2500000, createdAt: day(7) },
-                { companyId, dealerId: d4, type: "ORDER", amount: 650000, createdAt: day(6) },
-                { companyId, dealerId: d5, type: "ORDER", amount: 3200000, createdAt: day(5) },
-                { companyId, dealerId: d1, type: "ORDER", amount: 900000, createdAt: day(4) },
-                { companyId, dealerId: d2, type: "ORDER", amount: 1800000, createdAt: day(3) },
-                { companyId, dealerId: d3, type: "ORDER", amount: 360000, createdAt: day(2) },
-                { companyId, dealerId: d4, type: "ORDER", amount: 2000000, createdAt: day(1) },
-                { companyId, dealerId: d5, type: "ORDER", amount: 500000, createdAt: day(0) },
-                { companyId, dealerId: d1, type: "PAYMENT", amount: 4500000, createdAt: day(9) },
-                { companyId, dealerId: d3, type: "PAYMENT", amount: 2360000, createdAt: day(6) },
-                { companyId, dealerId: d5, type: "PAYMENT", amount: 3200000, createdAt: day(4) },
+                {
+                    companyId,
+                    dealerId: d1,
+                    type: "ORDER",
+                    amount: 4500000,
+                    createdAt: day(10),
+                },
+                {
+                    companyId,
+                    dealerId: d2,
+                    type: "ORDER",
+                    amount: 1200000,
+                    createdAt: day(8),
+                },
+                {
+                    companyId,
+                    dealerId: d3,
+                    type: "ORDER",
+                    amount: 2500000,
+                    createdAt: day(7),
+                },
+                {
+                    companyId,
+                    dealerId: d4,
+                    type: "ORDER",
+                    amount: 650000,
+                    createdAt: day(6),
+                },
+                {
+                    companyId,
+                    dealerId: d5,
+                    type: "ORDER",
+                    amount: 3200000,
+                    createdAt: day(5),
+                },
+                {
+                    companyId,
+                    dealerId: d1,
+                    type: "ORDER",
+                    amount: 900000,
+                    createdAt: day(4),
+                },
+                {
+                    companyId,
+                    dealerId: d2,
+                    type: "ORDER",
+                    amount: 1800000,
+                    createdAt: day(3),
+                },
+                {
+                    companyId,
+                    dealerId: d3,
+                    type: "ORDER",
+                    amount: 360000,
+                    createdAt: day(2),
+                },
+                {
+                    companyId,
+                    dealerId: d4,
+                    type: "ORDER",
+                    amount: 2000000,
+                    createdAt: day(1),
+                },
+                {
+                    companyId,
+                    dealerId: d5,
+                    type: "ORDER",
+                    amount: 500000,
+                    createdAt: day(0),
+                },
+                {
+                    companyId,
+                    dealerId: d1,
+                    type: "PAYMENT",
+                    amount: 4500000,
+                    createdAt: day(9),
+                },
+                {
+                    companyId,
+                    dealerId: d3,
+                    type: "PAYMENT",
+                    amount: 2360000,
+                    createdAt: day(6),
+                },
+                {
+                    companyId,
+                    dealerId: d5,
+                    type: "PAYMENT",
+                    amount: 3200000,
+                    createdAt: day(4),
+                },
             ],
         });
         await this.prisma.payment.create({
-            data: { companyId, dealerId: d1, branchId, amount: 4500000, method: "cash", note: "Demo payment", createdAt: day(9) },
+            data: {
+                companyId,
+                dealerId: d1,
+                branchId,
+                amount: 4500000,
+                method: "cash",
+                note: "Demo payment",
+                createdAt: day(9),
+            },
         });
         this.logger.log(`Data reset and re-seeded for company: ${companyId}`);
     }
@@ -311,10 +587,34 @@ let DemoService = DemoService_1 = class DemoService {
                 price: "0",
                 priceMonthly: "0",
                 priceYearly: "0",
-                featuresEn: ["1 branch", "3 staff", "50 dealers", "200 products", "Basic notifications"],
-                featuresUz: ["1 filial", "3 xodim", "50 diler", "200 mahsulot", "Asosiy bildirishnomalar"],
-                featuresRu: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "3 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ°", "50 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "200 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "Ð‘Ð°Ð·Ð¾Ð²Ñ‹Ðµ ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ñ"],
-                featuresTr: ["1 ÅŸube", "3 personel", "50 bayi", "200 Ã¼rÃ¼n", "Temel bildirimler"],
+                featuresEn: [
+                    "1 branch",
+                    "3 staff",
+                    "50 dealers",
+                    "200 products",
+                    "Basic notifications",
+                ],
+                featuresUz: [
+                    "1 filial",
+                    "3 xodim",
+                    "50 diler",
+                    "200 mahsulot",
+                    "Asosiy bildirishnomalar",
+                ],
+                featuresRu: [
+                    "1 Ñ„Ð¸Ð»Ð¸Ð°Ð»",
+                    "3 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ°",
+                    "50 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²",
+                    "200 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²",
+                    "Ð‘Ð°Ð·Ð¾Ð²Ñ‹Ðµ ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ñ",
+                ],
+                featuresTr: [
+                    "1 ÅŸube",
+                    "3 personel",
+                    "50 bayi",
+                    "200 Ã¼rÃ¼n",
+                    "Temel bildirimler",
+                ],
                 isActive: true,
                 isPopular: false,
                 order: 0,
@@ -338,10 +638,38 @@ let DemoService = DemoService_1 = class DemoService {
                 price: "9 999 so'm",
                 priceMonthly: "9999",
                 priceYearly: "99990",
-                featuresEn: ["1 branch", "5 staff", "150 dealers", "500 products", "Web store", "Starter analytics"],
-                featuresUz: ["1 filial", "5 xodim", "150 diler", "500 mahsulot", "Web do'kon", "Boshlang'ich analitika"],
-                featuresRu: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "5 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²", "150 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "500 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "Ð’ÐµÐ±-Ð¼Ð°Ð³Ð°Ð·Ð¸Ð½", "Ð¡Ñ‚Ð°Ñ€Ñ‚Ð¾Ð²Ð°Ñ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÐ°"],
-                featuresTr: ["1 ÅŸube", "5 personel", "150 bayi", "500 Ã¼rÃ¼n", "Web maÄŸaza", "BaÅŸlangÄ±Ã§ analitiÄŸi"],
+                featuresEn: [
+                    "1 branch",
+                    "5 staff",
+                    "150 dealers",
+                    "500 products",
+                    "Web store",
+                    "Starter analytics",
+                ],
+                featuresUz: [
+                    "1 filial",
+                    "5 xodim",
+                    "150 diler",
+                    "500 mahsulot",
+                    "Web do'kon",
+                    "Boshlang'ich analitika",
+                ],
+                featuresRu: [
+                    "1 Ñ„Ð¸Ð»Ð¸Ð°Ð»",
+                    "5 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²",
+                    "150 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²",
+                    "500 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²",
+                    "Ð’ÐµÐ±-Ð¼Ð°Ð³Ð°Ð·Ð¸Ð½",
+                    "Ð¡Ñ‚Ð°Ñ€Ñ‚Ð¾Ð²Ð°Ñ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÐ°",
+                ],
+                featuresTr: [
+                    "1 ÅŸube",
+                    "5 personel",
+                    "150 bayi",
+                    "500 Ã¼rÃ¼n",
+                    "Web maÄŸaza",
+                    "BaÅŸlangÄ±Ã§ analitiÄŸi",
+                ],
                 isActive: true,
                 isPopular: false,
                 order: 1,
@@ -365,10 +693,42 @@ let DemoService = DemoService_1 = class DemoService {
                 price: "29 999 so'm",
                 priceMonthly: "29999",
                 priceYearly: "299990",
-                featuresEn: ["3 branches", "15 staff", "1,000 dealers", "3,000 products", "1 Telegram bot", "Bulk import", "Full analytics"],
-                featuresUz: ["3 filial", "15 xodim", "1 000 diler", "3 000 mahsulot", "1 ta Telegram bot", "Ommaviy import", "To'liq analitika"],
-                featuresRu: ["3 Ñ„Ð¸Ð»Ð¸Ð°Ð»Ð°", "15 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²", "1 000 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "3 000 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "1 Telegram-Ð±Ð¾Ñ‚", "ÐœÐ°ÑÑÐ¾Ð²Ñ‹Ð¹ Ð¸Ð¼Ð¿Ð¾Ñ€Ñ‚", "ÐŸÐ¾Ð»Ð½Ð°Ñ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÐ°"],
-                featuresTr: ["3 ÅŸube", "15 personel", "1.000 bayi", "3.000 Ã¼rÃ¼n", "1 Telegram botu", "Toplu iÃ§e aktarma", "Tam analitik"],
+                featuresEn: [
+                    "3 branches",
+                    "15 staff",
+                    "1,000 dealers",
+                    "3,000 products",
+                    "1 Telegram bot",
+                    "Bulk import",
+                    "Full analytics",
+                ],
+                featuresUz: [
+                    "3 filial",
+                    "15 xodim",
+                    "1 000 diler",
+                    "3 000 mahsulot",
+                    "1 ta Telegram bot",
+                    "Ommaviy import",
+                    "To'liq analitika",
+                ],
+                featuresRu: [
+                    "3 Ñ„Ð¸Ð»Ð¸Ð°Ð»Ð°",
+                    "15 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²",
+                    "1 000 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²",
+                    "3 000 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²",
+                    "1 Telegram-Ð±Ð¾Ñ‚",
+                    "ÐœÐ°ÑÑÐ¾Ð²Ñ‹Ð¹ Ð¸Ð¼Ð¿Ð¾Ñ€Ñ‚",
+                    "ÐŸÐ¾Ð»Ð½Ð°Ñ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÐ°",
+                ],
+                featuresTr: [
+                    "3 ÅŸube",
+                    "15 personel",
+                    "1.000 bayi",
+                    "3.000 Ã¼rÃ¼n",
+                    "1 Telegram botu",
+                    "Toplu iÃ§e aktarma",
+                    "Tam analitik",
+                ],
                 isActive: true,
                 isPopular: true,
                 order: 2,
@@ -392,10 +752,42 @@ let DemoService = DemoService_1 = class DemoService {
                 price: "99 999 so'm",
                 priceMonthly: "99999",
                 priceYearly: "999990",
-                featuresEn: ["10 branches", "50 staff", "5,000 dealers", "15,000 products", "3 Telegram bots", "Priority support", "Advanced controls"],
-                featuresUz: ["10 filial", "50 xodim", "5 000 diler", "15 000 mahsulot", "3 ta Telegram bot", "Ustuvor support", "Kengaytirilgan nazorat"],
-                featuresRu: ["10 Ñ„Ð¸Ð»Ð¸Ð°Ð»Ð¾Ð²", "50 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²", "5 000 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "15 000 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "3 Telegram-Ð±Ð¾Ñ‚Ð°", "ÐŸÑ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð½Ð°Ñ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶ÐºÐ°", "Ð Ð°ÑÑˆÐ¸Ñ€ÐµÐ½Ð½Ñ‹Ð¹ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒ"],
-                featuresTr: ["10 ÅŸube", "50 personel", "5.000 bayi", "15.000 Ã¼rÃ¼n", "3 Telegram botu", "Ã–ncelikli destek", "GeliÅŸmiÅŸ kontroller"],
+                featuresEn: [
+                    "10 branches",
+                    "50 staff",
+                    "5,000 dealers",
+                    "15,000 products",
+                    "3 Telegram bots",
+                    "Priority support",
+                    "Advanced controls",
+                ],
+                featuresUz: [
+                    "10 filial",
+                    "50 xodim",
+                    "5 000 diler",
+                    "15 000 mahsulot",
+                    "3 ta Telegram bot",
+                    "Ustuvor support",
+                    "Kengaytirilgan nazorat",
+                ],
+                featuresRu: [
+                    "10 Ñ„Ð¸Ð»Ð¸Ð°Ð»Ð¾Ð²",
+                    "50 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²",
+                    "5 000 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²",
+                    "15 000 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²",
+                    "3 Telegram-Ð±Ð¾Ñ‚Ð°",
+                    "ÐŸÑ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð½Ð°Ñ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶ÐºÐ°",
+                    "Ð Ð°ÑÑˆÐ¸Ñ€ÐµÐ½Ð½Ñ‹Ð¹ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒ",
+                ],
+                featuresTr: [
+                    "10 ÅŸube",
+                    "50 personel",
+                    "5.000 bayi",
+                    "15.000 Ã¼rÃ¼n",
+                    "3 Telegram botu",
+                    "Ã–ncelikli destek",
+                    "GeliÅŸmiÅŸ kontroller",
+                ],
                 isActive: true,
                 isPopular: false,
                 order: 3,
@@ -458,18 +850,83 @@ let DemoService = DemoService_1 = class DemoService {
                 avgResponseMs: 82,
             },
             products: [
-                { id: "p1", name: "Premium Box Set", price: 250000, stock: 150, unit: "box", sku: "PBS-001" },
-                { id: "p2", name: "Standard Pack", price: 45000, stock: 2000, unit: "pcs", sku: "SP-002" },
-                { id: "p3", name: "Industrial Set", price: 1200000, stock: 45, unit: "set", sku: "IS-003" },
-                { id: "p4", name: "Mini Sample", price: 12000, stock: 5000, unit: "pcs", sku: "MS-004" },
-                { id: "p5", name: "Bulk Container", price: 3500000, stock: 12, unit: "cnt", sku: "BC-005" },
+                {
+                    id: "p1",
+                    name: "Premium Box Set",
+                    price: 250000,
+                    stock: 150,
+                    unit: "box",
+                    sku: "PBS-001",
+                },
+                {
+                    id: "p2",
+                    name: "Standard Pack",
+                    price: 45000,
+                    stock: 2000,
+                    unit: "pcs",
+                    sku: "SP-002",
+                },
+                {
+                    id: "p3",
+                    name: "Industrial Set",
+                    price: 1200000,
+                    stock: 45,
+                    unit: "set",
+                    sku: "IS-003",
+                },
+                {
+                    id: "p4",
+                    name: "Mini Sample",
+                    price: 12000,
+                    stock: 5000,
+                    unit: "pcs",
+                    sku: "MS-004",
+                },
+                {
+                    id: "p5",
+                    name: "Bulk Container",
+                    price: 3500000,
+                    stock: 12,
+                    unit: "cnt",
+                    sku: "BC-005",
+                },
             ],
             recentOrders: [
-                { id: "o1", dealer: "Apex Retail", amount: 4500000, status: "DELIVERED", date: "2026-03-20" },
-                { id: "o2", dealer: "Global Mart", amount: 1200000, status: "PENDING", date: "2026-03-21" },
-                { id: "o3", dealer: "City Express", amount: 2800000, status: "PROCESSING", date: "2026-03-21" },
-                { id: "o4", dealer: "Metro Store", amount: 650000, status: "DELIVERED", date: "2026-03-19" },
-                { id: "o5", dealer: "FastTrade", amount: 3200000, status: "DELIVERED", date: "2026-03-18" },
+                {
+                    id: "o1",
+                    dealer: "Apex Retail",
+                    amount: 4500000,
+                    status: "DELIVERED",
+                    date: "2026-03-20",
+                },
+                {
+                    id: "o2",
+                    dealer: "Global Mart",
+                    amount: 1200000,
+                    status: "PENDING",
+                    date: "2026-03-21",
+                },
+                {
+                    id: "o3",
+                    dealer: "City Express",
+                    amount: 2800000,
+                    status: "PROCESSING",
+                    date: "2026-03-21",
+                },
+                {
+                    id: "o4",
+                    dealer: "Metro Store",
+                    amount: 650000,
+                    status: "DELIVERED",
+                    date: "2026-03-19",
+                },
+                {
+                    id: "o5",
+                    dealer: "FastTrade",
+                    amount: 3200000,
+                    status: "DELIVERED",
+                    date: "2026-03-18",
+                },
             ],
         };
     }

@@ -36,7 +36,9 @@ let DemoReadonlyMiddleware = class DemoReadonlyMiddleware {
         const demoHeader = String(req.headers?.["x-supplio-demo"] || "").toLowerCase();
         const accessHeader = String(req.headers?.["x-supplio-demo-access"] || "").toLowerCase();
         const isDemoRequest = demoHeader === "true" || demoHeader === "1";
-        const isFullAccess = accessHeader === "full" || accessHeader === "edit" || accessHeader === "write";
+        const isFullAccess = accessHeader === "full" ||
+            accessHeader === "edit" ||
+            accessHeader === "write";
         if (!isDemoRequest) {
             return next();
         }

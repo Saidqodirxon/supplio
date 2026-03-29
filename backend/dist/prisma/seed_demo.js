@@ -48,7 +48,13 @@ async function main() {
         },
     });
     await hardDeleteDemoCompanyData(company.id);
-    const branches = await Promise.all(["Tashkent Main", "Samarkand Hub", "Andijan Point", "Bukhara North", "Namangan East"].map((name, idx) => prisma.branch.create({
+    const branches = await Promise.all([
+        "Tashkent Main",
+        "Samarkand Hub",
+        "Andijan Point",
+        "Bukhara North",
+        "Namangan East",
+    ].map((name, idx) => prisma.branch.create({
         data: {
             companyId: company.id,
             name,

@@ -8,7 +8,8 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   const isDemoMode = localStorage.getItem("supplio_demo_mode") === "1";
-  const isDemoFullAccess = localStorage.getItem("supplio_demo_full_access") === "1";
+  const isDemoFullAccess =
+    localStorage.getItem("supplio_demo_full_access") === "1";
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -16,7 +17,9 @@ api.interceptors.request.use((config) => {
 
   if (isDemoMode) {
     config.headers["X-Supplio-Demo"] = "true";
-    config.headers["X-Supplio-Demo-Access"] = isDemoFullAccess ? "full" : "view";
+    config.headers["X-Supplio-Demo-Access"] = isDemoFullAccess
+      ? "full"
+      : "view";
   }
 
   return config;

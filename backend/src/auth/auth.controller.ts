@@ -23,9 +23,15 @@ export class AuthController {
     @Body() loginDto: LoginDto,
     @Request() req: { headers?: Record<string, string> }
   ) {
-    const demoHeader = String(req?.headers?.["x-supplio-demo"] || "").toLowerCase();
+    const demoHeader = String(
+      req?.headers?.["x-supplio-demo"] || ""
+    ).toLowerCase();
     const isDemoRequest = demoHeader === "true" || demoHeader === "1";
-    return this.authService.login(loginDto.phone, loginDto.password, isDemoRequest);
+    return this.authService.login(
+      loginDto.phone,
+      loginDto.password,
+      isDemoRequest
+    );
   }
 
   @UseGuards(JwtAuthGuard)

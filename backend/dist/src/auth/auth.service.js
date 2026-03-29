@@ -82,7 +82,8 @@ let AuthService = AuthService_1 = class AuthService {
             where: { id: userId },
             select: { id: true, passwordHash: true },
         });
-        if (!user || !(await bcrypt.compare(data.currentPassword, user.passwordHash))) {
+        if (!user ||
+            !(await bcrypt.compare(data.currentPassword, user.passwordHash))) {
             throw new common_1.UnauthorizedException("Current password is incorrect");
         }
         const passwordHash = await bcrypt.hash(data.newPassword, 10);

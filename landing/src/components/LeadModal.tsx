@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, CheckCircle2, User, Phone, Info, Loader2, Package } from "lucide-react";
+import {
+  X,
+  Send,
+  CheckCircle2,
+  User,
+  Phone,
+  Info,
+  Loader2,
+  Package,
+} from "lucide-react";
 import { translations, Language } from "@/i18n/translations";
 
 interface LeadModalProps {
@@ -14,18 +23,29 @@ interface LeadModalProps {
 }
 
 function normalizeApiBaseUrl(rawUrl?: string) {
-  const fallback = 'https://api.supplio.uz';
-  const value = (rawUrl || fallback).trim().replace(/\/+$/, '');
-  return value.endsWith('/api') ? value.slice(0, -4) : value;
+  const fallback = "https://api.supplio.uz";
+  const value = (rawUrl || fallback).trim().replace(/\/+$/, "");
+  return value.endsWith("/api") ? value.slice(0, -4) : value;
 }
 
 function normalizeAppBaseUrl(rawUrl?: string) {
-  const fallback = 'https://demo.supplio.uz';
-  return (rawUrl || fallback).trim().replace(/\/+$/, '');
+  const fallback = "https://demo.supplio.uz";
+  return (rawUrl || fallback).trim().replace(/\/+$/, "");
 }
 
-export default function LeadModal({ isOpen, onClose, lang, tariffs, unlockDemoAfterSubmit = false }: LeadModalProps) {
-  const [formData, setFormData] = useState({ fullName: "", phone: "", info: "", tariffId: "" });
+export default function LeadModal({
+  isOpen,
+  onClose,
+  lang,
+  tariffs,
+  unlockDemoAfterSubmit = false,
+}: LeadModalProps) {
+  const [formData, setFormData] = useState({
+    fullName: "",
+    phone: "",
+    info: "",
+    tariffId: "",
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const t = translations[lang];
@@ -124,7 +144,9 @@ export default function LeadModal({ isOpen, onClose, lang, tariffs, unlockDemoAf
                         placeholder={t.common.leadForm.name}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
                         value={formData.fullName}
-                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, fullName: e.target.value })
+                        }
                       />
                     </div>
 
@@ -138,7 +160,9 @@ export default function LeadModal({ isOpen, onClose, lang, tariffs, unlockDemoAf
                         placeholder={t.common.leadForm.phone}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
                         value={formData.phone}
-                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phone: e.target.value })
+                        }
                       />
                     </div>
 
@@ -150,19 +174,42 @@ export default function LeadModal({ isOpen, onClose, lang, tariffs, unlockDemoAf
                         <select
                           className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none text-slate-700"
                           value={formData.tariffId}
-                          onChange={(e) => setFormData({ ...formData, tariffId: e.target.value })}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              tariffId: e.target.value,
+                            })
+                          }
                         >
                           <option value="" disabled className="text-slate-400">
-                            {lang === 'uz' ? 'Tarifni tanlang' : lang === 'ru' ? 'Выберите тариф' : lang === 'tr' ? 'Tarife seçin' : 'Select a Plan'}
+                            {lang === "uz"
+                              ? "Tarifni tanlang"
+                              : lang === "ru"
+                                ? "Выберите тариф"
+                                : lang === "tr"
+                                  ? "Tarife seçin"
+                                  : "Select a Plan"}
                           </option>
-                          {tariffs.map((tItem: Record<string, unknown>, i: number) => {
-                            const tName = String(tItem[`name${lang.charAt(0).toUpperCase() + lang.slice(1)}`] || tItem.name || `Plan ${i + 1}`);
-                            return (
-                              <option key={(tItem.id as string) || i} value={(tItem.id as string) || tName}>
-                                {tName} - {tItem.price as string} {t.common.uzs || 'UZS'}
-                              </option>
-                            );
-                          })}
+                          {tariffs.map(
+                            (tItem: Record<string, unknown>, i: number) => {
+                              const tName = String(
+                                tItem[
+                                  `name${lang.charAt(0).toUpperCase() + lang.slice(1)}`
+                                ] ||
+                                  tItem.name ||
+                                  `Plan ${i + 1}`
+                              );
+                              return (
+                                <option
+                                  key={(tItem.id as string) || i}
+                                  value={(tItem.id as string) || tName}
+                                >
+                                  {tName} - {tItem.price as string}{" "}
+                                  {t.common.uzs || "UZS"}
+                                </option>
+                              );
+                            }
+                          )}
                         </select>
                       </div>
                     )}
@@ -176,7 +223,9 @@ export default function LeadModal({ isOpen, onClose, lang, tariffs, unlockDemoAf
                         placeholder={t.common.leadForm.info}
                         className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all resize-none placeholder:text-slate-400"
                         value={formData.info}
-                        onChange={(e) => setFormData({ ...formData, info: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, info: e.target.value })
+                        }
                       />
                     </div>
                   </div>

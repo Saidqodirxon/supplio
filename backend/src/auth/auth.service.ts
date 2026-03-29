@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
@@ -80,11 +84,15 @@ export class AuthService {
     data: { currentPassword: string; newPassword: string }
   ) {
     if (!data.currentPassword || !data.newPassword) {
-      throw new BadRequestException("Both current and new passwords are required");
+      throw new BadRequestException(
+        "Both current and new passwords are required"
+      );
     }
 
     if (data.newPassword.length < 6) {
-      throw new BadRequestException("New password must be at least 6 characters");
+      throw new BadRequestException(
+        "New password must be at least 6 characters"
+      );
     }
 
     const user = await this.prisma.user.findUnique({
@@ -92,7 +100,10 @@ export class AuthService {
       select: { id: true, passwordHash: true },
     });
 
-    if (!user || !(await bcrypt.compare(data.currentPassword, user.passwordHash))) {
+    if (
+      !user ||
+      !(await bcrypt.compare(data.currentPassword, user.passwordHash))
+    ) {
       throw new UnauthorizedException("Current password is incorrect");
     }
 

@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NestMiddleware,
-} from "@nestjs/common";
+import { ForbiddenException, Injectable, NestMiddleware } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../../prisma/prisma.service";
 
@@ -31,10 +27,17 @@ export class DemoReadonlyMiddleware implements NestMiddleware {
       return next();
     }
 
-    const demoHeader = String(req.headers?.["x-supplio-demo"] || "").toLowerCase();
-    const accessHeader = String(req.headers?.["x-supplio-demo-access"] || "").toLowerCase();
+    const demoHeader = String(
+      req.headers?.["x-supplio-demo"] || ""
+    ).toLowerCase();
+    const accessHeader = String(
+      req.headers?.["x-supplio-demo-access"] || ""
+    ).toLowerCase();
     const isDemoRequest = demoHeader === "true" || demoHeader === "1";
-    const isFullAccess = accessHeader === "full" || accessHeader === "edit" || accessHeader === "write";
+    const isFullAccess =
+      accessHeader === "full" ||
+      accessHeader === "edit" ||
+      accessHeader === "write";
 
     if (!isDemoRequest) {
       return next();
