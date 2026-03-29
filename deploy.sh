@@ -54,8 +54,18 @@ update_backend() {
     [ -f ".env.production" ] && cp .env.production .env && ok "Backend: .env.production nusxalandi."
     
     if [ -f "prisma/schema.prisma" ]; then
-        npx prisma migrate deploy 2>/dev/null || warn "Prisma migrate deploy da xatolik (davom etilmoqda...)"
-        npx prisma generate
+        log "Prisma migrate deploy ishlatilmoqda..."
+        if npx prisma migrate deploy; then
+            ok "Prisma migrationlar qo'llandi."
+        else
+            fail "Prisma migrate deploy ishlamadi. Seeddan oldin migration xatolarini tuzating."
+        fi
+
+        if npx prisma generate; then
+            ok "Prisma client generate yakunlandi."
+        else
+            fail "Prisma client generate da xatolik."
+        fi
     fi
 
     # Build - xatosi bo'lsa ham davom etsin (eski dist ishlatsin)
@@ -78,27 +88,33 @@ update_backend() {
 run_backend_seeds() {
     log "${BOLD}DATABASE SEEDS${RESET} ishlatilmoqda..."
     cd "$REPO_DIR/backend"
+
+    # Seedlardan oldin migration holatini yana tekshirib olamiz
+    log "Seeddan oldin Prisma migration holati tekshirilmoqda..."
+    if ! npx prisma migrate deploy; then
+        fail "Migration qo'llanmagani uchun seedlar to'xtatildi."
+    fi
     
     # Barcha seedlarni ishlatish (seed.ts -> seed_demo.ts -> seed_landing.ts)
     log "Main seed ishlatilmoqda..."
     if npm run seed; then
         ok "Main seed yakunlandi."
     else
-        warn "Main seed da xatolik, davom etilmoqda..."
+        fail "Main seed da xatolik. Logni tekshirib tuzating."
     fi
 
     log "Demo seed ishlatilmoqda..."
     if npm run seed:demo; then
         ok "Demo seed yakunlandi."
     else
-        warn "Demo seed da xatolik, davom etilmoqda..."
+        fail "Demo seed da xatolik. Logni tekshirib tuzating."
     fi
 
     log "Landing seed ishlatilmoqda..."
     if npm run seed:landing; then
         ok "Landing seed yakunlandi."
     else
-        warn "Landing seed da xatolik, davom etilmoqda..."
+        fail "Landing seed da xatolik. Logni tekshirib tuzating."
     fi
     
     cd "$REPO_DIR"

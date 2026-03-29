@@ -45,8 +45,18 @@ build_backend() {
     [ -f ".env.production" ] && cp .env.production .env
     
     if [ -f "prisma/schema.prisma" ]; then
-        npx prisma migrate deploy 2>/dev/null || true
-        npx prisma generate 2>/dev/null || true
+        log "Prisma migrationlar tekshirilmoqda..."
+        if npx prisma migrate deploy; then
+            ok "Prisma migrationlar qo'llandi."
+        else
+            fail "Prisma migrate deploy ishlamadi. Avval migration xatosini tuzating."
+        fi
+
+        if npx prisma generate; then
+            ok "Prisma client generate yakunlandi."
+        else
+            fail "Prisma client generate da xatolik."
+        fi
     fi
 
     # Build - xatosi bo'lsa ham davom etsin (eski dist ishlatsin)

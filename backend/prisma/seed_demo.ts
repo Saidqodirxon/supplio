@@ -1,28 +1,49 @@
-import { PrismaClient, RoleType } from "@prisma/client";
+import { PrismaClient, Prisma, RoleType } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 const DEMO_PHONE = "+998000000000";
 const DEMO_PASSWORD = "demo1234";
 
+function isMissingTableError(error: unknown): boolean {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false;
+  if (error.code !== "P2010") return false;
+  const meta = error.meta as { code?: string; message?: string } | undefined;
+  return meta?.code === "42P01";
+}
+
+async function safeDeleteByCompany(table: string, companyId: string) {
+  try {
+    await prisma.$executeRawUnsafe(
+      `DELETE FROM "${table}" WHERE "companyId" = $1`,
+      companyId,
+    );
+  } catch (error) {
+    if (!isMissingTableError(error)) {
+      throw error;
+    }
+    console.warn(`[seed:demo] Table ${table} mavjud emas, skip qilindi.`);
+  }
+}
+
 async function hardDeleteDemoCompanyData(companyId: string) {
-  await prisma.$executeRaw`DELETE FROM "NotificationLog" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "NotificationTemplate" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "Notification" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "UpgradeRequest" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "DealerApprovalRequest" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "Order" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "Payment" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "LedgerTransaction" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "Expense" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "Product" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "Dealer" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "CustomBot" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "FeatureFlag" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "Branch" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "CustomRole" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "User" WHERE "companyId" = ${companyId}`;
-  await prisma.$executeRaw`DELETE FROM "Subscription" WHERE "companyId" = ${companyId}`;
+  await safeDeleteByCompany("NotificationLog", companyId);
+  await safeDeleteByCompany("NotificationTemplate", companyId);
+  await safeDeleteByCompany("Notification", companyId);
+  await safeDeleteByCompany("UpgradeRequest", companyId);
+  await safeDeleteByCompany("DealerApprovalRequest", companyId);
+  await safeDeleteByCompany("Order", companyId);
+  await safeDeleteByCompany("Payment", companyId);
+  await safeDeleteByCompany("LedgerTransaction", companyId);
+  await safeDeleteByCompany("Expense", companyId);
+  await safeDeleteByCompany("Product", companyId);
+  await safeDeleteByCompany("Dealer", companyId);
+  await safeDeleteByCompany("CustomBot", companyId);
+  await safeDeleteByCompany("FeatureFlag", companyId);
+  await safeDeleteByCompany("Branch", companyId);
+  await safeDeleteByCompany("CustomRole", companyId);
+  await safeDeleteByCompany("User", companyId);
+  await safeDeleteByCompany("Subscription", companyId);
 }
 
 async function main() {
