@@ -3,6 +3,7 @@
 ## 2 Ta Deploy Mode
 
 ### 1. **deploy.sh** - To'liq Deploy + Seeds
+
 **Qachon ishlatamiz**: Birinchi marta deploy yoki database reset kerak bo'lsa
 
 ```bash
@@ -14,6 +15,7 @@ bash /root/supplio/deploy.sh --skip-seeds
 ```
 
 **Nima qiladi**:
+
 - ✅ Git pull
 - ✅ Backend, Dashboard, Landing build
 - ✅ **Barcha seeds ishlatadi** (seed → seed:demo → seed:landing)
@@ -23,6 +25,7 @@ bash /root/supplio/deploy.sh --skip-seeds
 ---
 
 ### 2. **deploy-build.sh** - Faqat Build (seedlar YO'Q)
+
 **Qachon ishlatamiz**: Kod o'zgarganda, seedlarni qayta ishlatmayman
 
 ```bash
@@ -31,6 +34,7 @@ bash /root/supplio/deploy-build.sh
 ```
 
 **Nima qiladi**:
+
 - ✅ Git pull
 - ✅ Backend, Dashboard, Landing build **ONLY**
 - ❌ **SEEDLAR TO'XTALGAN** (data qoladi)
@@ -42,20 +46,25 @@ bash /root/supplio/deploy-build.sh
 ## Qo'llanma
 
 ### Birinchi marta (Fresh Deploy + Seeds)
+
 ```bash
 cd /root/supplio
 bash deploy.sh
 ```
+
 Bu 30-40 daqiqa vaqt oladi (seeds katta).
 
 ### Kod o'zgardi (quick update)
+
 ```bash
 cd /root/supplio
 bash deploy-build.sh
 ```
+
 Bu 5-10 daqiqa oladi (seedlar emas, faqat build).
 
 ### Agar database reset kerak bo'lsa
+
 ```bash
 cd /root/supplio
 bash deploy.sh --skip-seeds
@@ -68,6 +77,7 @@ bash deploy.sh
 ## Build Xatosiga Nisbatan Ishonch
 
 **Muhim**: Agar build da xatolik bo'lsa:
+
 - ✅ **Eski dist saqlanib qoladi** (o'chiriladi emas)
 - ✅ **Qolgan processlar to'xtamadi** (continue etadi)
 - ✅ **PM2 eski version bilan ishlashda davom etadi**
@@ -80,6 +90,7 @@ Buning uchun hech narsani o'chirmaydi, faqat "warn" chiqaradi.
 ## Environment Variables
 
 Kerakli `.env.production` fayllar:
+
 - `/root/supplio/backend/.env.production` (DATABASE_URL, JWT_SECRET va boshqalar)
 
 ---
@@ -87,11 +98,13 @@ Kerakli `.env.production` fayllar:
 ## PM2 Processlar
 
 Quyidagilar PM2 orqali run bo'ladi:
+
 - **Backend5050** - NestJS (port 5050)
 - **Dashboard3030** - React/Vite (port 3030)
 - **Landing3040** - Next.js (port 3040)
 
 **Qulayliq**:
+
 ```bash
 pm2 list                    # Barcha processlarni ko'r
 pm2 logs Backend5050        # Backend logsni ko'r
@@ -110,6 +123,7 @@ Seedlar quyidagilarni yaratadi:
 3. **seed:landing** - Landing page uchun static data
 
 Demo orqali kirish:
+
 - URL: `https://demo.supplio.uz/login`
 - Phone: `+998000000000`
 - Password: `demo1234`
@@ -121,12 +135,14 @@ Demo orqali kirish:
 ## Xatolarni Shaxsiy O'qish
 
 ### Backend Logs
+
 ```bash
 pm2 logs Backend5050 -n 50  # Oxirgi 50 ta log
 pm2 logs Backend5050 --err  # Faqat xatolar
 ```
 
 ### Database Ulanish
+
 ```bash
 # SSH orqali
 ssh root@your_server

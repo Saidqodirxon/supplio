@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
   if (pathnameIsMissingValidLocale && !isPublicAsset) {
     return NextResponse.redirect(new URL("/uz", request.url));
   }
-}
+} 
 
 
 export const config = {
