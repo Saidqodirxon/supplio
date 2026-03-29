@@ -9,7 +9,7 @@ import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AuthService {
-  private static readonly DEMO_PHONE = "+998000000000";
+  private static readonly DEMO_PHONE = "+998901000000";
 
   constructor(
     private prisma: PrismaService,

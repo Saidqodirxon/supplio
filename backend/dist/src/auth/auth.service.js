@@ -132,7 +132,7 @@ let AuthService = AuthService_1 = class AuthService {
     }
 };
 exports.AuthService = AuthService;
-AuthService.DEMO_PHONE = "+998000000000";
+AuthService.DEMO_PHONE = "+998901000000";
 exports.AuthService = AuthService = AuthService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,

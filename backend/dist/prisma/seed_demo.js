@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const prisma = new client_1.PrismaClient();
-const DEMO_PHONE = "+998000000000";
+const DEMO_PHONE = "+998901000000";
 const DEMO_PASSWORD = "demo1234";
 function isMissingTableError(error) {
     if (!(error instanceof client_1.Prisma.PrismaClientKnownRequestError))
