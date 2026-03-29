@@ -87,7 +87,7 @@
   .premium-button {
     @apply relative overflow-hidden flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest text-white premium-gradient shadow-xl shadow-blue-600/20 active:scale-95 transition-all hover:shadow-blue-600/40 hover:-translate-y-1;
   }
-
+ 
   .input-field {
     @apply w-full bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-2xl px-6 h-14 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all duration-300 text-slate-950 dark:text-slate-50 placeholder:text-slate-500 font-bold;
   }

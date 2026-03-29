@@ -469,11 +469,6 @@ export default function Staff() {
   const allChecked = permAll.every(k => !!roleForm.permissions[k]);
   const noneChecked = permAll.every(k => !roleForm.permissions[k]);
 
-  // ── Role select for form ──────────────────────────────────────────────────
-
-  const selectedEditCustomRole = customRoles.find(r => r.id === editForm.customRoleId);
-  const selectedAddCustomRole  = customRoles.find(r => r.id === staffForm.customRoleId);
-
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (

@@ -683,13 +683,13 @@ export default function Products() {
                   {/* Image */}
                   <div className="col-span-2">
                     <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
-                      {t.products?.image || 'Product Image'}
+                      {t.superadmin.coverImage || 'Product Image'}
                     </label>
                     <ImageUploader
                       value={form.imageUrl}
                       onChange={url => setForm(f => ({ ...f, imageUrl: url }))}
                       onRemove={() => setForm(f => ({ ...f, imageUrl: '' }))}
-                      label={t.products?.uploadImage || 'Upload product image'}
+                      label={t.superadmin.uploadCoverImage || 'Upload product image'}
                       className="h-44"
                     />
                   </div>

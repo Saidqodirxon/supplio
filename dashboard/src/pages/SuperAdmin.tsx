@@ -29,7 +29,6 @@ import {
   UserPlus,
   Newspaper,
   Plus,
-  Zap,
   TrendingUp,
   Clock,
   BadgeCheck,
