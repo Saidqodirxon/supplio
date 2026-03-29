@@ -45,6 +45,7 @@ build_backend() {
     [ -f ".env.production" ] && cp .env.production .env
     
     if [ -f "prisma/schema.prisma" ]; then
+        npx prisma migrate deploy 2>/dev/null || true
         npx prisma generate 2>/dev/null || true
     fi
 
@@ -79,13 +80,10 @@ build_dashboard() {
         warn "Dashboard build da xatolik! Eski dist ishlatilmoqda..."
     fi
     
-    if pm2 describe Dashboard3030 > /dev/null 2>&1; then
-        pm2 restart Dashboard3030 --update-env
-        ok "Dashboard restarted."
-    else
-        pm2 start npm --name Dashboard3030 -- preview
-        ok "Dashboard started."
-    fi
+    pm2 stop Dashboard3030 2>/dev/null || true
+    pm2 delete Dashboard3030 2>/dev/null || true
+    pm2 start "$REPO_DIR/dashboard/node_modules/.bin/vite" --name Dashboard3030 -- preview --port 3030
+    ok "Dashboard started (port 3030)."
     cd "$REPO_DIR"
 }
 
@@ -93,23 +91,20 @@ build_dashboard() {
 build_landing() {
     log "${BOLD}LANDING (Next.js)${RESET} build qilinmoqda..."
     cd "$REPO_DIR/landing"
-    
+
     npm install --silent --legacy-peer-deps 2>/dev/null || true
-    
+
     # Build - xatosi bo'lsa ham davom etsin
     if npm run build 2>/dev/null; then
         ok "Landing build muvaffaqiyatli."
     else
         warn "Landing build da xatolik! Eski .next ishlatilmoqda..."
     fi
-    
-    if pm2 describe Landing3040 > /dev/null 2>&1; then
-        pm2 restart Landing3040 --update-env
-        ok "Landing restarted."
-    else
-        pm2 start npm --name Landing3040 -- start
-        ok "Landing started."
-    fi
+
+    pm2 stop Landing3040 2>/dev/null || true
+    pm2 delete Landing3040 2>/dev/null || true
+    pm2 start "$REPO_DIR/landing/node_modules/.bin/next" --name Landing3040 -- start -p 3040
+    ok "Landing started (port 3040)."
     cd "$REPO_DIR"
 }
 

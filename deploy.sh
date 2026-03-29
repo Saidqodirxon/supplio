@@ -54,6 +54,7 @@ update_backend() {
     [ -f ".env.production" ] && cp .env.production .env && ok "Backend: .env.production nusxalandi."
     
     if [ -f "prisma/schema.prisma" ]; then
+        npx prisma migrate deploy 2>/dev/null || warn "Prisma migrate deploy da xatolik (davom etilmoqda...)"
         npx prisma generate
     fi
 
@@ -80,21 +81,21 @@ run_backend_seeds() {
     
     # Barcha seedlarni ishlatish (seed.ts -> seed_demo.ts -> seed_landing.ts)
     log "Main seed ishlatilmoqda..."
-    if npm run seed 2>/dev/null; then
+    if npm run seed; then
         ok "Main seed yakunlandi."
     else
         warn "Main seed da xatolik, davom etilmoqda..."
     fi
-    
+
     log "Demo seed ishlatilmoqda..."
-    if npm run seed:demo 2>/dev/null; then
+    if npm run seed:demo; then
         ok "Demo seed yakunlandi."
     else
         warn "Demo seed da xatolik, davom etilmoqda..."
     fi
-    
+
     log "Landing seed ishlatilmoqda..."
-    if npm run seed:landing 2>/dev/null; then
+    if npm run seed:landing; then
         ok "Landing seed yakunlandi."
     else
         warn "Landing seed da xatolik, davom etilmoqda..."
@@ -119,12 +120,10 @@ update_dashboard() {
         warn "Dashboard build da xatolik! Eski dist ishlatilmoqda..."
     fi
     
-    if pm2 describe Dashboard3030 > /dev/null 2>&1; then
-        pm2 restart Dashboard3030 --update-env
-    else
-        pm2 start npm --name Dashboard3030 -- preview
-    fi
-    ok "Dashboard ishga tushdi."
+    pm2 stop Dashboard3030 2>/dev/null || true
+    pm2 delete Dashboard3030 2>/dev/null || true
+    pm2 start "$REPO_DIR/dashboard/node_modules/.bin/vite" --name Dashboard3030 -- preview --port 3030
+    ok "Dashboard ishga tushdi (port 3030)."
     cd "$REPO_DIR"
 }
 
@@ -132,23 +131,21 @@ update_dashboard() {
 update_landing() {
     log "${BOLD}LANDING (Next.js)${RESET} yangilanmoqda..."
     cd "$REPO_DIR/landing"
-    
+
     rm -rf .next node_modules
     npm install --silent --legacy-peer-deps
-    
+
     # Build - xatosi bo'lsa ham davom etsin
     if npm run build 2>/dev/null; then
         ok "Landing build muvaffaqiyatli."
     else
         warn "Landing build da xatolik! Eski .next ishlatilmoqda..."
     fi
-    
-    if pm2 describe Landing3040 > /dev/null 2>&1; then
-        pm2 restart Landing3040 --update-env
-    else
-        pm2 start npm --name Landing3040 -- start
-    fi
-    ok "Landing ishga tushdi."
+
+    pm2 stop Landing3040 2>/dev/null || true
+    pm2 delete Landing3040 2>/dev/null || true
+    pm2 start "$REPO_DIR/landing/node_modules/.bin/next" --name Landing3040 -- start -p 3040
+    ok "Landing ishga tushdi (port 3040)."
     cd "$REPO_DIR"
 }
 
