@@ -249,7 +249,7 @@ async function seedTariffs() {
             nameUzCyr: "Корпоратив",
             price: "Muzokaralar asosida",
             priceMonthly: "Muzokaralar asosida",
-            isActive: true,
+            isActive: false,
             isPopular: false,
             maxBranches: 99999,
             maxUsers: 99999,
@@ -394,7 +394,9 @@ async function seedNews() {
         },
     ];
     for (const article of articles) {
-        const existing = await prisma.news.findFirst({ where: { slugUz: article.slugUz } });
+        const existing = await prisma.news.findFirst({
+            where: { slugUz: article.slugUz },
+        });
         if (!existing) {
             await prisma.news.create({ data: article });
             console.log(`  ✓ News created: ${article.titleEn}`);

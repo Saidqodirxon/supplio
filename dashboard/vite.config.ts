@@ -4,6 +4,12 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    allowedHosts: ["localhost", "supplio.uz", "*.supplio.uz"],
+  },
+  preview: {
+    allowedHosts: ["localhost", "supplio.uz", "*.supplio.uz"],
+  },
   plugins: [
     react(),
     VitePWA({
