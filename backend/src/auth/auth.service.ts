@@ -5,12 +5,20 @@ import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class AuthService {
+  private static readonly DEMO_PHONE = "+998000000000";
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService
   ) {}
 
-  async login(phone: string, pass: string) {
+  async login(phone: string, pass: string, isDemoRequest = false) {
+    if (isDemoRequest && phone !== AuthService.DEMO_PHONE) {
+      throw new UnauthorizedException(
+        "Demo rejimda faqat +998 00 000 00 00 bilan kirish mumkin"
+      );
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { phone },
     });

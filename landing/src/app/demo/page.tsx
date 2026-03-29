@@ -445,7 +445,7 @@ export default function DemoPage() {
         </motion.div>
       </main>
 
-      <LeadModal isOpen={isLeadModalOpen} onClose={() => setIsLeadModalOpen(false)} lang="en" />
+      <LeadModal isOpen={isLeadModalOpen} onClose={() => setIsLeadModalOpen(false)} lang="en" unlockDemoAfterSubmit={true} />
     </div>
   );
 }

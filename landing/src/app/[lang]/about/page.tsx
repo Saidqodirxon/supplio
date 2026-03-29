@@ -253,6 +253,7 @@ export default function AboutPage() {
         isOpen={isLeadModalOpen}
         onClose={() => setIsLeadModalOpen(false)}
         lang={lang}
+        unlockDemoAfterSubmit={true}
         tariffs={[]}
       />
     </div>

@@ -602,6 +602,7 @@ export default function NewsDetailPage() {
         isOpen={isLeadModalOpen}
         onClose={() => setIsLeadModalOpen(false)}
         lang={lang}
+        unlockDemoAfterSubmit={true}
       />
     </div>
   );

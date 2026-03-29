@@ -8,18 +8,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var AuthService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const jwt_1 = require("@nestjs/jwt");
 const bcrypt = require("bcrypt");
-let AuthService = class AuthService {
+let AuthService = AuthService_1 = class AuthService {
     constructor(prisma, jwtService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
     }
-    async login(phone, pass) {
+    async login(phone, pass, isDemoRequest = false) {
+        if (isDemoRequest && phone !== AuthService_1.DEMO_PHONE) {
+            throw new common_1.UnauthorizedException("Demo rejimda faqat +998 00 000 00 00 bilan kirish mumkin");
+        }
         const user = await this.prisma.user.findUnique({
             where: { phone },
         });
@@ -127,7 +131,8 @@ let AuthService = class AuthService {
     }
 };
 exports.AuthService = AuthService;
-exports.AuthService = AuthService = __decorate([
+AuthService.DEMO_PHONE = "+998000000000";
+exports.AuthService = AuthService = AuthService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         jwt_1.JwtService])

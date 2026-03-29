@@ -33,7 +33,11 @@ const store_module_1 = require("./store/store.module");
 const upload_module_1 = require("./upload/upload.module");
 const public_module_1 = require("./public/public.module");
 const app_controller_1 = require("./app.controller");
+const demo_readonly_middleware_1 = require("./common/middleware/demo-readonly.middleware");
 let AppModule = class AppModule {
+    configure(consumer) {
+        consumer.apply(demo_readonly_middleware_1.DemoReadonlyMiddleware).forRoutes("*");
+    }
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
@@ -65,7 +69,7 @@ exports.AppModule = AppModule = __decorate([
             public_module_1.PublicModule,
         ],
         controllers: [app_controller_1.AppController],
-        providers: [],
+        providers: [demo_readonly_middleware_1.DemoReadonlyMiddleware],
     })
 ], AppModule);
 //# sourceMappingURL=app.module.js.map

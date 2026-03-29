@@ -10,6 +10,7 @@ interface LeadModalProps {
   onClose: () => void;
   lang: Language;
   tariffs?: Record<string, unknown>[];
+  unlockDemoAfterSubmit?: boolean;
 }
 
 function normalizeApiBaseUrl(rawUrl?: string) {
@@ -18,12 +19,18 @@ function normalizeApiBaseUrl(rawUrl?: string) {
   return value.endsWith('/api') ? value.slice(0, -4) : value;
 }
 
-export default function LeadModal({ isOpen, onClose, lang, tariffs }: LeadModalProps) {
+function normalizeAppBaseUrl(rawUrl?: string) {
+  const fallback = 'https://demo.supplio.uz';
+  return (rawUrl || fallback).trim().replace(/\/+$/, '');
+}
+
+export default function LeadModal({ isOpen, onClose, lang, tariffs, unlockDemoAfterSubmit = false }: LeadModalProps) {
   const [formData, setFormData] = useState({ fullName: "", phone: "", info: "", tariffId: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const t = translations[lang];
   const API = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+  const APP_LOGIN_FULL_DEMO_URL = `${normalizeAppBaseUrl(process.env.NEXT_PUBLIC_DEMO_URL)}/login?demo=1&access=full`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +45,11 @@ export default function LeadModal({ isOpen, onClose, lang, tariffs }: LeadModalP
 
       if (res.ok) {
         setIsSuccess(true);
+        if (unlockDemoAfterSubmit) {
+          setTimeout(() => {
+            window.location.href = APP_LOGIN_FULL_DEMO_URL;
+          }, 1200);
+        }
         setTimeout(() => {
           onClose();
           setIsSuccess(false);

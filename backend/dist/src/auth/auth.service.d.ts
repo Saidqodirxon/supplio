@@ -3,8 +3,9 @@ import { JwtService } from "@nestjs/jwt";
 export declare class AuthService {
     private prisma;
     private jwtService;
+    private static readonly DEMO_PHONE;
     constructor(prisma: PrismaService, jwtService: JwtService);
-    login(phone: string, pass: string): Promise<{
+    login(phone: string, pass: string, isDemoRequest?: boolean): Promise<{
         token: string;
         user: {
             id: string;
@@ -15,11 +16,11 @@ export declare class AuthService {
     }>;
     getProfile(userId: string): Promise<{
         id: string;
-        isActive: boolean;
         phone: string;
         fullName: string;
         photoUrl: string;
         roleType: import(".prisma/client").$Enums.RoleType;
+        isActive: boolean;
         language: string;
     }>;
     updateProfile(userId: string, data: {
@@ -28,20 +29,20 @@ export declare class AuthService {
         language?: string;
     }): Promise<{
         id: string;
-        companyId: string;
-        isActive: boolean;
-        createdAt: Date;
-        deletedAt: Date | null;
-        updatedAt: Date;
-        deletedBy: string | null;
         phone: string;
+        companyId: string;
         branchId: string | null;
         passwordHash: string;
         fullName: string | null;
         photoUrl: string | null;
         roleType: import(".prisma/client").$Enums.RoleType;
-        language: string;
         customRoleId: string | null;
+        isActive: boolean;
+        language: string;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
+        deletedBy: string | null;
     }>;
     changePassword(userId: string, data: {
         currentPassword: string;

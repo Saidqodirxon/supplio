@@ -9,6 +9,11 @@ import { LangSelect } from '../components/LangSelect';
 import { formatPhoneNumber, unformatPhoneNumber } from '../utils/formatters';
 import api from '../services/api';
 
+const DEMO_MODE_STORAGE_KEY = 'supplio_demo_mode';
+const DEMO_FULL_ACCESS_STORAGE_KEY = 'supplio_demo_full_access';
+const DEMO_PHONE = '+998000000000';
+const DEMO_PASSWORD = 'demo1234';
+
 export default function Login() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -20,6 +25,8 @@ export default function Login() {
   const { isDark, toggleTheme } = useThemeStore();
   const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
   const [adminPhone, setAdminPhone] = useState<string | null>(null);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [isDemoFullAccess, setIsDemoFullAccess] = useState(false);
   const t = dashboardTranslations[language].login;
 
   useEffect(() => {
@@ -29,6 +36,36 @@ export default function Login() {
       document.documentElement.classList.remove('dark');
     }
   }, [isDark]);
+
+  useEffect(() => {
+    const hostDemo =
+      window.location.hostname === 'demo.supplio.uz' ||
+      window.location.hostname.startsWith('demo.');
+    const params = new URLSearchParams(window.location.search);
+    const demoParam = (params.get('demo') || '').toLowerCase();
+    const accessParam = (params.get('access') || '').toLowerCase();
+    const queryDemo = demoParam === '1' || demoParam === 'true' || demoParam === 'yes';
+    const queryFull = accessParam === 'full' || accessParam === 'edit' || accessParam === 'write';
+    const queryView = accessParam === 'view' || accessParam === 'readonly' || accessParam === 'read';
+
+    if (queryFull) {
+      localStorage.setItem(DEMO_FULL_ACCESS_STORAGE_KEY, '1');
+    } else if (queryView) {
+      localStorage.setItem(DEMO_FULL_ACCESS_STORAGE_KEY, '0');
+    }
+
+    if (hostDemo || queryDemo) {
+      localStorage.setItem(DEMO_MODE_STORAGE_KEY, '1');
+      setIsDemoMode(true);
+      setIsDemoFullAccess(localStorage.getItem(DEMO_FULL_ACCESS_STORAGE_KEY) === '1');
+      setPhoneNumber(formatPhoneNumber(DEMO_PHONE));
+      setPassword(DEMO_PASSWORD);
+      return;
+    }
+
+    setIsDemoMode(localStorage.getItem(DEMO_MODE_STORAGE_KEY) === '1');
+    setIsDemoFullAccess(localStorage.getItem(DEMO_FULL_ACCESS_STORAGE_KEY) === '1');
+  }, []);
 
   useEffect(() => {
     const fetchSettings = async () => {
@@ -47,6 +84,12 @@ export default function Login() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (isDemoMode && unformatPhoneNumber(phoneNumber) !== DEMO_PHONE) {
+      setError('Demo rejimda faqat +998 00 000 00 00 bilan kirish mumkin');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -94,6 +137,27 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {isDemoMode && (
+              <div className="rounded-2xl border border-blue-200 dark:border-blue-400/30 bg-blue-50 dark:bg-blue-500/10 p-4 space-y-3">
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-700 dark:text-blue-300">Demo credentials</p>
+                <div className="text-xs font-bold text-slate-700 dark:text-slate-200 space-y-1">
+                  <p>Login: {DEMO_PHONE}</p>
+                  <p>Password: {DEMO_PASSWORD}</p>
+                  {isDemoFullAccess ? <p className="text-emerald-700 dark:text-emerald-300">Full access ochilgan (edit/create ruxsat)</p> : <p className="text-blue-700 dark:text-blue-300">To'liq edit/create uchun avval so'rov yuboring.</p>}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPhoneNumber(formatPhoneNumber(DEMO_PHONE));
+                    setPassword(DEMO_PASSWORD);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl bg-blue-600 text-white text-[11px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all"
+                >
+                  Login ma'lumotini to'ldirish
+                </button>
+              </div>
+            )}
+
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">{t.phoneNumber}</label>
               <div className="relative group">
@@ -107,6 +171,7 @@ export default function Login() {
                   placeholder="+998 90 123 45 67"
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(formatPhoneNumber(e.target.value))}
+                  readOnly={isDemoMode}
                 />
               </div>
             </div>

@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, NestModule, MiddlewareConsumer } from "@nestjs/common";
 import { ScheduleModule } from "@nestjs/schedule";
 import { PrismaModule } from "./prisma/prisma.module";
 import { PaymentsModule } from "./payments/payments.module";
@@ -25,6 +25,7 @@ import { UploadModule } from "./upload/upload.module";
 import { PublicModule } from "./public/public.module";
 
 import { AppController } from "./app.controller";
+import { DemoReadonlyMiddleware } from "./common/middleware/demo-readonly.middleware";
 
 @Module({
   imports: [
@@ -54,6 +55,10 @@ import { AppController } from "./app.controller";
     PublicModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [DemoReadonlyMiddleware],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(DemoReadonlyMiddleware).forRoutes("*");
+  }
+}

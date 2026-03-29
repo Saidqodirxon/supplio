@@ -98,16 +98,43 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 }
 
 // Detect if running on demo subdomain
-const IS_DEMO_DOMAIN =
-  typeof window !== 'undefined' &&
-  (window.location.hostname === 'demo.supplio.uz' ||
-    window.location.hostname.startsWith('demo.'));
+const DEMO_MODE_STORAGE_KEY = 'supplio_demo_mode';
+const DEMO_FULL_ACCESS_STORAGE_KEY = 'supplio_demo_full_access';
+
+function isDemoRuntime() {
+  if (typeof window === 'undefined') return false;
+
+  const hostDemo =
+    window.location.hostname === 'demo.supplio.uz' ||
+    window.location.hostname.startsWith('demo.');
+
+  const params = new URLSearchParams(window.location.search);
+  const demoParam = (params.get('demo') || '').toLowerCase();
+  const queryDemo = demoParam === '1' || demoParam === 'true' || demoParam === 'yes';
+  const fullParam = (params.get('access') || '').toLowerCase();
+  const queryFull = fullParam === 'full' || fullParam === 'edit' || fullParam === 'write';
+  const queryView = fullParam === 'view' || fullParam === 'readonly' || fullParam === 'read';
+
+  if (queryFull) {
+    localStorage.setItem(DEMO_FULL_ACCESS_STORAGE_KEY, '1');
+  } else if (queryView) {
+    localStorage.setItem(DEMO_FULL_ACCESS_STORAGE_KEY, '0');
+  }
+
+  if (hostDemo || queryDemo) {
+    localStorage.setItem(DEMO_MODE_STORAGE_KEY, '1');
+    return true;
+  }
+
+  return localStorage.getItem(DEMO_MODE_STORAGE_KEY) === '1';
+}
 
 function App() {
   const { isDark } = useThemeStore();
+  const demoRuntime = isDemoRuntime();
 
   // On demo domain: show demo landing if not on /login path
-  if (IS_DEMO_DOMAIN) {
+  if (demoRuntime) {
     return (
       <ErrorBoundary>
         <Router>

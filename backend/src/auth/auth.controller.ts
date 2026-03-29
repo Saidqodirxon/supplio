@@ -19,8 +19,13 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post("login")
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto.phone, loginDto.password);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Request() req: { headers?: Record<string, string> }
+  ) {
+    const demoHeader = String(req?.headers?.["x-supplio-demo"] || "").toLowerCase();
+    const isDemoRequest = demoHeader === "true" || demoHeader === "1";
+    return this.authService.login(loginDto.phone, loginDto.password, isDemoRequest);
   }
 
   @UseGuards(JwtAuthGuard)

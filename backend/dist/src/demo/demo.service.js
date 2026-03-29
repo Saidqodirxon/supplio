@@ -51,7 +51,7 @@ let DemoService = DemoService_1 = class DemoService {
             demo: {
                 phone: DEMO_PHONE,
                 password: DEMO_PASSWORD,
-                url: "https://app.supplio.uz",
+                url: "https://demo.supplio.uz/login?demo=1&access=full",
                 note: "These credentials give you full access to the demo environment. Data resets daily at midnight.",
             },
         };

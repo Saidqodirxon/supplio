@@ -81,6 +81,11 @@ function normalizeBackendBaseUrl(rawUrl?: string) {
   return value.endsWith('/api') ? value.slice(0, -4) : value;
 }
 
+function normalizeAppBaseUrl(rawUrl?: string) {
+  const fallback = 'https://app.supplio.uz';
+  return (rawUrl || fallback).trim().replace(/\/+$/, '');
+}
+
 interface DynamicSettings {
   newsEnabled: boolean;
   defaultTrialDays?: number;
@@ -116,6 +121,8 @@ export default function LandingPage() {
   const [testimonialIdx, setTestimonialIdx] = useState(0);
 
   const BACKEND = normalizeBackendBaseUrl(process.env.NEXT_PUBLIC_BACKEND_URL);
+  const APP_LOGIN_URL = `${normalizeAppBaseUrl(process.env.NEXT_PUBLIC_APP_URL)}/login`;
+  const DEMO_LOGIN_URL = `${normalizeAppBaseUrl(process.env.NEXT_PUBLIC_DEMO_URL || 'https://demo.supplio.uz')}/login`;
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -190,7 +197,7 @@ export default function LandingPage() {
 
           <div className="hidden md:flex items-center gap-5">
             <LangSelect currentLang={lang} />
-            <Link href="https://app.supplio.uz/login" className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors">
+            <Link href={APP_LOGIN_URL} className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors">
               {t.nav.login}
             </Link>
             <button onClick={() => setIsLeadModalOpen(true)} className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20 active:scale-95">
@@ -213,7 +220,7 @@ export default function LandingPage() {
               <Link href="#pricing" onClick={() => setIsMenuOpen(false)}>{t.nav.pricing}</Link>
               <Link href="#news" onClick={() => setIsMenuOpen(false)}>{t.nav.news}</Link>
               <hr className="border-slate-100" />
-              <Link href="https://app.supplio.uz/login">{t.nav.login}</Link>
+              <Link href={APP_LOGIN_URL}>{t.nav.login}</Link>
               <button className="text-blue-600 font-bold text-left" onClick={() => { setIsMenuOpen(false); setIsLeadModalOpen(true); }}>{t.nav.register}</button>
               <div className="pt-4"><LangSelect currentLang={lang} /></div>
             </div>
@@ -249,9 +256,9 @@ export default function LandingPage() {
             <button onClick={() => setIsLeadModalOpen(true)} className="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-base hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/30 hover:scale-[1.02] active:scale-[0.98]">
               {t.hero.cta}
             </button>
-            <button onClick={() => setIsLeadModalOpen(true)} className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold text-base hover:bg-slate-50 transition-all hover:scale-[1.02] active:scale-[0.98]">
+            <Link href={`${DEMO_LOGIN_URL}?demo=1&access=view`} className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold text-base hover:bg-slate-50 transition-all hover:scale-[1.02] active:scale-[0.98] text-center">
               {t.hero.secondary}
-            </button>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -717,6 +724,7 @@ export default function LandingPage() {
         isOpen={isLeadModalOpen}
         onClose={() => setIsLeadModalOpen(false)}
         lang={lang}
+        unlockDemoAfterSubmit={true}
         tariffs={dynamicTariffs.length > 0 ? dynamicTariffs : (t.pricing.plans as unknown as SafePlan[])}
       />
     </div>

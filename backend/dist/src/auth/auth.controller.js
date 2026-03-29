@@ -21,8 +21,10 @@ let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
-    async login(loginDto) {
-        return this.authService.login(loginDto.phone, loginDto.password);
+    async login(loginDto, req) {
+        const demoHeader = String(req?.headers?.["x-supplio-demo"] || "").toLowerCase();
+        const isDemoRequest = demoHeader === "true" || demoHeader === "1";
+        return this.authService.login(loginDto.phone, loginDto.password, isDemoRequest);
     }
     async getProfile(req) {
         return this.authService.getProfile(req.user.id);
@@ -42,8 +44,9 @@ __decorate([
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
     (0, common_1.Post)("login"),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [login_dto_1.LoginDto]),
+    __metadata("design:paramtypes", [login_dto_1.LoginDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([
