@@ -1115,7 +1115,7 @@ export default function LandingPage() {
             </p>
             {contactPhone && (
               <a
-                href={contactPhoneHref}
+                href={contactPhoneHref || "#"}
                 className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
               >
                 <Phone className="w-4 h-4 text-blue-600" />
@@ -1228,7 +1228,7 @@ export default function LandingPage() {
               .map((social) => (
                 <a
                   key={social.label}
-                  href={social.href}
+                  href={social.href || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest font-bold"
@@ -1292,7 +1292,7 @@ export default function LandingPage() {
               <div className="space-y-3">
                 {contactPhone && (
                   <a
-                    href={contactPhoneHref}
+                    href={contactPhoneHref || "#"}
                     className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
                   >
                     <span className="inline-flex items-center gap-2 font-bold text-slate-700">

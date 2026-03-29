@@ -121,7 +121,7 @@ build_landing() {
 # ── 3. Barcha komponentlarni build qilish ─────────────────────
 
 echo ""
-log "🛠️  FAQAT BUILD QI'L, SEEDLAR BO'Z..."
+log "🛠️  FAQAT BUILD QI'L, SEEDLAR SIZ..."
 echo ""
 
 build_backend && \

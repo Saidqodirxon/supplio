@@ -312,10 +312,10 @@ async function seedTariffs() {
             ],
         },
     ];
-    for (const t of tariffs) {
-        await prisma.tariffPlan.create({ data: t });
+    await prisma.tariffPlan.createMany({ data: tariffs });
+    tariffs.forEach((t) => {
         console.log(`  ✓ Created: ${t.nameEn} — ${t.price}`);
-    }
+    });
     console.log("✓ Tariffs done");
 }
 async function seedNews() {

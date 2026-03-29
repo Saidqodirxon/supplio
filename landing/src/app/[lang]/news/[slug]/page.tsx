@@ -298,12 +298,14 @@ export default function NewsDetailPage() {
   }, [BACKEND]);
 
   const lk = getLangKey(lang);
-  const title = article ? article[`title${lk}`] || article.titleEn || "" : "";
+  const title = article
+    ? String(article[`title${lk}`] || article.titleEn || "")
+    : "";
   const excerpt = article
-    ? article[`excerpt${lk}`] || article.excerptEn || ""
+    ? String(article[`excerpt${lk}`] || article.excerptEn || "")
     : "";
   const content = article
-    ? article[`content${lk}`] || article.contentEn || ""
+    ? String(article[`content${lk}`] || article.contentEn || "")
     : "";
   const dateStr = article
     ? format(new Date(article.createdAt), "dd.MM.yyyy")

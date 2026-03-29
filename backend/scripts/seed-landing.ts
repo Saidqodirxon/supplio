@@ -30,6 +30,8 @@ async function seedSettings() {
 }
 
 async function seedTariffs() {
+  const deleted = await (prisma as any).tariffPlan.deleteMany({});
+  console.log(`  🗑  Deleted ${deleted.count} old tariff(s)`);
 
   const tariffs = [
     {
@@ -258,7 +260,7 @@ async function seedTariffs() {
       nameUzCyr: "Корпоратив",
       price: "Muzokaralar asosida",
       priceMonthly: "Muzokaralar asosida",
-      isActive: true,
+      isActive: false,
       isPopular: false,
       maxBranches: 99999,
       maxUsers: 99999,
@@ -322,14 +324,10 @@ async function seedTariffs() {
     },
   ];
 
-  for (const t of tariffs) {
-    await (prisma as any).tariffPlan.upsert({
-      where: { planKey: t.planKey },
-      update: t,
-      create: t,
-    });
-    console.log(`  ✓ Upserted: ${t.nameEn} — ${t.price}`);
-  }
+  await (prisma as any).tariffPlan.createMany({ data: tariffs });
+  tariffs.forEach((t) => {
+    console.log(`  ✓ Created: ${t.nameEn} — ${t.price}`);
+  });
   console.log("✓ Tariffs done");
 }
 
