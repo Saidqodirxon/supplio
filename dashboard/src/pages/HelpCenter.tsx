@@ -1,5 +1,14 @@
 import { useMemo, useState, useEffect } from "react";
-import { LifeBuoy, Phone, Mail, MapPin, Send, AlertTriangle, ExternalLink, Loader2 } from "lucide-react";
+import {
+  LifeBuoy,
+  Phone,
+  Mail,
+  MapPin,
+  Send,
+  AlertTriangle,
+  ExternalLink,
+  Loader2,
+} from "lucide-react";
 import { toast } from "sonner";
 import api from "../services/api";
 import { useAuthStore } from "../store/authStore";
@@ -60,8 +69,21 @@ export default function HelpCenter() {
         sent: "Обращение отправлено",
         errorFields: "Тема и описание обязательны",
         errorSend: "Ошибка при отправке",
-        categories: { Bug: "Ошибка", Question: "Вопрос", Access: "Доступ", Other: "Другое" },
-        labels: { Phone: "Телефон", Email: "Email", Telegram: "Telegram", Instagram: "Instagram", LinkedIn: "LinkedIn", Twitter: "Twitter", Address: "Адрес" },
+        categories: {
+          Bug: "Ошибка",
+          Question: "Вопрос",
+          Access: "Доступ",
+          Other: "Другое",
+        },
+        labels: {
+          Phone: "Телефон",
+          Email: "Email",
+          Telegram: "Telegram",
+          Instagram: "Instagram",
+          LinkedIn: "LinkedIn",
+          Twitter: "Twitter",
+          Address: "Адрес",
+        },
         open: "Открыть",
       };
     }
@@ -78,8 +100,21 @@ export default function HelpCenter() {
         sent: "Request submitted",
         errorFields: "Subject and description are required",
         errorSend: "Failed to send request",
-        categories: { Bug: "Bug", Question: "Question", Access: "Access", Other: "Other" },
-        labels: { Phone: "Phone", Email: "Email", Telegram: "Telegram", Instagram: "Instagram", LinkedIn: "LinkedIn", Twitter: "Twitter", Address: "Address" },
+        categories: {
+          Bug: "Bug",
+          Question: "Question",
+          Access: "Access",
+          Other: "Other",
+        },
+        labels: {
+          Phone: "Phone",
+          Email: "Email",
+          Telegram: "Telegram",
+          Instagram: "Instagram",
+          LinkedIn: "LinkedIn",
+          Twitter: "Twitter",
+          Address: "Address",
+        },
         open: "Open",
       };
     }
@@ -96,8 +131,21 @@ export default function HelpCenter() {
         sent: "Talep gönderildi",
         errorFields: "Konu ve açıklama gereklidir",
         errorSend: "Talep gönderilemedi",
-        categories: { Bug: "Hata", Question: "Soru", Access: "Erişim", Other: "Diğer" },
-        labels: { Phone: "Telefon", Email: "Email", Telegram: "Telegram", Instagram: "Instagram", LinkedIn: "LinkedIn", Twitter: "Twitter", Address: "Adres" },
+        categories: {
+          Bug: "Hata",
+          Question: "Soru",
+          Access: "Erişim",
+          Other: "Diğer",
+        },
+        labels: {
+          Phone: "Telefon",
+          Email: "Email",
+          Telegram: "Telegram",
+          Instagram: "Instagram",
+          LinkedIn: "LinkedIn",
+          Twitter: "Twitter",
+          Address: "Adres",
+        },
         open: "Aç",
       };
     }
@@ -113,8 +161,21 @@ export default function HelpCenter() {
       sent: "Ariza yuborildi",
       errorFields: "Mavzu va tavsif to'ldirilishi kerak",
       errorSend: "Ariza yuborishda xatolik",
-      categories: { Bug: "Xatolik", Question: "Savol", Access: "Kirish muammosi", Other: "Boshqa" },
-      labels: { Phone: "Telefon", Email: "Email", Telegram: "Telegram", Instagram: "Instagram", LinkedIn: "LinkedIn", Twitter: "Twitter", Address: "Manzil" },
+      categories: {
+        Bug: "Xatolik",
+        Question: "Savol",
+        Access: "Kirish muammosi",
+        Other: "Boshqa",
+      },
+      labels: {
+        Phone: "Telefon",
+        Email: "Email",
+        Telegram: "Telegram",
+        Instagram: "Instagram",
+        LinkedIn: "LinkedIn",
+        Twitter: "Twitter",
+        Address: "Manzil",
+      },
       open: "Ochish",
     };
   }, [language]);
@@ -134,10 +195,30 @@ export default function HelpCenter() {
     { label: text.labels.Phone, value: phone, href: phoneHref, icon: Phone },
     { label: text.labels.Email, value: email, href: emailHref, icon: Mail },
     { label: text.labels.Telegram, value: tg, href: tg, icon: Send },
-    { label: text.labels.Instagram, value: instagram, href: instagram, icon: ExternalLink },
-    { label: text.labels.LinkedIn, value: linkedin, href: linkedin, icon: ExternalLink },
-    { label: text.labels.Twitter, value: twitter, href: twitter, icon: ExternalLink },
-    { label: text.labels.Address, value: address, href: addressUrl, icon: MapPin },
+    {
+      label: text.labels.Instagram,
+      value: instagram,
+      href: instagram,
+      icon: ExternalLink,
+    },
+    {
+      label: text.labels.LinkedIn,
+      value: linkedin,
+      href: linkedin,
+      icon: ExternalLink,
+    },
+    {
+      label: text.labels.Twitter,
+      value: twitter,
+      href: twitter,
+      icon: ExternalLink,
+    },
+    {
+      label: text.labels.Address,
+      value: address,
+      href: addressUrl,
+      icon: MapPin,
+    },
   ].filter((m) => m.value);
 
   const submitIssue = async () => {
@@ -181,14 +262,18 @@ export default function HelpCenter() {
           </div>
           <div>
             <h1 className="text-2xl font-black tracking-tight">{text.title}</h1>
-            <p className="text-slate-500 text-sm font-medium">{text.subtitle}</p>
+            <p className="text-slate-500 text-sm font-medium">
+              {text.subtitle}
+            </p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-3xl p-6 sm:p-8 space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">{text.methods}</h2>
+          <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">
+            {text.methods}
+          </h2>
           {loading ? (
             <div className="py-10 flex items-center justify-center text-slate-400">
               <Loader2 className="w-5 h-5 animate-spin" />
@@ -200,13 +285,19 @@ export default function HelpCenter() {
                   key={`${m.label}-${m.value}`}
                   href={m.href || "#"}
                   target={m.href?.startsWith("http") ? "_blank" : undefined}
-                  rel={m.href?.startsWith("http") ? "noopener noreferrer" : undefined}
+                  rel={
+                    m.href?.startsWith("http")
+                      ? "noopener noreferrer"
+                      : undefined
+                  }
                   className="flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border border-slate-100 dark:border-white/10 hover:border-blue-200 hover:bg-blue-50/40 dark:hover:bg-blue-500/10 transition-all"
                 >
                   <span className="inline-flex items-center gap-2 text-slate-700 dark:text-slate-200 font-bold text-sm">
                     <m.icon className="w-4 h-4 text-blue-600" /> {m.label}
                   </span>
-                  <span className="text-xs text-slate-500 truncate max-w-[60%]">{m.value}</span>
+                  <span className="text-xs text-slate-500 truncate max-w-[60%]">
+                    {m.value}
+                  </span>
                 </a>
               ))}
             </div>
@@ -214,12 +305,18 @@ export default function HelpCenter() {
         </div>
 
         <div className="bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-3xl p-6 sm:p-8 space-y-4">
-          <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">{text.report}</h2>
+          <h2 className="text-sm font-black uppercase tracking-widest text-slate-400">
+            {text.report}
+          </h2>
           <div className="grid grid-cols-1 gap-3">
-            <label className="text-xs font-bold text-slate-500">{text.category}</label>
+            <label className="text-xs font-bold text-slate-500">
+              {text.category}
+            </label>
             <select
               value={form.category}
-              onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, category: e.target.value }))
+              }
               className="px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm font-semibold"
             >
               <option value="Bug">{text.categories.Bug}</option>
@@ -228,19 +325,27 @@ export default function HelpCenter() {
               <option value="Other">{text.categories.Other}</option>
             </select>
 
-            <label className="text-xs font-bold text-slate-500">{text.subject}</label>
+            <label className="text-xs font-bold text-slate-500">
+              {text.subject}
+            </label>
             <input
               value={form.subject}
-              onChange={(e) => setForm((p) => ({ ...p, subject: e.target.value }))}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, subject: e.target.value }))
+              }
               placeholder={text.subject}
               className="px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm font-semibold"
             />
 
-            <label className="text-xs font-bold text-slate-500">{text.message}</label>
+            <label className="text-xs font-bold text-slate-500">
+              {text.message}
+            </label>
             <textarea
               rows={5}
               value={form.message}
-              onChange={(e) => setForm((p) => ({ ...p, message: e.target.value }))}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, message: e.target.value }))
+              }
               placeholder={text.message}
               className="px-4 py-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm font-semibold resize-none"
             />
@@ -250,7 +355,12 @@ export default function HelpCenter() {
               disabled={sending}
               className="mt-2 py-3 rounded-xl bg-blue-600 text-white font-black text-sm inline-flex items-center justify-center gap-2 disabled:opacity-60"
             >
-              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <AlertTriangle className="w-4 h-4" />} {text.submit}
+              {sending ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <AlertTriangle className="w-4 h-4" />
+              )}{" "}
+              {text.submit}
             </button>
           </div>
         </div>

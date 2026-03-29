@@ -13,9 +13,21 @@ export class PublicService {
         take: 4,
         select: {
           id: true,
-          slugUz: true, slugRu: true, slugEn: true, slugTr: true, slugUzCyr: true,
-          titleUz: true, titleRu: true, titleEn: true, titleTr: true, titleUzCyr: true,
-          excerptUz: true, excerptRu: true, excerptEn: true, excerptTr: true, excerptUzCyr: true,
+          slugUz: true,
+          slugRu: true,
+          slugEn: true,
+          slugTr: true,
+          slugUzCyr: true,
+          titleUz: true,
+          titleRu: true,
+          titleEn: true,
+          titleTr: true,
+          titleUzCyr: true,
+          excerptUz: true,
+          excerptRu: true,
+          excerptEn: true,
+          excerptTr: true,
+          excerptUzCyr: true,
           image: true,
           createdAt: true,
         },
@@ -33,7 +45,9 @@ export class PublicService {
           superAdminPhone: true,
         },
       }),
-      (this.prisma as any).landingContent.findUnique({ where: { id: "LANDING" } }).catch(() => null),
+      (this.prisma as any).landingContent
+        .findUnique({ where: { id: "LANDING" } })
+        .catch(() => null),
     ]);
 
     return { news, tariffs, settings, landing };
@@ -69,28 +83,33 @@ export class PublicService {
         `SELECT COUNT(*) as cnt FROM "Company" WHERE "deletedAt" IS NULL`
       );
       companies = Number(r1[0]?.cnt ?? 0);
-    } catch (_e) { companies = 0; }
+    } catch (_e) {
+      companies = 0;
+    }
 
     try {
       const r2 = await this.prisma.$queryRawUnsafe<{ cnt: bigint }[]>(
         `SELECT COUNT(*) as cnt FROM "Order"`
       );
       orders = Number(r2[0]?.cnt ?? 0);
-    } catch (_e) { orders = 0; }
+    } catch (_e) {
+      orders = 0;
+    }
 
     return {
       testimonials,
       stats: {
         companies,
         orders,
-        uptime: '99.9%',
-        support: '24/7',
+        uptime: "99.9%",
+        support: "24/7",
       },
     };
   }
 
   async getNewsBySlug(slug: string, lang: string) {
-    const suffix = lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
+    const suffix =
+      lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
     const slugField = `slug${suffix}`;
     return (this.prisma as any).news.findFirst({
       where: {
@@ -99,10 +118,26 @@ export class PublicService {
       },
       select: {
         id: true,
-        slugUz: true, slugRu: true, slugEn: true, slugTr: true, slugUzCyr: true,
-        titleUz: true, titleRu: true, titleEn: true, titleTr: true, titleUzCyr: true,
-        excerptUz: true, excerptRu: true, excerptEn: true, excerptTr: true, excerptUzCyr: true,
-        contentUz: true, contentRu: true, contentEn: true, contentTr: true, contentUzCyr: true,
+        slugUz: true,
+        slugRu: true,
+        slugEn: true,
+        slugTr: true,
+        slugUzCyr: true,
+        titleUz: true,
+        titleRu: true,
+        titleEn: true,
+        titleTr: true,
+        titleUzCyr: true,
+        excerptUz: true,
+        excerptRu: true,
+        excerptEn: true,
+        excerptTr: true,
+        excerptUzCyr: true,
+        contentUz: true,
+        contentRu: true,
+        contentEn: true,
+        contentTr: true,
+        contentUzCyr: true,
         image: true,
         viewCount: true,
         isPublished: true,

@@ -230,8 +230,15 @@ export default function LandingPage() {
   const heroBadge = landing?.[`heroBadge${langKey}`] || t.hero.badge;
   const footerDesc = landing?.[`footerDesc${langKey}`] || t.footer.desc;
   const fallbackPhone = "+998901112233";
-  const contactPhone = (landing?.contactPhone || settings?.superAdminPhone || fallbackPhone).trim() || null;
-  const contactPhoneHref = contactPhone ? `tel:${contactPhone.replace(/[^\d+]/g, "")}` : null;
+  const contactPhone =
+    (
+      landing?.contactPhone ||
+      settings?.superAdminPhone ||
+      fallbackPhone
+    ).trim() || null;
+  const contactPhoneHref = contactPhone
+    ? `tel:${contactPhone.replace(/[^\d+]/g, "")}`
+    : null;
   const contactEmail = landing?.contactEmail?.trim() || null;
   const contactEmailHref = contactEmail ? `mailto:${contactEmail}` : null;
   const contactAddress = landing?.contactAddress?.trim() || null;
@@ -332,7 +339,13 @@ export default function LandingPage() {
                 {t.nav.news}
               </Link>
               <hr className="border-slate-100" />
-              <Link href={APP_LOGIN_URL} target="_blank" rel="noopener noreferrer">{t.nav.login}</Link>
+              <Link
+                href={APP_LOGIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t.nav.login}
+              </Link>
               <button
                 className="text-blue-600 font-bold text-left"
                 onClick={() => {
@@ -828,14 +841,23 @@ export default function LandingPage() {
             const isScrollable = count >= 5;
 
             const PlanCard = ({ plan, i }: { plan: SafePlan; i: number }) => {
-              const langSuffix = lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
+              const langSuffix =
+                lang === "oz"
+                  ? "UzCyr"
+                  : lang.charAt(0).toUpperCase() + lang.slice(1);
               const name =
                 dynamicTariffs.length > 0
-                  ? String(plan[`name${langSuffix}`] || plan.nameUz || plan.name || "")
+                  ? String(
+                      plan[`name${langSuffix}`] ||
+                        plan.nameUz ||
+                        plan.name ||
+                        ""
+                    )
                   : plan.name;
               const features =
                 dynamicTariffs.length > 0
-                  ? (plan[`features${langSuffix}`] || plan.featuresUz) as string[]
+                  ? ((plan[`features${langSuffix}`] ||
+                      plan.featuresUz) as string[])
                   : plan.features;
               const isPopular = plan.isPopular;
               const price = (plan.priceMonthly as string) || plan.price || "0";
@@ -992,7 +1014,15 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {dynamicNews.length === 0 ? (
                 <p className="col-span-3 text-center text-slate-400 py-12 font-medium">
-                  {lang === "uz" ? "Hozircha yangiliklar yo'q." : lang === "ru" ? "Пока нет статей." : lang === "tr" ? "Henüz makale yok." : lang === "oz" ? "Ҳозирча янгиликлар йўқ." : "No articles yet."}
+                  {lang === "uz"
+                    ? "Hozircha yangiliklar yo'q."
+                    : lang === "ru"
+                      ? "Пока нет статей."
+                      : lang === "tr"
+                        ? "Henüz makale yok."
+                        : lang === "oz"
+                          ? "Ҳозирча янгиликлар йўқ."
+                          : "No articles yet."}
                 </p>
               ) : null}
               {(dynamicNews as unknown as SafeNews[]).map((news, i: number) => {
@@ -1101,8 +1131,8 @@ export default function LandingPage() {
                 <span>{contactEmail}</span>
               </a>
             )}
-            {contactAddress && (
-              contactAddressUrl ? (
+            {contactAddress &&
+              (contactAddressUrl ? (
                 <a
                   href={contactAddressUrl}
                   target="_blank"
@@ -1117,8 +1147,7 @@ export default function LandingPage() {
                   <MapPin className="w-4 h-4 text-blue-600" />
                   <span>{contactAddress}</span>
                 </div>
-              )
-            )}
+              ))}
             <button
               onClick={() => setIsHelpModalOpen(true)}
               className="inline-flex items-center gap-2 mt-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
@@ -1171,7 +1200,11 @@ export default function LandingPage() {
                     key={j}
                     href={link.href}
                     target={link.href.startsWith("http") ? "_blank" : undefined}
-                    rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                    rel={
+                      link.href.startsWith("http")
+                        ? "noopener noreferrer"
+                        : undefined
+                    }
                     className="hover:text-blue-600 transition-colors"
                   >
                     {link.name}
@@ -1258,25 +1291,58 @@ export default function LandingPage() {
 
               <div className="space-y-3">
                 {contactPhone && (
-                  <a href={contactPhoneHref} className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50">
-                    <span className="inline-flex items-center gap-2 font-bold text-slate-700"><Phone className="w-4 h-4 text-blue-600" />
-                      {lang === "ru" ? "Телефон" : lang === "tr" ? "Telefon" : lang === "oz" ? "Телефон" : "Telefon"}
+                  <a
+                    href={contactPhoneHref}
+                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
+                  >
+                    <span className="inline-flex items-center gap-2 font-bold text-slate-700">
+                      <Phone className="w-4 h-4 text-blue-600" />
+                      {lang === "ru"
+                        ? "Телефон"
+                        : lang === "tr"
+                          ? "Telefon"
+                          : lang === "oz"
+                            ? "Телефон"
+                            : "Telefon"}
                     </span>
-                    <span className="text-xs text-slate-500">{contactPhone}</span>
+                    <span className="text-xs text-slate-500">
+                      {contactPhone}
+                    </span>
                   </a>
                 )}
                 {contactEmail && contactEmailHref && (
-                  <a href={contactEmailHref} className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50">
-                    <span className="inline-flex items-center gap-2 font-bold text-slate-700"><Mail className="w-4 h-4 text-blue-600" /> Email</span>
-                    <span className="text-xs text-slate-500">{contactEmail}</span>
+                  <a
+                    href={contactEmailHref}
+                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
+                  >
+                    <span className="inline-flex items-center gap-2 font-bold text-slate-700">
+                      <Mail className="w-4 h-4 text-blue-600" /> Email
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {contactEmail}
+                    </span>
                   </a>
                 )}
                 {contactAddress && (
-                  <a href={contactAddressUrl || "#"} target={contactAddressUrl ? "_blank" : undefined} rel={contactAddressUrl ? "noopener noreferrer" : undefined} className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50">
-                    <span className="inline-flex items-center gap-2 font-bold text-slate-700"><MapPin className="w-4 h-4 text-blue-600" />
-                      {lang === "ru" ? "Адрес" : lang === "tr" ? "Adres" : lang === "oz" ? "Манзил" : "Manzil"}
+                  <a
+                    href={contactAddressUrl || "#"}
+                    target={contactAddressUrl ? "_blank" : undefined}
+                    rel={contactAddressUrl ? "noopener noreferrer" : undefined}
+                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
+                  >
+                    <span className="inline-flex items-center gap-2 font-bold text-slate-700">
+                      <MapPin className="w-4 h-4 text-blue-600" />
+                      {lang === "ru"
+                        ? "Адрес"
+                        : lang === "tr"
+                          ? "Adres"
+                          : lang === "oz"
+                            ? "Манзил"
+                            : "Manzil"}
                     </span>
-                    <span className="text-xs text-slate-500 truncate max-w-[55%]">{contactAddress}</span>
+                    <span className="text-xs text-slate-500 truncate max-w-[55%]">
+                      {contactAddress}
+                    </span>
                   </a>
                 )}
                 {[
@@ -1287,10 +1353,25 @@ export default function LandingPage() {
                 ]
                   .filter((s) => s.href)
                   .map((social) => (
-                    <a key={social.label} href={social.href || "#"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50">
-                      <span className="inline-flex items-center gap-2 font-bold text-slate-700"><ExternalLink className="w-4 h-4 text-blue-600" /> {social.label}</span>
+                    <a
+                      key={social.label}
+                      href={social.href || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
+                    >
+                      <span className="inline-flex items-center gap-2 font-bold text-slate-700">
+                        <ExternalLink className="w-4 h-4 text-blue-600" />{" "}
+                        {social.label}
+                      </span>
                       <span className="text-xs text-slate-500">
-                        {lang === "ru" ? "Открыть" : lang === "tr" ? "Aç" : lang === "oz" ? "Очиш" : "Ochish"}
+                        {lang === "ru"
+                          ? "Открыть"
+                          : lang === "tr"
+                            ? "Aç"
+                            : lang === "oz"
+                              ? "Очиш"
+                              : "Ochish"}
                       </span>
                     </a>
                   ))}

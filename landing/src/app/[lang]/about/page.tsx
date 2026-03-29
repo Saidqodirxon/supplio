@@ -166,7 +166,13 @@ export default function AboutPage() {
               {t.nav.news}
             </Link>
             <hr className="border-slate-100" />
-            <Link href={APP_LOGIN_URL} target="_blank" rel="noopener noreferrer">{t.nav.login}</Link>
+            <Link
+              href={APP_LOGIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {t.nav.login}
+            </Link>
             <button
               className="text-blue-600 font-bold text-left"
               onClick={() => {

@@ -195,7 +195,9 @@ export default function LeadModal({
                         >
                           <option value="" disabled className="text-slate-400">
                             {lang === "uz" || lang === "oz"
-                              ? (lang === "oz" ? "Тарифни танланг" : "Tarifni tanlang")
+                              ? lang === "oz"
+                                ? "Тарифни танланг"
+                                : "Tarifni tanlang"
                               : lang === "ru"
                                 ? "Выберите тариф"
                                 : lang === "tr"
@@ -204,7 +206,11 @@ export default function LeadModal({
                           </option>
                           {tariffs.map(
                             (tItem: Record<string, unknown>, i: number) => {
-                              const tLangSuffix = lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
+                              const tLangSuffix =
+                                lang === "oz"
+                                  ? "UzCyr"
+                                  : lang.charAt(0).toUpperCase() +
+                                    lang.slice(1);
                               const tName = String(
                                 tItem[`name${tLangSuffix}`] ||
                                   tItem.nameUz ||

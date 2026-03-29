@@ -1873,14 +1873,25 @@ export default function SuperAdmin() {
                           </div>
                           <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest pb-2">
                             <Eye className="w-3 h-3" />
-                            {item.viewCount ?? 0} {language === 'ru' ? 'просмотров' : language === 'en' ? 'views' : 'ko\'rishlar'}
+                            {item.viewCount ?? 0}{" "}
+                            {language === "ru"
+                              ? "просмотров"
+                              : language === "en"
+                                ? "views"
+                                : "ko'rishlar"}
                           </div>
                           <div className="flex gap-3 pt-2">
                             <button
                               onClick={async () => {
                                 try {
-                                  await api.patch(`/super/news/${item.id}`, { isPublished: !item.isPublished });
-                                  toast.success(item.isPublished ? t.superadmin.draft : t.superadmin.published);
+                                  await api.patch(`/super/news/${item.id}`, {
+                                    isPublished: !item.isPublished,
+                                  });
+                                  toast.success(
+                                    item.isPublished
+                                      ? t.superadmin.draft
+                                      : t.superadmin.published
+                                  );
                                   fetchData();
                                 } catch {
                                   toast.error(t.common.error);
@@ -1893,7 +1904,9 @@ export default function SuperAdmin() {
                                   : "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-500/20"
                               )}
                             >
-                              {item.isPublished ? t.superadmin.draft : t.superadmin.published}
+                              {item.isPublished
+                                ? t.superadmin.draft
+                                : t.superadmin.published}
                             </button>
                             <button
                               onClick={() => {
@@ -1907,7 +1920,12 @@ export default function SuperAdmin() {
                             </button>
                             <button
                               onClick={async () => {
-                                if (!window.confirm(t.superadmin.confirmDeleteNews)) return;
+                                if (
+                                  !window.confirm(
+                                    t.superadmin.confirmDeleteNews
+                                  )
+                                )
+                                  return;
                                 try {
                                   await api.delete(`/super/news/${item.id}`);
                                   toast.success(t.superadmin.deleted);
@@ -2754,8 +2772,14 @@ export default function SuperAdmin() {
                       {[
                         { key: "contactPhone", label: t.superadmin.phone },
                         { key: "contactEmail", label: "Email" },
-                        { key: "contactAddress", label: "Manzil (ko'rsatiladigan matn)" },
-                        { key: "contactAddressUrl", label: "Manzil harita URL (href)" },
+                        {
+                          key: "contactAddress",
+                          label: "Manzil (ko'rsatiladigan matn)",
+                        },
+                        {
+                          key: "contactAddressUrl",
+                          label: "Manzil harita URL (href)",
+                        },
                         { key: "socialTelegram", label: "Telegram URL" },
                         { key: "socialInstagram", label: "Instagram URL" },
                         { key: "socialLinkedin", label: "LinkedIn URL" },

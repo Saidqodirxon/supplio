@@ -266,7 +266,9 @@ export default function NewsDetailPage() {
         setArticle(data);
         // Increment view count via POST (non-GET to avoid bot inflation)
         if (data?.id) {
-          fetch(`${BACKEND}/api/public/news/${data.id}/view`, { method: "POST" })
+          fetch(`${BACKEND}/api/public/news/${data.id}/view`, {
+            method: "POST",
+          })
             .then((r) => (r.ok ? r.json() : null))
             .then((viewData) => {
               if (viewData && typeof viewData.viewCount === "number") {
