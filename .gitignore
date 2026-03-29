@@ -1,2 +1,9 @@
 .claude
+dist/
+build/
+*.tsbuildinfo
+.next/
+node_modules/
+.env
+.env.local
 
