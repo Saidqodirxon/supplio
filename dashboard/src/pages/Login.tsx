@@ -19,7 +19,7 @@ import api from "../services/api";
 
 const DEMO_MODE_STORAGE_KEY = "supplio_demo_mode";
 const DEMO_FULL_ACCESS_STORAGE_KEY = "supplio_demo_full_access";
-const DEMO_PHONE = "+998000000000";
+const DEMO_PHONE = "+998901000000";
 const DEMO_PASSWORD = "demo1234";
 
 export default function Login() {
