@@ -79,14 +79,13 @@ export class DemoService {
   }
 
   async resetCompanyData(companyId: string) {
-    // 1. Wipe everything (Hard delete for demo reset)
-    // In a real app we might use truncate if permissions allow, but deleteMany is safer here.
-    await this.prisma.order.deleteMany({ where: { companyId } });
-    await this.prisma.payment.deleteMany({ where: { companyId } });
-    await this.prisma.ledgerTransaction.deleteMany({ where: { companyId } });
-    await this.prisma.dealer.deleteMany({ where: { companyId } });
-    await this.prisma.product.deleteMany({ where: { companyId } });
-    await this.prisma.expense.deleteMany({ where: { companyId } });
+    // 1. Hard delete via raw SQL — bypasses soft-delete middleware so phone/sku unique constraints don't collide on re-seed
+    await this.prisma.$executeRaw`DELETE FROM "Order" WHERE "companyId" = ${companyId}`;
+    await this.prisma.$executeRaw`DELETE FROM "Payment" WHERE "companyId" = ${companyId}`;
+    await this.prisma.$executeRaw`DELETE FROM "LedgerTransaction" WHERE "companyId" = ${companyId}`;
+    await this.prisma.$executeRaw`DELETE FROM "Dealer" WHERE "companyId" = ${companyId}`;
+    await this.prisma.$executeRaw`DELETE FROM "Product" WHERE "companyId" = ${companyId}`;
+    await this.prisma.$executeRaw`DELETE FROM "Expense" WHERE "companyId" = ${companyId}`;
 
     // We keep the branches to avoid ID mismatches in re-seeding if we want simplicity
     const branches = await this.prisma.branch.findMany({

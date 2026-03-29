@@ -65,10 +65,8 @@ export declare class SuperAdminService {
             };
         } & {
             id: string;
-            createdAt: Date;
-            deletedAt: Date | null;
-            name: string;
             updatedAt: Date;
+            name: string;
             slug: string;
             logo: string | null;
             website: string | null;
@@ -80,6 +78,8 @@ export declare class SuperAdminService {
             subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
             trialExpiresAt: Date;
             dbConnectionUrl: string | null;
+            createdAt: Date;
+            deletedAt: Date | null;
             deletedBy: string | null;
             cashbackPercent: number;
         })[];
@@ -95,10 +95,10 @@ export declare class SuperAdminService {
         }[];
         users: {
             id: string;
-            isActive: boolean;
             phone: string;
             fullName: string;
             roleType: import(".prisma/client").$Enums.RoleType;
+            isActive: boolean;
         }[];
         _count: {
             dealers: number;
@@ -107,10 +107,8 @@ export declare class SuperAdminService {
         };
     } & {
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         logo: string | null;
         website: string | null;
@@ -122,15 +120,15 @@ export declare class SuperAdminService {
         subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
     }>;
     updateCompany(id: string, data: Record<string, unknown>): Promise<{
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         logo: string | null;
         website: string | null;
@@ -142,15 +140,15 @@ export declare class SuperAdminService {
         subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
     }>;
     deleteCompany(id: string, deletedBy: string): Promise<{
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         logo: string | null;
         website: string | null;
@@ -162,15 +160,15 @@ export declare class SuperAdminService {
         subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
     }>;
     setCompanyPlan(id: string, plan: string, status: string): Promise<{
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         logo: string | null;
         website: string | null;
@@ -182,15 +180,15 @@ export declare class SuperAdminService {
         subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
     }>;
     setCompanyStatus(id: string, status: string): Promise<{
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
-        name: string;
         updatedAt: Date;
+        name: string;
         slug: string;
         logo: string | null;
         website: string | null;
@@ -202,13 +200,15 @@ export declare class SuperAdminService {
         subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
     }>;
     getAllNews(): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         slugUz: string;
         slugRu: string;
         slugEn: string;
@@ -235,8 +235,8 @@ export declare class SuperAdminService {
     }[]>;
     createNews(authorId: string, data: Record<string, unknown>): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         slugUz: string;
         slugRu: string;
         slugEn: string;
@@ -263,8 +263,8 @@ export declare class SuperAdminService {
     }>;
     updateNews(id: string, data: Record<string, unknown>): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         slugUz: string;
         slugRu: string;
         slugEn: string;
@@ -291,8 +291,8 @@ export declare class SuperAdminService {
     }>;
     deleteNews(id: string): Promise<{
         id: string;
-        createdAt: Date;
         updatedAt: Date;
+        createdAt: Date;
         slugUz: string;
         slugRu: string;
         slugEn: string;
@@ -317,15 +317,13 @@ export declare class SuperAdminService {
         authorId: string | null;
         isPublished: boolean;
     }>;
-    seedNews(): Promise<{
-        message: string;
-        count: number;
-    }>;
     broadcast(payload: {
         title: string;
         message: string;
         targetPlan?: string;
-    }): Promise<import(".prisma/client").Prisma.BatchPayload>;
+    }): Promise<{
+        count: number;
+    }>;
     getAuditLogs(query?: {
         page?: number;
         limit?: number;
@@ -339,11 +337,11 @@ export declare class SuperAdminService {
         } & {
             id: string;
             createdAt: Date;
-            ip: string | null;
-            resource: string | null;
-            action: string;
             userId: string | null;
+            action: string;
+            resource: string | null;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            ip: string | null;
         })[];
         total: number;
         page: number;
@@ -361,8 +359,8 @@ export declare class SuperAdminService {
             createdAt: Date;
             deletedAt: Date | null;
             phone: string;
-            status: string;
             fullName: string;
+            status: string;
         }[];
         total: number;
         page: number;
@@ -377,8 +375,8 @@ export declare class SuperAdminService {
         createdAt: Date;
         deletedAt: Date | null;
         phone: string;
-        status: string;
         fullName: string;
+        status: string;
     }>;
     deleteLead(id: string): Promise<{
         info: string | null;
@@ -386,38 +384,38 @@ export declare class SuperAdminService {
         createdAt: Date;
         deletedAt: Date | null;
         phone: string;
-        status: string;
         fullName: string;
+        status: string;
     }>;
     getAllTariffs(): Promise<{
         id: string;
-        isActive: boolean;
-        createdAt: Date;
         updatedAt: Date;
-        price: string;
+        createdAt: Date;
+        isActive: boolean;
         order: number;
-        maxBranches: number;
-        maxUsers: number;
-        maxCustomBots: number;
-        maxDealers: number;
-        maxProducts: number;
-        allowCustomBot: boolean;
-        allowWebStore: boolean;
-        allowAnalytics: boolean;
-        allowNotifications: boolean;
-        allowMultiCompany: boolean;
-        allowBulkImport: boolean;
         nameUz: string;
         nameRu: string;
         nameEn: string;
         nameTr: string;
         nameUzCyr: string;
+        price: string;
         featuresUz: import("@prisma/client/runtime/library").JsonValue;
         featuresRu: import("@prisma/client/runtime/library").JsonValue;
         featuresEn: import("@prisma/client/runtime/library").JsonValue;
         featuresTr: import("@prisma/client/runtime/library").JsonValue | null;
         featuresUzCyr: import("@prisma/client/runtime/library").JsonValue | null;
         isPopular: boolean;
+        allowAnalytics: boolean;
+        allowBulkImport: boolean;
+        allowCustomBot: boolean;
+        allowMultiCompany: boolean;
+        allowNotifications: boolean;
+        allowWebStore: boolean;
+        maxBranches: number;
+        maxCustomBots: number;
+        maxDealers: number;
+        maxProducts: number;
+        maxUsers: number;
         planKey: string;
         priceMonthly: string;
         priceYearly: string;
@@ -425,33 +423,33 @@ export declare class SuperAdminService {
     }[]>;
     createTariff(data: Record<string, unknown>): Promise<{
         id: string;
-        isActive: boolean;
-        createdAt: Date;
         updatedAt: Date;
-        price: string;
+        createdAt: Date;
+        isActive: boolean;
         order: number;
-        maxBranches: number;
-        maxUsers: number;
-        maxCustomBots: number;
-        maxDealers: number;
-        maxProducts: number;
-        allowCustomBot: boolean;
-        allowWebStore: boolean;
-        allowAnalytics: boolean;
-        allowNotifications: boolean;
-        allowMultiCompany: boolean;
-        allowBulkImport: boolean;
         nameUz: string;
         nameRu: string;
         nameEn: string;
         nameTr: string;
         nameUzCyr: string;
+        price: string;
         featuresUz: import("@prisma/client/runtime/library").JsonValue;
         featuresRu: import("@prisma/client/runtime/library").JsonValue;
         featuresEn: import("@prisma/client/runtime/library").JsonValue;
         featuresTr: import("@prisma/client/runtime/library").JsonValue | null;
         featuresUzCyr: import("@prisma/client/runtime/library").JsonValue | null;
         isPopular: boolean;
+        allowAnalytics: boolean;
+        allowBulkImport: boolean;
+        allowCustomBot: boolean;
+        allowMultiCompany: boolean;
+        allowNotifications: boolean;
+        allowWebStore: boolean;
+        maxBranches: number;
+        maxCustomBots: number;
+        maxDealers: number;
+        maxProducts: number;
+        maxUsers: number;
         planKey: string;
         priceMonthly: string;
         priceYearly: string;
@@ -459,33 +457,33 @@ export declare class SuperAdminService {
     }>;
     updateTariff(id: string, data: Record<string, unknown>): Promise<{
         id: string;
-        isActive: boolean;
-        createdAt: Date;
         updatedAt: Date;
-        price: string;
+        createdAt: Date;
+        isActive: boolean;
         order: number;
-        maxBranches: number;
-        maxUsers: number;
-        maxCustomBots: number;
-        maxDealers: number;
-        maxProducts: number;
-        allowCustomBot: boolean;
-        allowWebStore: boolean;
-        allowAnalytics: boolean;
-        allowNotifications: boolean;
-        allowMultiCompany: boolean;
-        allowBulkImport: boolean;
         nameUz: string;
         nameRu: string;
         nameEn: string;
         nameTr: string;
         nameUzCyr: string;
+        price: string;
         featuresUz: import("@prisma/client/runtime/library").JsonValue;
         featuresRu: import("@prisma/client/runtime/library").JsonValue;
         featuresEn: import("@prisma/client/runtime/library").JsonValue;
         featuresTr: import("@prisma/client/runtime/library").JsonValue | null;
         featuresUzCyr: import("@prisma/client/runtime/library").JsonValue | null;
         isPopular: boolean;
+        allowAnalytics: boolean;
+        allowBulkImport: boolean;
+        allowCustomBot: boolean;
+        allowMultiCompany: boolean;
+        allowNotifications: boolean;
+        allowWebStore: boolean;
+        maxBranches: number;
+        maxCustomBots: number;
+        maxDealers: number;
+        maxProducts: number;
+        maxUsers: number;
         planKey: string;
         priceMonthly: string;
         priceYearly: string;
@@ -493,33 +491,33 @@ export declare class SuperAdminService {
     }>;
     deleteTariff(id: string): Promise<{
         id: string;
-        isActive: boolean;
-        createdAt: Date;
         updatedAt: Date;
-        price: string;
+        createdAt: Date;
+        isActive: boolean;
         order: number;
-        maxBranches: number;
-        maxUsers: number;
-        maxCustomBots: number;
-        maxDealers: number;
-        maxProducts: number;
-        allowCustomBot: boolean;
-        allowWebStore: boolean;
-        allowAnalytics: boolean;
-        allowNotifications: boolean;
-        allowMultiCompany: boolean;
-        allowBulkImport: boolean;
         nameUz: string;
         nameRu: string;
         nameEn: string;
         nameTr: string;
         nameUzCyr: string;
+        price: string;
         featuresUz: import("@prisma/client/runtime/library").JsonValue;
         featuresRu: import("@prisma/client/runtime/library").JsonValue;
         featuresEn: import("@prisma/client/runtime/library").JsonValue;
         featuresTr: import("@prisma/client/runtime/library").JsonValue | null;
         featuresUzCyr: import("@prisma/client/runtime/library").JsonValue | null;
         isPopular: boolean;
+        allowAnalytics: boolean;
+        allowBulkImport: boolean;
+        allowCustomBot: boolean;
+        allowMultiCompany: boolean;
+        allowNotifications: boolean;
+        allowWebStore: boolean;
+        maxBranches: number;
+        maxCustomBots: number;
+        maxDealers: number;
+        maxProducts: number;
+        maxUsers: number;
         planKey: string;
         priceMonthly: string;
         priceYearly: string;
@@ -527,13 +525,10 @@ export declare class SuperAdminService {
     }>;
     getLandingContent(): Promise<any>;
     updateLandingContent(data: Record<string, unknown>): Promise<any>;
-    seedDefaultTariffs(): Promise<{
-        seeded: number;
-    }>;
     getAllFeatures(): Promise<{
         id: string;
-        companyId: string | null;
         updatedAt: Date;
+        companyId: string | null;
         featureKey: string;
         isEnabled: boolean;
         planLevel: import(".prisma/client").$Enums.SubscriptionPlan | null;
@@ -544,8 +539,8 @@ export declare class SuperAdminService {
         isEnabled: boolean;
     }): Promise<{
         id: string;
-        companyId: string | null;
         updatedAt: Date;
+        companyId: string | null;
         featureKey: string;
         isEnabled: boolean;
         planLevel: import(".prisma/client").$Enums.SubscriptionPlan | null;
@@ -560,8 +555,8 @@ export declare class SuperAdminService {
     getReleaseNotes(): Promise<{
         id: string;
         createdAt: Date;
-        title: string;
         version: string;
+        title: string;
         content: string;
     }[]>;
     createReleaseNote(data: {
@@ -571,15 +566,15 @@ export declare class SuperAdminService {
     }): Promise<{
         id: string;
         createdAt: Date;
-        title: string;
         version: string;
+        title: string;
         content: string;
     }>;
     deleteReleaseNote(id: string): Promise<{
         id: string;
         createdAt: Date;
-        title: string;
         version: string;
+        title: string;
         content: string;
     }>;
     createUpgradeRequest(companyId: string, data: Record<string, unknown>): Promise<any>;
@@ -588,7 +583,6 @@ export declare class SuperAdminService {
         status: string;
         note?: string;
     }): Promise<any>;
-    fixUsers(): Promise<import(".prisma/client").Prisma.BatchPayload>;
     getDistributors(query?: {
         search?: string;
         status?: string;
@@ -598,9 +592,9 @@ export declare class SuperAdminService {
         items: ({
             users: {
                 id: string;
-                isActive: boolean;
                 phone: string;
                 fullName: string;
+                isActive: boolean;
             }[];
             _count: {
                 dealers: number;
@@ -609,10 +603,8 @@ export declare class SuperAdminService {
             };
         } & {
             id: string;
-            createdAt: Date;
-            deletedAt: Date | null;
-            name: string;
             updatedAt: Date;
+            name: string;
             slug: string;
             logo: string | null;
             website: string | null;
@@ -624,6 +616,8 @@ export declare class SuperAdminService {
             subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
             trialExpiresAt: Date;
             dbConnectionUrl: string | null;
+            createdAt: Date;
+            deletedAt: Date | null;
             deletedBy: string | null;
             cashbackPercent: number;
         })[];
@@ -643,10 +637,8 @@ export declare class SuperAdminService {
     }): Promise<{
         company: {
             id: string;
-            createdAt: Date;
-            deletedAt: Date | null;
-            name: string;
             updatedAt: Date;
+            name: string;
             slug: string;
             logo: string | null;
             website: string | null;
@@ -658,6 +650,8 @@ export declare class SuperAdminService {
             subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
             trialExpiresAt: Date;
             dbConnectionUrl: string | null;
+            createdAt: Date;
+            deletedAt: Date | null;
             deletedBy: string | null;
             cashbackPercent: number;
         };

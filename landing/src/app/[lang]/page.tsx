@@ -508,7 +508,7 @@ export default function LandingPage() {
               const displayFeatures = dynamicTariffs.length > 0 ? [...(features || []), getBotFeature(maxCustomBots, lang)] : (features || []);
 
               return (
-                <motion.div {...fadeInUp} transition={{ delay: i * 0.1 }} className={`relative flex flex-col p-7 rounded-3xl border ${isScrollable ? 'min-w-75 w-75' : ''} ${isPopular ? 'bg-white border-blue-600/20 shadow-2xl ring-2 ring-blue-600/30 z-10' : 'bg-slate-800/40 border-slate-700/50 backdrop-blur-sm'}`}>
+                <motion.div {...fadeInUp} transition={{ delay: i * 0.1 }} className={`relative flex flex-col p-7 rounded-3xl border h-full ${isScrollable ? 'min-w-75 w-75' : ''} ${isPopular ? 'bg-white border-blue-600/20 shadow-2xl ring-2 ring-blue-600/30 z-10' : 'bg-slate-800/40 border-slate-700/50 backdrop-blur-sm'}`}>
                   {isPopular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-full whitespace-nowrap">
                       {lang === 'uz' ? 'Ommabop' : lang === 'ru' ? 'Популярный' : lang === 'tr' ? 'Popüler' : 'Most Popular'}
@@ -565,7 +565,7 @@ export default function LandingPage() {
             }
 
             return (
-              <div className={`grid ${gridClass} gap-6`}>
+              <div className={`grid ${gridClass} gap-6 items-stretch`}>
                 {plans.map((plan, i) => (
                   <PlanCard key={i} plan={plan} i={i} />
                 ))}
@@ -589,38 +589,50 @@ export default function LandingPage() {
               </button>
             </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {dynamicNews.length === 0 ? (
-                <p className="col-span-2 text-center text-slate-400 py-12 font-medium">No articles yet.</p>
+                <p className="col-span-3 text-center text-slate-400 py-12 font-medium">No articles yet.</p>
               ) : null}
               {(dynamicNews as unknown as SafeNews[]).map((news, i: number) => {
                 const lkNews = lang === 'oz' ? 'UzCyr' : lang.charAt(0).toUpperCase() + lang.slice(1);
                 const title = String(news[`title${lkNews}`] || news['titleEn'] || '');
                 const excerpt = String(news[`excerpt${lkNews}`] || news['excerptEn'] || '');
                 const slug = String(news[`slug${lkNews}`] || news['slugEn'] || '');
-                const date = news.createdAt ? format(new Date(news.createdAt as string), 'dd.MM.yyyy') : '';
+                const date = news.createdAt ? format(new Date(news.createdAt as string), 'dd MMM yyyy') : '';
 
                 return (
-                  <motion.div key={news.id || i} {...fadeInUp} transition={{ delay: i * 0.15 }} className="group flex flex-col sm:flex-row gap-6 bg-white p-6 rounded-2xl border border-slate-100 hover:shadow-xl hover:border-blue-100 transition-all cursor-pointer text-left">
-                    <div className="w-full sm:w-48 h-48 sm:h-auto rounded-xl bg-slate-50 shrink-0 overflow-hidden relative border border-slate-100 flex items-center justify-center">
-                      {news.image ? (
-                        <img src={String(news.image).startsWith('http') ? String(news.image) : `${BACKEND}${news.image}`} alt={title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                      ) : (
-                        <Newspaper className="w-16 h-16 text-slate-200 group-hover:text-blue-200 transition-colors" />
-                      )}
-                    </div>
-                    <div className="flex flex-col justify-between py-1 space-y-4 text-left">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 text-xs font-medium text-slate-400">
-                          <Calendar className="w-4 h-4 text-blue-600" /> {date}
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug">{title}</h3>
-                        <p className="text-slate-500 text-sm leading-relaxed line-clamp-2">{excerpt}</p>
+                  <motion.div key={news.id || i} {...fadeInUp} transition={{ delay: i * 0.1 }}>
+                    <Link href={`/${params.lang}/news/${slug}`} className="group flex flex-col h-full bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-2xl hover:border-blue-100 hover:-translate-y-1 transition-all duration-300 text-left">
+                      {/* Cover */}
+                      <div className="relative w-full aspect-[16/9] bg-slate-100 overflow-hidden shrink-0">
+                        {news.image ? (
+                          <img
+                            src={String(news.image).startsWith('http') ? String(news.image) : `${BACKEND}${news.image}`}
+                            alt={title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                            <Newspaper className="w-12 h-12 text-blue-200" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
-                      <Link href={`/${params.lang}/news/${slug}`} className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 group/link">
-                        {t.news.more} <ChevronRight className="w-4 h-4 group-hover/link:translate-x-1 transition-transform" />
-                      </Link>
-                    </div>
+
+                      {/* Body */}
+                      <div className="flex flex-col flex-1 p-6 space-y-3">
+                        <div className="flex items-center gap-2 text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                          <Calendar className="w-3.5 h-3.5" /> {date}
+                        </div>
+                        <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors leading-snug line-clamp-2">
+                          {title}
+                        </h3>
+                        <p className="text-slate-500 text-sm leading-relaxed line-clamp-3 flex-1">{excerpt}</p>
+                        <div className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 pt-1 group-hover:gap-2.5 transition-all">
+                          {t.news.more} <ChevronRight className="w-3.5 h-3.5" />
+                        </div>
+                      </div>
+                    </Link>
                   </motion.div>
                 );
               })}

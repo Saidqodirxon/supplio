@@ -4,6 +4,8 @@ import api from '../services/api';
 import { toast } from '../utils/toast';
 import clsx from 'clsx';
 
+const BACKEND = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
+
 interface ImageUploaderProps {
   value?: string;
   onChange: (url: string) => void;
@@ -58,7 +60,7 @@ export default function ImageUploader({ value, onChange, onRemove, label = 'Uplo
   if (value) {
     return (
       <div className={clsx('relative group rounded-2xl overflow-hidden border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5', className)}>
-        <img src={value.startsWith('http') ? value : `http://localhost:5000${value}`} alt="Upload" className="w-full h-full object-cover" />
+        <img src={value.startsWith('http') ? value : `${BACKEND}${value}`} alt="upload" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-slate-900/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
           <button
             type="button"

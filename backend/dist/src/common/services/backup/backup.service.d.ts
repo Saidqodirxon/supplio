@@ -6,6 +6,7 @@ export declare class BackupService {
     constructor(prisma: PrismaService);
     private buildCompanyBackupFileName;
     handleDailyBackup(): Promise<void>;
+    private cleanupOldBackups;
     createFullBackup(): Promise<{
         zipPath: string;
         dir: string;

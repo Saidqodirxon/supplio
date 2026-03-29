@@ -360,7 +360,7 @@ export default function Layout() {
 
         {/* Main content — single scroll area */}
         <main id="main-scroll" className="flex-1 overflow-y-auto w-full scroll-smooth">
-          <div className="max-w-7xl mx-auto p-6 lg:p-10 pb-20">
+          <div className="max-w-[1600px] mx-auto p-6 lg:p-8 pb-20">
             <Outlet />
           </div>
         </main>

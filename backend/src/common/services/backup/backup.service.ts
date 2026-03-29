@@ -85,6 +85,7 @@ export class BackupService {
         process.env.BACKUP_CHAT_ID || process.env.LOG_CHAT_ID
       );
       this.logger.log("Daily backup complete");
+      await this.cleanupOldBackups(2);
     } catch (err: any) {
       this.logger.error("Daily backup failed: " + (err?.message || err));
     }
@@ -92,6 +93,35 @@ export class BackupService {
     await this.prisma.systemSettings
       .update({ where: { id: "GLOBAL" }, data: { lastBackupAt: new Date() } })
       .catch(() => {});
+  }
+
+  // ── Keep only N most recent backups, delete the rest ─────────────────────
+
+  private async cleanupOldBackups(keepCount: number): Promise<void> {
+    if (!fs.existsSync(this.backupDir)) return;
+
+    const entries = fs.readdirSync(this.backupDir).map((name) => {
+      const fullPath = path.join(this.backupDir, name);
+      const stats = fs.statSync(fullPath);
+      return { name, fullPath, mtime: stats.mtimeMs, isDir: stats.isDirectory() };
+    });
+
+    // Sort newest first
+    entries.sort((a, b) => b.mtime - a.mtime);
+
+    const toDelete = entries.slice(keepCount);
+    for (const entry of toDelete) {
+      try {
+        if (entry.isDir) {
+          fs.rmSync(entry.fullPath, { recursive: true, force: true });
+        } else {
+          fs.unlinkSync(entry.fullPath);
+        }
+        this.logger.log(`Cleanup: deleted old backup ${entry.name}`);
+      } catch (e: any) {
+        this.logger.warn(`Cleanup: could not delete ${entry.name}: ${e?.message}`);
+      }
+    }
   }
 
   // ── Full backup: system pg_dump + per-company SQL + zip ──────────────────

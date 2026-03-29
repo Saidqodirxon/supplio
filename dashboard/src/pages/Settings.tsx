@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Settings as SettingsIcon,
   Instagram,
@@ -15,15 +15,19 @@ import {
   Camera,
   Info,
   TrendingUp,
-} from 'lucide-react';
-import { useAuthStore } from '../store/authStore';
-import { dashboardTranslations } from '../i18n/translations';
-import api from '../services/api';
-import { motion } from 'framer-motion';
-import clsx from 'clsx';
-import { toast } from '../utils/toast';
-import UpgradeModal from '../components/UpgradeModal';
-import { usePlanLimits } from '../hooks/usePlanLimits';
+  Eye,
+  EyeOff,
+  Check,
+  X,
+} from "lucide-react";
+import { useAuthStore } from "../store/authStore";
+import { dashboardTranslations } from "../i18n/translations";
+import api from "../services/api";
+import { motion } from "framer-motion";
+import clsx from "clsx";
+import { toast } from "../utils/toast";
+import UpgradeModal from "../components/UpgradeModal";
+import { usePlanLimits } from "../hooks/usePlanLimits";
 
 interface CompanySettings {
   name: string;
@@ -41,11 +45,11 @@ interface CompanySettings {
 // Cashback explanation per language (sodda til)
 // Cashback: distributor sets % for their DEALERS — not received from system
 const CASHBACK_HELP: Record<string, string> = {
-  uz: 'Cashback — siz (distributor) dilerlaringizga beradigan bonus. Masalan: 5% → diler 100,000 so\'m buyurtma bersa, uning hisobiga 5,000 so\'m bonus qo\'shiladi. Bu bonus keyingi buyurtmasida chegirma sifatida ishlatiladi. Tizim sizga cashback bermaydi — bu siz dilerga beradigan rag\'bat.',
-  en: 'Cashback — a bonus YOU (the distributor) give to your dealers. Example: 5% → on a 100,000 UZS order the dealer earns 5,000 UZS bonus, applied as a discount on their next order. The system does not give cashback to you — you give it to your dealers as an incentive.',
-  oz: 'Кэшбэк — сиз (дистрибутор) дилерларингизга берадиган бонус. Масалан: 5% → дилер 100,000 сўм буюртма берса, унинг ҳисобига 5,000 сўм бонус қўшилади. Тизим сизга кэшбэк бермайди — бу сиз дилерга берадиган рағбат.',
-  ru: 'Кэшбэк — бонус, который ВЫ (дистрибьютор) даёте своим дилерам. Пример: 5% → при заказе на 100,000 сум дилер получает бонус 5,000 сум, который применяется как скидка при следующем заказе. Система не даёт кэшбэк вам — вы даёте его дилерам в качестве стимула.',
-  tr: 'Cashback — SİZİN (distribütör) bayilerinize verdiğiniz bir bonustur. Örnek: %5 → 100.000 UZS siparişte bayi 5.000 UZS bonus kazanır, bu bonus sonraki siparişte indirim olarak uygulanır. Sistem size cashback vermez — siz bunu bayilerinize teşvik olarak verirsiniz.',
+  uz: "Cashback — siz (distributor) dilerlaringizga beradigan bonus. Masalan: 5% → diler 100,000 so'm buyurtma bersa, uning hisobiga 5,000 so'm bonus qo'shiladi. Bu bonus keyingi buyurtmasida chegirma sifatida ishlatiladi. Tizim sizga cashback bermaydi — bu siz dilerga beradigan rag'bat.",
+  en: "Cashback — a bonus YOU (the distributor) give to your dealers. Example: 5% → on a 100,000 UZS order the dealer earns 5,000 UZS bonus, applied as a discount on their next order. The system does not give cashback to you — you give it to your dealers as an incentive.",
+  oz: "Кэшбэк — сиз (дистрибутор) дилерларингизга берадиган бонус. Масалан: 5% → дилер 100,000 сўм буюртма берса, унинг ҳисобига 5,000 сўм бонус қўшилади. Тизим сизга кэшбэк бермайди — бу сиз дилерга берадиган рағбат.",
+  ru: "Кэшбэк — бонус, который ВЫ (дистрибьютор) даёте своим дилерам. Пример: 5% → при заказе на 100,000 сум дилер получает бонус 5,000 сум, который применяется как скидка при следующем заказе. Система не даёт кэшбэк вам — вы даёте его дилерам в качестве стимула.",
+  tr: "Cashback — SİZİN (distribütör) bayilerinize verdiğiniz bir bonustur. Örnek: %5 → 100.000 UZS siparişte bayi 5.000 UZS bonus kazanır, bu bonus sonraki siparişte indirim olarak uygulanır. Sistem size cashback vermez — siz bunu bayilerinize teşvik olarak verirsiniz.",
 };
 
 function UserProfileForm() {
@@ -53,21 +57,21 @@ function UserProfileForm() {
   const t = dashboardTranslations[language];
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: user?.fullName || '',
-    photoUrl: user?.photoUrl || '/favicon.png',
+    fullName: user?.fullName || "",
+    photoUrl: user?.photoUrl || "/favicon.png",
   });
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const uploadData = new FormData();
-    uploadData.append('file', file);
+    uploadData.append("file", file);
     try {
       setLoading(true);
-      const res = await api.post('/upload/image', uploadData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const res = await api.post("/upload/image", uploadData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      setFormData(prev => ({ ...prev, photoUrl: res.data.url }));
+      setFormData((prev) => ({ ...prev, photoUrl: res.data.url }));
       toast.success(t.common.save);
     } catch {
       toast.error(t.common.error);
@@ -80,7 +84,7 @@ function UserProfileForm() {
     e.preventDefault();
     try {
       setLoading(true);
-      await api.patch('/auth/profile', formData);
+      await api.patch("/auth/profile", formData);
       updateUser(formData);
       toast.success(t.common.save);
     } catch {
@@ -111,15 +115,15 @@ function UserProfileForm() {
             {formData.photoUrl && !loading ? (
               <img
                 src={
-                  formData.photoUrl.startsWith('http') ||
-                  formData.photoUrl.startsWith('/')
+                  formData.photoUrl.startsWith("http") ||
+                  formData.photoUrl.startsWith("/")
                     ? formData.photoUrl
                     : `/api${formData.photoUrl}`
                 }
                 alt="Profile"
                 className="w-full h-full object-cover"
-                onError={e => {
-                  (e.target as HTMLImageElement).src = '/favicon.png';
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/favicon.png";
                 }}
               />
             ) : (
@@ -150,10 +154,12 @@ function UserProfileForm() {
             className="input-field w-full"
             value={formData.fullName}
             placeholder={t.superadmin.fullNameLabel}
-            onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, fullName: e.target.value })
+            }
           />
           <p className="text-[10px] text-slate-400 font-semibold">
-            {user?.phone} · {user?.roleType?.replace(/_/g, ' ')}
+            {user?.phone} · {user?.roleType?.replace(/_/g, " ")}
           </p>
         </div>
       </div>
@@ -172,32 +178,71 @@ function UserProfileForm() {
 }
 
 function UserSecurityForm() {
-  const { user, language } = useAuthStore();
+  const { user, language, updateUser } = useAuthStore();
   const t = dashboardTranslations[language];
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [fullName, setFullName] = useState(user?.fullName || "");
   const [savingPassword, setSavingPassword] = useState(false);
   const [requestingReset, setRequestingReset] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: '',
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
+
+  useEffect(() => {
+    setFullName(user?.fullName || "");
+  }, [user?.fullName]);
+
+  const handleProfileSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const normalizedName = fullName.trim();
+
+    if (normalizedName.length < 2) {
+      toast.error("Ism kamida 2 ta belgidan iborat bo'lishi kerak");
+      return;
+    }
+
+    try {
+      setSavingProfile(true);
+      await api.patch("/auth/profile", { fullName: normalizedName });
+      updateUser({ fullName: normalizedName });
+      toast.success("Ism yangilandi");
+    } catch {
+      toast.error(t.common.error);
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!passwordForm.currentPassword || !passwordForm.newPassword) return toast.error(t.common.error);
-    if (passwordForm.newPassword.length < 6) return toast.error('Yangi parol kamida 6 ta belgi bo‘lishi kerak');
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) return toast.error('Yangi parollar mos emas');
+    if (!passwordForm.currentPassword || !passwordForm.newPassword)
+      return toast.error(t.common.error);
+    if (passwordForm.newPassword.length < 6)
+      return toast.error("Yangi parol kamida 6 ta belgi bo‘lishi kerak");
+    if (passwordForm.newPassword !== passwordForm.confirmPassword)
+      return toast.error("Yangi parollar mos emas");
 
     try {
       setSavingPassword(true);
-      await api.patch('/auth/change-password', {
+      await api.patch("/auth/change-password", {
         currentPassword: passwordForm.currentPassword,
         newPassword: passwordForm.newPassword,
       });
-      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-      toast.success('Parol yangilandi');
+      setPasswordForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      toast.success("Parol yangilandi");
     } catch {
-      toast.error('Joriy parol noto‘g‘ri yoki amal bajarilmadi');
+      toast.error("Joriy parol noto‘g‘ri yoki amal bajarilmadi");
     } finally {
       setSavingPassword(false);
     }
@@ -206,8 +251,8 @@ function UserSecurityForm() {
   const handleRequestReset = async () => {
     try {
       setRequestingReset(true);
-      await api.post('/auth/request-password-reset');
-      toast.success('SuperAdmin ga parol reset so‘rovi yuborildi');
+      await api.post("/auth/request-password-reset");
+      toast.success("SuperAdmin ga parol reset so‘rovi yuborildi");
     } catch {
       toast.error(t.common.error);
     } finally {
@@ -231,66 +276,190 @@ function UserSecurityForm() {
           <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
             {t.superadmin.fullNameLabel}
           </label>
-          <div className="input-field w-full opacity-80 cursor-not-allowed">
-            {user?.fullName || '-'}
-          </div>
+          <input
+            type="text"
+            className="input-field w-full"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder={t.superadmin.fullNameLabel}
+          />
         </div>
         <div className="space-y-2">
           <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
             {t.settings.phone}
           </label>
           <div className="input-field w-full opacity-80 cursor-not-allowed">
-            {user?.phone || '-'}
+            {user?.phone || "-"}
           </div>
         </div>
       </div>
 
+      <form onSubmit={handleProfileSave} className="flex justify-end">
+        <button
+          type="submit"
+          disabled={savingProfile || fullName.trim() === (user?.fullName || "").trim()}
+          className="px-8 py-3.5 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
+        >
+          <Save className="w-4 h-4" />
+          {savingProfile ? t.common.loading : "Ismni saqlash"}
+        </button>
+      </form>
+
       <div className="rounded-2xl border border-amber-100 dark:border-amber-900/30 bg-amber-50/70 dark:bg-amber-900/10 px-5 py-4">
         <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 leading-relaxed">
-          Telefon raqami va asosiy profil ma’lumotlari faqat SuperAdmin tomonidan boshqariladi. Siz bu yerda faqat parolni yangilashingiz mumkin.
+          Telefon raqami faqat SuperAdmin tomonidan boshqariladi. Ismni bu
+          yerda yangilashingiz mumkin.
         </p>
       </div>
 
-      <form onSubmit={handlePasswordChange} className="space-y-5 rounded-3xl border border-slate-100 dark:border-white/5 p-6 bg-slate-50/70 dark:bg-white/[0.03]">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input
-            type="password"
-            className="input-field w-full"
-            placeholder="Joriy parol"
-            value={passwordForm.currentPassword}
-            onChange={e => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
-          />
-          <input
-            type="password"
-            className="input-field w-full"
-            placeholder="Yangi parol"
-            value={passwordForm.newPassword}
-            onChange={e => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
-          />
-          <input
-            type="password"
-            className="input-field w-full"
-            placeholder="Yangi parolni takrorlang"
-            value={passwordForm.confirmPassword}
-            onChange={e => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-          />
+      <form
+        onSubmit={handlePasswordChange}
+        className="space-y-4 rounded-3xl border border-slate-100 dark:border-white/5 p-6 bg-slate-50/70 dark:bg-white/[0.03]"
+      >
+        {/* Current password */}
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            Joriy parol
+          </label>
+          <div className="relative">
+            <input
+              type={showPasswords.current ? "text" : "password"}
+              className="input-field w-full pr-14"
+              placeholder="••••••••"
+              value={passwordForm.currentPassword}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({
+                  ...prev,
+                  currentPassword: e.target.value,
+                }))
+              }
+            />
+            <button
+              type="button"
+              onClick={() =>
+                setShowPasswords((p) => ({ ...p, current: !p.current }))
+              }
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              {showPasswords.current ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 justify-between">
+        {/* New password */}
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            Yangi parol
+          </label>
+          <div className="relative">
+            <input
+              type={showPasswords.new ? "text" : "password"}
+              className="input-field w-full pr-14"
+              placeholder="Kamida 6 ta belgi"
+              value={passwordForm.newPassword}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({
+                  ...prev,
+                  newPassword: e.target.value,
+                }))
+              }
+            />
+            <button
+              type="button"
+              onClick={() => setShowPasswords((p) => ({ ...p, new: !p.new }))}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              {showPasswords.new ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
+          {passwordForm.newPassword.length > 0 &&
+            passwordForm.newPassword.length < 6 && (
+              <p className="text-[10px] text-rose-500 font-bold flex items-center gap-1">
+                <X className="w-3 h-3" /> Kamida 6 ta belgi
+              </p>
+            )}
+        </div>
+
+        {/* Confirm password */}
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            Yangi parolni takrorlang
+          </label>
+          <div className="relative">
+            <input
+              type={showPasswords.confirm ? "text" : "password"}
+              className={`input-field w-full pr-14 transition-all ${passwordForm.confirmPassword.length > 0 ? (passwordForm.confirmPassword === passwordForm.newPassword ? "border-emerald-400 focus:border-emerald-500" : "border-rose-400 focus:border-rose-500") : ""}`}
+              placeholder="Parolni qayta kiriting"
+              value={passwordForm.confirmPassword}
+              onChange={(e) =>
+                setPasswordForm((prev) => ({
+                  ...prev,
+                  confirmPassword: e.target.value,
+                }))
+              }
+            />
+            <button
+              type="button"
+              onClick={() =>
+                setShowPasswords((p) => ({ ...p, confirm: !p.confirm }))
+              }
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              {showPasswords.confirm ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
+            </button>
+            {passwordForm.confirmPassword.length > 0 && (
+              <div className="absolute right-12 top-1/2 -translate-y-1/2">
+                {passwordForm.confirmPassword === passwordForm.newPassword ? (
+                  <Check className="w-4 h-4 text-emerald-500" />
+                ) : (
+                  <X className="w-4 h-4 text-rose-500" />
+                )}
+              </div>
+            )}
+          </div>
+          {passwordForm.confirmPassword.length > 0 &&
+            passwordForm.confirmPassword !== passwordForm.newPassword && (
+              <p className="text-[10px] text-rose-500 font-bold flex items-center gap-1">
+                <X className="w-3 h-3" /> Parollar mos emas
+              </p>
+            )}
+          {passwordForm.confirmPassword.length > 0 &&
+            passwordForm.confirmPassword === passwordForm.newPassword && (
+              <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+                <Check className="w-3 h-3" /> Parollar mos
+              </p>
+            )}
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-between pt-2">
           <button
             type="button"
             onClick={handleRequestReset}
             disabled={requestingReset}
             className="px-6 py-3 rounded-2xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
           >
-            {requestingReset ? t.common.loading : 'SuperAdmin dan reset so‘rash'}
+            {requestingReset
+              ? t.common.loading
+              : "SuperAdmin dan reset so'rash"}
           </button>
           <button
             type="submit"
             disabled={savingPassword}
             className="px-8 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all disabled:opacity-50"
           >
-            {savingPassword ? t.common.loading : 'Parolni saqlash'}
+            {savingPassword ? t.common.loading : "Parolni saqlash"}
           </button>
         </div>
       </form>
@@ -304,18 +473,19 @@ export default function Settings() {
   const { user, language } = useAuthStore();
   const t = dashboardTranslations[language];
   const navigate = useNavigate();
-  const { showUpgrade, setShowUpgrade, upgradeReason, triggerUpgrade } = usePlanLimits();
+  const { showUpgrade, setShowUpgrade, upgradeReason, triggerUpgrade } =
+    usePlanLimits();
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
   const [company, setCompany] = useState<CompanySettings | null>(null);
 
-  const role = user?.roleType ?? '';
-  const isOwnerOrAdmin = role === 'OWNER' || role === 'SUPER_ADMIN';
+  const role = user?.roleType ?? "";
+  const isOwnerOrAdmin = role === "OWNER" || role === "SUPER_ADMIN";
 
   useEffect(() => {
     const fetchCompany = async () => {
       try {
-        const res = await api.get('/company/me');
+        const res = await api.get("/company/me");
         setCompany(res.data);
       } catch {
         // Manager/Seller might not have access to company/me - that's OK
@@ -330,7 +500,7 @@ export default function Settings() {
     e.preventDefault();
     if (!company) return;
     try {
-      await api.patch('/company/me', company);
+      await api.patch("/company/me", company);
       setSuccess(true);
       toast.success(t.settings.settingsSaved);
       setTimeout(() => setSuccess(false), 3000);
@@ -374,9 +544,21 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div
+        className={
+          isOwnerOrAdmin
+            ? "grid grid-cols-1 lg:grid-cols-3 gap-8"
+            : "flex flex-col justify-start items-center"
+        }
+      >
         {/* Left col */}
-        <div className="lg:col-span-2 space-y-8">
+        <div
+          className={
+            isOwnerOrAdmin
+              ? "lg:col-span-2 space-y-8"
+              : "w-full max-w-2xl space-y-8"
+          }
+        >
           {/* Profile — everyone sees this */}
           <UserSecurityForm />
 
@@ -399,13 +581,16 @@ export default function Settings() {
                 {/* Company name */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                    <ShieldCheck className="w-3 h-3" /> {t.settings.companyAlias}
+                    <ShieldCheck className="w-3 h-3" />{" "}
+                    {t.settings.companyAlias}
                   </label>
                   <input
                     type="text"
                     className="input-field w-full"
                     value={company.name}
-                    onChange={e => setCompany({ ...company, name: e.target.value })}
+                    onChange={(e) =>
+                      setCompany({ ...company, name: e.target.value })
+                    }
                   />
                 </div>
 
@@ -417,8 +602,10 @@ export default function Settings() {
                   <input
                     type="text"
                     className="input-field w-full"
-                    value={company.website || ''}
-                    onChange={e => setCompany({ ...company, website: e.target.value })}
+                    value={company.website || ""}
+                    onChange={(e) =>
+                      setCompany({ ...company, website: e.target.value })
+                    }
                     placeholder="https://example.com"
                   />
                 </div>
@@ -431,8 +618,10 @@ export default function Settings() {
                   <input
                     type="text"
                     className="input-field w-full"
-                    value={company.instagram || ''}
-                    onChange={e => setCompany({ ...company, instagram: e.target.value })}
+                    value={company.instagram || ""}
+                    onChange={(e) =>
+                      setCompany({ ...company, instagram: e.target.value })
+                    }
                     placeholder="@username"
                   />
                 </div>
@@ -445,8 +634,10 @@ export default function Settings() {
                   <input
                     type="text"
                     className="input-field w-full"
-                    value={company.telegram || ''}
-                    onChange={e => setCompany({ ...company, telegram: e.target.value })}
+                    value={company.telegram || ""}
+                    onChange={(e) =>
+                      setCompany({ ...company, telegram: e.target.value })
+                    }
                     placeholder="@channel_name"
                   />
                 </div>
@@ -454,7 +645,9 @@ export default function Settings() {
                 {/* Cashback — only OWNER/SUPER_ADMIN */}
                 <div className="sm:col-span-2 space-y-3 p-5 rounded-2xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30">
                   <label className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Zap className="w-3 h-3" /> {(t.settings as Record<string, string>).cashback || 'Cashback (%)'}
+                    <Zap className="w-3 h-3" />{" "}
+                    {(t.settings as Record<string, string>).cashback ||
+                      "Cashback (%)"}
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -464,14 +657,16 @@ export default function Settings() {
                       step="0.5"
                       className="input-field w-32"
                       value={company.cashbackPercent ?? 0}
-                      onChange={e =>
+                      onChange={(e) =>
                         setCompany({
                           ...company,
                           cashbackPercent: parseFloat(e.target.value) || 0,
                         })
                       }
                     />
-                    <span className="text-sm font-black text-slate-500 dark:text-slate-400">%</span>
+                    <span className="text-sm font-black text-slate-500 dark:text-slate-400">
+                      %
+                    </span>
                   </div>
                   {/* Cashback explanation — sodda til bilan */}
                   <div className="flex items-start gap-2 mt-2">
@@ -496,16 +691,23 @@ export default function Settings() {
                   </div>
                   <button
                     type="button"
-                    onClick={() => setCompany({ ...company, siteActive: !company.siteActive })}
+                    onClick={() =>
+                      setCompany({
+                        ...company,
+                        siteActive: !company.siteActive,
+                      })
+                    }
                     className={clsx(
-                      'w-12 h-6 rounded-full transition-all relative flex items-center px-1 shrink-0',
-                      company.siteActive ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'
+                      "w-12 h-6 rounded-full transition-all relative flex items-center px-1 shrink-0",
+                      company.siteActive
+                        ? "bg-emerald-500"
+                        : "bg-slate-200 dark:bg-slate-700"
                     )}
                   >
                     <div
                       className={clsx(
-                        'w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-200',
-                        company.siteActive && 'translate-x-6'
+                        "w-4 h-4 bg-white rounded-full shadow-lg transition-all duration-200",
+                        company.siteActive && "translate-x-6"
                       )}
                     />
                   </button>
@@ -543,11 +745,11 @@ export default function Settings() {
                   {t.settings.profile}
                 </p>
                 <p className="text-[11px] text-slate-400 font-semibold mt-0.5">
-                  {language === 'uz'
-                    ? 'Kompaniya sozlamalarini faqat rahbar o\'zgartira oladi.'
-                    : language === 'ru'
-                    ? 'Настройки компании может изменить только руководитель.'
-                    : 'Only the company owner can change company settings.'}
+                  {language === "uz"
+                    ? "Kompaniya sozlamalarini faqat rahbar o'zgartira oladi."
+                    : language === "ru"
+                      ? "Настройки компании может изменить только руководитель."
+                      : "Only the company owner can change company settings."}
                 </p>
               </div>
             </div>
@@ -577,7 +779,8 @@ export default function Settings() {
                 </div>
                 <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                   <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" /> {t.settings.usagePeriod}
+                    <Calendar className="w-3.5 h-3.5" />{" "}
+                    {t.settings.usagePeriod}
                   </span>
                   <span className="text-slate-900 dark:text-white">
                     {daysLeft} {t.settings.daysLeft}
@@ -586,7 +789,7 @@ export default function Settings() {
               </div>
               <div className="mt-8 space-y-3">
                 <button
-                  onClick={() => navigate('/subscription')}
+                  onClick={() => navigate("/subscription")}
                   className="w-full py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:opacity-90 active:scale-95"
                 >
                   {t.settings.manageBilling}
@@ -596,7 +799,15 @@ export default function Settings() {
                   className="w-full py-3.5 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:opacity-90 active:scale-95 flex items-center justify-center gap-2"
                 >
                   <TrendingUp className="w-3.5 h-3.5" />
-                  {language === 'uz' ? "Tarifni oshirish" : language === 'ru' ? "Повысить тариф" : language === 'tr' ? "Planı Yükselt" : language === 'oz' ? "Тарифни ошириш" : "Upgrade Plan"}
+                  {language === "uz"
+                    ? "Tarifni oshirish"
+                    : language === "ru"
+                      ? "Повысить тариф"
+                      : language === "tr"
+                        ? "Planı Yükselt"
+                        : language === "oz"
+                          ? "Тарифни ошириш"
+                          : "Upgrade Plan"}
                 </button>
               </div>
             </div>

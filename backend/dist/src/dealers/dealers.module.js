@@ -12,12 +12,13 @@ const dealers_service_1 = require("./dealers.service");
 const dealers_controller_1 = require("./dealers.controller");
 const prisma_module_1 = require("../prisma/prisma.module");
 const plan_limits_service_1 = require("../common/services/plan-limits.service");
+const telegram_module_1 = require("../telegram/telegram.module");
 let DealersModule = class DealersModule {
 };
 exports.DealersModule = DealersModule;
 exports.DealersModule = DealersModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule],
+        imports: [prisma_module_1.PrismaModule, telegram_module_1.TelegramModule],
         controllers: [dealers_controller_1.DealersController],
         providers: [dealers_service_1.DealersService, plan_limits_service_1.PlanLimitsService],
     })

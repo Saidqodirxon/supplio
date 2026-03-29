@@ -15,13 +15,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DealersController = void 0;
 const common_1 = require("@nestjs/common");
 const dealers_service_1 = require("./dealers.service");
+const telegram_service_1 = require("../telegram/telegram.service");
 const tenant_guard_1 = require("../common/middleware/tenant.guard");
 const roles_guard_1 = require("../common/middleware/roles.guard");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 let DealersController = class DealersController {
-    constructor(dealersService) {
+    constructor(dealersService, telegramService) {
         this.dealersService = dealersService;
+        this.telegramService = telegramService;
     }
     async create(req, body) {
         return this.dealersService.create(req.companyId, body);
@@ -39,10 +41,14 @@ let DealersController = class DealersController {
         return this.dealersService.remove(id, req.companyId, req.user.id);
     }
     async approve(req, id) {
-        return this.dealersService.approveDealer(id, req.companyId, req.user.id);
+        const result = await this.dealersService.approveDealer(id, req.companyId, req.user.id);
+        this.telegramService.notifyDealerApprovalResult(req.companyId, id, true).catch(() => { });
+        return result;
     }
     async reject(req, id) {
-        return this.dealersService.rejectDealer(id, req.companyId, req.user.id);
+        const result = await this.dealersService.rejectDealer(id, req.companyId, req.user.id);
+        this.telegramService.notifyDealerApprovalResult(req.companyId, id, false).catch(() => { });
+        return result;
     }
     async block(req, id) {
         return this.dealersService.block(id, req.companyId);
@@ -135,6 +141,7 @@ __decorate([
 exports.DealersController = DealersController = __decorate([
     (0, common_1.Controller)("dealers"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, tenant_guard_1.TenantGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [dealers_service_1.DealersService])
+    __metadata("design:paramtypes", [dealers_service_1.DealersService,
+        telegram_service_1.TelegramService])
 ], DealersController);
 //# sourceMappingURL=dealers.controller.js.map

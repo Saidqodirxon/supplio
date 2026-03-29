@@ -16,6 +16,7 @@ export declare class TelegramService implements OnModuleInit {
     private translations;
     private getT;
     private getLangFromCtx;
+    private buildMainMenuKeyboard;
     initBot(botId: string, companyId: string, token: string, companyName: string): Promise<void>;
     private handleDebt;
     private handleProducts;
@@ -117,5 +118,6 @@ export declare class TelegramService implements OnModuleInit {
         description: string | null;
         webhookUrl: string | null;
     }>;
+    notifyDealerApprovalResult(companyId: string, dealerId: string, approved: boolean): Promise<void>;
     stopAll(): Promise<void>;
 }

@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Patch, Delete, Body, Req, Param, UseGuards } from "@nestjs/common";
 import { DealersService } from "./dealers.service";
+import { TelegramService } from "../telegram/telegram.service";
 import { TenantGuard } from "../common/middleware/tenant.guard";
 import { RolesGuard } from "../common/middleware/roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
@@ -20,7 +21,10 @@ interface AuthenticatedRequest extends Request {
 @Controller("dealers")
 @UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 export class DealersController {
-  constructor(private readonly dealersService: DealersService) {}
+  constructor(
+    private readonly dealersService: DealersService,
+    private readonly telegramService: TelegramService,
+  ) {}
 
   @Post()
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER")
@@ -59,13 +63,17 @@ export class DealersController {
   @Post(":id/approve")
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER")
   async approve(@Req() req: AuthenticatedRequest, @Param("id") id: string) {
-    return this.dealersService.approveDealer(id, req.companyId, req.user.id);
+    const result = await this.dealersService.approveDealer(id, req.companyId, req.user.id);
+    this.telegramService.notifyDealerApprovalResult(req.companyId, id, true).catch(() => {});
+    return result;
   }
 
   @Post(":id/reject")
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER")
   async reject(@Req() req: AuthenticatedRequest, @Param("id") id: string) {
-    return this.dealersService.rejectDealer(id, req.companyId, req.user.id);
+    const result = await this.dealersService.rejectDealer(id, req.companyId, req.user.id);
+    this.telegramService.notifyDealerApprovalResult(req.companyId, id, false).catch(() => {});
+    return result;
   }
 
   @Post(":id/block")

@@ -98,12 +98,6 @@ export class SuperAdminController {
     return this.superAdminService.directUpdate(body.model, body.id, body.field, body.value);
   }
 
-  @Post("fix-users")
-  @Roles("SUPER_ADMIN")
-  async fixUsers() {
-    return this.superAdminService.fixUsers();
-  }
-
   // ── Company Management ────────────────────────────────────────────────────
 
   @Get("companies")
@@ -181,12 +175,6 @@ export class SuperAdminController {
   @Roles("SUPER_ADMIN")
   async deleteNews(@Param("id") id: string) {
     return this.superAdminService.deleteNews(id);
-  }
-
-  @Post("news/seed")
-  @Roles("SUPER_ADMIN")
-  async seedNews() {
-    return this.superAdminService.seedNews();
   }
 
   // ── Broadcast ─────────────────────────────────────────────────────────────
@@ -281,19 +269,6 @@ export class SuperAdminController {
   @Roles("SUPER_ADMIN")
   async deleteTariff(@Param("id") id: string) {
     return this.superAdminService.deleteTariff(id);
-  }
-
-  @Post("tariffs/seed")
-  @Roles("SUPER_ADMIN")
-  async seedTariffs() {
-    return this.superAdminService.seedDefaultTariffs();
-  }
-
-  @Post("units/seed")
-  @Roles("SUPER_ADMIN")
-  async seedUnits() {
-    await this.unitsService.seedDefaults();
-    return { message: "Default units seeded" };
   }
 
   // ── Audit Logs ────────────────────────────────────────────────────────────

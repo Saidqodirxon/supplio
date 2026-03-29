@@ -12,6 +12,11 @@ import { toast } from '../utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useScrollLock } from '../utils/useScrollLock';
+import ImageUploader from '../components/ImageUploader';
+
+const BACKEND = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').replace(/\/api$/, '');
+const imgSrc = (url?: string | null) =>
+  !url ? '' : url.startsWith('http') ? url : `${BACKEND}${url}`;
 
 interface ProductForm {
   name: string;
@@ -516,8 +521,12 @@ export default function Products() {
                     <tr key={product.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0">
-                            <Package className="w-4 h-4 text-emerald-600" />
+                          <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center">
+                            {product.imageUrl ? (
+                              <img src={imgSrc(product.imageUrl)} alt={product.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Package className="w-4 h-4 text-slate-400" />
+                            )}
                           </div>
                           <div>
                             <p className="text-sm font-black text-slate-900 dark:text-white">
@@ -671,6 +680,20 @@ export default function Products() {
               </div>
               <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8">
                 <div className="grid grid-cols-2 gap-4">
+                  {/* Image */}
+                  <div className="col-span-2">
+                    <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
+                      {t.products?.image || 'Product Image'}
+                    </label>
+                    <ImageUploader
+                      value={form.imageUrl}
+                      onChange={url => setForm(f => ({ ...f, imageUrl: url }))}
+                      onRemove={() => setForm(f => ({ ...f, imageUrl: '' }))}
+                      label={t.products?.uploadImage || 'Upload product image'}
+                      className="h-44"
+                    />
+                  </div>
+
                   {/* Name */}
                   <div className="col-span-2">
                     <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">{t.products?.name || 'Name'} *</label>

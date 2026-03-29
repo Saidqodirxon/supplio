@@ -3,9 +3,10 @@ import { DealersService } from "./dealers.service";
 import { DealersController } from "./dealers.controller";
 import { PrismaModule } from "../prisma/prisma.module";
 import { PlanLimitsService } from "../common/services/plan-limits.service";
+import { TelegramModule } from "../telegram/telegram.module";
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, TelegramModule],
   controllers: [DealersController],
   providers: [DealersService, PlanLimitsService],
 })

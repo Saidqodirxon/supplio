@@ -23,8 +23,8 @@ async function bootstrap() {
     logger: ["error", "warn", "log"],
   });
 
-  // Static assets
-  app.useStaticAssets(join(__dirname, "..", "uploads"), {
+  // Static assets — __dirname is dist/src, so go up two levels to reach backend/uploads
+  app.useStaticAssets(join(__dirname, "..", "..", "uploads"), {
     prefix: "/uploads/",
   });
 

@@ -19,7 +19,7 @@ async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         logger: ["error", "warn", "log"],
     });
-    app.useStaticAssets((0, path_1.join)(__dirname, "..", "uploads"), {
+    app.useStaticAssets((0, path_1.join)(__dirname, "..", "..", "uploads"), {
         prefix: "/uploads/",
     });
     app.use((0, helmet_1.default)());

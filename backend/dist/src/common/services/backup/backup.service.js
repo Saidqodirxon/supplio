@@ -84,6 +84,7 @@ let BackupService = BackupService_1 = class BackupService {
             const result = await this.createFullBackup();
             await this.sendToTelegram(result.zipPath, path.basename(result.zipPath), process.env.LOG_BOT_TOKEN, process.env.BACKUP_CHAT_ID || process.env.LOG_CHAT_ID);
             this.logger.log("Daily backup complete");
+            await this.cleanupOldBackups(2);
         }
         catch (err) {
             this.logger.error("Daily backup failed: " + (err?.message || err));
@@ -91,6 +92,31 @@ let BackupService = BackupService_1 = class BackupService {
         await this.prisma.systemSettings
             .update({ where: { id: "GLOBAL" }, data: { lastBackupAt: new Date() } })
             .catch(() => { });
+    }
+    async cleanupOldBackups(keepCount) {
+        if (!fs.existsSync(this.backupDir))
+            return;
+        const entries = fs.readdirSync(this.backupDir).map((name) => {
+            const fullPath = path.join(this.backupDir, name);
+            const stats = fs.statSync(fullPath);
+            return { name, fullPath, mtime: stats.mtimeMs, isDir: stats.isDirectory() };
+        });
+        entries.sort((a, b) => b.mtime - a.mtime);
+        const toDelete = entries.slice(keepCount);
+        for (const entry of toDelete) {
+            try {
+                if (entry.isDir) {
+                    fs.rmSync(entry.fullPath, { recursive: true, force: true });
+                }
+                else {
+                    fs.unlinkSync(entry.fullPath);
+                }
+                this.logger.log(`Cleanup: deleted old backup ${entry.name}`);
+            }
+            catch (e) {
+                this.logger.warn(`Cleanup: could not delete ${entry.name}: ${e?.message}`);
+            }
+        }
     }
     async createFullBackup() {
         const dateStr = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);

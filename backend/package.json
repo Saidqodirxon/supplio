@@ -14,7 +14,8 @@
     "start:prod": "node dist/src/main",
     "seed": "ts-node prisma/seed.ts",
     "seed:super": "ts-node prisma/seed_super.ts",
-    "seed:demo": "ts-node prisma/seed_demo.ts"
+    "seed:demo": "ts-node prisma/seed_demo.ts",
+    "seed:landing": "ts-node scripts/seed-landing.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

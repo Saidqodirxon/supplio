@@ -80,12 +80,12 @@ let DemoService = DemoService_1 = class DemoService {
         }
     }
     async resetCompanyData(companyId) {
-        await this.prisma.order.deleteMany({ where: { companyId } });
-        await this.prisma.payment.deleteMany({ where: { companyId } });
-        await this.prisma.ledgerTransaction.deleteMany({ where: { companyId } });
-        await this.prisma.dealer.deleteMany({ where: { companyId } });
-        await this.prisma.product.deleteMany({ where: { companyId } });
-        await this.prisma.expense.deleteMany({ where: { companyId } });
+        await this.prisma.$executeRaw `DELETE FROM "Order" WHERE "companyId" = ${companyId}`;
+        await this.prisma.$executeRaw `DELETE FROM "Payment" WHERE "companyId" = ${companyId}`;
+        await this.prisma.$executeRaw `DELETE FROM "LedgerTransaction" WHERE "companyId" = ${companyId}`;
+        await this.prisma.$executeRaw `DELETE FROM "Dealer" WHERE "companyId" = ${companyId}`;
+        await this.prisma.$executeRaw `DELETE FROM "Product" WHERE "companyId" = ${companyId}`;
+        await this.prisma.$executeRaw `DELETE FROM "Expense" WHERE "companyId" = ${companyId}`;
         const branches = await this.prisma.branch.findMany({
             where: { companyId },
         });

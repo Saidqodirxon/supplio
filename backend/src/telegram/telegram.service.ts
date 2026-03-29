@@ -44,7 +44,11 @@ export class TelegramService implements OnModuleInit {
       suspended: "⚠️ Ushbu bot xizmati vaqtinchalik to'xtatilgan. Iltimos, menejer bilan bog'laning.",
       notRegistered: "❌ Siz diler sifatida ro'yxatdan o'tmagansiz.\nIltimos, kompaniya menejeri bilan bog'laning.",
       loginSuccess: " muvaffaqiyatli tizimga kirdingiz!",
-      commands: "\n\n📋 Buyruqlar:\n/debt — Qarzni ko'rish\n/payments — To'lovlar tarixi\n/products — Mahsulotlarni ko'rish\n/orders — Buyurtmalar tarixi\n/help — Yordam",
+      pendingApproval: "⏳ Sizning so'rovingiz ko'rib chiqilmoqda. Distributor tasdiqlashini kuting.",
+      approvalSent: "✅ Ro'yxatdan o'tish so'rovingiz distributorga yuborildi.\n⏳ Tasdiqlash kutilyapti. Xabar beriladi.",
+      accessDenied: "⛔ Sizda bu botdan foydalanish huquqi yo'q.\nDistributor bilan bog'laning.",
+      blocked: "🚫 Hisobingiz bloklangan. Menejer bilan bog'laning.",
+      commands: "\n\n📋 Asosiy menyudan foydalaning.",
       kbdDebt: "💰 Qarzim",
       kbdPayments: "💸 To'lovlarim",
       kbdProducts: "📦 Mahsulotlar",
@@ -60,11 +64,11 @@ export class TelegramService implements OnModuleInit {
       recentOrders: "📋 *So'nggi buyurtmalar:*",
       noPayments: "📭 Hali to'lovlar yo'q.",
       recentPayments: "💸 *Oxirgi to'lovlar:*",
-      startOver: "⚠️ Avval /start orqali ro'yxatdan o'ting va telefon raqamingizni yuboring.",
+      startOver: "⚠️ Avval /start bosing va telefon raqamingizni yuboring.",
       helpTitle: "Yordam",
-      helpCommands: "📋 Buyruqlar:\n\n/debt — Qarzingizni ko'ring\n/payments — To'lovlar tarixi\n/products — Mahsulotlar ro'yxati\n/orders — Buyurtmalar tarixi\n/cart — Savat\n/checkout — Buyurtma berish\n/help — Yordam\n\n📞 Muammo bo'lsa: kompaniya menejeriga murojaat qiling.",
+      helpCommands: "📋 Buyruqlar:\n\n💰 Qarzim — qarzni ko'rish\n💸 To'lovlarim — to'lovlar tarixi\n📦 Mahsulotlar — mahsulotlar ro'yxati\n📋 Buyurtmalarim — buyurtmalar tarixi\n🛒 Savat — savatni ko'rish\n\n📞 Muammo bo'lsa: kompaniya menejeriga murojaat qiling.",
       addToCart: "🛒 Savatga",
-      cartEmpty: "🛒 Savat bo'sh.\n/products orqali mahsulot qo'shing.",
+      cartEmpty: "🛒 Savat bo'sh.\nMahsulotlarni 📦 Mahsulotlar tugmasi orqali qo'shing.",
       cartTitle: "🛒 *Savatingiz:*",
       cartTotal: "💰 *Jami:*",
       cartCheckout: "✅ Buyurtma berish",
@@ -74,9 +78,53 @@ export class TelegramService implements OnModuleInit {
       cartRemoved: "❌ O'chirildi.",
       checkoutSuccess: "✅ Buyurtma qabul qilindi!\n\n*Buyurtma #",
       checkoutFail: "❌ Buyurtma berishda xatolik. Iltimos, qayta urinib ko'ring.",
-      checkoutEmpty: "🛒 Savat bo'sh. Avval /products orqali mahsulot tanlang.",
+      checkoutEmpty: "🛒 Savat bo'sh. Avval mahsulot tanlang.",
       limitExceeded: "⚠️ Kredit limiti yetarli emas! Avval qarzni to'lang.",
       kbdCart: "🛒 Savat",
+    },
+    oz: {
+      welcome: "Ассалому алайкум! Ботга хуш келибсиз.\nИлтимос, телефон рақамингизни юборинг:",
+      sendPhone: "📞 Телефон рақамни юбориш",
+      suspended: "⚠️ Ушбу бот хизмати вақтинча тўхтатилган. Менежер билан боғланинг.",
+      notRegistered: "❌ Сиз дилер сифатида рўйхатдан ўтмагансиз.\nКомпания менежери билан боғланинг.",
+      loginSuccess: " муваффақиятли тизимга кирдингиз!",
+      pendingApproval: "⏳ Сизнинг сўровингиз кўриб чиқилмоқда. Дистрибьютор тасдиқлашини кутинг.",
+      approvalSent: "✅ Рўйхатдан ўтиш сўровингиз дистрибьюторга юборилди.\n⏳ Тасдиқлаш кутиляпти.",
+      accessDenied: "⛔ Сизда бу ботдан фойдаланиш ҳуқуқи йўқ.\nДистрибьютор билан боғланинг.",
+      blocked: "🚫 Ҳисобингиз блокланган. Менежер билан боғланинг.",
+      commands: "\n\n📋 Асосий менюдан фойдаланинг.",
+      kbdDebt: "💰 Қарзим",
+      kbdPayments: "💸 Тўловларим",
+      kbdProducts: "📦 Маҳсулотлар",
+      kbdOrders: "📋 Буюртмаларим",
+      kbdHelp: "ℹ️ Ёрдам",
+      debtTitle: "Жорий қарз",
+      limitTitle: "Кредит лимити",
+      overLimit: "⚠️ Кредит лимитидан ошган!",
+      withinLimit: "✅ Лимитда",
+      noProducts: "📭 Ҳозирча маҳсулотлар мавжуд эмас.",
+      productList: "📦 *Маҳсулотлар рўйхати:*",
+      noOrders: "📭 Ҳали буюртмалар йўқ.",
+      recentOrders: "📋 *Сўнгги буюртмалар:*",
+      noPayments: "📭 Ҳали тўловлар йўқ.",
+      recentPayments: "💸 *Охирги тўловлар:*",
+      startOver: "⚠️ Аввал /start босинг ва телефон рақамингизни юборинг.",
+      helpTitle: "Ёрдам",
+      helpCommands: "📋 Буйруқлар:\n\n💰 Қарзим — қарзни кўриш\n💸 Тўловларим — тўловлар тарихи\n📦 Маҳсулотлар — маҳсулотлар рўйхати\n📋 Буюртмаларим — буюртмалар тарихи\n🛒 Сават — саватни кўриш\n\n📞 Муаммо бўлса: компания менежерига мурожаат қилинг.",
+      addToCart: "🛒 Саватга",
+      cartEmpty: "🛒 Сават бўш.\nМаҳсулотларни 📦 Маҳсулотлар тугмаси орқали қўшинг.",
+      cartTitle: "🛒 *Савatingиз:*",
+      cartTotal: "💰 *Жами:*",
+      cartCheckout: "✅ Буюртма бериш",
+      cartClear: "🗑 Тозалаш",
+      cartCleared: "🗑 Сават тозаланди.",
+      cartUpdated: "✅ Саватга қўшилди!",
+      cartRemoved: "❌ Ўчирилди.",
+      checkoutSuccess: "✅ Буюртма қабул қилинди!\n\n*Буюртма #",
+      checkoutFail: "❌ Буюртма беришда хатолик. Қайта уриниб кўринг.",
+      checkoutEmpty: "🛒 Сават бўш. Аввал маҳсулот танланг.",
+      limitExceeded: "⚠️ Кредит лимити етарли эмас! Аввал қарзни тўланг.",
+      kbdCart: "🛒 Сават",
     },
     ru: {
       welcome: "Здравствуйте! Добро пожаловать.\nПожалуйста, отправьте ваш номер телефона:",
@@ -84,7 +132,11 @@ export class TelegramService implements OnModuleInit {
       suspended: "⚠️ Сервис временно приостановлен. Свяжитесь с менеджером.",
       notRegistered: "❌ Вы не зарегистрированы как дилер. Свяжитесь с менеджером компании.",
       loginSuccess: ", вы успешно вошли в систему!",
-      commands: "\n\n📋 Команды:\n/debt — Мой долг\n/payments — История платежей\n/products — Список продуктов\n/orders — История заказов\n/cart — Корзина\n/checkout — Оформить заказ\n/help — Помощь",
+      pendingApproval: "⏳ Ваша заявка рассматривается. Ожидайте подтверждения от дистрибьютора.",
+      approvalSent: "✅ Заявка на регистрацию отправлена дистрибьютору.\n⏳ Ожидайте подтверждения.",
+      accessDenied: "⛔ У вас нет доступа к этому боту.\nСвяжитесь с дистрибьютором.",
+      blocked: "🚫 Ваш аккаунт заблокирован. Свяжитесь с менеджером.",
+      commands: "\n\n📋 Используйте главное меню.",
       kbdDebt: "💰 Мой долг",
       kbdPayments: "💸 Платежи",
       kbdProducts: "📦 Продукты",
@@ -100,11 +152,11 @@ export class TelegramService implements OnModuleInit {
       recentOrders: "📋 *Последние заказы:*",
       noPayments: "📭 Платежей пока нет.",
       recentPayments: "💸 *Последние платежи:*",
-      startOver: "⚠️ Сначала отправьте /start и ваш номер телефона.",
+      startOver: "⚠️ Сначала нажмите /start и отправьте ваш номер телефона.",
       helpTitle: "Помощь",
-      helpCommands: "📋 Команды:\n\n/debt — Узнать долг\n/payments — История платежей\n/products — Список товаров\n/orders — Список заказов\n/cart — Корзина\n/checkout — Оформить заказ\n/help — Помощь\n\n📞 Проблемы? Свяжитесь с менеджером.",
+      helpCommands: "📋 Команды:\n\n💰 Мой долг — узнать долг\n💸 Платежи — история платежей\n📦 Продукты — список товаров\n📋 Заказы — история заказов\n🛒 Корзина — ваша корзина\n\n📞 Проблемы? Свяжитесь с менеджером.",
       addToCart: "🛒 В корзину",
-      cartEmpty: "🛒 Корзина пуста.\nДобавьте товары через /products.",
+      cartEmpty: "🛒 Корзина пуста.\nДобавьте товары через 📦 Продукты.",
       cartTitle: "🛒 *Ваша корзина:*",
       cartTotal: "💰 *Итого:*",
       cartCheckout: "✅ Оформить заказ",
@@ -114,21 +166,124 @@ export class TelegramService implements OnModuleInit {
       cartRemoved: "❌ Удалено.",
       checkoutSuccess: "✅ Заказ принят!\n\n*Заказ #",
       checkoutFail: "❌ Ошибка при оформлении. Попробуйте ещё раз.",
-      checkoutEmpty: "🛒 Корзина пуста. Сначала добавьте товары через /products.",
+      checkoutEmpty: "🛒 Корзина пуста. Сначала выберите товары.",
       limitExceeded: "⚠️ Недостаточно кредитного лимита! Сначала погасите долг.",
       kbdCart: "🛒 Корзина",
-    }
+    },
+    tr: {
+      welcome: "Merhaba! Hoş geldiniz.\nLütfen telefon numaranızı gönderin:",
+      sendPhone: "📞 Numara gönder",
+      suspended: "⚠️ Bu bot geçici olarak askıya alınmıştır. Yöneticiyle iletişime geçin.",
+      notRegistered: "❌ Bayi olarak kayıtlı değilsiniz.\nŞirket yöneticisiyle iletişime geçin.",
+      loginSuccess: " sisteme başarıyla giriş yaptınız!",
+      pendingApproval: "⏳ Başvurunuz inceleniyor. Distribütörün onayını bekleyin.",
+      approvalSent: "✅ Kayıt başvurunuz distribütöre gönderildi.\n⏳ Onay bekleniyor.",
+      accessDenied: "⛔ Bu botu kullanma izniniz yok.\nDistribütörünüzle iletişime geçin.",
+      blocked: "🚫 Hesabınız engellendi. Yöneticiyle iletişime geçin.",
+      commands: "\n\n📋 Ana menüyü kullanın.",
+      kbdDebt: "💰 Borcum",
+      kbdPayments: "💸 Ödemelerim",
+      kbdProducts: "📦 Ürünler",
+      kbdOrders: "📋 Siparişlerim",
+      kbdHelp: "ℹ️ Yardım",
+      debtTitle: "Mevcut borç",
+      limitTitle: "Kredi limiti",
+      overLimit: "⚠️ Limit aşıldı!",
+      withinLimit: "✅ Limit dahilinde",
+      noProducts: "📭 Henüz ürün yok.",
+      productList: "📦 *Ürün listesi:*",
+      noOrders: "📭 Henüz sipariş yok.",
+      recentOrders: "📋 *Son siparişler:*",
+      noPayments: "📭 Henüz ödeme yok.",
+      recentPayments: "💸 *Son ödemeler:*",
+      startOver: "⚠️ Önce /start'a basın ve telefon numaranızı gönderin.",
+      helpTitle: "Yardım",
+      helpCommands: "📋 Komutlar:\n\n💰 Borcum — borç görüntüle\n💸 Ödemelerim — ödeme geçmişi\n📦 Ürünler — ürün listesi\n📋 Siparişlerim — sipariş geçmişi\n🛒 Sepet — sepetiniz\n\n📞 Sorun mu var? Yöneticiyle iletişime geçin.",
+      addToCart: "🛒 Sepete ekle",
+      cartEmpty: "🛒 Sepet boş.\n📦 Ürünler butonundan ürün ekleyin.",
+      cartTitle: "🛒 *Sepetiniz:*",
+      cartTotal: "💰 *Toplam:*",
+      cartCheckout: "✅ Sipariş ver",
+      cartClear: "🗑 Temizle",
+      cartCleared: "🗑 Sepet temizlendi.",
+      cartUpdated: "✅ Sepete eklendi!",
+      cartRemoved: "❌ Kaldırıldı.",
+      checkoutSuccess: "✅ Sipariş alındı!\n\n*Sipariş #",
+      checkoutFail: "❌ Sipariş hatası. Lütfen tekrar deneyin.",
+      checkoutEmpty: "🛒 Sepet boş. Önce ürün seçin.",
+      limitExceeded: "⚠️ Kredi limiti yetersiz! Önce borcunuzu ödeyin.",
+      kbdCart: "🛒 Sepet",
+    },
+    en: {
+      welcome: "Hello! Welcome.\nPlease share your phone number:",
+      sendPhone: "📞 Share phone number",
+      suspended: "⚠️ This bot is temporarily suspended. Please contact the manager.",
+      notRegistered: "❌ You are not registered as a dealer.\nPlease contact the company manager.",
+      loginSuccess: " you have successfully logged in!",
+      pendingApproval: "⏳ Your request is under review. Please wait for the distributor's approval.",
+      approvalSent: "✅ Your registration request has been sent to the distributor.\n⏳ Awaiting approval.",
+      accessDenied: "⛔ You don't have permission to use this bot.\nContact your distributor.",
+      blocked: "🚫 Your account is blocked. Please contact the manager.",
+      commands: "\n\n📋 Use the main menu.",
+      kbdDebt: "💰 My Debt",
+      kbdPayments: "💸 Payments",
+      kbdProducts: "📦 Products",
+      kbdOrders: "📋 Orders",
+      kbdHelp: "ℹ️ Help",
+      debtTitle: "Current debt",
+      limitTitle: "Credit limit",
+      overLimit: "⚠️ Credit limit exceeded!",
+      withinLimit: "✅ Within limit",
+      noProducts: "📭 No products available yet.",
+      productList: "📦 *Product list:*",
+      noOrders: "📭 No orders yet.",
+      recentOrders: "📋 *Recent orders:*",
+      noPayments: "📭 No payments yet.",
+      recentPayments: "💸 *Recent payments:*",
+      startOver: "⚠️ Press /start first and send your phone number.",
+      helpTitle: "Help",
+      helpCommands: "📋 Commands:\n\n💰 My Debt — view debt\n💸 Payments — payment history\n📦 Products — product list\n📋 Orders — order history\n🛒 Cart — view cart\n\n📞 Need help? Contact the company manager.",
+      addToCart: "🛒 Add to cart",
+      cartEmpty: "🛒 Cart is empty.\nAdd products via 📦 Products.",
+      cartTitle: "🛒 *Your cart:*",
+      cartTotal: "💰 *Total:*",
+      cartCheckout: "✅ Place order",
+      cartClear: "🗑 Clear",
+      cartCleared: "🗑 Cart cleared.",
+      cartUpdated: "✅ Added to cart!",
+      cartRemoved: "❌ Removed.",
+      checkoutSuccess: "✅ Order placed!\n\n*Order #",
+      checkoutFail: "❌ Order failed. Please try again.",
+      checkoutEmpty: "🛒 Cart is empty. Please select products first.",
+      limitExceeded: "⚠️ Insufficient credit limit! Please pay your debt first.",
+      kbdCart: "🛒 Cart",
+    },
   };
 
   private getT(lang: string = 'uz') {
-    return this.translations[lang] || this.translations['uz'];
+    return this.translations[lang] ?? this.translations['uz'];
   }
 
   /** Detect language from Telegram ctx.from.language_code and return translations */
   private getLangFromCtx(ctx: Context) {
     const code = (ctx.from as any)?.language_code ?? 'uz';
-    const lang = code.startsWith('ru') ? 'ru' : 'uz';
+    let lang = 'uz';
+    if (code.startsWith('ru')) lang = 'ru';
+    else if (code.startsWith('tr')) lang = 'tr';
+    else if (code.startsWith('en')) lang = 'en';
     return this.translations[lang] ?? this.translations['uz'];
+  }
+
+  /** Build main menu keyboard for a given translation */
+  private buildMainMenuKeyboard(t: ReturnType<typeof this.getLangFromCtx>) {
+    return {
+      keyboard: [
+        [{ text: t.kbdDebt }, { text: t.kbdPayments }],
+        [{ text: t.kbdProducts }, { text: t.kbdOrders }],
+        [{ text: t.kbdCart }, { text: t.kbdHelp }],
+      ],
+      resize_keyboard: true,
+    };
   }
 
   async initBot(botId: string, companyId: string, token: string, companyName: string) {
@@ -149,33 +304,36 @@ export class TelegramService implements OnModuleInit {
           return ctx.reply(t.suspended);
         }
 
-        // Check if this user is already registered — skip phone prompt
         const chatId = String(ctx.chat.id);
         const existingDealer = await this.prisma.dealer.findFirst({
           where: { telegramChatId: chatId, companyId, deletedAt: null },
         });
 
         if (existingDealer) {
+          if (existingDealer.isBlocked) return ctx.reply(t.blocked);
+
+          if (!existingDealer.isApproved) {
+            const pending = await (this.prisma as any).dealerApprovalRequest.findFirst({
+              where: { dealerId: existingDealer.id, status: 'PENDING' },
+            });
+            return ctx.reply(pending ? t.pendingApproval : t.accessDenied);
+          }
+
           const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
-          await ctx.reply(`👋 ${existingDealer.name}${t.loginSuccess}${t.commands}`, {
-            reply_markup: {
-              keyboard: [
-                [{ text: t.kbdDebt }, { text: t.kbdPayments }],
-                [{ text: t.kbdProducts }, { text: t.kbdOrders }],
-                [{ text: t.kbdCart }, { text: t.kbdHelp }],
-              ],
-              resize_keyboard: true,
-            },
+          await ctx.reply(`👋 *${existingDealer.name}*${t.loginSuccess}${t.commands}`, {
+            parse_mode: 'Markdown',
+            reply_markup: this.buildMainMenuKeyboard(t),
           });
           await ctx.reply(`🛍 ${companyName}`, {
             reply_markup: {
-              inline_keyboard: [[{ text: '🛍 Do\'konni ochish', web_app: { url: storeUrl } }]],
+              inline_keyboard: [[{ text: '🛍 Online do\'kon', web_app: { url: storeUrl } }]],
             },
           });
           return;
         }
 
-        await ctx.reply(`🏢 ${companyName}\n\n${t.welcome}`, {
+        await ctx.reply(`🏢 *${companyName}*\n\n${t.welcome}`, {
+          parse_mode: 'Markdown',
           reply_markup: {
             keyboard: [[{ text: t.sendPhone, request_contact: true }]],
             resize_keyboard: true, one_time_keyboard: true,
@@ -188,60 +346,69 @@ export class TelegramService implements OnModuleInit {
         let phone = contact.phone_number.replace("+", "");
         if (!phone.startsWith("998")) phone = "998" + phone;
 
+        const t = this.getLangFromCtx(ctx);
+        const chatId = String(ctx.chat.id);
+
         const dealer = await this.prisma.dealer.findFirst({
           where: { phone: { contains: phone.slice(-9) }, companyId, deletedAt: null },
         });
 
-        const t = this.getLangFromCtx(ctx);
-
         if (!dealer) return ctx.reply(t.notRegistered);
 
-        const chatId = String(ctx.chat.id);
+        // Link chatId to dealer
         await this.prisma.dealer.update({ where: { id: dealer.id }, data: { telegramChatId: chatId } });
+
+        if (dealer.isBlocked) return ctx.reply(t.blocked);
+
+        if (!dealer.isApproved) {
+          // Avoid duplicate requests
+          const existing = await (this.prisma as any).dealerApprovalRequest.findFirst({
+            where: { dealerId: dealer.id, status: 'PENDING' },
+          });
+          if (!existing) {
+            await (this.prisma as any).dealerApprovalRequest.create({
+              data: { companyId, dealerId: dealer.id, status: 'PENDING', requestedAt: new Date() },
+            });
+            this.loggerBot.sendDealerApprovalRequest({
+              name: dealer.name, phone: dealer.phone, companyName,
+            }).catch(() => {});
+          }
+          return ctx.reply(`👤 *${dealer.name}*\n\n${t.approvalSent}`, { parse_mode: 'Markdown' });
+        }
 
         const company = await this.prisma.company.findUnique({ where: { id: companyId } });
         const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
 
-        await ctx.reply(`✅ ${dealer.name}${t.loginSuccess}${t.commands}`, {
-          reply_markup: {
-            keyboard: [
-              [{ text: t.kbdDebt }, { text: t.kbdPayments }],
-              [{ text: t.kbdProducts }, { text: t.kbdOrders }],
-              [{ text: t.kbdCart }, { text: t.kbdHelp }],
-            ],
-            resize_keyboard: true,
-          },
+        await ctx.reply(`✅ *${dealer.name}*${t.loginSuccess}${t.commands}`, {
+          parse_mode: 'Markdown',
+          reply_markup: this.buildMainMenuKeyboard(t),
         });
-
-        // Send WebApp button as inline keyboard
         await ctx.reply(`🛍 ${companyName}`, {
           reply_markup: {
-            inline_keyboard: [[
-              { text: '🛍 Do\'konni ochish', web_app: { url: storeUrl } },
-            ]],
+            inline_keyboard: [[{ text: '🛍 Online do\'kon', web_app: { url: storeUrl } }]],
           },
         });
       });
 
       bot.command("debt", async (ctx) => await this.handleDebt(ctx, companyId));
-      bot.hears(["💰 Qarzim", "💰 Мой долг"], async (ctx) => await this.handleDebt(ctx, companyId));
+      bot.hears(["💰 Qarzim", "💰 Қарзим", "💰 Мой долг", "💰 Borcum", "💰 My Debt"], async (ctx) => await this.handleDebt(ctx, companyId));
 
       bot.command("products", async (ctx) => await this.handleProducts(ctx, companyId));
-      bot.hears(["📦 Mahsulotlar", "📦 Продукты"], async (ctx) => await this.handleProducts(ctx, companyId));
+      bot.hears(["📦 Mahsulotlar", "📦 Маҳсулотлар", "📦 Продукты", "📦 Ürünler", "📦 Products"], async (ctx) => await this.handleProducts(ctx, companyId));
 
       bot.command("payments", async (ctx) => await this.handlePayments(ctx, companyId));
-      bot.hears(["💸 To'lovlarim", "💸 Платежи"], async (ctx) => await this.handlePayments(ctx, companyId));
+      bot.hears(["💸 To'lovlarim", "💸 Тўловларим", "💸 Платежи", "💸 Ödemelerim", "💸 Payments"], async (ctx) => await this.handlePayments(ctx, companyId));
 
       bot.command("orders", async (ctx) => await this.handleOrders(ctx, companyId));
-      bot.hears(["📋 Buyurtmalarim", "📋 Заказы"], async (ctx) => await this.handleOrders(ctx, companyId));
+      bot.hears(["📋 Buyurtmalarim", "📋 Буюртмаларим", "📋 Заказы", "📋 Siparişlerim", "📋 Orders"], async (ctx) => await this.handleOrders(ctx, companyId));
 
       bot.command("cart", async (ctx) => await this.handleCart(ctx, companyId));
-      bot.hears(["🛒 Savat", "🛒 Корзина"], async (ctx) => await this.handleCart(ctx, companyId));
+      bot.hears(["🛒 Savat", "🛒 Сават", "🛒 Корзина", "🛒 Sepet", "🛒 Cart"], async (ctx) => await this.handleCart(ctx, companyId));
 
       bot.command("checkout", async (ctx) => await this.handleCheckout(ctx, companyId));
 
       bot.command("help", async (ctx) => await this.handleHelp(ctx, companyName));
-      bot.hears(["ℹ️ Yordam", "ℹ️ Помощь"], async (ctx) => await this.handleHelp(ctx, companyName));
+      bot.hears(["ℹ️ Yordam", "ℹ️ Ёрдам", "ℹ️ Помощь", "ℹ️ Yardım", "ℹ️ Help"], async (ctx) => await this.handleHelp(ctx, companyName));
 
       bot.on("callback_query", async (ctx) => await this.handleCallback(ctx, companyId));
 
@@ -302,8 +469,9 @@ export class TelegramService implements OnModuleInit {
       return ctx.reply(t.noProducts);
     }
 
-    // Send each product as a separate message with an inline "Add to cart" button
     await ctx.reply(t.productList, { parse_mode: "Markdown" });
+
+    const backendUrl = (process.env.APP_URL || process.env.FRONTEND_URL || 'http://localhost:5000').replace(/\/$/, '');
 
     for (const p of products) {
       const effectivePrice = (p as any).discountPrice ?? p.price;
@@ -311,24 +479,38 @@ export class TelegramService implements OnModuleInit {
       const priceStr = isPromo
         ? `~~${p.price.toLocaleString()}~~ → *${effectivePrice.toLocaleString()} so'm* 🔥`
         : `*${p.price.toLocaleString()} so'm*`;
-      const msg =
+      const caption =
         `${isPromo ? '🏷 *AKSIYA!* ' : ''}*${p.name}*\n` +
         `💵 ${priceStr} / ${p.unit}\n` +
-        `📦 ${p.stock} ${p.unit} mavjud`;
+        `📦 ${p.stock} ${p.unit}`;
 
-      await ctx.reply(msg, {
-        parse_mode: "Markdown",
-        reply_markup: {
-          inline_keyboard: [[
-            { text: `${t.addToCart} (+1)`, callback_data: `add:${p.id}:1` },
-            { text: "+5", callback_data: `add:${p.id}:5` },
-            { text: "+10", callback_data: `add:${p.id}:10` },
-          ]],
-        },
+      const buttons = [[
+        { text: `${t.addToCart} (+1)`, callback_data: `add:${p.id}:1` },
+        { text: '+5', callback_data: `add:${p.id}:5` },
+        { text: '+10', callback_data: `add:${p.id}:10` },
+      ]];
+
+      if (p.imageUrl) {
+        const photoUrl = p.imageUrl.startsWith('http') ? p.imageUrl : `${backendUrl}${p.imageUrl}`;
+        try {
+          await (ctx as any).replyWithPhoto(photoUrl, {
+            caption,
+            parse_mode: 'Markdown',
+            reply_markup: { inline_keyboard: buttons },
+          });
+          continue;
+        } catch {
+          // fallback to text if photo fails
+        }
+      }
+
+      await ctx.reply(caption, {
+        parse_mode: 'Markdown',
+        reply_markup: { inline_keyboard: buttons },
       });
     }
 
-    await ctx.reply(`/cart — ${t.cartTitle.replace(/\*/g, '')}`, { parse_mode: "Markdown" });
+    await ctx.reply(`🛒 ${t.cartTitle.replace(/\*/g, '')}`, { parse_mode: 'Markdown' });
   }
 
   private async handleOrders(ctx: Context, companyId: string) {
@@ -516,10 +698,10 @@ export class TelegramService implements OnModuleInit {
 
     // Check dealer approval and block status
     if (!dealer.isApproved) {
-      return (ctx as any).reply('⛔ Siz hali distributor tomonidan tasdiqlanmagansiz. Menejer bilan bog\'laning.');
+      return (ctx as any).reply(t.pendingApproval);
     }
     if (dealer.isBlocked) {
-      return (ctx as any).reply('🚫 Hisobingiz bloklangan. Buyurtma berish mumkin emas. Menejer bilan bog\'laning.');
+      return (ctx as any).reply(t.blocked);
     }
 
     const productIds = Array.from(cart.keys());
@@ -748,18 +930,23 @@ export class TelegramService implements OnModuleInit {
 
   private async getDealerByChatId(ctx: Context, companyId: string) {
     const chatId = String(ctx.chat?.id);
+    const t = this.getLangFromCtx(ctx);
     const dealer = await this.prisma.dealer.findFirst({
       where: { telegramChatId: chatId, companyId, deletedAt: null },
     });
 
     if (!dealer) {
-      const t = this.getLangFromCtx(ctx);
       await ctx.reply(t.startOver);
       return null;
     }
 
     if (dealer.isBlocked) {
-      await ctx.reply('🚫 Hisobingiz bloklangan. Menejer bilan bog\'laning.');
+      await ctx.reply(t.blocked);
+      return null;
+    }
+
+    if (!dealer.isApproved) {
+      await ctx.reply(t.pendingApproval);
       return null;
     }
 
@@ -897,6 +1084,49 @@ export class TelegramService implements OnModuleInit {
     const existing = this.bots.get(id);
     if (existing) { try { existing.stop(); } catch {} this.bots.delete(id); }
     return this.prisma.customBot.update({ where: { id }, data: { deletedAt: new Date(), isActive: false } });
+  }
+
+  /** Notify dealer via Telegram after distributor approves or rejects their request */
+  async notifyDealerApprovalResult(companyId: string, dealerId: string, approved: boolean) {
+    const botRecord = await this.prisma.customBot.findFirst({
+      where: { companyId, isActive: true, deletedAt: null },
+    });
+    if (!botRecord) return;
+
+    const bot = this.bots.get(botRecord.id);
+    if (!bot) return;
+
+    const dealer = await this.prisma.dealer.findFirst({
+      where: { id: dealerId, companyId },
+      select: { telegramChatId: true, name: true },
+    });
+    if (!dealer?.telegramChatId) return;
+
+    const approvedMsgs = {
+      uz: `✅ *${dealer.name}*, so'rovingiz tasdiqlandi!\n\nEndi botdan to'liq foydalanishingiz mumkin. Davom etish uchun /start bosing.`,
+      oz: `✅ *${dealer.name}*, сўровингиз тасдиқланди!\n\nЭнди ботдан тўлиқ фойдаланишингиз мумкин. Давом этиш учун /start босинг.`,
+      ru: `✅ *${dealer.name}*, ваша заявка одобрена!\n\nТеперь вы можете пользоваться ботом. Нажмите /start чтобы продолжить.`,
+      tr: `✅ *${dealer.name}*, başvurunuz onaylandı!\n\nArtık botu kullanabilirsiniz. Devam etmek için /start'a basın.`,
+      en: `✅ *${dealer.name}*, your request has been approved!\n\nYou can now use the bot. Press /start to continue.`,
+    };
+
+    const rejectedMsgs = {
+      uz: `❌ *${dealer.name}*, afsuski so'rovingiz rad etildi.\n\nBatafsil ma'lumot uchun distributor bilan bog'laning.`,
+      oz: `❌ *${dealer.name}*, афсуски сўровингиз рад этилди.\n\nБатафсил маълумот учун дистрибьютор билан боғланинг.`,
+      ru: `❌ *${dealer.name}*, к сожалению ваша заявка отклонена.\n\nСвяжитесь с дистрибьютором для уточнения.`,
+      tr: `❌ *${dealer.name}*, başvurunuz reddedildi.\n\nAyrıntılar için distribütörünüzle iletişime geçin.`,
+      en: `❌ *${dealer.name}*, your request has been rejected.\n\nPlease contact your distributor for more information.`,
+    };
+
+    // Send in all 5 languages since we don't know which language the dealer uses
+    const msgs = approved ? approvedMsgs : rejectedMsgs;
+    const text = Object.values(msgs).join('\n\n────────────\n\n');
+
+    try {
+      await bot.telegram.sendMessage(dealer.telegramChatId, text, { parse_mode: 'Markdown' });
+    } catch (e: any) {
+      this.logger.warn(`Could not notify dealer ${dealerId} of approval result: ${e.message}`);
+    }
   }
 
   async stopAll() {

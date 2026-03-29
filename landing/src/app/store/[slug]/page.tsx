@@ -75,6 +75,8 @@ export default function StorePage() {
   const [orderId, setOrderId] = useState("");
 
   const API = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
+  const imgUrl = (url?: string | null) =>
+    !url ? '' : url.startsWith('http') ? url : `${API}${url}`;
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -223,7 +225,7 @@ export default function StorePage() {
             </Link>
             <div className="flex items-center gap-3">
               {company?.logo ? (
-                <img src={company.logo} alt={company.name} className="w-8 h-8 rounded-xl object-cover" />
+                <img src={imgUrl(company.logo)} alt={company.name} className="w-8 h-8 rounded-xl object-cover" />
               ) : (
                 <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
                   <Building2 className="w-4 h-4 text-white" />
@@ -356,7 +358,7 @@ export default function StorePage() {
                   >
                     <div className="h-44 bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center relative overflow-hidden">
                       {product.imageUrl ? (
-                        <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src={imgUrl(product.imageUrl)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <Package className="w-14 h-14 text-slate-200 group-hover:text-blue-200 transition-colors" />
                       )}

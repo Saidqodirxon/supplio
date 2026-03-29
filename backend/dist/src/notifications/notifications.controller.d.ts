@@ -23,10 +23,10 @@ export declare class NotificationsController {
             companyId: string;
             createdAt: Date;
             deletedAt: Date | null;
-            type: string;
-            message: string;
             title: string;
+            message: string;
             isRead: boolean;
+            type: string;
             senderId: string | null;
             receiverUserId: string | null;
             receiverDealerId: string | null;
@@ -50,19 +50,19 @@ export declare class NotificationsController {
         message: string;
         type?: string;
         receiverDealerId?: string;
-    }): Promise<import(".prisma/client").Prisma.BatchPayload | {
+    }): Promise<{
         id: string;
         companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        type: string;
-        message: string;
         title: string;
+        message: string;
         isRead: boolean;
+        type: string;
         senderId: string | null;
         receiverUserId: string | null;
         receiverDealerId: string | null;
-    }>;
+    } | import(".prisma/client").Prisma.BatchPayload>;
     sendToUser(req: AuthenticatedRequest, body: {
         receiverUserId: string;
         title: string;
@@ -73,10 +73,10 @@ export declare class NotificationsController {
         companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        type: string;
-        message: string;
         title: string;
+        message: string;
         isRead: boolean;
+        type: string;
         senderId: string | null;
         receiverUserId: string | null;
         receiverDealerId: string | null;
@@ -93,9 +93,9 @@ export declare class NotificationsController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        updatedAt: Date;
-        type: string;
         message: import("@prisma/client/runtime/library").JsonValue;
+        type: string;
+        updatedAt: Date;
     }[]>;
     createTemplate(req: AuthenticatedRequest, body: {
         name: string;
@@ -109,9 +109,9 @@ export declare class NotificationsController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        updatedAt: Date;
-        type: string;
         message: import("@prisma/client/runtime/library").JsonValue;
+        type: string;
+        updatedAt: Date;
     }>;
     updateTemplate(req: AuthenticatedRequest, id: string, body: {
         name?: string;
@@ -128,10 +128,10 @@ export declare class NotificationsController {
         id: string;
         companyId: string;
         createdAt: Date;
-        status: string;
-        dealerId: string | null;
         message: string;
         templateId: string | null;
+        dealerId: string | null;
+        status: string;
     })[]>;
 }
 export {};

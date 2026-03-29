@@ -62,9 +62,6 @@ let SuperAdminController = class SuperAdminController {
     async directUpdate(body) {
         return this.superAdminService.directUpdate(body.model, body.id, body.field, body.value);
     }
-    async fixUsers() {
-        return this.superAdminService.fixUsers();
-    }
     async getCompanies(search, plan, status, page, limit) {
         return this.superAdminService.getAllCompanies({
             search,
@@ -101,9 +98,6 @@ let SuperAdminController = class SuperAdminController {
     async deleteNews(id) {
         return this.superAdminService.deleteNews(id);
     }
-    async seedNews() {
-        return this.superAdminService.seedNews();
-    }
     async broadcast(body) {
         return this.superAdminService.broadcast(body);
     }
@@ -135,13 +129,6 @@ let SuperAdminController = class SuperAdminController {
     }
     async deleteTariff(id) {
         return this.superAdminService.deleteTariff(id);
-    }
-    async seedTariffs() {
-        return this.superAdminService.seedDefaultTariffs();
-    }
-    async seedUnits() {
-        await this.unitsService.seedDefaults();
-        return { message: "Default units seeded" };
     }
     async getAuditLogs(page, limit, userId) {
         return this.superAdminService.getAuditLogs({
@@ -269,13 +256,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "directUpdate", null);
 __decorate([
-    (0, common_1.Post)("fix-users"),
-    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], SuperAdminController.prototype, "fixUsers", null);
-__decorate([
     (0, common_1.Get)("companies"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
     __param(0, (0, common_1.Query)("search")),
@@ -365,13 +345,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "deleteNews", null);
 __decorate([
-    (0, common_1.Post)("news/seed"),
-    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], SuperAdminController.prototype, "seedNews", null);
-__decorate([
     (0, common_1.Post)("broadcast"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
     __param(0, (0, common_1.Body)()),
@@ -447,20 +420,6 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "deleteTariff", null);
-__decorate([
-    (0, common_1.Post)("tariffs/seed"),
-    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], SuperAdminController.prototype, "seedTariffs", null);
-__decorate([
-    (0, common_1.Post)("units/seed"),
-    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", Promise)
-], SuperAdminController.prototype, "seedUnits", null);
 __decorate([
     (0, common_1.Get)("audit-logs"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
