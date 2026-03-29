@@ -297,7 +297,9 @@ function UserSecurityForm() {
       <form onSubmit={handleProfileSave} className="flex justify-end">
         <button
           type="submit"
-          disabled={savingProfile || fullName.trim() === (user?.fullName || "").trim()}
+          disabled={
+            savingProfile || fullName.trim() === (user?.fullName || "").trim()
+          }
           className="px-8 py-3.5 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
         >
           <Save className="w-4 h-4" />
@@ -307,8 +309,8 @@ function UserSecurityForm() {
 
       <div className="rounded-2xl border border-amber-100 dark:border-amber-900/30 bg-amber-50/70 dark:bg-amber-900/10 px-5 py-4">
         <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 leading-relaxed">
-          Telefon raqami faqat SuperAdmin tomonidan boshqariladi. Ismni bu
-          yerda yangilashingiz mumkin.
+          Telefon raqami faqat SuperAdmin tomonidan boshqariladi. Ismni bu yerda
+          yangilashingiz mumkin.
         </p>
       </div>
 
