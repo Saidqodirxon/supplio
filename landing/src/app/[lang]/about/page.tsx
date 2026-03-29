@@ -45,6 +45,12 @@ const VALUE_ICONS = [Zap, BarChart3, Users, ShieldCheck];
 
 const APP_LOGIN_URL = `${(process.env.NEXT_PUBLIC_APP_URL || "https://app.supplio.uz").replace(/\/+$/, "")}/login`;
 
+function normalizeBackendBaseUrl(rawUrl?: string) {
+  const fallback = "http://localhost:5000";
+  const value = (rawUrl || fallback).trim().replace(/\/+$/, "");
+  return value.endsWith("/api") ? value.slice(0, -4) : value;
+}
+
 export default function AboutPage() {
   const params = useParams();
   const lang: Language = slugToLang(params.lang as string);
@@ -53,12 +59,24 @@ export default function AboutPage() {
   const [scrolled, setScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [tariffs, setTariffs] = useState<Record<string, unknown>[]>([]);
+
+  const BACKEND = normalizeBackendBaseUrl(process.env.NEXT_PUBLIC_BACKEND_URL);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    fetch(`${BACKEND}/api/public/tariffs`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        setTariffs(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setTariffs([]));
+  }, [BACKEND]);
 
   return (
     <div className="min-h-screen bg-white text-left overflow-x-hidden font-sans selection:bg-blue-600 selection:text-white">
@@ -98,6 +116,8 @@ export default function AboutPage() {
             <LangSelect currentLang={lang} />
             <Link
               href={APP_LOGIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
             >
               {t.nav.login}
@@ -146,7 +166,7 @@ export default function AboutPage() {
               {t.nav.news}
             </Link>
             <hr className="border-slate-100" />
-            <Link href={APP_LOGIN_URL}>{t.nav.login}</Link>
+            <Link href={APP_LOGIN_URL} target="_blank" rel="noopener noreferrer">{t.nav.login}</Link>
             <button
               className="text-blue-600 font-bold text-left"
               onClick={() => {
@@ -404,7 +424,7 @@ export default function AboutPage() {
         onClose={() => setIsLeadModalOpen(false)}
         lang={lang}
         unlockDemoAfterSubmit={true}
-        tariffs={[]}
+        tariffs={tariffs}
       />
     </div>
   );

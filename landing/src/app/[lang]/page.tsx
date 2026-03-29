@@ -16,6 +16,10 @@ import {
   ShieldCheck,
   MessageCircle,
   Phone,
+  Mail,
+  MapPin,
+  LifeBuoy,
+  ExternalLink,
   ChevronLeft,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -140,7 +144,10 @@ interface DynamicLanding {
   heroBadgeTr?: string;
   contactPhone?: string;
   contactEmail?: string;
+  contactAddress?: string;
+  contactAddressUrl?: string;
   socialTelegram?: string;
+  socialInstagram?: string;
   socialLinkedin?: string;
   socialTwitter?: string;
   footerDescUz?: string;
@@ -156,6 +163,7 @@ export default function LandingPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
   const [dynamicNews, setDynamicNews] = useState<DynamicNews[]>([]);
   const [dynamicTariffs, setDynamicTariffs] = useState<DynamicTariff[]>([]);
   const [settings, setSettings] = useState<DynamicSettings | null>(null);
@@ -221,8 +229,17 @@ export default function LandingPage() {
   const heroSubtitle = landing?.[`heroSubtitle${langKey}`] || t.hero.subtitle;
   const heroBadge = landing?.[`heroBadge${langKey}`] || t.hero.badge;
   const footerDesc = landing?.[`footerDesc${langKey}`] || t.footer.desc;
-  const contactPhone =
-    landing?.contactPhone || settings?.superAdminPhone || null;
+  const fallbackPhone = "+998901112233";
+  const contactPhone = (landing?.contactPhone || settings?.superAdminPhone || fallbackPhone).trim() || null;
+  const contactPhoneHref = contactPhone ? `tel:${contactPhone.replace(/[^\d+]/g, "")}` : null;
+  const contactEmail = landing?.contactEmail?.trim() || null;
+  const contactEmailHref = contactEmail ? `mailto:${contactEmail}` : null;
+  const contactAddress = landing?.contactAddress?.trim() || null;
+  const contactAddressUrl = landing?.contactAddressUrl?.trim() || null;
+  const socialTelegram = landing?.socialTelegram?.trim() || null;
+  const socialInstagram = landing?.socialInstagram?.trim() || null;
+  const socialLinkedin = landing?.socialLinkedin?.trim() || null;
+  const socialTwitter = landing?.socialTwitter?.trim() || null;
 
   return (
     <div className="min-h-screen selection:bg-blue-600 selection:text-white overflow-x-hidden font-sans bg-white text-left">
@@ -272,6 +289,8 @@ export default function LandingPage() {
             <LangSelect currentLang={lang} />
             <Link
               href={APP_LOGIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
             >
               {t.nav.login}
@@ -313,7 +332,7 @@ export default function LandingPage() {
                 {t.nav.news}
               </Link>
               <hr className="border-slate-100" />
-              <Link href={APP_LOGIN_URL}>{t.nav.login}</Link>
+              <Link href={APP_LOGIN_URL} target="_blank" rel="noopener noreferrer">{t.nav.login}</Link>
               <button
                 className="text-blue-600 font-bold text-left"
                 onClick={() => {
@@ -1065,11 +1084,56 @@ export default function LandingPage() {
               {footerDesc}
             </p>
             {contactPhone && (
-              <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+              <a
+                href={contactPhoneHref}
+                className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
+              >
                 <Phone className="w-4 h-4 text-blue-600" />
                 <span>{contactPhone}</span>
-              </div>
+              </a>
             )}
+            {contactEmail && contactEmailHref && (
+              <a
+                href={contactEmailHref}
+                className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
+              >
+                <Mail className="w-4 h-4 text-blue-600" />
+                <span>{contactEmail}</span>
+              </a>
+            )}
+            {contactAddress && (
+              contactAddressUrl ? (
+                <a
+                  href={contactAddressUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
+                >
+                  <MapPin className="w-4 h-4 text-blue-600" />
+                  <span>{contactAddress}</span>
+                </a>
+              ) : (
+                <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
+                  <MapPin className="w-4 h-4 text-blue-600" />
+                  <span>{contactAddress}</span>
+                </div>
+              )
+            )}
+            <button
+              onClick={() => setIsHelpModalOpen(true)}
+              className="inline-flex items-center gap-2 mt-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
+            >
+              <LifeBuoy className="w-4 h-4 text-blue-600" />
+              {lang === "uz"
+                ? "Yordam markazi"
+                : lang === "ru"
+                  ? "Центр помощи"
+                  : lang === "tr"
+                    ? "Yardım Merkezi"
+                    : lang === "oz"
+                      ? "Ёрдам маркази"
+                      : "Help Center"}
+            </button>
           </div>
 
           {[
@@ -1106,6 +1170,8 @@ export default function LandingPage() {
                   <Link
                     key={j}
                     href={link.href}
+                    target={link.href.startsWith("http") ? "_blank" : undefined}
+                    rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
                     className="hover:text-blue-600 transition-colors"
                   >
                     {link.name}
@@ -1120,9 +1186,10 @@ export default function LandingPage() {
           <p className="text-slate-500 text-sm">{t.footer.copyright}</p>
           <div className="flex gap-6">
             {[
-              { label: "Twitter", href: landing?.socialTwitter },
-              { label: "LinkedIn", href: landing?.socialLinkedin },
-              { label: "Telegram", href: landing?.socialTelegram },
+              { label: "Twitter", href: socialTwitter },
+              { label: "Instagram", href: socialInstagram },
+              { label: "LinkedIn", href: socialLinkedin },
+              { label: "Telegram", href: socialTelegram },
             ]
               .filter((s) => s.href)
               .map((social) => (
@@ -1151,6 +1218,87 @@ export default function LandingPage() {
             : (t.pricing.plans as unknown as SafePlan[])
         }
       />
+
+      <AnimatePresence>
+        {isHelpModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+              onClick={() => setIsHelpModalOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 10 }}
+              className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-4"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-black text-slate-900 tracking-tight inline-flex items-center gap-2">
+                  <LifeBuoy className="w-5 h-5 text-blue-600" />
+                  {lang === "uz"
+                    ? "Yordam markazi"
+                    : lang === "ru"
+                      ? "Центр помощи"
+                      : lang === "tr"
+                        ? "Yardım Merkezi"
+                        : lang === "oz"
+                          ? "Ёрдам маркази"
+                          : "Help Center"}
+                </h3>
+                <button
+                  onClick={() => setIsHelpModalOpen(false)}
+                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {contactPhone && (
+                  <a href={contactPhoneHref} className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50">
+                    <span className="inline-flex items-center gap-2 font-bold text-slate-700"><Phone className="w-4 h-4 text-blue-600" />
+                      {lang === "ru" ? "Телефон" : lang === "tr" ? "Telefon" : lang === "oz" ? "Телефон" : "Telefon"}
+                    </span>
+                    <span className="text-xs text-slate-500">{contactPhone}</span>
+                  </a>
+                )}
+                {contactEmail && contactEmailHref && (
+                  <a href={contactEmailHref} className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50">
+                    <span className="inline-flex items-center gap-2 font-bold text-slate-700"><Mail className="w-4 h-4 text-blue-600" /> Email</span>
+                    <span className="text-xs text-slate-500">{contactEmail}</span>
+                  </a>
+                )}
+                {contactAddress && (
+                  <a href={contactAddressUrl || "#"} target={contactAddressUrl ? "_blank" : undefined} rel={contactAddressUrl ? "noopener noreferrer" : undefined} className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50">
+                    <span className="inline-flex items-center gap-2 font-bold text-slate-700"><MapPin className="w-4 h-4 text-blue-600" />
+                      {lang === "ru" ? "Адрес" : lang === "tr" ? "Adres" : lang === "oz" ? "Манзил" : "Manzil"}
+                    </span>
+                    <span className="text-xs text-slate-500 truncate max-w-[55%]">{contactAddress}</span>
+                  </a>
+                )}
+                {[
+                  { label: "Telegram", href: socialTelegram },
+                  { label: "Instagram", href: socialInstagram },
+                  { label: "LinkedIn", href: socialLinkedin },
+                  { label: "Twitter", href: socialTwitter },
+                ]
+                  .filter((s) => s.href)
+                  .map((social) => (
+                    <a key={social.label} href={social.href || "#"} target="_blank" rel="noopener noreferrer" className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50">
+                      <span className="inline-flex items-center gap-2 font-bold text-slate-700"><ExternalLink className="w-4 h-4 text-blue-600" /> {social.label}</span>
+                      <span className="text-xs text-slate-500">
+                        {lang === "ru" ? "Открыть" : lang === "tr" ? "Aç" : lang === "oz" ? "Очиш" : "Ochish"}
+                      </span>
+                    </a>
+                  ))}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -25,6 +25,7 @@ import {
   UserCog,
   ChevronRight,
   Zap,
+  LifeBuoy,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAuthStore } from "../store/authStore";
@@ -54,6 +55,14 @@ export default function Layout() {
 
   const isDemo = window.location.hostname.includes("demo");
   const isOwner = user?.roleType === "OWNER" || user?.roleType === "SUPER_ADMIN";
+  const helpCenterLabel =
+    language === "ru"
+      ? "Центр помощи"
+      : language === "en"
+        ? "Help Center"
+        : language === "tr"
+          ? "Yardım Merkezi"
+          : "Yordam markazi";
 
   // Sync theme with DOM
   useEffect(() => {
@@ -89,6 +98,7 @@ export default function Layout() {
     { name: t.sidebar.analytics, href: "/analytics", icon: TrendingUp, roles: ["OWNER", "MANAGER", "SUPER_ADMIN"] },
     { name: t.sidebar.reports, href: "/reports", icon: BarChart3, roles: ["OWNER", "MANAGER", "SUPER_ADMIN"] },
     { name: t.sidebar.notifications, href: "/notifications", icon: Bell, roles: ["ALL"] },
+    { name: helpCenterLabel, href: "/help-center", icon: LifeBuoy, roles: ["ALL"] },
     { name: t.sidebar.subscription, href: "/subscription", icon: Crown, roles: ["OWNER", "SUPER_ADMIN"] },
     { name: t.sidebar.telegramBots, href: "/telegram-bots", icon: Bot, roles: ["OWNER", "SUPER_ADMIN"] },
   ];
@@ -108,6 +118,7 @@ export default function Layout() {
     if (path.includes("/expenses")) return t.sidebar.expenses;
     if (path.includes("/analytics")) return t.sidebar.analytics;
     if (path.includes("/notifications")) return t.sidebar.notifications;
+    if (path.includes("/help-center")) return helpCenterLabel;
     if (path.includes("/subscription")) return t.sidebar.subscription;
     if (path.includes("/super")) return t.sidebar.superadmin;
     if (path.includes("/settings")) return t.sidebar.settings;
@@ -248,10 +259,10 @@ export default function Layout() {
                   </p>
                 </div>
                 <button
-                  onClick={() => navigate('/settings')}
+                  onClick={() => navigate('/help-center')}
                   className="w-full py-2.5 bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95"
                 >
-                  {language === 'ru' ? 'Настройки' : language === 'en' ? 'Settings' : language === 'tr' ? 'Ayarlar' : 'Sozlamalar'}
+                  {language === 'ru' ? 'Открыть' : language === 'en' ? 'Open' : language === 'tr' ? 'Aç' : 'Ochish'}
                 </button>
               </div>
             </div>

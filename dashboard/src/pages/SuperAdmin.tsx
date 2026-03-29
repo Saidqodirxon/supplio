@@ -98,7 +98,9 @@ function parseTicketFields(info: string): Record<string, string> {
 }
 
 const IS_TICKET = (info?: string) =>
-  !!info && info.startsWith("PASSWORD_RESET_REQUEST");
+  !!info &&
+  (info.startsWith("PASSWORD_RESET_REQUEST") ||
+    info.startsWith("SUPPORT_TICKET"));
 
 const LEAD_STATUS_COLORS: Record<string, string> = {
   NEW: "bg-blue-600/10 text-blue-600 border-blue-200 dark:border-blue-800",
@@ -206,7 +208,10 @@ interface LandingContent {
   heroBadgeTr: string;
   contactPhone: string;
   contactEmail: string;
+  contactAddress: string;
+  contactAddressUrl: string;
   socialTelegram: string;
+  socialInstagram: string;
   socialLinkedin: string;
   socialTwitter: string;
   footerDescUz: string;
@@ -325,7 +330,10 @@ export default function SuperAdmin() {
     heroBadgeTr: "",
     contactPhone: "",
     contactEmail: "",
+    contactAddress: "",
+    contactAddressUrl: "",
     socialTelegram: "",
+    socialInstagram: "",
     socialLinkedin: "",
     socialTwitter: "",
     footerDescUz: "",
@@ -2746,7 +2754,10 @@ export default function SuperAdmin() {
                       {[
                         { key: "contactPhone", label: t.superadmin.phone },
                         { key: "contactEmail", label: "Email" },
+                        { key: "contactAddress", label: "Manzil (ko'rsatiladigan matn)" },
+                        { key: "contactAddressUrl", label: "Manzil harita URL (href)" },
                         { key: "socialTelegram", label: "Telegram URL" },
+                        { key: "socialInstagram", label: "Instagram URL" },
                         { key: "socialLinkedin", label: "LinkedIn URL" },
                         { key: "socialTwitter", label: "Twitter URL" },
                       ].map(({ key, label }) => (

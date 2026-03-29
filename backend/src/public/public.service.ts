@@ -104,6 +104,7 @@ export class PublicService {
         excerptUz: true, excerptRu: true, excerptEn: true, excerptTr: true, excerptUzCyr: true,
         contentUz: true, contentRu: true, contentEn: true, contentTr: true, contentUzCyr: true,
         image: true,
+        viewCount: true,
         isPublished: true,
         createdAt: true,
       },

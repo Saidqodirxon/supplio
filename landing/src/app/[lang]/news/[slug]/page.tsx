@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Loader2,
   AlertCircle,
+  Eye,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { translations, slugToLang } from "@/i18n/translations";
@@ -140,8 +141,9 @@ interface BackendNewsItem {
   contentTr: string;
   contentUzCyr: string;
   image?: string;
+  viewCount?: number;
   createdAt: string;
-  [key: string]: string | undefined;
+  [key: string]: string | number | undefined;
 }
 
 function getLangKey(lang: string): string {
@@ -240,6 +242,7 @@ export default function NewsDetailPage() {
   const [notFound, setNotFound] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [feedbackText, setFeedbackText] = useState<string | null>(null);
+  const [tariffs, setTariffs] = useState<Record<string, unknown>[]>([]);
 
   const uiText = NEWS_DETAIL_TEXT[lang] ?? NEWS_DETAIL_TEXT.uz;
 
@@ -263,7 +266,16 @@ export default function NewsDetailPage() {
         setArticle(data);
         // Increment view count via POST (non-GET to avoid bot inflation)
         if (data?.id) {
-          fetch(`${BACKEND}/api/public/news/${data.id}/view`, { method: "POST" }).catch(() => {});
+          fetch(`${BACKEND}/api/public/news/${data.id}/view`, { method: "POST" })
+            .then((r) => (r.ok ? r.json() : null))
+            .then((viewData) => {
+              if (viewData && typeof viewData.viewCount === "number") {
+                setArticle((prev) =>
+                  prev ? { ...prev, viewCount: viewData.viewCount } : prev
+                );
+              }
+            })
+            .catch(() => {});
         }
       } catch {
         setNotFound(true);
@@ -273,6 +285,15 @@ export default function NewsDetailPage() {
     }
     load();
   }, [slug, lang]);
+
+  useEffect(() => {
+    fetch(`${BACKEND}/api/public/tariffs`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        setTariffs(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setTariffs([]));
+  }, [BACKEND]);
 
   const lk = getLangKey(lang);
   const title = article ? article[`title${lk}`] || article.titleEn || "" : "";
@@ -454,6 +475,9 @@ export default function NewsDetailPage() {
             <div className="flex items-center gap-4 text-blue-600 font-black text-[10px] uppercase tracking-[0.4em]">
               <div className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
               <Calendar className="w-4 h-4" /> {dateStr}
+              <span className="inline-flex items-center gap-1.5 text-slate-500">
+                <Eye className="w-4 h-4" /> {article.viewCount ?? 0}
+              </span>
             </div>
             <h1 className="text-5xl md:text-8xl font-black text-slate-900 tracking-tighter leading-[0.85]">
               {title}
@@ -607,6 +631,7 @@ export default function NewsDetailPage() {
         onClose={() => setIsLeadModalOpen(false)}
         lang={lang}
         unlockDemoAfterSubmit={true}
+        tariffs={tariffs}
       />
     </div>
   );

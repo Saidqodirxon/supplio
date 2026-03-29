@@ -680,6 +680,7 @@ export default function DemoPage() {
         onClose={() => setIsLeadModalOpen(false)}
         lang="en"
         unlockDemoAfterSubmit={true}
+        tariffs={tariffs as unknown as Record<string, unknown>[]}
       />
     </div>
   );

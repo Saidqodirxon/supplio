@@ -27,6 +27,7 @@ import Reports from "./pages/Reports";
 import OwnerDemo from "./pages/OwnerDemo";
 import Staff from "./pages/Staff";
 import DemoLanding from "./pages/DemoLanding";
+import HelpCenter from "./pages/HelpCenter";
 import { NotFound, SubscriptionExpired, AccountLocked } from "./pages/Error";
 import { useAuthStore } from "./store/authStore";
 import { useThemeStore } from "./store/themeStore";
@@ -204,6 +205,7 @@ function App() {
               <Route path="products" element={<Products />} />
               <Route path="expenses" element={<Expenses />} />
               <Route path="notifications" element={<Notifications />} />
+              <Route path="help-center" element={<HelpCenter />} />
               <Route path="settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Route>
@@ -257,6 +259,7 @@ function App() {
             <Route path="products" element={<Products />} />
             <Route path="expenses" element={<Expenses />} />
             <Route path="notifications" element={<Notifications />} />
+            <Route path="help-center" element={<HelpCenter />} />
             <Route path="subscription" element={<Subscription />} />
             <Route path="super" element={<SuperAdmin />} />
             <Route path="approvals" element={<Approvals />} />

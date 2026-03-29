@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X,
@@ -51,6 +51,17 @@ export default function LeadModal({
   const t = translations[lang];
   const API = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
   const APP_LOGIN_FULL_DEMO_URL = `${normalizeAppBaseUrl(process.env.NEXT_PUBLIC_DEMO_URL)}/login?demo=1&access=full`;
+
+  useEffect(() => {
+    if (isOpen && tariffs && tariffs.length > 0 && !formData.tariffId) {
+      const first = tariffs[0] as Record<string, unknown>;
+      const firstTariffId = String(first.id || "");
+      setFormData((prev) => ({
+        ...prev,
+        tariffId: firstTariffId,
+      }));
+    }
+  }, [isOpen, tariffs, formData.tariffId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,6 +183,7 @@ export default function LeadModal({
                           <Package className="w-4 h-4" />
                         </div>
                         <select
+                          required
                           className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all appearance-none text-slate-700"
                           value={formData.tariffId}
                           onChange={(e) =>
@@ -182,20 +194,20 @@ export default function LeadModal({
                           }
                         >
                           <option value="" disabled className="text-slate-400">
-                            {lang === "uz"
-                              ? "Tarifni tanlang"
+                            {lang === "uz" || lang === "oz"
+                              ? (lang === "oz" ? "Тарифни танланг" : "Tarifni tanlang")
                               : lang === "ru"
                                 ? "Выберите тариф"
                                 : lang === "tr"
-                                  ? "Tarife seçin"
+                                  ? "Tarifi seçin"
                                   : "Select a Plan"}
                           </option>
                           {tariffs.map(
                             (tItem: Record<string, unknown>, i: number) => {
+                              const tLangSuffix = lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
                               const tName = String(
-                                tItem[
-                                  `name${lang.charAt(0).toUpperCase() + lang.slice(1)}`
-                                ] ||
+                                tItem[`name${tLangSuffix}`] ||
+                                  tItem.nameUz ||
                                   tItem.name ||
                                   `Plan ${i + 1}`
                               );

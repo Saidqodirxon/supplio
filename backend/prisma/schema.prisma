@@ -518,9 +518,13 @@ model LandingContent {
   heroBadgeRu    String   @default("")
   heroBadgeEn    String   @default("")
   heroBadgeTr    String   @default("")
-  contactPhone   String?
-  contactEmail   String?
+  contactPhone      String?
+  contactPhoneHref  String?
+  contactEmail      String?
+  contactAddress    String?
+  contactAddressUrl String?
   socialTelegram String?
+  socialInstagram String?
   socialLinkedin String?
   socialTwitter  String?
   footerDescUz   String   @default("")
