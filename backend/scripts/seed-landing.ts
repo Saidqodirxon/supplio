@@ -339,22 +339,32 @@ async function seedNews() {
       slugRu: "chto-takoe-supplio",
       slugTr: "supplio-nedir",
       slugUzCyr: "supplio-nima-uz-cyr",
-      titleUz: "Supplio nima? Markaziy Osiyo uchun yaratilgan B2B distributsiya platformasi",
-      titleEn: "What is Supplio? The B2B Distribution Platform for Central Asia",
-      titleRu: "Что такое Supplio? B2B-платформа дистрибуции для Центральной Азии",
+      titleUz:
+        "Supplio nima? Markaziy Osiyo uchun yaratilgan B2B distributsiya platformasi",
+      titleEn:
+        "What is Supplio? The B2B Distribution Platform for Central Asia",
+      titleRu:
+        "Что такое Supplio? B2B-платформа дистрибуции для Центральной Азии",
       titleTr: "Supplio Nedir? Orta Asya İçin B2B Dağıtım Platformu",
-      titleUzCyr: "Supplio нима? Марказий Осиё учун B2B дистрибуция платформаси",
-      excerptUz: "Supplio — ishlab chiqaruvchilar va distribyutorlar uchun dilerlarni boshqarish, kredit limitlarini nazorat qilish va Telegram orqali buyurtmalarni avtomatlashtirish imkonini beruvchi yagona SaaS platforma.",
-      excerptEn: "Supplio is an all-in-one SaaS platform that helps manufacturers and distributors manage dealers, control credit limits, and automate orders through Telegram.",
-      excerptRu: "Supplio — это универсальная SaaS-платформа для управления дилерами, контроля кредитных лимитов и автоматизации заказов через Telegram.",
-      excerptTr: "Supplio, bayileri yönetmenize, kredi limitlerini kontrol etmenize ve Telegram üzerinden siparişleri otomatikleştirmenize yardımcı olan hepsi bir arada SaaS platformudur.",
-      excerptUzCyr: "Supplio — дилерларни бошқариш, кредит лимитларини назорат қилиш ва Telegram орқали буюртмаларни автоматлаштириш имконини берувчи ягона SaaS платформа.",
+      titleUzCyr:
+        "Supplio нима? Марказий Осиё учун B2B дистрибуция платформаси",
+      excerptUz:
+        "Supplio — ishlab chiqaruvchilar va distribyutorlar uchun dilerlarni boshqarish, kredit limitlarini nazorat qilish va Telegram orqali buyurtmalarni avtomatlashtirish imkonini beruvchi yagona SaaS platforma.",
+      excerptEn:
+        "Supplio is an all-in-one SaaS platform that helps manufacturers and distributors manage dealers, control credit limits, and automate orders through Telegram.",
+      excerptRu:
+        "Supplio — это универсальная SaaS-платформа для управления дилерами, контроля кредитных лимитов и автоматизации заказов через Telegram.",
+      excerptTr:
+        "Supplio, bayileri yönetmenize, kredi limitlerini kontrol etmenize ve Telegram üzerinden siparişleri otomatikleştirmenize yardımcı olan hepsi bir arada SaaS platformudur.",
+      excerptUzCyr:
+        "Supplio — дилерларни бошқариш, кредит лимитларини назорат қилиш ва Telegram орқали буюртмаларни автоматлаштириш имконини берувчи ягона SaaS платформа.",
       contentUz: `## Supplio nima?\n\nSupplio — ishlab chiqaruvchilar, ulgurchi savdogarlar va distribyutorlar uchun maxsus yaratilgan zamonaviy B2B distributsiya boshqaruv platformasi.\n\n## Kim uchun?\n\n- **Ishlab chiqaruvchilar** — mintaqaviy distribyutorlar tarmog'iga sotadigan\n- **Distribyutorlar** — bir nechta filial bo'ylab yuzlab dilerlarni boshqaradigan\n- **Ulgurchi savdogarlar** — real vaqt kredit nazorati kerak bo'lgan\n\n## Asosiy imkoniyatlar\n\n**1. Telegram Bot** — Har bir filial o'zining brendlangan botini oladi.\n\n**2. Kredit Nazorat** — Har bir buyurtma tasdiqlashdan oldin kredit limiti tekshiriladi.\n\n**3. Ko'p Filial** — Barcha filiallarni bitta paneldan boshqaring.\n\n**4. Tahlil** — Top dilerlar, mahsulotlar, kredit real vaqtda.\n\n14 kunlik bepul sinov. Sozlash to'lovi yo'q.`,
       contentEn: `## What is Supplio?\n\nSupplio is a modern B2B distribution management platform built for manufacturers, wholesalers, and distributors.\n\n## Who is it for?\n\n- **Manufacturers** selling to regional distributor networks\n- **Distributors** managing hundreds of dealers across multiple branches\n- **Wholesalers** needing real-time credit control\n\n## Key Features\n\n**1. Telegram Bot** — Each branch gets a branded bot. Dealers order directly in chat.\n\n**2. Credit Control** — Every order is checked against credit limits. Auto-block on breach.\n\n**3. Multi-Branch** — Manage all branches from one dashboard.\n\n**4. Analytics** — Top dealers, products, credit utilization in real time.\n\n14-day free trial. No setup fees.`,
       contentRu: `## Что такое Supplio?\n\nSupplio — современная платформа управления B2B-дистрибуцией для производителей, оптовиков и дистрибьюторов.\n\n## Для кого?\n\n- **Производители** — продающие через дилерскую сеть\n- **Дистрибьюторы** — управляющие сотнями дилеров\n- **Оптовики** — нуждающиеся в контроле кредитов\n\n## Ключевые возможности\n\n**1. Telegram-боты** — Каждый филиал получает фирменного бота.\n\n**2. Контроль кредитов** — Каждый заказ проверяется по лимиту.\n\n**3. Мультифилиальность** — Управление всеми филиалами с одной панели.\n\n**4. Аналитика** — Топ дилеры, продажи, кредиты в реальном времени.\n\n14 дней бесплатно. Без платы за настройку.`,
       contentTr: `## Supplio Nedir?\n\nSupplio, üreticiler, toptancılar ve distribütörler için geliştirilmiş modern bir B2B dağıtım yönetim platformudur.\n\n## Kimler İçin?\n\n- Dağıtım ağına satan **üreticiler**\n- Yüzlerce bayi yöneten **distribütörler**\n- Gerçek zamanlı kredi kontrolü gereken **toptancılar**\n\n## Temel Özellikler\n\n**1. Telegram Botu** — Her şube markalı bir bot alır.\n\n**2. Kredi Kontrolü** — Her sipariş limitle kontrol edilir.\n\n**3. Çok Şubeli Yönetim** — Tüm şubeleri tek panelden yönetin.\n\n**4. Analitik** — Gerçek zamanlı bayiler, ürünler, kredi kullanımı.\n\n14 günlük ücretsiz deneme.`,
       contentUzCyr: `## Supplio нима?\n\nSupplio — ишлаб чиқарувчилар, улгурчи савдогарлар ва дистрибьюторлар учун замонавий B2B дистрибуция бошқарув платформаси.\n\n## Асосий имкониятлар\n\n**1. Telegram Бот** — Ҳар бир филиал брендланган ботини олади.\n\n**2. Кредит Назорат** — Ҳар бир буюртма лимит бўйича текширилади.\n\n**3. Кўп Филиал** — Барча филиалларни битта панелдан бошқаринг.\n\n14 кунлик бепул синов.`,
-      image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=85",
+      image:
+        "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=85",
       isPublished: true,
     },
     {
@@ -368,17 +378,28 @@ async function seedNews() {
       titleRu: "Представляем Supplio V2 — Полностью Перестроен",
       titleTr: "Supplio V2'yi Tanıtıyoruz — Sıfırdan Yeniden İnşa Edildi",
       titleUzCyr: "Supplio V2 Тақдимоти — Нолдан Қайта Яратилди",
-      excerptUz: "Markaziy Osiyodagi B2B distribyutorlar uchun eng kuchli kredit-nazorat tizimi tayyor.",
-      excerptEn: "The most powerful credit-control system ever built for B2B distributors in Central Asia is here.",
-      excerptRu: "Самая мощная система кредитного контроля для B2B-дистрибьюторов Центральной Азии уже здесь.",
-      excerptTr: "Orta Asya'daki B2B distribütörler için en güçlü kredi kontrol sistemi burada.",
-      excerptUzCyr: "Марказий Осиёдаги B2B дистрибьюторлар учун энг кучли кредит-назорат тизими тайёр.",
-      contentUz: "Biz Supplio-ni butunlay qaytadan yaratdik. Yangi versiyada real vaqt sinxronizatsiyasi, har bir buyurtmada kredit tekshiruvi va yangilangan boshqaruv paneli mavjud.",
-      contentEn: "We've completely reimagined Supplio from the ground up. The new version features real-time ledger synchronization, instant credit verification on every order, and a redesigned dashboard.",
-      contentRu: "Мы полностью перестроили Supplio. Новая версия включает синхронизацию в реальном времени, мгновенную проверку кредитных лимитов и обновлённую панель управления.",
-      contentTr: "Supplio'yu tamamen yeniden hayal ettik. Gerçek zamanlı senkronizasyon, anında kredi doğrulama ve yeniden tasarlanmış kontrol paneli içeriyor.",
-      contentUzCyr: "Биз Supplio-ни бутунлай қайтадан яратдик. Янги версияда реал вақт синхронизацияси ва янгиланган бошқарув панели мавжуд.",
-      image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
+      excerptUz:
+        "Markaziy Osiyodagi B2B distribyutorlar uchun eng kuchli kredit-nazorat tizimi tayyor.",
+      excerptEn:
+        "The most powerful credit-control system ever built for B2B distributors in Central Asia is here.",
+      excerptRu:
+        "Самая мощная система кредитного контроля для B2B-дистрибьюторов Центральной Азии уже здесь.",
+      excerptTr:
+        "Orta Asya'daki B2B distribütörler için en güçlü kredi kontrol sistemi burada.",
+      excerptUzCyr:
+        "Марказий Осиёдаги B2B дистрибьюторлар учун энг кучли кредит-назорат тизими тайёр.",
+      contentUz:
+        "Biz Supplio-ni butunlay qaytadan yaratdik. Yangi versiyada real vaqt sinxronizatsiyasi, har bir buyurtmada kredit tekshiruvi va yangilangan boshqaruv paneli mavjud.",
+      contentEn:
+        "We've completely reimagined Supplio from the ground up. The new version features real-time ledger synchronization, instant credit verification on every order, and a redesigned dashboard.",
+      contentRu:
+        "Мы полностью перестроили Supplio. Новая версия включает синхронизацию в реальном времени, мгновенную проверку кредитных лимитов и обновлённую панель управления.",
+      contentTr:
+        "Supplio'yu tamamen yeniden hayal ettik. Gerçek zamanlı senkronizasyon, anında kredi doğrulama ve yeniden tasarlanmış kontrol paneli içeriyor.",
+      contentUzCyr:
+        "Биз Supplio-ни бутунлай қайтадан яратдик. Янги версияда реал вақт синхронизацияси ва янгиланган бошқарув панели мавжуд.",
+      image:
+        "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80",
       isPublished: true,
     },
     {
@@ -392,23 +413,36 @@ async function seedNews() {
       titleRu: "Почему Дистрибьюторы Переходят на Telegram",
       titleTr: "Distribütörler Neden Telegram'a Geçiyor",
       titleUzCyr: "Нима Учун Дистрибьюторлар Телеграмга Ўтмоқда",
-      excerptUz: "Ko'proq distribyutorlar an'anaviy ilovalardan Telegram asosidagi buyurtma tizimlariga o'tmoqda.",
-      excerptEn: "More distributors are replacing traditional apps with Telegram-based ordering systems.",
-      excerptRu: "Всё больше дистрибьюторов заменяют традиционные приложения системами заказов через Telegram.",
-      excerptTr: "Giderek daha fazla distribütör geleneksel uygulamaları Telegram tabanlı sistemlerle değiştiriyor.",
-      excerptUzCyr: "Кўпроқ дистрибьюторлар анъанавий иловалардан Телеграм асосидаги тизимларига ўтмоқда.",
-      contentUz: "Telegram endi shunchaki messenger emas — biznes operatsion tizimiga aylanmoqda. Ma'lumotlarimiz shuni ko'rsatadiki, Telegram orqali buyurtma berish an'anaviy veb-formalarga nisbatan 73% tezroq.",
-      contentEn: "Telegram is no longer just a messenger — it's becoming a business operating system. Our data shows Telegram-based ordering reduces order processing time by 73% vs traditional web forms.",
-      contentRu: "Telegram — это уже не просто мессенджер, а полноценная бизнес-операционная система. Наши данные: Telegram-заказы на 73% быстрее традиционных веб-форм.",
-      contentTr: "Telegram artık sadece bir mesajlaşma uygulaması değil. Telegram tabanlı siparişler geleneksel formlardan %73 daha hızlı.",
-      contentUzCyr: "Телеграм энди шунчаки мессенжер эмас. Буюртмалар анъанавий веб-формаларга нисбатан 73% тезроқ.",
-      image: "https://images.unsplash.com/photo-1611262588024-d12430b98920?w=800&q=80",
+      excerptUz:
+        "Ko'proq distribyutorlar an'anaviy ilovalardan Telegram asosidagi buyurtma tizimlariga o'tmoqda.",
+      excerptEn:
+        "More distributors are replacing traditional apps with Telegram-based ordering systems.",
+      excerptRu:
+        "Всё больше дистрибьюторов заменяют традиционные приложения системами заказов через Telegram.",
+      excerptTr:
+        "Giderek daha fazla distribütör geleneksel uygulamaları Telegram tabanlı sistemlerle değiştiriyor.",
+      excerptUzCyr:
+        "Кўпроқ дистрибьюторлар анъанавий иловалардан Телеграм асосидаги тизимларига ўтмоқда.",
+      contentUz:
+        "Telegram endi shunchaki messenger emas — biznes operatsion tizimiga aylanmoqda. Ma'lumotlarimiz shuni ko'rsatadiki, Telegram orqali buyurtma berish an'anaviy veb-formalarga nisbatan 73% tezroq.",
+      contentEn:
+        "Telegram is no longer just a messenger — it's becoming a business operating system. Our data shows Telegram-based ordering reduces order processing time by 73% vs traditional web forms.",
+      contentRu:
+        "Telegram — это уже не просто мессенджер, а полноценная бизнес-операционная система. Наши данные: Telegram-заказы на 73% быстрее традиционных веб-форм.",
+      contentTr:
+        "Telegram artık sadece bir mesajlaşma uygulaması değil. Telegram tabanlı siparişler geleneksel formlardan %73 daha hızlı.",
+      contentUzCyr:
+        "Телеграм энди шунчаки мессенжер эмас. Буюртмалар анъанавий веб-формаларга нисбатан 73% тезроқ.",
+      image:
+        "https://images.unsplash.com/photo-1611262588024-d12430b98920?w=800&q=80",
       isPublished: true,
     },
   ];
 
   for (const article of articles) {
-    const existing = await (prisma as any).news.findFirst({ where: { slugUz: article.slugUz } });
+    const existing = await (prisma as any).news.findFirst({
+      where: { slugUz: article.slugUz },
+    });
     if (!existing) {
       await (prisma as any).news.create({ data: article });
       console.log(`  ✓ News created: ${article.titleEn}`);
