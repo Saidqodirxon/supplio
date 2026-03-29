@@ -16,7 +16,7 @@ async function safeDeleteByCompany(table: string, companyId: string) {
   try {
     await prisma.$executeRawUnsafe(
       `DELETE FROM "${table}" WHERE "companyId" = $1`,
-      companyId,
+      companyId
     );
   } catch (error) {
     if (!isMissingTableError(error)) {
