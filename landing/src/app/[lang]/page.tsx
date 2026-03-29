@@ -415,6 +415,8 @@ export default function LandingPage() {
             </button>
             <Link
               href={`${DEMO_LOGIN_URL}?demo=1&access=view`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-full sm:w-auto px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-2xl font-bold text-base hover:bg-slate-50 transition-all hover:scale-[1.02] active:scale-[0.98] text-center"
             >
               {t.hero.secondary}

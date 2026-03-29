@@ -2,7 +2,7 @@ import { PrismaClient, Prisma, RoleType } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
-const DEMO_PHONE = "+998000000000";
+const DEMO_PHONE = "+998901000000";
 const DEMO_PASSWORD = "demo1234";
 
 function isMissingTableError(error: unknown): boolean {
