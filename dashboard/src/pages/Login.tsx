@@ -107,7 +107,13 @@ export default function Login() {
     setError("");
 
     if (isDemoMode && unformatPhoneNumber(phoneNumber) !== DEMO_PHONE) {
-      setError("Demo rejimda faqat +998 00 000 00 00 bilan kirish mumkin");
+      setError(
+        language === "uz"
+          ? `Demo rejimda faqat ${DEMO_PHONE} bilan kirish mumkin`
+          : language === "ru"
+            ? `В демо режиме можно использовать только ${DEMO_PHONE}`
+            : `In demo mode, only ${DEMO_PHONE} is allowed`
+      );
       return;
     }
 
@@ -119,7 +125,13 @@ export default function Login() {
         password: password,
       });
 
-      const { user, token } = response.data;
+      let { user, token } = response.data;
+
+      // In demo mode, give full OWNER access regardless of actual role
+      if (isDemoMode && user) {
+        user.roleType = "OWNER";
+      }
+
       setAuth(user, token);
       navigate("/dashboard");
     } catch (err: unknown) {

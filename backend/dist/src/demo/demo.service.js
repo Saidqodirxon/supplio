@@ -15,7 +15,7 @@ const common_1 = require("@nestjs/common");
 const schedule_1 = require("@nestjs/schedule");
 const prisma_service_1 = require("../prisma/prisma.service");
 const telegraf_1 = require("telegraf");
-const DEMO_PHONE = "+998000000000";
+const DEMO_PHONE = "+998901000000";
 const DEMO_PASSWORD = "demo1234";
 let DemoService = DemoService_1 = class DemoService {
     constructor(prisma) {
@@ -57,8 +57,8 @@ let DemoService = DemoService_1 = class DemoService {
             demo: {
                 phone: DEMO_PHONE,
                 password: DEMO_PASSWORD,
-                url: "https://demo.supplio.uz/login?demo=1&access=full",
-                note: "These credentials give you full access to the demo environment. Data resets daily at midnight.",
+                url: "https://demo.supplio.uz/login?demo=1&access=view",
+                note: "Demo environment is read-only by default for security. Data resets daily at midnight.",
             },
         };
     }

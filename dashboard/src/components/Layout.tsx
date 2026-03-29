@@ -32,8 +32,10 @@ import { useAuthStore } from "../store/authStore";
 import { useThemeStore } from "../store/themeStore";
 import { dashboardTranslations } from "../i18n/translations";
 import { LangSelect } from "./LangSelect";
+import DemoRoleSwitcher from "./DemoRoleSwitcher";
 import NotificationDrawer from "./NotificationDrawer";
 import { Helmet } from "react-helmet-async";
+import { toast } from "sonner";
 import api from "../services/api";
 
 interface SubscriptionBadge {
@@ -46,7 +48,7 @@ export default function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout, language } = useAuthStore();
+  const { user, logout, language, getEffectiveRole } = useAuthStore();
   const { isDark, toggleTheme } = useThemeStore();
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -56,8 +58,10 @@ export default function Layout() {
   const t = dashboardTranslations[language];
 
   const isDemo = window.location.hostname.includes("demo");
-  const isOwner =
-    user?.roleType === "OWNER" || user?.roleType === "SUPER_ADMIN";
+  const isDemoReadOnly =
+    isDemo && localStorage.getItem("supplio_demo_full_access") !== "1";
+  const effectiveRole = getEffectiveRole();
+  const isOwner = effectiveRole === "OWNER" || effectiveRole === "SUPER_ADMIN";
   const helpCenterLabel =
     language === "ru"
       ? "Центр помощи"
@@ -193,7 +197,7 @@ export default function Layout() {
 
   const navigation = allNavigation.filter(
     (item) =>
-      item.roles.includes("ALL") || item.roles.includes(user?.roleType ?? "")
+      item.roles.includes("ALL") || item.roles.includes(effectiveRole ?? "")
   );
 
   const currentTitle = (() => {
@@ -208,6 +212,14 @@ export default function Layout() {
     if (path.includes("/analytics")) return t.sidebar.analytics;
     if (path.includes("/notifications")) return t.sidebar.notifications;
     if (path.includes("/help-center")) return helpCenterLabel;
+    if (path.includes("/profile"))
+      return language === "ru"
+        ? "Профиль"
+        : language === "en"
+          ? "Profile"
+          : language === "tr"
+            ? "Profil"
+            : "Profil";
     if (path.includes("/subscription")) return t.sidebar.subscription;
     if (path.includes("/super")) return t.sidebar.superadmin;
     if (path.includes("/settings")) return t.sidebar.settings;
@@ -245,6 +257,82 @@ export default function Layout() {
     }
     return { plan, extra: subscription.status, isWarning: false };
   })();
+
+  const actionKeywords = [
+    "create",
+    "add",
+    "new",
+    "edit",
+    "delete",
+    "remove",
+    "save",
+    "submit",
+    "yarat",
+    "qo'sh",
+    "qosh",
+    "tahrir",
+    "o'chir",
+    "ochir",
+    "saqla",
+    "yubor",
+    "созд",
+    "добав",
+    "редакт",
+    "удал",
+    "сохран",
+  ];
+
+  const showReadOnlyToast = () => {
+    toast.warning(
+      "Demo read-only: create/edit/delete amallari yopiq. To'liq rejim uchun demo so'rov yuboring.",
+      {
+        duration: 3000,
+        style: {
+          borderRadius: "1rem",
+          fontFamily: "Outfit, sans-serif",
+          fontWeight: 700,
+        },
+      }
+    );
+  };
+
+  const handleReadOnlyClickCapture = (
+    e: React.MouseEvent<HTMLElement, MouseEvent>
+  ) => {
+    if (!isDemoReadOnly) return;
+
+    const target = e.target as HTMLElement;
+    const clickable = target.closest("button, [role='button'], a");
+    if (!clickable) return;
+
+    const text = (clickable.textContent || "").toLowerCase();
+    const isMutatingAction = actionKeywords.some((keyword) =>
+      text.includes(keyword)
+    );
+
+    if (isMutatingAction) {
+      e.preventDefault();
+      e.stopPropagation();
+      showReadOnlyToast();
+    }
+  };
+
+  const handleReadOnlySubmitCapture = (e: React.FormEvent<HTMLElement>) => {
+    if (!isDemoReadOnly) return;
+
+    const nativeEvent = e.nativeEvent as SubmitEvent;
+    const submitter = nativeEvent.submitter as HTMLElement | null;
+    const text = (submitter?.textContent || "").toLowerCase();
+    const isMutatingAction = actionKeywords.some((keyword) =>
+      text.includes(keyword)
+    );
+
+    if (isMutatingAction) {
+      e.preventDefault();
+      e.stopPropagation();
+      showReadOnlyToast();
+    }
+  };
 
   return (
     <div className="h-screen overflow-hidden flex font-outfit transition-colors duration-300 bg-background text-foreground">
@@ -428,6 +516,18 @@ export default function Layout() {
               </div>
             </div>
             <button
+              onClick={() => navigate("/profile")}
+              className="w-full px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl transition-all active:scale-95 hover:bg-blue-500/20 mb-3"
+            >
+              {language === "ru"
+                ? "Профиль"
+                : language === "en"
+                  ? "Profile"
+                  : language === "tr"
+                    ? "Profil"
+                    : "Profil"}
+            </button>
+            <button
               onClick={logout}
               className="flex w-full items-center justify-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white premium-gradient rounded-xl transition-all active:scale-95 shadow-md shadow-blue-500/20"
             >
@@ -505,6 +605,8 @@ export default function Layout() {
 
             <LangSelect />
 
+            {isDemo && <DemoRoleSwitcher />}
+
             <div className="h-6 w-px bg-slate-200 dark:bg-white/10 hidden sm:block" />
 
             <button
@@ -536,8 +638,15 @@ export default function Layout() {
         <main
           id="main-scroll"
           className="flex-1 overflow-y-auto w-full scroll-smooth"
+          onClickCapture={handleReadOnlyClickCapture}
+          onSubmitCapture={handleReadOnlySubmitCapture}
         >
           <div className="max-w-[1600px] mx-auto p-6 lg:p-8 pb-20">
+            {isDemoReadOnly && (
+              <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 dark:border-amber-700/40 dark:bg-amber-900/20 dark:text-amber-300 text-sm font-bold">
+                Demo read-only rejim: create/edit/delete vaqtincha o'chirilgan.
+              </div>
+            )}
             <Outlet />
           </div>
         </main>

@@ -29,20 +29,20 @@ export declare class AuthService {
         language?: string;
     }): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         phone: string;
         companyId: string;
+        branchId: string | null;
         passwordHash: string;
         fullName: string | null;
         photoUrl: string | null;
         roleType: import(".prisma/client").$Enums.RoleType;
+        customRoleId: string | null;
         isActive: boolean;
         language: string;
-        branchId: string | null;
-        customRoleId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
+        deletedBy: string | null;
     }>;
     changePassword(userId: string, data: {
         currentPassword: string;

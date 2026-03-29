@@ -11,6 +11,12 @@ api.interceptors.request.use((config) => {
   const isDemoMode = localStorage.getItem("supplio_demo_mode") === "1";
   const isDemoFullAccess =
     localStorage.getItem("supplio_demo_full_access") === "1";
+  const method = (config.method || "get").toLowerCase();
+  const isMutatingMethod =
+    method === "post" ||
+    method === "put" ||
+    method === "patch" ||
+    method === "delete";
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -21,6 +27,29 @@ api.interceptors.request.use((config) => {
     config.headers["X-Supplio-Demo-Access"] = isDemoFullAccess
       ? "full"
       : "view";
+  }
+
+  // Block write operations in demo read-only mode before request is sent.
+  if (isDemoMode && !isDemoFullAccess && isMutatingMethod) {
+    sonnerToast.warning(
+      "Demo rejim — faqat ko'rish uchun. Tahrirlash uchun to'liq demo so'rov yuboring.",
+      {
+        duration: 3500,
+        style: {
+          borderRadius: "1rem",
+          fontFamily: "Outfit, sans-serif",
+          fontWeight: 700,
+        },
+      }
+    );
+
+    return Promise.reject({
+      response: {
+        status: 403,
+        data: { message: "DEMO_READ_ONLY" },
+      },
+      config,
+    });
   }
 
   return config;
@@ -49,10 +78,17 @@ api.interceptors.response.use(
       } else if (msg?.includes("ACCOUNT_LOCKED")) {
         window.location.href = "/locked";
       } else if (msg?.includes("DEMO_READ_ONLY")) {
-        sonnerToast.warning("Demo rejim — faqat ko'rish uchun. Tahrirlash uchun to'liq demo so'rov yuboring.", {
-          duration: 4000,
-          style: { borderRadius: "1rem", fontFamily: "Outfit, sans-serif", fontWeight: 700 },
-        });
+        sonnerToast.warning(
+          "Demo rejim — faqat ko'rish uchun. Tahrirlash uchun to'liq demo so'rov yuboring.",
+          {
+            duration: 4000,
+            style: {
+              borderRadius: "1rem",
+              fontFamily: "Outfit, sans-serif",
+              fontWeight: 700,
+            },
+          }
+        );
       }
     }
     return Promise.reject(error);

@@ -19,7 +19,7 @@ export class AuthService {
   async login(phone: string, pass: string, isDemoRequest = false) {
     if (isDemoRequest && phone !== AuthService.DEMO_PHONE) {
       throw new UnauthorizedException(
-        "Demo rejimda faqat +998 00 000 00 00 bilan kirish mumkin"
+        `Demo rejimda faqat ${AuthService.DEMO_PHONE} bilan kirish mumkin`
       );
     }
 

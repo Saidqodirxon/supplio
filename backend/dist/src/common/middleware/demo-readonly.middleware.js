@@ -13,7 +13,7 @@ exports.DemoReadonlyMiddleware = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_service_1 = require("../../prisma/prisma.service");
-const DEMO_VIEWER_PHONE = "+998000000000";
+const DEMO_VIEWER_PHONE = "+998901000000";
 const SAFE_MUTATING_PATH_PREFIXES = [
     "/api/auth/login",
     "/api/leads",
@@ -31,15 +31,6 @@ let DemoReadonlyMiddleware = class DemoReadonlyMiddleware {
         }
         const path = String(req.originalUrl || req.url || "").split("?")[0];
         if (SAFE_MUTATING_PATH_PREFIXES.some((prefix) => path.startsWith(prefix))) {
-            return next();
-        }
-        const demoHeader = String(req.headers?.["x-supplio-demo"] || "").toLowerCase();
-        const accessHeader = String(req.headers?.["x-supplio-demo-access"] || "").toLowerCase();
-        const isDemoRequest = demoHeader === "true" || demoHeader === "1";
-        const isFullAccess = accessHeader === "full" ||
-            accessHeader === "edit" ||
-            accessHeader === "write";
-        if (!isDemoRequest) {
             return next();
         }
         const authHeader = String(req.headers?.authorization || "");
@@ -64,7 +55,7 @@ let DemoReadonlyMiddleware = class DemoReadonlyMiddleware {
             if (!user?.company?.isDemo) {
                 return next();
             }
-            if (user.phone === DEMO_VIEWER_PHONE && !isFullAccess) {
+            if (user.phone === DEMO_VIEWER_PHONE) {
                 throw new common_1.ForbiddenException("DEMO_READ_ONLY: Bu demo akkaunt faqat ko'rish uchun. Edit/Create uchun demo so'rov yuboring.");
             }
             return next();

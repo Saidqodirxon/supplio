@@ -22,7 +22,7 @@ let AuthService = AuthService_1 = class AuthService {
     }
     async login(phone, pass, isDemoRequest = false) {
         if (isDemoRequest && phone !== AuthService_1.DEMO_PHONE) {
-            throw new common_1.UnauthorizedException("Demo rejimda faqat +998 00 000 00 00 bilan kirish mumkin");
+            throw new common_1.UnauthorizedException(`Demo rejimda faqat ${AuthService_1.DEMO_PHONE} bilan kirish mumkin`);
         }
         const user = await this.prisma.user.findUnique({
             where: { phone },

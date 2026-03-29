@@ -3,7 +3,7 @@ import { Cron, CronExpression } from "@nestjs/schedule";
 import { PrismaService } from "../prisma/prisma.service";
 import { Telegraf } from "telegraf";
 
-const DEMO_PHONE = "+998000000000";
+const DEMO_PHONE = "+998901000000";
 const DEMO_PASSWORD = "demo1234";
 
 @Injectable()
@@ -57,8 +57,8 @@ export class DemoService {
       demo: {
         phone: DEMO_PHONE,
         password: DEMO_PASSWORD,
-        url: "https://demo.supplio.uz/login?demo=1&access=full",
-        note: "These credentials give you full access to the demo environment. Data resets daily at midnight.",
+        url: "https://demo.supplio.uz/login?demo=1&access=view",
+        note: "Demo environment is read-only by default for security. Data resets daily at midnight.",
       },
     };
   }

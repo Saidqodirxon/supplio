@@ -118,6 +118,21 @@ function normalizeAppBaseUrl(rawUrl?: string) {
   return (rawUrl || fallback).trim().replace(/\/+$/, "");
 }
 
+function sanitizeExternalUrl(raw?: string | null) {
+  const value = (raw || "").trim();
+  if (!value) return null;
+  try {
+    const parsed = new URL(value);
+    const protocol = parsed.protocol.toLowerCase();
+    if (protocol === "http:" || protocol === "https:") {
+      return parsed.toString();
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 interface DynamicSettings {
   newsEnabled: boolean;
   defaultTrialDays?: number;
@@ -242,11 +257,11 @@ export default function LandingPage() {
   const contactEmail = landing?.contactEmail?.trim() || null;
   const contactEmailHref = contactEmail ? `mailto:${contactEmail}` : null;
   const contactAddress = landing?.contactAddress?.trim() || null;
-  const contactAddressUrl = landing?.contactAddressUrl?.trim() || null;
-  const socialTelegram = landing?.socialTelegram?.trim() || null;
-  const socialInstagram = landing?.socialInstagram?.trim() || null;
-  const socialLinkedin = landing?.socialLinkedin?.trim() || null;
-  const socialTwitter = landing?.socialTwitter?.trim() || null;
+  const contactAddressUrl = sanitizeExternalUrl(landing?.contactAddressUrl);
+  const socialTelegram = sanitizeExternalUrl(landing?.socialTelegram);
+  const socialInstagram = sanitizeExternalUrl(landing?.socialInstagram);
+  const socialLinkedin = sanitizeExternalUrl(landing?.socialLinkedin);
+  const socialTwitter = sanitizeExternalUrl(landing?.socialTwitter);
 
   return (
     <div className="min-h-screen selection:bg-blue-600 selection:text-white overflow-x-hidden font-sans bg-white text-left">

@@ -28,6 +28,7 @@ import OwnerDemo from "./pages/OwnerDemo";
 import Staff from "./pages/Staff";
 import DemoLanding from "./pages/DemoLanding";
 import HelpCenter from "./pages/HelpCenter";
+import Profile from "./pages/Profile";
 import { NotFound, SubscriptionExpired, AccountLocked } from "./pages/Error";
 import { useAuthStore } from "./store/authStore";
 import { useThemeStore } from "./store/themeStore";
@@ -120,6 +121,25 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
   if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return <>{children}</>;
+}
+
+// Role-based route protection
+function ProtectedRoute({
+  allowedRoles,
+  children,
+}: {
+  allowedRoles: string[];
+  children: React.ReactNode;
+}) {
+  const user = useAuthStore((state) => state.user);
+  const getEffectiveRole = useAuthStore((state) => state.getEffectiveRole);
+  const effectiveRole = getEffectiveRole();
+
+  if (!user || !allowedRoles.includes(effectiveRole || "")) {
+    return <NotFound />;
   }
 
   return <>{children}</>;
@@ -251,22 +271,130 @@ function App() {
           >
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="dealers" element={<Dealers />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="orders" element={<Orders />} />
-            <Route path="payments" element={<Payments />} />
-            <Route path="branches" element={<Branches />} />
-            <Route path="analytics" element={<Analytics />} />
             <Route path="products" element={<Products />} />
-            <Route path="expenses" element={<Expenses />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="help-center" element={<HelpCenter />} />
-            <Route path="subscription" element={<Subscription />} />
-            <Route path="super" element={<SuperAdmin />} />
-            <Route path="approvals" element={<Approvals />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="telegram-bots" element={<TelegramBots />} />
-            <Route path="staff" element={<Staff />} />
-            <Route path="settings" element={<Settings />} />
+
+            {/* Owner/Manager/Super Admin routes */}
+            <Route
+              path="dealers"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["OWNER", "MANAGER", "SUPER_ADMIN"]}
+                >
+                  <Dealers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="approvals"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["OWNER", "MANAGER", "SUPER_ADMIN"]}
+                >
+                  <Approvals />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="payments"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["OWNER", "MANAGER", "SUPER_ADMIN"]}
+                >
+                  <Payments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="branches"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["OWNER", "MANAGER", "SUPER_ADMIN"]}
+                >
+                  <Branches />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="expenses"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["OWNER", "MANAGER", "SUPER_ADMIN"]}
+                >
+                  <Expenses />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="analytics"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["OWNER", "MANAGER", "SUPER_ADMIN"]}
+                >
+                  <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="reports"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["OWNER", "MANAGER", "SUPER_ADMIN"]}
+                >
+                  <Reports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="staff"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["OWNER", "MANAGER", "SUPER_ADMIN"]}
+                >
+                  <Staff />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Owner/Super Admin routes */}
+            <Route
+              path="subscription"
+              element={
+                <ProtectedRoute allowedRoles={["OWNER", "SUPER_ADMIN"]}>
+                  <Subscription />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="telegram-bots"
+              element={
+                <ProtectedRoute allowedRoles={["OWNER", "SUPER_ADMIN"]}>
+                  <TelegramBots />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Super Admin only routes */}
+            <Route
+              path="super"
+              element={
+                <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                  <SuperAdmin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="settings"
+              element={
+                <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+
             <Route path="demo-owner" element={<OwnerDemo />} />
             <Route path="*" element={<NotFound />} />
           </Route>
