@@ -67,21 +67,29 @@ function getBotFeature(limit: number, lang: Language): string {
     return lang === "uz"
       ? "Telegram bot yo'q"
       : lang === "ru"
-        ? "Bez Telegram bota"
+        ? "Без Telegram бота"
         : lang === "tr"
           ? "Telegram bot yok"
-          : "No Telegram bot";
+          : lang === "oz"
+            ? "Telegram бот йўқ"
+            : "No Telegram bot";
   }
   if (limit >= 99999) {
     return lang === "uz"
       ? "Cheksiz Telegram bot"
       : lang === "ru"
-        ? "Bezlimit Telegram botov"
+        ? "Безлимит Telegram ботов"
         : lang === "tr"
           ? "Sinirsiz Telegram bot"
-          : "Unlimited Telegram bots";
+          : lang === "oz"
+            ? "Чексиз Telegram бот"
+            : "Unlimited Telegram bots";
   }
-  return lang === "uz" ? `${limit} ta Telegram bot` : `${limit} Telegram bot`;
+  return lang === "uz"
+    ? `${limit} ta Telegram bot`
+    : lang === "oz"
+      ? `${limit} та Telegram бот`
+      : `${limit} Telegram bot`;
 }
 
 type SafeNews = {
@@ -728,7 +736,9 @@ export default function LandingPage() {
                 ? "Начните сегодня"
                 : lang === "tr"
                   ? "Bugün başlayın"
-                  : "Start Today";
+                  : lang === "oz"
+                    ? "Бугун бошланг"
+                    : "Start Today";
           const ctaSubtitle =
             lang === "uz"
               ? `${trialDays} kunlik bepul sinov. Kredit kartasi kerak emas.`
@@ -736,7 +746,9 @@ export default function LandingPage() {
                 ? `${trialDays}-дневный бесплатный пробный период. Без кредитной карты.`
                 : lang === "tr"
                   ? `${trialDays} günlük ücretsiz deneme. Kredi kartı gerekmez.`
-                  : `${trialDays}-day free trial. No credit card required.`;
+                  : lang === "oz"
+                    ? `${trialDays} кунлик бепул синов. Карта талаб қилинмайди.`
+                    : `${trialDays}-day free trial. No credit card required.`;
           return (
             <div className="max-w-3xl mx-auto">
               <motion.h2
@@ -797,19 +809,14 @@ export default function LandingPage() {
             const isScrollable = count >= 5;
 
             const PlanCard = ({ plan, i }: { plan: SafePlan; i: number }) => {
+              const langSuffix = lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
               const name =
                 dynamicTariffs.length > 0
-                  ? String(
-                      plan[
-                        `name${lang.charAt(0).toUpperCase() + lang.slice(1)}`
-                      ] || ""
-                    )
+                  ? String(plan[`name${langSuffix}`] || plan.nameUz || plan.name || "")
                   : plan.name;
               const features =
                 dynamicTariffs.length > 0
-                  ? (plan[
-                      `features${lang.charAt(0).toUpperCase() + lang.slice(1)}`
-                    ] as string[])
+                  ? (plan[`features${langSuffix}`] || plan.featuresUz) as string[]
                   : plan.features;
               const isPopular = plan.isPopular;
               const price = (plan.priceMonthly as string) || plan.price || "0";
@@ -835,7 +842,9 @@ export default function LandingPage() {
                           ? "Популярный"
                           : lang === "tr"
                             ? "Popüler"
-                            : "Most Popular"}
+                            : lang === "oz"
+                              ? "Оммабоп"
+                              : "Most Popular"}
                     </div>
                   )}
 
@@ -865,7 +874,9 @@ export default function LandingPage() {
                             ? `${trialDays} дней бесплатно`
                             : lang === "tr"
                               ? `${trialDays} gün ücretsiz`
-                              : `${trialDays}-day free trial`}
+                              : lang === "oz"
+                                ? `${trialDays} кунлик бепул синов`
+                                : `${trialDays}-day free trial`}
                       </p>
                     )}
                   </div>
@@ -962,7 +973,7 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {dynamicNews.length === 0 ? (
                 <p className="col-span-3 text-center text-slate-400 py-12 font-medium">
-                  No articles yet.
+                  {lang === "uz" ? "Hozircha yangiliklar yo'q." : lang === "ru" ? "Пока нет статей." : lang === "tr" ? "Henüz makale yok." : lang === "oz" ? "Ҳозирча янгиликлар йўқ." : "No articles yet."}
                 </p>
               ) : null}
               {(dynamicNews as unknown as SafeNews[]).map((news, i: number) => {

@@ -261,6 +261,10 @@ export default function NewsDetailPage() {
           return;
         }
         setArticle(data);
+        // Increment view count via POST (non-GET to avoid bot inflation)
+        if (data?.id) {
+          fetch(`${BACKEND}/api/public/news/${data.id}/view`, { method: "POST" }).catch(() => {});
+        }
       } catch {
         setNotFound(true);
       } finally {

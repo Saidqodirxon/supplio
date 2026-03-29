@@ -133,7 +133,9 @@ function isDemoRuntime() {
 
   const hostDemo =
     window.location.hostname === "demo.supplio.uz" ||
-    window.location.hostname.startsWith("demo.");
+    window.location.hostname === "www.demo.supplio.uz" ||
+    window.location.hostname.startsWith("demo.") ||
+    window.location.hostname.startsWith("www.demo.");
 
   const params = new URLSearchParams(window.location.search);
   const demoParam = (params.get("demo") || "").toLowerCase();

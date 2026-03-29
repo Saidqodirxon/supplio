@@ -90,13 +90,36 @@ let PublicService = class PublicService {
         };
     }
     async getNewsBySlug(slug, lang) {
-        const slugField = `slug${lang.charAt(0).toUpperCase() + lang.slice(1)}`;
+        const suffix = lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
+        const slugField = `slug${suffix}`;
         return this.prisma.news.findFirst({
             where: {
                 [slugField]: slug,
                 isPublished: true,
             },
+            select: {
+                id: true,
+                slugUz: true, slugRu: true, slugEn: true, slugTr: true, slugUzCyr: true,
+                titleUz: true, titleRu: true, titleEn: true, titleTr: true, titleUzCyr: true,
+                excerptUz: true, excerptRu: true, excerptEn: true, excerptTr: true, excerptUzCyr: true,
+                contentUz: true, contentRu: true, contentEn: true, contentTr: true, contentUzCyr: true,
+                image: true,
+                isPublished: true,
+                createdAt: true,
+            },
         });
+    }
+    async incrementNewsView(id) {
+        try {
+            return await this.prisma.news.update({
+                where: { id },
+                data: { viewCount: { increment: 1 } },
+                select: { id: true, viewCount: true },
+            });
+        }
+        catch {
+            return { id, viewCount: 0 };
+        }
     }
 };
 exports.PublicService = PublicService;

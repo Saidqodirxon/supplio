@@ -33,6 +33,7 @@ import {
   Clock,
   BadgeCheck,
   Download,
+  Eye,
 } from "lucide-react";
 import clsx from "clsx";
 import { useScrollLock } from "../utils/useScrollLock";
@@ -146,6 +147,7 @@ interface NewsItem {
   slugUzCyr?: string;
   image?: string;
   isPublished: boolean;
+  viewCount?: number;
   createdAt: string;
 }
 
@@ -186,6 +188,7 @@ interface GlobalSettings {
   telegram?: string;
   defaultTrialDays?: number;
   maintenanceMode?: boolean;
+  superAdminPhone?: string;
 }
 
 interface LandingContent {
@@ -1860,25 +1863,43 @@ export default function SuperAdmin() {
                               ] || item.excerptUz}
                             </p>
                           </div>
-                          <div className="flex gap-4 pt-4">
+                          <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest pb-2">
+                            <Eye className="w-3 h-3" />
+                            {item.viewCount ?? 0} {language === 'ru' ? 'просмотров' : language === 'en' ? 'views' : 'ko\'rishlar'}
+                          </div>
+                          <div className="flex gap-3 pt-2">
+                            <button
+                              onClick={async () => {
+                                try {
+                                  await api.patch(`/super/news/${item.id}`, { isPublished: !item.isPublished });
+                                  toast.success(item.isPublished ? t.superadmin.draft : t.superadmin.published);
+                                  fetchData();
+                                } catch {
+                                  toast.error(t.common.error);
+                                }
+                              }}
+                              className={clsx(
+                                "px-4 py-3 rounded-2xl font-black text-xs uppercase tracking-widest transition-all active:scale-95",
+                                item.isPublished
+                                  ? "bg-amber-500/10 text-amber-600 hover:bg-amber-500 hover:text-white border border-amber-500/20"
+                                  : "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-500/20"
+                              )}
+                            >
+                              {item.isPublished ? t.superadmin.draft : t.superadmin.published}
+                            </button>
                             <button
                               onClick={() => {
                                 setEditingItem(item);
                                 setNewsForm({ ...item } as NewsItem);
                                 setIsNewsModalOpen(true);
                               }}
-                              className="flex-1 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95"
+                              className="flex-1 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95"
                             >
                               {t.superadmin.editBtn}
                             </button>
                             <button
                               onClick={async () => {
-                                if (
-                                  !window.confirm(
-                                    t.superadmin.confirmDeleteNews
-                                  )
-                                )
-                                  return;
+                                if (!window.confirm(t.superadmin.confirmDeleteNews)) return;
                                 try {
                                   await api.delete(`/super/news/${item.id}`);
                                   toast.success(t.superadmin.deleted);
@@ -1887,7 +1908,7 @@ export default function SuperAdmin() {
                                   toast.error(t.superadmin.failedToDelete);
                                 }
                               }}
-                              className="p-4 bg-rose-600/10 text-rose-600 border border-rose-600/20 rounded-2xl hover:bg-rose-600 hover:text-white transition-all"
+                              className="p-3 bg-rose-600/10 text-rose-600 border border-rose-600/20 rounded-2xl hover:bg-rose-600 hover:text-white transition-all"
                             >
                               <Trash2 className="w-5 h-5" />
                             </button>
@@ -2014,6 +2035,24 @@ export default function SuperAdmin() {
                             s ? { ...s, telegram: e.target.value } : null
                           )
                         }
+                        className="w-full px-8 py-5 bg-white dark:bg-white/5 rounded-3xl border-2 border-slate-100 dark:border-white/10 text-xl font-black focus:border-blue-600 transition-all font-mono"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 px-2">
+                        <ShieldCheck className="w-3 h-3 text-emerald-600" />{" "}
+                        Admin telefon raqami (login sahifasida ko'rinadi)
+                      </label>
+                      <input
+                        type="text"
+                        value={settings?.superAdminPhone || ""}
+                        onChange={(e) =>
+                          setSettings((s) =>
+                            s ? { ...s, superAdminPhone: e.target.value } : null
+                          )
+                        }
+                        placeholder="+998901234567"
                         className="w-full px-8 py-5 bg-white dark:bg-white/5 rounded-3xl border-2 border-slate-100 dark:border-white/10 text-xl font-black focus:border-blue-600 transition-all font-mono"
                       />
                     </div>

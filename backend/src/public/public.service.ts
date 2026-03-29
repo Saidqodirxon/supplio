@@ -90,12 +90,36 @@ export class PublicService {
   }
 
   async getNewsBySlug(slug: string, lang: string) {
-    const slugField = `slug${lang.charAt(0).toUpperCase() + lang.slice(1)}`;
+    const suffix = lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
+    const slugField = `slug${suffix}`;
     return (this.prisma as any).news.findFirst({
       where: {
         [slugField]: slug,
         isPublished: true,
       },
+      select: {
+        id: true,
+        slugUz: true, slugRu: true, slugEn: true, slugTr: true, slugUzCyr: true,
+        titleUz: true, titleRu: true, titleEn: true, titleTr: true, titleUzCyr: true,
+        excerptUz: true, excerptRu: true, excerptEn: true, excerptTr: true, excerptUzCyr: true,
+        contentUz: true, contentRu: true, contentEn: true, contentTr: true, contentUzCyr: true,
+        image: true,
+        isPublished: true,
+        createdAt: true,
+      },
     });
+  }
+
+  async incrementNewsView(id: string) {
+    try {
+      return await (this.prisma as any).news.update({
+        where: { id },
+        data: { viewCount: { increment: 1 } },
+        select: { id: true, viewCount: true },
+      });
+    } catch {
+      // viewCount column may not exist yet — ignore until migration runs
+      return { id, viewCount: 0 };
+    }
   }
 }

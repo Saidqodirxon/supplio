@@ -1,9 +1,11 @@
 -- Supplio Company Export
 -- Company: Supplio Demo
--- Exported: 2026-03-28T20:00:00.674Z
+-- Exported: 2026-03-29T20:00:00.777Z
 -- ID: 49e18d1f-089d-482a-81c8-b11f0c8a067a
 
--- Branch: empty
+-- Branch (1 rows)
+INSERT INTO "Branch" ("id", "companyId", "name", "address", "phone", "createdAt", "updatedAt", "deletedAt", "deletedBy") VALUES ('021f39ca-2b92-4d45-8549-3c02e4493d1e', '49e18d1f-089d-482a-81c8-b11f0c8a067a', 'Main distribution Hub', 'Demo City, St 1', NULL, '2026-03-29T16:14:07.181Z', '2026-03-29T16:14:07.181Z', NULL, NULL) ON CONFLICT DO NOTHING;
+
 -- Dealer: empty
 -- Product: empty
 -- Order: empty

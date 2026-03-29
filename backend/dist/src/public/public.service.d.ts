@@ -24,4 +24,5 @@ export declare class PublicService {
         };
     }>;
     getNewsBySlug(slug: string, lang: string): Promise<any>;
+    incrementNewsView(id: string): Promise<any>;
 }

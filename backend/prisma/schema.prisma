@@ -472,6 +472,7 @@ model News {
   image        String?
   authorId     String?
   isPublished  Boolean  @default(true)
+  viewCount    Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   author       User?    @relation("NewsAuthor", fields: [authorId], references: [id])

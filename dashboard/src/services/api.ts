@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast as sonnerToast } from "sonner";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
@@ -33,9 +34,13 @@ api.interceptors.response.use(
     const msg = error.response?.data?.message;
 
     if (status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+      const requestUrl = error.config?.url || "";
+      const isAuthRequest = requestUrl.includes("/auth/login");
+      if (!isAuthRequest) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        window.location.href = "/login";
+      }
     }
 
     if (status === 403) {
@@ -43,6 +48,11 @@ api.interceptors.response.use(
         window.location.href = "/expired";
       } else if (msg?.includes("ACCOUNT_LOCKED")) {
         window.location.href = "/locked";
+      } else if (msg?.includes("DEMO_READ_ONLY")) {
+        sonnerToast.warning("Demo rejim — faqat ko'rish uchun. Tahrirlash uchun to'liq demo so'rov yuboring.", {
+          duration: 4000,
+          style: { borderRadius: "1rem", fontFamily: "Outfit, sans-serif", fontWeight: 700 },
+        });
       }
     }
     return Promise.reject(error);

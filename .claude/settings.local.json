@@ -45,7 +45,8 @@
       "Bash(find E:/projects/realcoder/supplio/dashboard/src -name logo* -o -name *.svg -o -name *.png)",
       "Bash(find /e/projects/realcoder/supplio/dashboard -type f \\\\\\(-name *authStore* -o -name *login* \\\\\\))",
       "Bash(npx ts-node:*)",
-      "Bash(find E:projectsrealcodersuppliobackendsrcanalytics -type f -name *.ts -o -name *.js)"
+      "Bash(find E:projectsrealcodersuppliobackendsrcanalytics -type f -name *.ts -o -name *.js)",
+      "Bash(find /e/projects/realcoder/supplio/landing/src/app/[lang] -name \"pricing\" -o -name \"*pricing*\")"
     ]
   }
 }

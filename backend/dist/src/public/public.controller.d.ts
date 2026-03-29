@@ -24,4 +24,5 @@ export declare class PublicController {
         };
     }>;
     getNews(slug: string, lang?: string): Promise<any>;
+    incrementView(id: string): Promise<any>;
 }

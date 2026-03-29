@@ -72,7 +72,7 @@ let DemoService = DemoService_1 = class DemoService {
             .catch(() => { });
     }
     async handleDailyReset() {
-        this.logger.log("CRON: Starting Demo Environment Reset...");
+        this.logger.log("CRON: Starting Demo Environment Reset (every 2 days)...");
         const demoCompanies = await this.prisma.company.findMany({
             where: { isDemo: true },
         });
@@ -933,7 +933,7 @@ let DemoService = DemoService_1 = class DemoService {
 };
 exports.DemoService = DemoService;
 __decorate([
-    (0, schedule_1.Cron)(schedule_1.CronExpression.EVERY_DAY_AT_MIDNIGHT),
+    (0, schedule_1.Cron)("0 0 */2 * *"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

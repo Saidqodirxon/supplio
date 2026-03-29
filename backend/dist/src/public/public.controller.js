@@ -31,6 +31,9 @@ let PublicController = class PublicController {
     getNews(slug, lang = "uz") {
         return this.publicService.getNewsBySlug(slug, lang);
     }
+    incrementView(id) {
+        return this.publicService.incrementNewsView(id);
+    }
 };
 exports.PublicController = PublicController;
 __decorate([
@@ -59,6 +62,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], PublicController.prototype, "getNews", null);
+__decorate([
+    (0, common_1.Post)("news/:id/view"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], PublicController.prototype, "incrementView", null);
 exports.PublicController = PublicController = __decorate([
     (0, common_1.Controller)("public"),
     __metadata("design:paramtypes", [public_service_1.PublicService])

@@ -34,44 +34,16 @@ const fadeInUp = {
 
 const TEAM = [
   {
-    name: "Azizbek Yusupov",
-    role: "CEO & Co-founder",
-    avatar: "AY",
+    name: "Saidqodirxon Rahimov",
+    role: "CEO, Owner & Founder",
+    avatar: "SR",
     color: "bg-blue-600",
-  },
-  {
-    name: "Dilnoza Mirzayeva",
-    role: "CTO & Co-founder",
-    avatar: "DM",
-    color: "bg-indigo-600",
-  },
-  {
-    name: "Rustam Karimov",
-    role: "Head of Product",
-    avatar: "RK",
-    color: "bg-violet-600",
-  },
-  {
-    name: "Shahlo Toshmatova",
-    role: "Lead Engineer",
-    avatar: "ST",
-    color: "bg-emerald-600",
-  },
-  {
-    name: "Bobur Nazarov",
-    role: "Head of Sales",
-    avatar: "BN",
-    color: "bg-amber-600",
-  },
-  {
-    name: "Kamola Ergasheva",
-    role: "UX Designer",
-    avatar: "KE",
-    color: "bg-rose-600",
   },
 ];
 
 const VALUE_ICONS = [Zap, BarChart3, Users, ShieldCheck];
+
+const APP_LOGIN_URL = `${(process.env.NEXT_PUBLIC_APP_URL || "https://app.supplio.uz").replace(/\/+$/, "")}/login`;
 
 export default function AboutPage() {
   const params = useParams();
@@ -125,7 +97,7 @@ export default function AboutPage() {
           <div className="hidden md:flex items-center gap-4">
             <LangSelect currentLang={lang} />
             <Link
-              href="https://app.supplio.uz/login"
+              href={APP_LOGIN_URL}
               className="px-5 py-2.5 text-sm font-semibold text-slate-700 hover:text-blue-600 transition-colors"
             >
               {t.nav.login}
@@ -174,7 +146,7 @@ export default function AboutPage() {
               {t.nav.news}
             </Link>
             <hr className="border-slate-100" />
-            <Link href="https://app.supplio.uz/login">{t.nav.login}</Link>
+            <Link href={APP_LOGIN_URL}>{t.nav.login}</Link>
             <button
               className="text-blue-600 font-bold text-left"
               onClick={() => {
@@ -349,24 +321,24 @@ export default function AboutPage() {
               {a.teamSubtitle}
             </p>
           </motion.div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+          <div className="flex flex-wrap justify-center gap-8">
             {TEAM.map((member, i) => (
               <motion.div
                 key={i}
                 {...fadeInUp}
                 transition={{ delay: i * 0.08 }}
-                className="text-center space-y-4"
+                className="text-center space-y-5 flex flex-col items-center"
               >
                 <div
-                  className={`w-16 h-16 sm:w-20 sm:h-20 rounded-3xl ${member.color} text-white flex items-center justify-center text-lg font-black mx-auto shadow-xl`}
+                  className={`w-24 h-24 sm:w-28 sm:h-28 rounded-3xl ${member.color} text-white flex items-center justify-center text-2xl font-black shadow-2xl shadow-blue-600/30`}
                 >
                   {member.avatar}
                 </div>
-                <div>
-                  <p className="font-bold text-white text-sm leading-tight">
+                <div className="space-y-1">
+                  <p className="font-bold text-white text-base leading-tight">
                     {member.name}
                   </p>
-                  <p className="text-slate-400 text-xs mt-1 leading-tight">
+                  <p className="text-slate-400 text-sm mt-1 leading-tight">
                     {member.role}
                   </p>
                 </div>

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from "@nestjs/common";
+import { Controller, Get, Post, Param, Query } from "@nestjs/common";
 import { PublicService } from "./public.service";
 
 @Controller("public")
@@ -23,5 +23,10 @@ export class PublicController {
   @Get("news/:slug")
   getNews(@Param("slug") slug: string, @Query("lang") lang: string = "uz") {
     return this.publicService.getNewsBySlug(slug, lang);
+  }
+
+  @Post("news/:id/view")
+  incrementView(@Param("id") id: string) {
+    return this.publicService.incrementNewsView(id);
   }
 }
