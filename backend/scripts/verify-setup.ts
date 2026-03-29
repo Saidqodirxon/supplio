@@ -11,6 +11,6 @@ async function main() {
     console.log(`- ${u.phone} (${u.roleType})`);
   }
 }
-
+ 
 main().finally(() => prisma.$disconnect());
 

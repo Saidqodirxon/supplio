@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
   const pathnameIsMissingValidLocale = Object.keys(languageSlugs).every(
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
   );
-
+ 
   // We should also check if it's not a public asset
   const isPublicAsset =
     pathname.startsWith("/_next") ||
