@@ -9,6 +9,9 @@ import {
   Param,
   Query,
   Request,
+  NotFoundException,
+  Res,
+  StreamableFile,
 } from "@nestjs/common";
 import { SuperAdminService } from "./super-admin.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
@@ -16,6 +19,8 @@ import { RolesGuard } from "../common/middleware/roles.guard";
 import { Roles } from "../common/decorators/roles.decorator";
 import { BackupService } from "../common/services/backup/backup.service";
 import { UnitsService } from "../units/units.service";
+import { createReadStream } from "fs";
+import { Response } from "express";
 
 @Controller("super")
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -44,6 +49,31 @@ export class SuperAdminController {
   @Roles("SUPER_ADMIN")
   async sendBackupToTelegram() {
     return this.backupService.createBackupAndSend();
+  }
+
+  @Post("backups/company/:companyId/trigger")
+  @Roles("SUPER_ADMIN")
+  async triggerCompanyBackup(@Param("companyId") companyId: string) {
+    return this.backupService.createCompanyBackup(companyId);
+  }
+
+  @Post("backups/company/:companyId/send")
+  @Roles("SUPER_ADMIN")
+  async sendCompanyBackupToTelegram(@Param("companyId") companyId: string) {
+    return this.backupService.createCompanyBackupAndSend(companyId);
+  }
+
+  @Get("backups/download")
+  @Roles("SUPER_ADMIN")
+  async downloadBackup(@Query("name") name: string, @Res({ passthrough: true }) res: Response) {
+    try {
+      const filePath = this.backupService.resolveBackupPath(name);
+      res.setHeader("Content-Type", "application/octet-stream");
+      res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(name)}"`);
+      return new StreamableFile(createReadStream(filePath));
+    } catch {
+      throw new NotFoundException("Backup file not found");
+    }
   }
 
   // ── Settings ──────────────────────────────────────────────────────────────
@@ -204,6 +234,15 @@ export class SuperAdminController {
   }
 
   // ── Notify Distributors ───────────────────────────────────────────────────
+
+  @Patch("distributors/:id/owner-password")
+  @Roles("SUPER_ADMIN")
+  async resetDistributorOwnerPassword(
+    @Param("id") id: string,
+    @Body() body: { password: string }
+  ) {
+    return this.superAdminService.resetDistributorOwnerPassword(id, body.password);
+  }
 
   @Post("notify-distributors")
   @Roles("SUPER_ADMIN")

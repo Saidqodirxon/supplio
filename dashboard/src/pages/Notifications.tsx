@@ -22,7 +22,7 @@ import {
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDistanceToNow, format } from 'date-fns';
 import { uz, ru, enUS, tr } from 'date-fns/locale';
@@ -128,7 +128,8 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [showSendModal, setShowSendModal] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [filter, setFilter] = useState<'all' | 'unread'>('all');
+  const [filter, setFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [sendForm, setSendForm] = useState({
     title: '',
     message: '',
@@ -154,7 +155,7 @@ export default function NotificationsPage() {
   const locale = locales[language] || enUS;
   const isAdmin = user?.roleType === 'SUPER_ADMIN' || user?.roleType === 'OWNER' || user?.roleType === 'MANAGER';
 
-  useScrollLock(showSendModal || showTemplateModal);
+  useScrollLock(showSendModal || showTemplateModal || !!selectedNotification);
 
   const fetchNotifications = async () => {
     try {
@@ -315,8 +316,13 @@ export default function NotificationsPage() {
     }
   };
 
-  const displayed = notifications.filter(n => filter === 'all' || !n.isRead);
+  const displayed = notifications.filter((n) => {
+    if (filter === 'unread') return !n.isRead;
+    if (filter === 'read') return n.isRead;
+    return true;
+  });
   const unreadCount = notifications.filter(n => !n.isRead).length;
+  const readCount = notifications.length - unreadCount;
 
   const TABS: { key: Tab; label: string; icon: ReactElement }[] = [
     { key: 'inbox', label: 'Kirish qutisi', icon: <Bell className="w-4 h-4" /> },
@@ -400,7 +406,7 @@ export default function NotificationsPage() {
           </div>
 
           <div className="flex gap-2">
-            {(['all', 'unread'] as const).map(f => (
+            {(['all', 'unread', 'read'] as const).map(f => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
@@ -411,7 +417,7 @@ export default function NotificationsPage() {
                     : 'border border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800'
                 )}
               >
-                {f === 'all' ? 'Barchasi' : `O'qilmagan (${unreadCount})`}
+                {f === 'all' ? 'Barchasi' : f === 'unread' ? `O'qilmagan (${unreadCount})` : `O'qilgan (${readCount})`}
               </button>
             ))}
           </div>
@@ -441,7 +447,10 @@ export default function NotificationsPage() {
                         'p-6 flex items-start gap-4 cursor-pointer transition-colors',
                         !notif.isRead ? 'bg-blue-50/30 dark:bg-blue-900/10 hover:bg-blue-50/50' : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/30'
                       )}
-                      onClick={() => !notif.isRead && markRead(notif.id)}
+                      onClick={() => {
+                        setSelectedNotification(notif);
+                        if (!notif.isRead) void markRead(notif.id);
+                      }}
                     >
                       <div className={clsx('w-10 h-10 rounded-xl flex items-center justify-center shrink-0', style.bg)}>
                         {style.icon}
@@ -452,7 +461,7 @@ export default function NotificationsPage() {
                             <p className={clsx('text-sm font-black text-slate-900 dark:text-white', !notif.isRead && 'text-blue-700 dark:text-blue-300')}>
                               {notif.title}
                             </p>
-                            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">{notif.message}</p>
+                            <p className="text-xs text-slate-500 mt-0.5 leading-relaxed line-clamp-2">{notif.message}</p>
                           </div>
                           <div className="shrink-0 text-right">
                             <p className="text-[9px] font-bold text-slate-400 uppercase">
@@ -477,6 +486,53 @@ export default function NotificationsPage() {
           </div>
         </>
       )}
+
+      <AnimatePresence>
+        {selectedNotification && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-6">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.96 }}
+              className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] p-8 shadow-4xl space-y-6"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className={clsx(
+                      'inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest',
+                      selectedNotification.isRead ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'
+                    )}>
+                      {selectedNotification.isRead ? (t.notifications?.read || "O'qilgan") : (t.notifications?.unread || "O'qilmagan")}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                    {selectedNotification.title}
+                  </h3>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    {format(new Date(selectedNotification.createdAt), 'dd MMM yyyy, HH:mm')}
+                  </p>
+                </div>
+                <button onClick={() => setSelectedNotification(null)} className="p-3 rounded-2xl bg-slate-100 dark:bg-white/10">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="rounded-3xl bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/5 p-6">
+                <p className="text-sm leading-7 text-slate-700 dark:text-slate-200 whitespace-pre-wrap">
+                  {selectedNotification.message}
+                </p>
+              </div>
+
+              {selectedNotification.sender && (
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  From: {selectedNotification.sender.fullName || selectedNotification.sender.phone}
+                </p>
+              )}
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ── TEMPLATES TAB ── */}
       {tab === 'templates' && (

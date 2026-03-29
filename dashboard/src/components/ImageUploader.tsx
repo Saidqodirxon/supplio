@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Upload, X, Image as ImageIcon, Loader2 } from 'lucide-react';
 import api from '../services/api';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import clsx from 'clsx';
 
 interface ImageUploaderProps {

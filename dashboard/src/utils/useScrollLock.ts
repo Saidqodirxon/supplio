@@ -7,16 +7,27 @@ import { useEffect } from 'react';
 export function useScrollLock(isLocked: boolean) {
   useEffect(() => {
     const main = document.getElementById('main-scroll');
-    if (!main) return;
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollbarWidth = window.innerWidth - html.clientWidth;
 
     if (isLocked) {
-      main.classList.add('scroll-locked');
+      main?.classList.add('scroll-locked');
+      body.style.overflow = 'hidden';
+      body.style.paddingRight = scrollbarWidth > 0 ? `${scrollbarWidth}px` : '';
+      html.style.overflow = 'hidden';
     } else {
-      main.classList.remove('scroll-locked');
+      main?.classList.remove('scroll-locked');
+      body.style.overflow = '';
+      body.style.paddingRight = '';
+      html.style.overflow = '';
     }
 
     return () => {
-      main.classList.remove('scroll-locked');
+      main?.classList.remove('scroll-locked');
+      body.style.overflow = '';
+      body.style.paddingRight = '';
+      html.style.overflow = '';
     };
   }, [isLocked]);
 }

@@ -48,6 +48,12 @@ interface Dealer {
 
 type OrderState = "idle" | "loading" | "success" | "error";
 
+function normalizeApiBaseUrl(rawUrl?: string) {
+  const fallback = "http://localhost:5000";
+  const value = (rawUrl || fallback).trim().replace(/\/+$/, "");
+  return value.endsWith("/api") ? value.slice(0, -4) : value;
+}
+
 export default function StorePage() {
   const params = useParams();
   const companySlug = params.slug as string;
@@ -68,7 +74,7 @@ export default function StorePage() {
   const [orderError, setOrderError] = useState("");
   const [orderId, setOrderId] = useState("");
 
-  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const API = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
 
   useEffect(() => {
     const fetchStore = async () => {

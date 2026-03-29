@@ -12,18 +12,25 @@ interface LeadModalProps {
   tariffs?: Record<string, unknown>[];
 }
 
+function normalizeApiBaseUrl(rawUrl?: string) {
+  const fallback = 'https://api.supplio.uz';
+  const value = (rawUrl || fallback).trim().replace(/\/+$/, '');
+  return value.endsWith('/api') ? value.slice(0, -4) : value;
+}
+
 export default function LeadModal({ isOpen, onClose, lang, tariffs }: LeadModalProps) {
   const [formData, setFormData] = useState({ fullName: "", phone: "", info: "", tariffId: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const t = translations[lang];
+  const API = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.supplio.uz'}/api/leads`, {
+      const res = await fetch(`${API}/api/leads`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),

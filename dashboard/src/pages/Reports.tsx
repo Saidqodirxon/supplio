@@ -5,7 +5,7 @@ import {
   Award, CreditCard
 } from 'lucide-react';
 import api from '../services/api';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { useAuthStore } from '../store/authStore';
 import clsx from 'clsx';
 

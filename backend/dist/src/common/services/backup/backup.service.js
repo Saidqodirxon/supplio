@@ -20,6 +20,25 @@ const https = require("https");
 const schedule_1 = require("@nestjs/schedule");
 const prisma_service_1 = require("../../../prisma/prisma.service");
 const execPromise = (0, util_1.promisify)(child_process_1.exec);
+function sanitizeFilePart(value) {
+    return value.replace(/[^a-zA-Z0-9_\-.]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "") || "backup";
+}
+function buildPgDumpCommand(outputPath, rawDbUrl) {
+    let sanitizedUrl = rawDbUrl;
+    let schemaArg = "";
+    try {
+        const parsed = new URL(rawDbUrl);
+        const schema = parsed.searchParams.get("schema");
+        if (schema) {
+            parsed.searchParams.delete("schema");
+            sanitizedUrl = parsed.toString();
+            schemaArg = ` --schema="${schema}"`;
+        }
+    }
+    catch {
+    }
+    return `pg_dump -f "${outputPath}"${schemaArg} "${sanitizedUrl}"`;
+}
 function escVal(val) {
     if (val === null || val === undefined)
         return "NULL";
@@ -54,6 +73,11 @@ let BackupService = BackupService_1 = class BackupService {
         if (!fs.existsSync(this.backupDir))
             fs.mkdirSync(this.backupDir, { recursive: true });
     }
+    buildCompanyBackupFileName(companyName, slug) {
+        const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+        const safeSlug = sanitizeFilePart(slug || companyName).toUpperCase();
+        return `SUPPLIO_${safeSlug}_${stamp}.sql`;
+    }
     async handleDailyBackup() {
         this.logger.log("Daily Backup Triggered: 01:00 AM");
         try {
@@ -77,7 +101,7 @@ let BackupService = BackupService_1 = class BackupService {
         if (!dbUrl)
             throw new Error("DATABASE_URL not set");
         this.logger.log("Running pg_dump for full system backup...");
-        await execPromise(`pg_dump -f "${systemSqlPath}" "${dbUrl}"`);
+        await execPromise(buildPgDumpCommand(systemSqlPath, dbUrl));
         this.logger.log(`System dump done: ${(fs.statSync(systemSqlPath).size / 1024).toFixed(1)} KB`);
         const companies = await this.prisma.company.findMany({
             where: { deletedAt: null },
@@ -147,6 +171,30 @@ let BackupService = BackupService_1 = class BackupService {
         const stats = fs.statSync(result.zipPath);
         return { name: path.basename(result.zipPath), size: stats.size, createdAt: new Date() };
     }
+    async createCompanyBackup(companyId) {
+        const company = await this.prisma.company.findUnique({
+            where: { id: companyId },
+            select: { id: true, name: true, slug: true, dbConnectionUrl: true },
+        });
+        if (!company)
+            throw new Error("Company not found");
+        const fileName = this.buildCompanyBackupFileName(company.name, company.slug);
+        const filePath = path.join(this.backupDir, fileName);
+        if (company.dbConnectionUrl) {
+            await execPromise(buildPgDumpCommand(filePath, company.dbConnectionUrl));
+        }
+        else {
+            const sql = await this.exportCompanyToSql(company.id, company.name);
+            fs.writeFileSync(filePath, sql, "utf8");
+        }
+        const stats = fs.statSync(filePath);
+        return { name: fileName, path: filePath, createdAt: stats.birthtime, size: stats.size };
+    }
+    async createCompanyBackupAndSend(companyId) {
+        const result = await this.createCompanyBackup(companyId);
+        await this.sendToTelegram(result.path, result.name, process.env.LOG_BOT_TOKEN, process.env.BACKUP_CHAT_ID || process.env.LOG_CHAT_ID);
+        return { name: result.name, size: result.size, createdAt: result.createdAt };
+    }
     async createBackup() {
         const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
         const fileName = `backup-${timestamp}.sql`;
@@ -154,7 +202,7 @@ let BackupService = BackupService_1 = class BackupService {
         const dbUrl = process.env.DATABASE_URL;
         if (!dbUrl)
             throw new Error("DATABASE_URL not found");
-        await execPromise(`pg_dump -f "${filePath}" "${dbUrl}"`);
+        await execPromise(buildPgDumpCommand(filePath, dbUrl));
         return { name: fileName, path: filePath, createdAt: new Date() };
     }
     async sendToTelegram(filePath, fileName, token, chatId) {
@@ -206,13 +254,21 @@ let BackupService = BackupService_1 = class BackupService {
         const safeName = `SUPPLIO_${slug.toUpperCase()}_${new Date().toISOString().split("T")[0]}`;
         const outputPath = path.join(this.backupDir, `${safeName}.sql`);
         if (company?.dbConnectionUrl) {
-            await execPromise(`pg_dump -f "${outputPath}" "${company.dbConnectionUrl}"`);
+            await execPromise(buildPgDumpCommand(outputPath, company.dbConnectionUrl));
         }
         else {
             const sql = await this.exportCompanyToSql(companyId, company?.name || slug);
             fs.writeFileSync(outputPath, sql, "utf8");
         }
         return outputPath;
+    }
+    resolveBackupPath(name) {
+        const safeName = path.basename(name);
+        const fullPath = path.join(this.backupDir, safeName);
+        if (!fs.existsSync(fullPath)) {
+            throw new Error("Backup file not found");
+        }
+        return fullPath;
     }
     async listBackups() {
         if (!fs.existsSync(this.backupDir))

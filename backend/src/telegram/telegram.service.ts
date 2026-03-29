@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit, Logger, BadRequestException } from "@nestjs/c
 import { Telegraf, Context, Telegram } from "telegraf";
 import { PrismaService } from "../prisma/prisma.service";
 import { TelegramLoggerService } from "./telegram-logger.service";
+import { PlanLimitsService } from "../common/services/plan-limits.service";
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
@@ -13,6 +14,7 @@ export class TelegramService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private loggerBot: TelegramLoggerService,
+    private planLimits: PlanLimitsService,
   ) {}
 
   async onModuleInit() {
@@ -820,6 +822,7 @@ export class TelegramService implements OnModuleInit {
     if (!data.token?.trim()) {
       throw new BadRequestException('Bot token is required.');
     }
+    await this.planLimits.checkBotLimit(companyId);
     // Validate token before saving
     const validation = await this.validateToken(data.token.trim());
     if (!validation.valid) {

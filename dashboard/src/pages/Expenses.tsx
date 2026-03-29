@@ -11,7 +11,7 @@ import {
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useScrollLock } from '../utils/useScrollLock';
@@ -181,7 +181,7 @@ export default function Expenses() {
         <div className="glass-card p-8">
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">{t.expenses?.totalExpenses || 'Total Expenses'}</p>
           <h3 className="text-3xl font-black text-rose-600 tracking-tight">{total.toLocaleString()}</h3>
-          <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">{t.common.uzs} • {expenses.length} {t.common?.records || 'records'}</p>
+          <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase">{t.common.uzs} • {expenses.length} items</p>
         </div>
 
         {/* Net profit after expenses */}

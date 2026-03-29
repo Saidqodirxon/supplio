@@ -37,4 +37,22 @@ export class AuthController {
   ) {
     return this.authService.updateProfile(req.user.id, body);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch("change-password")
+  async changePassword(
+    @Request() req: { user: { id: string } },
+    @Body() body: { currentPassword: string; newPassword: string }
+  ) {
+    return this.authService.changePassword(req.user.id, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post("request-password-reset")
+  async requestPasswordReset(
+    @Request() req: { user: { id: string } },
+    @Body() body?: { note?: string }
+  ) {
+    return this.authService.requestPasswordReset(req.user.id, body);
+  }
 }

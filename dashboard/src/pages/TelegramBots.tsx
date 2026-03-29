@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Bot, Plus, Trash2, Edit2, Check, X, Copy, ExternalLink, Loader2, RefreshCw, AlertCircle, CheckCircle, Circle, ChevronRight } from 'lucide-react';
 import api from '../services/api';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import clsx from 'clsx';
 import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
+import { getApiErrorMessage } from '../utils/apiError';
 
 const T = {
   en: {
@@ -222,6 +223,8 @@ export default function TelegramBots() {
   const [broadcasting, setBroadcasting] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState<{ sent: number; failed: number } | null>(null);
 
+  const errorText = (error: unknown, fallback: string) => getApiErrorMessage(error, fallback, language);
+
   const fetchBots = useCallback(async () => {
     setLoading(true);
     try {
@@ -233,7 +236,7 @@ export default function TelegramBots() {
       const slug = companyRes.data?.slug;
       if (slug) setStoreUrl(`${window.location.origin}/store/${slug}`);
     } catch {
-      toast.error(dt.common?.error ?? 'Error');
+      toast.error(errorText(undefined, dt.common?.error ?? 'Error'));
     } finally {
       setLoading(false);
     }
@@ -250,6 +253,7 @@ export default function TelegramBots() {
       setTokenStatus('valid');
     } catch {
       setTokenStatus('invalid');
+      toast.error(errorText(undefined, t.invalid));
     } finally {
       setValidating(false);
     }
@@ -270,7 +274,7 @@ export default function TelegramBots() {
       setTokenStatus('idle');
       fetchBots();
     } catch (e: any) {
-      toast.error(e?.response?.data?.message ?? 'Failed to add bot');
+      toast.error(errorText(e, 'Failed to add bot'));
     } finally {
       setCreating(false);
     }
@@ -283,8 +287,8 @@ export default function TelegramBots() {
       toast.success('Saved');
       setEditId(null);
       fetchBots();
-    } catch {
-      toast.error('Failed to save');
+    } catch (e) {
+      toast.error(errorText(e, 'Failed to save'));
     } finally {
       setSaving(false);
     }
@@ -296,8 +300,8 @@ export default function TelegramBots() {
       await api.delete(`/telegram/bots/${id}`);
       toast.success('Bot removed');
       setBots(prev => prev.filter(b => b.id !== id));
-    } catch {
-      toast.error('Failed to remove bot');
+    } catch (e) {
+      toast.error(errorText(e, 'Failed to remove bot'));
     } finally {
       setDeletingId(null);
     }
@@ -313,8 +317,8 @@ export default function TelegramBots() {
       setBroadcastResult(res.data);
       toast.success(`Yuborildi: ${res.data.sent} ta`);
       setBroadcastMsg('');
-    } catch {
-      toast.error('Xabar yuborishda xatolik');
+    } catch (e) {
+      toast.error(errorText(e, 'Xabar yuborishda xatolik'));
     } finally {
       setBroadcasting(false);
     }

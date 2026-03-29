@@ -2,13 +2,15 @@ import { OnModuleInit } from "@nestjs/common";
 import { Telegraf } from "telegraf";
 import { PrismaService } from "../prisma/prisma.service";
 import { TelegramLoggerService } from "./telegram-logger.service";
+import { PlanLimitsService } from "../common/services/plan-limits.service";
 export declare class TelegramService implements OnModuleInit {
     private prisma;
     private loggerBot;
+    private planLimits;
     private readonly logger;
     private bots;
     private carts;
-    constructor(prisma: PrismaService, loggerBot: TelegramLoggerService);
+    constructor(prisma: PrismaService, loggerBot: TelegramLoggerService, planLimits: PlanLimitsService);
     onModuleInit(): Promise<void>;
     initializeBots(): Promise<void>;
     private translations;

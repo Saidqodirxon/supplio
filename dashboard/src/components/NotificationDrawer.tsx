@@ -19,9 +19,20 @@ interface Notification {
 
 const locales: Record<string, Locale> = { uz, ru, en: enUS, tr };
 
-export default function NotificationDrawer({ isOpen, onClose, isDark }: { isOpen: boolean, onClose: () => void, isDark: boolean }) {
+export default function NotificationDrawer({
+  isOpen,
+  onClose,
+  isDark,
+  onUnreadCountChange,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  isDark: boolean;
+  onUnreadCountChange?: (count: number) => void;
+}) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const { language } = useAuthStore();
 
   const fetchNotifications = async () => {
@@ -29,7 +40,9 @@ export default function NotificationDrawer({ isOpen, onClose, isDark }: { isOpen
       setLoading(true);
       const res = await api.get('/notifications');
       const data = res.data;
-      setNotifications(Array.isArray(data) ? data : (data?.notifications || data?.items || []));
+      const items = Array.isArray(data) ? data : (data?.notifications || data?.items || []);
+      setNotifications(items);
+      onUnreadCountChange?.(items.filter((item: Notification) => !item.isRead).length);
     } catch (err) {
       console.error('Failed to fetch notifications', err);
     } finally {
@@ -44,9 +57,25 @@ export default function NotificationDrawer({ isOpen, onClose, isDark }: { isOpen
   const markAllRead = async () => {
     try {
       await api.patch('/notifications/read-all');
-      setNotifications((notifications || []).map(n => ({ ...n, isRead: true })));
+      setNotifications((current) => current.map((notification) => ({ ...notification, isRead: true })));
+      onUnreadCountChange?.(0);
     } catch (err) {
       console.error('Failed to mark all as read', err);
+    }
+  };
+
+  const markRead = async (id: string) => {
+    try {
+      await api.patch(`/notifications/${id}/read`);
+      setNotifications((current) => {
+        const next = current.map((notification) =>
+          notification.id === id ? { ...notification, isRead: true } : notification
+        );
+        onUnreadCountChange?.(next.filter((notification) => !notification.isRead).length);
+        return next;
+      });
+    } catch (err) {
+      console.error('Failed to mark notification as read', err);
     }
   };
 
@@ -104,8 +133,15 @@ export default function NotificationDrawer({ isOpen, onClose, isDark }: { isOpen
                 (notifications || []).map((notif) => (
                   <div
                     key={notif.id}
+                    onClick={() => {
+                      if (!notif.isRead) {
+                        void markRead(notif.id);
+                      }
+                      setSelectedNotification(notif);
+                    }}
                     className={clsx(
                       "p-4 rounded-2xl border transition-all relative group overflow-hidden",
+                      !notif.isRead && "cursor-pointer",
                       notif.isRead
                         ? (isDark ? "bg-white/5 border-white/5 opacity-60" : "bg-slate-50 border-slate-100")
                         : (isDark ? "bg-blue-500/10 border-blue-500/20" : "bg-blue-50 border-blue-100/50")
@@ -148,6 +184,44 @@ export default function NotificationDrawer({ isOpen, onClose, isDark }: { isOpen
                 </button>
               </div>
             )}
+
+            <AnimatePresence>
+              {selectedNotification && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+                    onClick={() => setSelectedNotification(null)}
+                  />
+                  <motion.div
+                    initial={{ y: 24, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 24, opacity: 0 }}
+                    className={clsx(
+                      "absolute inset-x-4 bottom-4 rounded-[2rem] border p-6 shadow-2xl",
+                      isDark ? "bg-slate-950 border-white/10" : "bg-white border-slate-200"
+                    )}
+                  >
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                      <div>
+                        <h3 className="text-base font-black leading-tight">{selectedNotification.title}</h3>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">
+                          {formatDistanceToNow(new Date(selectedNotification.createdAt), { addSuffix: true, locale: locales[language] || uz })}
+                        </p>
+                      </div>
+                      <button onClick={() => setSelectedNotification(null)} className="p-2 rounded-xl bg-slate-100 dark:bg-white/5">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <p className="text-sm leading-6 text-slate-600 dark:text-slate-300 whitespace-pre-wrap max-h-64 overflow-y-auto">
+                      {selectedNotification.message}
+                    </p>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </motion.div>
         </>
       )}

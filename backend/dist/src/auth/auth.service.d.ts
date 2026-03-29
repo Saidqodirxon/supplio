@@ -43,4 +43,19 @@ export declare class AuthService {
         language: string;
         customRoleId: string | null;
     }>;
+    changePassword(userId: string, data: {
+        currentPassword: string;
+        newPassword: string;
+    }): Promise<{
+        success: boolean;
+    }>;
+    requestPasswordReset(userId: string, data?: {
+        note?: string;
+    }): Promise<{
+        success: boolean;
+        alreadyRequested: boolean;
+    } | {
+        success: boolean;
+        alreadyRequested?: undefined;
+    }>;
 }

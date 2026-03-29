@@ -367,25 +367,26 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
         });
     }
     async seedDefaultTariffs() {
-        const plans = [
+        const seededPlans = [
             {
                 planKey: "FREE",
                 order: 0,
                 nameUz: "Bepul",
-                nameRu: "Бесплатно",
+                nameRu: "Ð‘ÐµÑÐ¿Ð»Ð°Ñ‚Ð½Ð¾",
                 nameEn: "Free",
-                nameTr: "Ücretsiz",
-                nameUzCyr: "Бепул",
+                nameTr: "Ãœcretsiz",
+                nameUzCyr: "Ð‘ÐµÐ¿ÑƒÐ»",
                 price: "0",
                 priceMonthly: "0",
                 priceYearly: "0",
-                featuresUz: ["1 filial", "5 foydalanuvchi", "50 dealer", "200 mahsulot"],
-                featuresRu: ["1 филиал", "5 пользователей", "50 дилеров", "200 товаров"],
-                featuresEn: ["1 branch", "5 users", "50 dealers", "200 products"],
-                featuresTr: ["1 şube", "5 kullanıcı", "50 bayi", "200 ürün"],
-                featuresUzCyr: ["1 филиал", "5 фойдаланувчи", "50 дилер", "200 маҳсулот"],
+                featuresUz: ["1 filial", "3 xodim", "50 dealer", "200 mahsulot", "Asosiy bildirishnomalar"],
+                featuresRu: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "3 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ°", "50 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "200 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "Ð‘Ð°Ð·Ð¾Ð²Ñ‹Ðµ ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ñ"],
+                featuresEn: ["1 branch", "3 staff", "50 dealers", "200 products", "Basic notifications"],
+                featuresTr: ["1 ÅŸube", "3 personel", "50 bayi", "200 Ã¼rÃ¼n", "Temel bildirimler"],
+                featuresUzCyr: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "3 Ñ…Ð¾Ð´Ð¸Ð¼", "50 Ð´Ð¸Ð»ÐµÑ€", "200 Ð¼Ð°Ò³ÑÑƒÐ»Ð¾Ñ‚", "ÐÑÐ¾ÑÐ¸Ð¹ Ð±Ð¸Ð»Ð´Ð¸Ñ€Ð¸ÑˆÐ½Ð¾Ð¼Ð°Ð»Ð°Ñ€"],
                 maxBranches: 1,
-                maxUsers: 5,
+                maxCustomBots: 0,
+                maxUsers: 3,
                 maxDealers: 50,
                 maxProducts: 200,
                 allowCustomBot: false,
@@ -399,23 +400,24 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             {
                 planKey: "START",
                 order: 1,
-                nameUz: "Boshlang'ich",
-                nameRu: "Стартовый",
+                nameUz: "Start",
+                nameRu: "Ð¡Ñ‚Ð°Ñ€Ñ‚",
                 nameEn: "Start",
-                nameTr: "Başlangıç",
-                nameUzCyr: "Бошланғич",
-                price: "99 000",
-                priceMonthly: "99000",
-                priceYearly: "990000",
-                featuresUz: ["3 filial", "15 foydalanuvchi", "500 dealer", "1000 mahsulot", "Analitika"],
-                featuresRu: ["3 филиала", "15 пользователей", "500 дилеров", "1000 товаров", "Аналитика"],
-                featuresEn: ["3 branches", "15 users", "500 dealers", "1000 products", "Analytics"],
-                featuresTr: ["3 şube", "15 kullanıcı", "500 bayi", "1000 ürün", "Analitik"],
-                featuresUzCyr: ["3 филиал", "15 фойдаланувчи", "500 дилер", "1000 маҳсулот", "Аналитика"],
-                maxBranches: 3,
-                maxUsers: 15,
-                maxDealers: 500,
-                maxProducts: 1000,
+                nameTr: "BaÅŸlangÄ±Ã§",
+                nameUzCyr: "Ð¡Ñ‚Ð°Ñ€Ñ‚",
+                price: "9 999 so'm",
+                priceMonthly: "9999",
+                priceYearly: "99990",
+                featuresUz: ["1 filial", "5 xodim", "150 dealer", "500 mahsulot", "Web do'kon", "Boshlang'ich analitika"],
+                featuresRu: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "5 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²", "150 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "500 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "Ð’ÐµÐ±-Ð¼Ð°Ð³Ð°Ð·Ð¸Ð½", "Ð¡Ñ‚Ð°Ñ€Ñ‚Ð¾Ð²Ð°Ñ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÐ°"],
+                featuresEn: ["1 branch", "5 staff", "150 dealers", "500 products", "Web store", "Starter analytics"],
+                featuresTr: ["1 ÅŸube", "5 personel", "150 bayi", "500 Ã¼rÃ¼n", "Web maÄŸaza", "BaÅŸlangÄ±Ã§ analitiÄŸi"],
+                featuresUzCyr: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "5 Ñ…Ð¾Ð´Ð¸Ð¼", "150 Ð´Ð¸Ð»ÐµÑ€", "500 Ð¼Ð°Ò³ÑÑƒÐ»Ð¾Ñ‚", "Ð’ÐµÐ± Ð´ÑžÐºÐ¾Ð½", "Ð‘Ð¾ÑˆÐ»Ð°Ð½Ò“Ð¸Ñ‡ Ñ‚Ð°Ò³Ð»Ð¸Ð»"],
+                maxBranches: 1,
+                maxCustomBots: 0,
+                maxUsers: 5,
+                maxDealers: 150,
+                maxProducts: 500,
                 allowCustomBot: false,
                 allowWebStore: true,
                 allowAnalytics: true,
@@ -427,24 +429,25 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             {
                 planKey: "PRO",
                 order: 2,
-                nameUz: "Professional",
-                nameRu: "Профессиональный",
-                nameEn: "Professional",
-                nameTr: "Profesyonel",
-                nameUzCyr: "Профессионал",
-                price: "249 000",
-                priceMonthly: "249000",
-                priceYearly: "2490000",
-                featuresUz: ["10 filial", "50 foydalanuvchi", "Cheksiz dealer", "Cheksiz mahsulot", "Bot", "Ommaviy import"],
-                featuresRu: ["10 филиалов", "50 пользователей", "Неограниченно дилеров", "Неограниченно товаров", "Бот", "Массовый импорт"],
-                featuresEn: ["10 branches", "50 users", "Unlimited dealers", "Unlimited products", "Bot", "Bulk import"],
-                featuresTr: ["10 şube", "50 kullanıcı", "Sınırsız bayi", "Sınırsız ürün", "Bot", "Toplu içe aktarma"],
-                featuresUzCyr: ["10 филиал", "50 фойдаланувчи", "Чексиз дилер", "Чексиз маҳсулот", "Бот", "Оммавий импорт"],
+                nameUz: "Pro",
+                nameRu: "ÐŸÑ€Ð¾",
+                nameEn: "Pro",
+                nameTr: "Pro",
+                nameUzCyr: "ÐŸÑ€Ð¾",
+                price: "29 999 so'm",
+                priceMonthly: "29999",
+                priceYearly: "299990",
+                featuresUz: ["3 filial", "15 xodim", "1 000 dealer", "3 000 mahsulot", "1 ta Telegram bot", "Ommaviy import", "To'liq analitika"],
+                featuresRu: ["3 Ñ„Ð¸Ð»Ð¸Ð°Ð»Ð°", "15 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²", "1 000 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "3 000 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "1 Telegram-Ð±Ð¾Ñ‚", "ÐœÐ°ÑÑÐ¾Ð²Ñ‹Ð¹ Ð¸Ð¼Ð¿Ð¾Ñ€Ñ‚", "ÐŸÐ¾Ð»Ð½Ð°Ñ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÐ°"],
+                featuresEn: ["3 branches", "15 staff", "1,000 dealers", "3,000 products", "1 Telegram bot", "Bulk import", "Full analytics"],
+                featuresTr: ["3 ÅŸube", "15 personel", "1.000 bayi", "3.000 Ã¼rÃ¼n", "1 Telegram botu", "Toplu iÃ§e aktarma", "Tam analitik"],
+                featuresUzCyr: ["3 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "15 Ñ…Ð¾Ð´Ð¸Ð¼", "1 000 Ð´Ð¸Ð»ÐµÑ€", "3 000 Ð¼Ð°Ò³ÑÑƒÐ»Ð¾Ñ‚", "1 Ñ‚Ð° Telegram Ð±Ð¾Ñ‚", "ÐžÐ¼Ð¼Ð°Ð²Ð¸Ð¹ Ð¸Ð¼Ð¿Ð¾Ñ€Ñ‚", "Ð¢ÑžÐ»Ð¸Ò› Ñ‚Ð°Ò³Ð»Ð¸Ð»"],
                 isPopular: true,
-                maxBranches: 10,
-                maxUsers: 50,
-                maxDealers: 99999,
-                maxProducts: 99999,
+                maxBranches: 3,
+                maxCustomBots: 1,
+                maxUsers: 15,
+                maxDealers: 1000,
+                maxProducts: 3000,
                 allowCustomBot: true,
                 allowWebStore: true,
                 allowAnalytics: true,
@@ -456,40 +459,38 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             {
                 planKey: "PREMIUM",
                 order: 3,
-                nameUz: "Enterprise",
-                nameRu: "Корпоративный",
-                nameEn: "Enterprise",
-                nameTr: "Kurumsal",
-                nameUzCyr: "Корпоратив",
-                price: "499 000",
-                priceMonthly: "499000",
-                priceYearly: "4990000",
-                featuresUz: ["Cheksiz filial", "Cheksiz foydalanuvchi", "Maxsus bot", "Ko'p kompaniya", "Ustuvor support"],
-                featuresRu: ["Неограниченно филиалов", "Неограниченно пользователей", "Кастомный бот", "Мультикомпания", "Приоритетная поддержка"],
-                featuresEn: ["Unlimited branches", "Unlimited users", "Custom bot", "Multi-company", "Priority support"],
-                featuresTr: ["Sınırsız şube", "Sınırsız kullanıcı", "Özel bot", "Çoklu şirket", "Öncelikli destek"],
-                featuresUzCyr: ["Чексиз филиал", "Чексиз фойдаланувчи", "Махсус бот", "Кўп компания", "Устувор support"],
-                maxBranches: 99999,
-                maxUsers: 99999,
-                maxDealers: 99999,
-                maxProducts: 99999,
+                nameUz: "Premium",
+                nameRu: "ÐŸÑ€ÐµÐ¼Ð¸ÑƒÐ¼",
+                nameEn: "Premium",
+                nameTr: "Premium",
+                nameUzCyr: "ÐŸÑ€ÐµÐ¼Ð¸ÑƒÐ¼",
+                price: "99 999 so'm",
+                priceMonthly: "99999",
+                priceYearly: "999990",
+                featuresUz: ["10 filial", "50 xodim", "5 000 dealer", "15 000 mahsulot", "3 ta Telegram bot", "Ustuvor support", "Kengaytirilgan nazorat"],
+                featuresRu: ["10 Ñ„Ð¸Ð»Ð¸Ð°Ð»Ð¾Ð²", "50 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²", "5 000 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "15 000 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "3 Telegram-Ð±Ð¾Ñ‚Ð°", "ÐŸÑ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð½Ð°Ñ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶ÐºÐ°", "Ð Ð°ÑÑˆÐ¸Ñ€ÐµÐ½Ð½Ñ‹Ð¹ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒ"],
+                featuresEn: ["10 branches", "50 staff", "5,000 dealers", "15,000 products", "3 Telegram bots", "Priority support", "Advanced controls"],
+                featuresTr: ["10 ÅŸube", "50 personel", "5.000 bayi", "15.000 Ã¼rÃ¼n", "3 Telegram botu", "Ã–ncelikli destek", "GeliÅŸmiÅŸ kontroller"],
+                featuresUzCyr: ["10 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "50 Ñ…Ð¾Ð´Ð¸Ð¼", "5 000 Ð´Ð¸Ð»ÐµÑ€", "15 000 Ð¼Ð°Ò³ÑÑƒÐ»Ð¾Ñ‚", "3 Ñ‚Ð° Telegram Ð±Ð¾Ñ‚", "Ð£ÑÑ‚ÑƒÐ²Ð¾Ñ€ ÑÑ€Ð´Ð°Ð¼", "ÐšÐµÐ½Ð³Ð°Ð¹Ñ‚Ð¸Ñ€Ð¸Ð»Ð³Ð°Ð½ Ð½Ð°Ð·Ð¾Ñ€Ð°Ñ‚"],
+                maxBranches: 10,
+                maxCustomBots: 3,
+                maxUsers: 50,
+                maxDealers: 5000,
+                maxProducts: 15000,
                 allowCustomBot: true,
                 allowWebStore: true,
                 allowAnalytics: true,
                 allowNotifications: true,
-                allowMultiCompany: true,
+                allowMultiCompany: false,
                 allowBulkImport: true,
                 trialDays: 30,
             },
         ];
-        for (const plan of plans) {
-            await this.prisma.tariffPlan.upsert({
-                where: { planKey: plan.planKey },
-                update: plan,
-                create: plan,
-            });
-        }
-        return { seeded: plans.length };
+        await this.prisma.tariffPlan.deleteMany({});
+        await this.prisma.tariffPlan.createMany({
+            data: seededPlans,
+        });
+        return { seeded: seededPlans.length };
     }
     async getAllFeatures() {
         return this.prisma.featureFlag.findMany({ orderBy: { featureKey: "asc" } });
@@ -555,9 +556,55 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
         });
     }
     async updateUpgradeRequest(id, data) {
-        return this.prisma.upgradeRequest.update({
-            where: { id },
-            data: { status: data.status, note: data.note },
+        return this.prisma.$transaction(async (tx) => {
+            const request = await tx.upgradeRequest.findUnique({
+                where: { id },
+            });
+            if (!request)
+                throw new Error("Upgrade request not found");
+            const updatedRequest = await tx.upgradeRequest.update({
+                where: { id },
+                data: { status: data.status, note: data.note },
+            });
+            if (data.status !== "APPROVED" || !request.requestedPlan) {
+                return updatedRequest;
+            }
+            const planKey = String(request.requestedPlan).toUpperCase();
+            const tariff = await tx.tariffPlan.findUnique({
+                where: { planKey },
+            });
+            if (!tariff)
+                throw new Error(`Tariff plan not found: ${planKey}`);
+            const company = await tx.company.findUnique({
+                where: { id: request.companyId },
+                select: { id: true, slug: true, dbConnectionUrl: true },
+            });
+            if (!company)
+                throw new Error("Company not found");
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + Math.max(tariff.trialDays || 30, 30));
+            const tenantDbUrl = !company.dbConnectionUrl && planKey !== "FREE"
+                ? process.env.DATABASE_URL?.replace("supplio", `supplio_tenant_${company.slug}`)
+                : company.dbConnectionUrl;
+            await tx.company.update({
+                where: { id: request.companyId },
+                data: {
+                    subscriptionPlan: planKey,
+                    subscriptionStatus: "ACTIVE",
+                    trialExpiresAt: expiresAt,
+                    ...(tenantDbUrl ? { dbConnectionUrl: tenantDbUrl } : {}),
+                },
+            });
+            await tx.subscription.create({
+                data: {
+                    companyId: request.companyId,
+                    plan: planKey,
+                    status: "ACTIVE",
+                    amount: Number(tariff.priceMonthly || 0),
+                    expiresAt,
+                },
+            });
+            return updatedRequest;
         });
     }
     async fixUsers() {
@@ -625,6 +672,41 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
                 user: { id: user.id, phone: user.phone, fullName: user.fullName },
             };
         });
+    }
+    async resetDistributorOwnerPassword(companyId, password) {
+        if (!password || password.length < 6) {
+            throw new common_1.NotFoundException("Password must be at least 6 characters");
+        }
+        const company = await this.prisma.company.findUnique({
+            where: { id: companyId },
+            select: {
+                id: true,
+                name: true,
+                users: {
+                    where: { roleType: "OWNER", deletedAt: null },
+                    select: { id: true, phone: true, fullName: true },
+                    take: 1,
+                },
+            },
+        });
+        const owner = company?.users[0];
+        if (!company || !owner) {
+            throw new common_1.NotFoundException("Distributor owner not found");
+        }
+        const passwordHash = await bcrypt.hash(password, 10);
+        await this.prisma.user.update({
+            where: { id: owner.id },
+            data: { passwordHash },
+        });
+        return {
+            success: true,
+            companyName: company.name,
+            owner: {
+                id: owner.id,
+                phone: owner.phone,
+                fullName: owner.fullName,
+            },
+        };
     }
     async notifyDistributors(payload) {
         const where = { deletedAt: null };

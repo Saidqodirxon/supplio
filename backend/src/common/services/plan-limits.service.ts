@@ -4,6 +4,7 @@ import { PrismaService } from "../../prisma/prisma.service";
 interface PlanLimits {
   maxBranches: number;
   maxUsers: number;
+  maxCustomBots: number;
   maxDealers: number;
   maxProducts: number;
   allowCustomBot: boolean;
@@ -14,9 +15,12 @@ interface PlanLimits {
   allowBulkImport: boolean;
 }
 
+interface TariffPlanLimitsRow extends PlanLimits {}
+
 const DEFAULT_LIMITS: PlanLimits = {
   maxBranches: 1,
   maxUsers: 5,
+  maxCustomBots: 0,
   maxDealers: 50,
   maxProducts: 200,
   allowCustomBot: false,
@@ -41,9 +45,24 @@ export class PlanLimitsService {
 
     if (!company) return DEFAULT_LIMITS;
 
-    const plan = await this.prisma.tariffPlan.findUnique({
-      where: { planKey: company.subscriptionPlan },
-    });
+    const rows = await this.prisma.$queryRaw<TariffPlanLimitsRow[]>`
+      SELECT
+        "maxBranches",
+        "maxUsers",
+        COALESCE("maxCustomBots", 0) AS "maxCustomBots",
+        "maxDealers",
+        "maxProducts",
+        "allowCustomBot",
+        "allowWebStore",
+        "allowAnalytics",
+        "allowNotifications",
+        "allowMultiCompany",
+        "allowBulkImport"
+      FROM "TariffPlan"
+      WHERE "planKey" = ${company.subscriptionPlan}
+      LIMIT 1
+    `;
+    const plan = rows[0] ?? null;
 
     if (!plan) {
       this.logger.warn(`No TariffPlan found for planKey=${company.subscriptionPlan}, using defaults`);
@@ -53,6 +72,7 @@ export class PlanLimitsService {
     return {
       maxBranches: plan.maxBranches,
       maxUsers: plan.maxUsers,
+      maxCustomBots: plan.maxCustomBots,
       maxDealers: plan.maxDealers,
       maxProducts: plan.maxProducts,
       allowCustomBot: plan.allowCustomBot,
@@ -64,9 +84,33 @@ export class PlanLimitsService {
     };
   }
 
-  private limitError(resource: string, max: number): never {
+  private getResourceLabel(resource: string): string {
+    const labels: Record<string, string> = {
+      branches: "Branch",
+      users: "Staff",
+      dealers: "Dealer",
+      products: "Product",
+      customBot: "Telegram bot",
+      allowAnalytics: "Analytics",
+      allowWebStore: "Web store",
+      allowNotifications: "Notifications",
+      allowMultiCompany: "Multi-company",
+      allowBulkImport: "Bulk import",
+    };
+    return labels[resource] || resource;
+  }
+
+  private limitError(resource: string, max: number, type: "limit" | "feature" = "limit"): never {
+    const label = this.getResourceLabel(resource);
+    const message =
+      type === "feature"
+        ? `${label} is not available on your current plan. Please upgrade your tariff.`
+        : max > 0
+          ? `${label} limit reached. Your current plan allows up to ${max}. Please upgrade your tariff.`
+          : `${label} is not available on your current plan. Please upgrade your tariff.`;
+
     throw new HttpException(
-      { message: `${resource} limit reached (${max}). Upgrade your plan.`, limitReached: true, resource },
+      { message, limitReached: true, resource, max, code: "PLAN_LIMIT_REACHED" },
       402,
     );
   }
@@ -97,11 +141,23 @@ export class PlanLimitsService {
 
   async checkBotAllowed(companyId: string) {
     const limits = await this.getLimitsForCompany(companyId);
-    if (!limits.allowCustomBot) this.limitError('customBot', 0);
+    if (!limits.allowCustomBot) this.limitError('customBot', 0, 'feature');
+  }
+
+  async checkBotLimit(companyId: string) {
+    const limits = await this.getLimitsForCompany(companyId);
+    if (!limits.allowCustomBot || limits.maxCustomBots <= 0) {
+      this.limitError('customBot', limits.maxCustomBots, 'feature');
+    }
+
+    const count = await this.prisma.customBot.count({
+      where: { companyId, deletedAt: null },
+    });
+    if (count >= limits.maxCustomBots) this.limitError('customBot', limits.maxCustomBots);
   }
 
   async checkFeatureAllowed(companyId: string, feature: keyof PlanLimits) {
     const limits = await this.getLimitsForCompany(companyId);
-    if (!limits[feature]) this.limitError(feature, 0);
+    if (!limits[feature]) this.limitError(feature, 0, 'feature');
   }
 }

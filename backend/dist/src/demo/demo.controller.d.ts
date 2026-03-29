@@ -47,6 +47,7 @@ export declare class DemoController {
             nameUz: string;
             nameRu: string;
             nameTr: string;
+            price: string;
             priceMonthly: string;
             priceYearly: string;
             featuresEn: string[];
@@ -60,6 +61,7 @@ export declare class DemoController {
             maxUsers: number;
             maxDealers: number;
             maxProducts: number;
+            maxCustomBots: number;
             allowAnalytics: boolean;
             allowCustomBot: boolean;
             allowWebStore: boolean;
@@ -148,6 +150,7 @@ export declare class DemoController {
         nameUz: string;
         nameRu: string;
         nameTr: string;
+        price: string;
         priceMonthly: string;
         priceYearly: string;
         featuresEn: string[];
@@ -161,6 +164,7 @@ export declare class DemoController {
         maxUsers: number;
         maxDealers: number;
         maxProducts: number;
+        maxCustomBots: number;
         allowAnalytics: boolean;
         allowCustomBot: boolean;
         allowWebStore: boolean;

@@ -11,7 +11,7 @@ import { CardSkeleton } from '../components/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPhoneNumber } from '../utils/formatters';
 import PhoneInput from '../components/PhoneInput';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { useScrollLock } from '../utils/useScrollLock';
 import UpgradeModal from '../components/UpgradeModal';
 import { usePlanLimits } from '../hooks/usePlanLimits';

@@ -33,6 +33,7 @@ import {
   TrendingUp,
   Clock,
   BadgeCheck,
+  Download,
 } from "lucide-react";
 import clsx from "clsx";
 import { useScrollLock } from '../utils/useScrollLock';
@@ -41,7 +42,7 @@ import { dashboardTranslations } from '../i18n/translations';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../services/api';
 import { useSearchParams } from 'react-router-dom';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { format } from 'date-fns';
 import { uz, ru, enUS, tr } from 'date-fns/locale';
 import type { Locale } from 'date-fns';
@@ -116,6 +117,7 @@ interface TariffPlan {
   featuresUzCyr?: string[];
   maxBranches: number;
   maxUsers: number;
+  maxCustomBots: number;
   maxDealers: number;
   maxProducts: number;
   allowCustomBot: boolean;
@@ -246,7 +248,10 @@ export default function SuperAdmin() {
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
   const [isTariffModalOpen, setIsTariffModalOpen] = useState(false);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<NewsItem | Lead | TariffPlan | null>(null);
+  const [resetPasswordTarget, setResetPasswordTarget] = useState<{ id: string; name: string } | null>(null);
+  const [resetPasswordValue, setResetPasswordValue] = useState('');
 
   const [newsLangTab, setNewsLangTab] = useState<'Uz' | 'En' | 'Ru' | 'Tr' | 'UzCyr'>('Uz');
 
@@ -262,7 +267,7 @@ export default function SuperAdmin() {
     price: '', priceMonthly: '0', priceYearly: '0',
     featuresUz: [], featuresRu: [], featuresEn: [], featuresTr: [], featuresUzCyr: [],
     isActive: true, isPopular: false, order: 0,
-    maxBranches: 1, maxUsers: 5, maxDealers: 100, maxProducts: 500, trialDays: 14,
+    maxBranches: 1, maxUsers: 5, maxCustomBots: 0, maxDealers: 100, maxProducts: 500, trialDays: 14,
     allowCustomBot: false, allowWebStore: true, allowAnalytics: false,
     allowNotifications: true, allowMultiCompany: false, allowBulkImport: false,
   });
@@ -278,6 +283,29 @@ export default function SuperAdmin() {
   const [distForm, setDistForm] = useState<DistributorForm>(emptyDistForm);
   const [distSaving, setDistSaving] = useState(false);
 
+  const refreshBackups = useCallback(async () => {
+    const res = await api.get('/super/backups');
+    setBackups(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
+  }, []);
+
+  const downloadBackup = useCallback(async (name: string) => {
+    const res = await api.get('/super/backups/download', {
+      params: { name },
+      responseType: 'blob',
+    });
+    const contentDisposition = res.headers['content-disposition'] as string | undefined;
+    const matchedName = contentDisposition?.match(/filename="?([^"]+)"?$/i)?.[1];
+    const fileName = matchedName ? decodeURIComponent(matchedName) : name;
+    const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(blobUrl);
+  }, []);
+
   // Notify distributors tab
   const [notifyForm, setNotifyForm] = useState({ title: '', message: '', type: 'INFO' });
   const [notifyAll, setNotifyAll] = useState(true);
@@ -285,7 +313,7 @@ export default function SuperAdmin() {
   const [notifySending, setNotifySending] = useState(false);
 
   // Scroll lock — must be after all modal state declarations
-  useScrollLock(isNewsModalOpen || isTariffModalOpen || isLeadModalOpen || isDistModalOpen || isConfirmModalOpen);
+  useScrollLock(isNewsModalOpen || isTariffModalOpen || isLeadModalOpen || isDistModalOpen || isConfirmModalOpen || isResetPasswordModalOpen);
 
   const fetchData = useCallback(async () => {
     try {
@@ -300,8 +328,7 @@ export default function SuperAdmin() {
         const res = await api.get('/super/settings');
         setSettings(res.data);
       } else if (activeTab === 'backups') {
-        const res = await api.get('/super/backups');
-        setBackups(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
+        await refreshBackups();
       } else if (activeTab === 'activities') {
         const res = await api.get('/super/audit-logs');
         setActivities(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
@@ -327,7 +354,7 @@ export default function SuperAdmin() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab]);
+  }, [activeTab, refreshBackups]);
 
   const { user } = useAuthStore();
 
@@ -809,20 +836,20 @@ export default function SuperAdmin() {
           {activeTab === 'backups' && (
             <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div onClick={async () => { try { await api.post('/super/backups/trigger'); toast.success(t.superadmin.backupStarted); } catch { toast.error(t.common.error); } }} className="bg-white dark:bg-white/5 p-10 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-white/10 hover:border-blue-500 transition-all group flex flex-col items-center justify-center text-center cursor-pointer gap-4">
+              <button type="button" onClick={async () => { try { await api.post('/super/backups/trigger'); await refreshBackups(); toast.success(t.superadmin.backupStarted); } catch { toast.error(t.common.error); } }} className="bg-white dark:bg-white/5 p-10 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-white/10 hover:border-blue-500 transition-all group flex flex-col items-center justify-center text-center cursor-pointer gap-4">
                 <div className="w-16 h-16 rounded-3xl bg-blue-600/10 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Plus className="w-8 h-8" />
                 </div>
                 <h3 className="text-sm font-black uppercase tracking-widest">{t.superadmin.newBackupBtn}</h3>
                 <p className="text-xs text-slate-500 font-bold max-w-[200px]">{t.superadmin.backupsDesc}</p>
-              </div>
-              <div onClick={async () => { try { await api.post('/super/backups/send'); toast.success(t.superadmin.backupSent); } catch { toast.error(t.common.error); } }} className="bg-white dark:bg-white/5 p-10 rounded-[3rem] border-2 border-dashed border-emerald-200 dark:border-emerald-900/30 hover:border-emerald-500 transition-all group flex flex-col items-center justify-center text-center cursor-pointer gap-4">
+              </button>
+              <button type="button" onClick={async () => { try { await api.post('/super/backups/send'); await refreshBackups(); toast.success(t.superadmin.backupSent); } catch { toast.error(t.common.error); } }} className="bg-white dark:bg-white/5 p-10 rounded-[3rem] border-2 border-dashed border-emerald-200 dark:border-emerald-900/30 hover:border-emerald-500 transition-all group flex flex-col items-center justify-center text-center cursor-pointer gap-4">
                 <div className="w-16 h-16 rounded-3xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
                   <Send className="w-8 h-8" />
                 </div>
                 <h3 className="text-sm font-black uppercase tracking-widest">{t.superadmin.sendBackupNow}</h3>
                 <p className="text-xs text-slate-500 font-bold max-w-[200px]">Zip → Telegram bot</p>
-              </div>
+              </button>
               {backups.map((b) => (
                 <div key={b.name} className="bg-white dark:bg-white/5 p-8 rounded-[3rem] border border-slate-100 dark:border-white/5 flex items-center justify-between group hover:shadow-2xl transition-all">
                   <div className="flex items-center gap-6">
@@ -834,8 +861,12 @@ export default function SuperAdmin() {
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{(b.size / 1024 / 1024).toFixed(2)} MB</p>
                     </div>
                   </div>
-                  <button className="p-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl shadow-xl active:scale-95 transition-all">
-                    <RotateCcw className="w-4 h-4" />
+                  <button
+                    type="button"
+                    onClick={() => downloadBackup(b.name)}
+                    className="p-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl shadow-xl active:scale-95 transition-all"
+                  >
+                    <Download className="w-4 h-4" />
                   </button>
                 </div>
               ))}
@@ -854,7 +885,7 @@ export default function SuperAdmin() {
                       price: '', priceMonthly: '0', priceYearly: '0',
                       featuresUz: [], featuresRu: [], featuresEn: [], featuresTr: [], featuresUzCyr: [],
                       isActive: true, isPopular: false, order: 0,
-                      maxBranches: 1, maxUsers: 5, maxDealers: 100, maxProducts: 500, trialDays: 14,
+                      maxBranches: 1, maxUsers: 5, maxCustomBots: 0, maxDealers: 100, maxProducts: 500, trialDays: 14,
                       allowCustomBot: false, allowWebStore: true, allowAnalytics: false,
                       allowNotifications: true, allowMultiCompany: false, allowBulkImport: false,
                     });
@@ -889,6 +920,7 @@ export default function SuperAdmin() {
                       <span>{t.superadmin.maxUsers}: <b className="text-slate-700 dark:text-slate-300">{plan.maxUsers}</b></span>
                       <span>{t.superadmin.maxDealers}: <b className="text-slate-700 dark:text-slate-300">{plan.maxDealers}</b></span>
                       <span>{t.superadmin.maxProducts}: <b className="text-slate-700 dark:text-slate-300">{plan.maxProducts}</b></span>
+                      <span>Telegram Bots: <b className="text-slate-700 dark:text-slate-300">{plan.maxCustomBots}</b></span>
                       <span>{t.superadmin.trialDays2}: <b className="text-slate-700 dark:text-slate-300">{plan.trialDays}d</b></span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
@@ -1224,6 +1256,47 @@ export default function SuperAdmin() {
                           </div>
                         </div>
                         <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={async () => {
+                              try {
+                                const res = await api.post(`/super/backups/company/${dist.id}/trigger`);
+                                await refreshBackups();
+                                if (res.data?.name) {
+                                  await downloadBackup(res.data.name);
+                                }
+                                toast.success(`${dist.name}: ${res.data?.name || 'backup tayyorlandi'}`);
+                              } catch {
+                                toast.error(t.common.error);
+                              }
+                            }}
+                            className="px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-600 hover:text-white transition-all"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              try {
+                                await api.post(`/super/backups/company/${dist.id}/send`);
+                                await refreshBackups();
+                                toast.success(`${dist.name}: ${t.superadmin.backupSent}`);
+                              } catch {
+                                toast.error(t.common.error);
+                              }
+                            }}
+                            className="px-4 py-2 bg-amber-50 text-amber-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-white transition-all"
+                          >
+                            <Send className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setResetPasswordTarget({ id: dist.id, name: dist.name });
+                              setResetPasswordValue('');
+                              setIsResetPasswordModalOpen(true);
+                            }}
+                            className="px-4 py-2 bg-violet-50 text-violet-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-violet-600 hover:text-white transition-all"
+                          >
+                            <Lock className="w-3.5 h-3.5" />
+                          </button>
                           <button
                             onClick={() => { setNotifyAll(false); setSelectedDistIds([dist.id]); setActiveTab('notify'); setSearchParams({ tab: 'notify' }); }}
                             className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all"
@@ -1843,6 +1916,7 @@ export default function SuperAdmin() {
                     {[
                       { key: 'maxBranches', label: t.superadmin.maxBranches },
                       { key: 'maxUsers', label: t.superadmin.maxUsers },
+                      { key: 'maxCustomBots', label: 'Telegram Bots' },
                       { key: 'maxDealers', label: t.superadmin.maxDealers },
                       { key: 'maxProducts', label: t.superadmin.maxProducts },
                     ].map(({ key, label }) => (
@@ -1944,6 +2018,72 @@ export default function SuperAdmin() {
                   className="px-12 py-4 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20"
                 >
                   {t.common.save}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isResetPasswordModalOpen && resetPasswordTarget && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-6">
+            <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} className="bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] p-10 shadow-4xl space-y-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-2xl font-black tracking-tight">Distributor parolini yangilash</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 font-semibold mt-1">
+                    {resetPasswordTarget.name}
+                  </p>
+                </div>
+                <button onClick={() => setIsResetPasswordModalOpen(false)} className="p-3 bg-slate-100 dark:bg-white/10 rounded-2xl">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2">
+                  Yangi owner paroli
+                </label>
+                <input
+                  type="password"
+                  value={resetPasswordValue}
+                  onChange={(e) => setResetPasswordValue(e.target.value)}
+                  className="w-full px-6 py-4 rounded-2xl border-2 border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 font-bold"
+                  placeholder="Kamida 6 ta belgi"
+                />
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold px-1">
+                  Bu amal distributor kompaniyasining `OWNER` user parolini yangilaydi.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-4">
+                <button onClick={() => setIsResetPasswordModalOpen(false)} className="px-6 py-4 bg-slate-100 dark:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-xs">
+                  {t.common.cancel}
+                </button>
+                <button
+                  onClick={async () => {
+                    if (resetPasswordValue.length < 6) {
+                      toast.error('Parol kamida 6 ta belgi bo‘lishi kerak');
+                      return;
+                    }
+                    try {
+                      setLoading(true);
+                      await api.patch(`/super/distributors/${resetPasswordTarget.id}/owner-password`, {
+                        password: resetPasswordValue,
+                      });
+                      toast.success(`${resetPasswordTarget.name}: parol yangilandi`);
+                      setResetPasswordValue('');
+                      setIsResetPasswordModalOpen(false);
+                    } catch {
+                      toast.error(t.common.error);
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  className="px-8 py-4 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-blue-600/20"
+                >
+                  Parolni yangilash
                 </button>
               </div>
             </motion.div>

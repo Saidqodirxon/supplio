@@ -50,4 +50,27 @@ export declare class AuthController {
         language: string;
         customRoleId: string | null;
     }>;
+    changePassword(req: {
+        user: {
+            id: string;
+        };
+    }, body: {
+        currentPassword: string;
+        newPassword: string;
+    }): Promise<{
+        success: boolean;
+    }>;
+    requestPasswordReset(req: {
+        user: {
+            id: string;
+        };
+    }, body?: {
+        note?: string;
+    }): Promise<{
+        success: boolean;
+        alreadyRequested: boolean;
+    } | {
+        success: boolean;
+        alreadyRequested?: undefined;
+    }>;
 }

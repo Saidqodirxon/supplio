@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 
-const BACKEND = process.env.BACKEND_URL || 'http://localhost:5000';
+function normalizeBackendBaseUrl(rawUrl?: string) {
+  const fallback = 'http://localhost:5000';
+  const value = (rawUrl || fallback).trim().replace(/\/+$/, '');
+  return value.endsWith('/api') ? value.slice(0, -4) : value;
+}
+
+const BACKEND = normalizeBackendBaseUrl(process.env.BACKEND_URL);
 
 export async function GET() {
   try {

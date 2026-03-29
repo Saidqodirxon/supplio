@@ -8,7 +8,7 @@ import api from '../services/api';
 import type { Product, ProductsResponse, ProductStats, Category, Unit } from '../types';
 import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useScrollLock } from '../utils/useScrollLock';

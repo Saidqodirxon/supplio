@@ -12,9 +12,9 @@ export declare class AuditLogService {
         id: string;
         createdAt: Date;
         ip: string | null;
+        resource: string | null;
         action: string;
         userId: string | null;
-        resource: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
     }>;
     getLogs(filters: {
@@ -43,9 +43,9 @@ export declare class AuditLogService {
         id: string;
         createdAt: Date;
         ip: string | null;
+        resource: string | null;
         action: string;
         userId: string | null;
-        resource: string | null;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
     })[]>;
 }

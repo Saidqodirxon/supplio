@@ -21,7 +21,7 @@ import { dashboardTranslations } from '../i18n/translations';
 import api from '../services/api';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import UpgradeModal from '../components/UpgradeModal';
 import { usePlanLimits } from '../hooks/usePlanLimits';
 
@@ -171,6 +171,135 @@ function UserProfileForm() {
   );
 }
 
+function UserSecurityForm() {
+  const { user, language } = useAuthStore();
+  const t = dashboardTranslations[language];
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [requestingReset, setRequestingReset] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!passwordForm.currentPassword || !passwordForm.newPassword) return toast.error(t.common.error);
+    if (passwordForm.newPassword.length < 6) return toast.error('Yangi parol kamida 6 ta belgi bo‘lishi kerak');
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) return toast.error('Yangi parollar mos emas');
+
+    try {
+      setSavingPassword(true);
+      await api.patch('/auth/change-password', {
+        currentPassword: passwordForm.currentPassword,
+        newPassword: passwordForm.newPassword,
+      });
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      toast.success('Parol yangilandi');
+    } catch {
+      toast.error('Joriy parol noto‘g‘ri yoki amal bajarilmadi');
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  const handleRequestReset = async () => {
+    try {
+      setRequestingReset(true);
+      await api.post('/auth/request-password-reset');
+      toast.success('SuperAdmin ga parol reset so‘rovi yuborildi');
+    } catch {
+      toast.error(t.common.error);
+    } finally {
+      setRequestingReset(false);
+    }
+  };
+
+  return (
+    <div className="glass-card p-8 space-y-8 border border-slate-100 dark:border-white/5">
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-indigo-600/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+          <ShieldCheck className="w-4.5 h-4.5" />
+        </div>
+        <h2 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+          {t.settings.profile}
+        </h2>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+            {t.superadmin.fullNameLabel}
+          </label>
+          <div className="input-field w-full opacity-80 cursor-not-allowed">
+            {user?.fullName || '-'}
+          </div>
+        </div>
+        <div className="space-y-2">
+          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+            {t.settings.phone}
+          </label>
+          <div className="input-field w-full opacity-80 cursor-not-allowed">
+            {user?.phone || '-'}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-amber-100 dark:border-amber-900/30 bg-amber-50/70 dark:bg-amber-900/10 px-5 py-4">
+        <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 leading-relaxed">
+          Telefon raqami va asosiy profil ma’lumotlari faqat SuperAdmin tomonidan boshqariladi. Siz bu yerda faqat parolni yangilashingiz mumkin.
+        </p>
+      </div>
+
+      <form onSubmit={handlePasswordChange} className="space-y-5 rounded-3xl border border-slate-100 dark:border-white/5 p-6 bg-slate-50/70 dark:bg-white/[0.03]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input
+            type="password"
+            className="input-field w-full"
+            placeholder="Joriy parol"
+            value={passwordForm.currentPassword}
+            onChange={e => setPasswordForm(prev => ({ ...prev, currentPassword: e.target.value }))}
+          />
+          <input
+            type="password"
+            className="input-field w-full"
+            placeholder="Yangi parol"
+            value={passwordForm.newPassword}
+            onChange={e => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
+          />
+          <input
+            type="password"
+            className="input-field w-full"
+            placeholder="Yangi parolni takrorlang"
+            value={passwordForm.confirmPassword}
+            onChange={e => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
+          />
+        </div>
+
+        <div className="flex flex-col sm:flex-row gap-3 justify-between">
+          <button
+            type="button"
+            onClick={handleRequestReset}
+            disabled={requestingReset}
+            className="px-6 py-3 rounded-2xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
+          >
+            {requestingReset ? t.common.loading : 'SuperAdmin dan reset so‘rash'}
+          </button>
+          <button
+            type="submit"
+            disabled={savingPassword}
+            className="px-8 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all disabled:opacity-50"
+          >
+            {savingPassword ? t.common.loading : 'Parolni saqlash'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+void UserProfileForm;
+
 export default function Settings() {
   const { user, language } = useAuthStore();
   const t = dashboardTranslations[language];
@@ -249,7 +378,7 @@ export default function Settings() {
         {/* Left col */}
         <div className="lg:col-span-2 space-y-8">
           {/* Profile — everyone sees this */}
-          <UserProfileForm />
+          <UserSecurityForm />
 
           {/* Company Settings — only OWNER and SUPER_ADMIN */}
           {isOwnerOrAdmin && company && (
@@ -325,7 +454,7 @@ export default function Settings() {
                 {/* Cashback — only OWNER/SUPER_ADMIN */}
                 <div className="sm:col-span-2 space-y-3 p-5 rounded-2xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30">
                   <label className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Zap className="w-3 h-3" /> {t.settings.cashback ?? 'Cashback (%)'}
+                    <Zap className="w-3 h-3" /> {(t.settings as Record<string, string>).cashback || 'Cashback (%)'}
                   </label>
                   <div className="flex items-center gap-3">
                     <input

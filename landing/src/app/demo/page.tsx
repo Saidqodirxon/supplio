@@ -11,7 +11,13 @@ import {
 import { format } from "date-fns";
 import LeadModal from "@/components/LeadModal";
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+function normalizeBackendBaseUrl(rawUrl?: string) {
+  const fallback = 'http://localhost:5000';
+  const value = (rawUrl || fallback).trim().replace(/\/+$/, '');
+  return value.endsWith('/api') ? value.slice(0, -4) : value;
+}
+
+const BACKEND = normalizeBackendBaseUrl(process.env.NEXT_PUBLIC_BACKEND_URL);
 
 interface DemoStats {
   totalCompanies: number;

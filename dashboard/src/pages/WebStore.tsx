@@ -7,7 +7,7 @@ import {
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { motion } from 'framer-motion';
 import clsx from 'clsx';
 

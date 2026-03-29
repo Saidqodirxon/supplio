@@ -54,6 +54,16 @@ type SafePlan = {
   [key: string]: unknown;
 };
 
+function getBotFeature(limit: number, lang: Language): string {
+  if (limit <= 0) {
+    return lang === 'uz' ? 'Telegram bot yo\'q' : lang === 'ru' ? 'Bez Telegram bota' : lang === 'tr' ? 'Telegram bot yok' : 'No Telegram bot';
+  }
+  if (limit >= 99999) {
+    return lang === 'uz' ? 'Cheksiz Telegram bot' : lang === 'ru' ? 'Bezlimit Telegram botov' : lang === 'tr' ? 'Sinirsiz Telegram bot' : 'Unlimited Telegram bots';
+  }
+  return lang === 'uz' ? `${limit} ta Telegram bot` : `${limit} Telegram bot`;
+}
+
 type SafeNews = {
   id?: number | string;
   title?: string;
@@ -64,6 +74,12 @@ type SafeNews = {
   image?: string;
   [key: string]: unknown;
 };
+
+function normalizeBackendBaseUrl(rawUrl?: string) {
+  const fallback = 'http://localhost:5000';
+  const value = (rawUrl || fallback).trim().replace(/\/+$/, '');
+  return value.endsWith('/api') ? value.slice(0, -4) : value;
+}
 
 interface DynamicSettings {
   newsEnabled: boolean;
@@ -99,7 +115,7 @@ export default function LandingPage() {
   const [testimonials, setTestimonials] = useState<Array<{ id: string; name: string; company?: string; roleTitle?: string; contentUz: string; contentRu: string; contentEn: string; contentTr: string; rating: number }>>([]);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
 
-  const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000';
+  const BACKEND = normalizeBackendBaseUrl(process.env.NEXT_PUBLIC_BACKEND_URL);
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -488,6 +504,8 @@ export default function LandingPage() {
               const isPopular = plan.isPopular;
               const price = (plan.priceMonthly as string) || plan.price || '0';
               const trialDays = (plan.trialDays as number) || settings?.defaultTrialDays || 14;
+              const maxCustomBots = Number(plan.maxCustomBots || 0);
+              const displayFeatures = dynamicTariffs.length > 0 ? [...(features || []), getBotFeature(maxCustomBots, lang)] : (features || []);
 
               return (
                 <motion.div {...fadeInUp} transition={{ delay: i * 0.1 }} className={`relative flex flex-col p-7 rounded-3xl border ${isScrollable ? 'min-w-75 w-75' : ''} ${isPopular ? 'bg-white border-blue-600/20 shadow-2xl ring-2 ring-blue-600/30 z-10' : 'bg-slate-800/40 border-slate-700/50 backdrop-blur-sm'}`}>
@@ -511,7 +529,7 @@ export default function LandingPage() {
                   </div>
 
                   <div className="space-y-4 mb-10 flex-1 text-left">
-                    {(features || []).map((f: string, fi: number) => (
+                    {displayFeatures.map((f: string, fi: number) => (
                       <div key={fi} className="flex items-start gap-3">
                         <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isPopular ? 'bg-blue-600 text-white' : 'bg-white/10 text-white'}`}>
                           <Check className="w-3 h-3 stroke-[3]" />

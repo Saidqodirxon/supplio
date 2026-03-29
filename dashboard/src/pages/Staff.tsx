@@ -3,7 +3,7 @@ import { Users, Plus, X, UserX, Shield, AlertTriangle, Pencil, Trash2, ChevronDo
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import clsx from 'clsx';
 import { useScrollLock } from '../utils/useScrollLock';
@@ -153,6 +153,8 @@ export default function Staff() {
   const [deactivateId, setDeactivateId] = useState<string | null>(null);
   const [editRole, setEditRole] = useState<CustomRole | null>(null);
   const [showRolesExpanded, setShowRolesExpanded] = useState(false);
+  const [hasInitializedRolesPanel, setHasInitializedRolesPanel] = useState(false);
+  const [deleteRoleId, setDeleteRoleId] = useState<string | null>(null);
 
   const [saving, setSaving] = useState(false);
   const [staffForm, setStaffForm] = useState({
@@ -160,12 +162,12 @@ export default function Staff() {
   });
   const [roleForm, setRoleForm] = useState({ name: '', permissions: { ...DEFAULT_PERMISSIONS } });
 
-  const { language, role } = useAuthStore();
+  const { language, user } = useAuthStore();
   const t = dashboardTranslations[language];
-  const canManage = role === 'OWNER' || role === 'MANAGER' || role === 'SUPER_ADMIN';
+  const canManage = user?.roleType === 'OWNER' || user?.roleType === 'MANAGER' || user?.roleType === 'SUPER_ADMIN';
   const { showUpgrade, setShowUpgrade, upgradeReason, handleApiError } = usePlanLimits();
 
-  useScrollLock(showAddStaff || showRoleManager || !!deactivateId || !!editRole);
+  useScrollLock(showAddStaff || showRoleManager || !!deactivateId || !!deleteRoleId);
 
   // ── Data ──────────────────────────────────────────────────────────────────
 
@@ -188,6 +190,13 @@ export default function Staff() {
   };
 
   useEffect(() => { fetchAll(); }, []);
+
+  useEffect(() => {
+    if (!hasInitializedRolesPanel && customRoles.length > 0) {
+      setShowRolesExpanded(true);
+      setHasInitializedRolesPanel(true);
+    }
+  }, [customRoles.length, hasInitializedRolesPanel]);
 
   // ── Staff form ────────────────────────────────────────────────────────────
 
@@ -235,10 +244,17 @@ export default function Staff() {
     setShowRoleManager(true);
   };
 
+  const closeRoleManager = () => {
+    setShowRoleManager(false);
+    setEditRole(null);
+    setRoleForm({ name: '', permissions: { ...DEFAULT_PERMISSIONS } });
+  };
+
   const openEditRole = (r: CustomRole) => {
     setRoleForm({ name: r.name, permissions: { ...DEFAULT_PERMISSIONS, ...(r.permissions as any) } });
     setEditRole(r);
     setShowRoleManager(true);
+    setShowRolesExpanded(true);
   };
 
   const handleSaveRole = async (e: React.FormEvent) => {
@@ -252,7 +268,8 @@ export default function Staff() {
         await api.post('/company/roles', roleForm);
       }
       toast.success(t.common.save);
-      setShowRoleManager(false);
+      closeRoleManager();
+      setShowRolesExpanded(true);
       fetchAll();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || t.common.error);
@@ -265,6 +282,7 @@ export default function Staff() {
     try {
       await api.delete(`/company/roles/${roleId}`);
       toast.success(t.common.delete);
+      setDeleteRoleId(null);
       fetchAll();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || t.common.error);
@@ -283,6 +301,7 @@ export default function Staff() {
     { value: '', label: `(${t.expenses?.branch || 'No branch'})` },
     ...branches.map(b => ({ value: b.id, label: b.name })),
   ];
+  const selectedCustomRole = customRoles.find(r => r.id === staffForm.customRoleId);
 
   const visibleStaff = staff.filter(s => s.roleType !== 'OWNER' && s.roleType !== 'SUPER_ADMIN');
 
@@ -290,6 +309,11 @@ export default function Staff() {
     if (member.roleType === 'CUSTOM' && member.customRole) return member.customRole.name;
     return member.roleType;
   };
+
+  const getEnabledPermissions = (permissions?: Record<string, boolean>) =>
+    Object.entries(permissions || {})
+      .filter(([, allowed]) => !!allowed)
+      .map(([key]) => (PERMISSION_LABELS[language] ?? PERMISSION_LABELS.en)[key] || key);
 
   // ── Render ────────────────────────────────────────────────────────────────
 
@@ -323,7 +347,7 @@ export default function Staff() {
       </div>
 
       {/* Custom roles summary */}
-      {canManage && customRoles.length > 0 && (
+      {canManage && (
         <div className="glass-card overflow-hidden">
           <button
             onClick={() => setShowRolesExpanded(v => !v)}
@@ -337,7 +361,7 @@ export default function Staff() {
             </div>
             {showRolesExpanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
           </button>
-          {showRolesExpanded && (
+          {showRolesExpanded && customRoles.length > 0 && (
             <div className="border-t border-slate-100 dark:border-slate-800 divide-y divide-slate-50 dark:divide-slate-800">
               {customRoles.map(cr => (
                 <div key={cr.id} className="flex items-center justify-between px-6 py-4">
@@ -354,13 +378,29 @@ export default function Staff() {
                       <Pencil className="w-3.5 h-3.5" />
                     </button>
                     {(!cr._count || cr._count.users === 0) && (
-                      <button onClick={() => handleDeleteRole(cr.id)} className="p-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/20 text-slate-400 hover:text-rose-600 transition-all">
+                      <button onClick={() => setDeleteRoleId(cr.id)} className="p-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/20 text-slate-400 hover:text-rose-600 transition-all">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+          {showRolesExpanded && customRoles.length === 0 && (
+            <div className="border-t border-slate-100 dark:border-slate-800 px-6 py-8 text-center">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-6 h-6 text-indigo-500" />
+              </div>
+              <p className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">
+                {language === 'uz' ? 'Maxsus rollar yo‘q' : language === 'ru' ? 'Пользовательских ролей нет' : language === 'tr' ? 'Ozel rol yok' : language === 'oz' ? 'Махсус роллар йук' : 'No custom roles yet'}
+              </p>
+              <p className="text-xs text-slate-400 mt-2 font-semibold">
+                {language === 'uz' ? 'Eski yoki yangi rollarni shu yerdan boshqarasiz.' : language === 'ru' ? 'Здесь можно управлять всеми ролями компании.' : language === 'tr' ? 'Tum roller buradan boshqariladi.' : language === 'oz' ? 'Барча роллар шу ердан бошкарилади.' : 'Manage all company roles here.'}
+              </p>
+              <button onClick={openNewRole} className="mt-5 px-5 py-3 rounded-2xl bg-indigo-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-indigo-700 transition-all">
+                {language === 'uz' ? 'Rol qo‘shish' : language === 'ru' ? 'Добавить роль' : language === 'tr' ? 'Rol ekle' : language === 'oz' ? 'Рол кушиш' : 'Add role'}
+              </button>
             </div>
           )}
         </div>
@@ -484,7 +524,7 @@ export default function Staff() {
                   />
                 </div>
                 {staffForm.roleType === 'CUSTOM' && customRoles.length > 0 && (
-                  <div>
+                  <div className="space-y-3">
                     <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Custom Role *</label>
                     <CustomSelect
                       options={customRoleOptions}
@@ -493,6 +533,53 @@ export default function Staff() {
                       placeholder="Select custom role..."
                       searchable
                     />
+                    <div className="rounded-2xl border border-indigo-100 dark:border-indigo-900/30 bg-indigo-50/60 dark:bg-indigo-900/10 p-4">
+                      {selectedCustomRole ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="px-3 py-1 rounded-xl text-[9px] font-black uppercase tracking-widest bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
+                              {selectedCustomRole.name}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                              {selectedCustomRole._count?.users || 0} {language === 'uz' ? 'biriktirilgan' : language === 'ru' ? 'назначено' : language === 'tr' ? 'atanmis' : language === 'oz' ? 'бириктирилган' : 'assigned'}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            {getEnabledPermissions(selectedCustomRole.permissions).length > 0 ? (
+                              getEnabledPermissions(selectedCustomRole.permissions).map((permission) => (
+                                <span key={permission} className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-900/30 text-[10px] font-bold text-slate-600 dark:text-slate-300">
+                                  {permission}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="text-xs font-semibold text-slate-400">
+                                {language === 'uz' ? 'Bu rolda faol ruxsat tanlanmagan.' : language === 'ru' ? 'Для этой роли нет активных разрешений.' : language === 'tr' ? 'Bu rol icin aktif izin tanlanmagan.' : language === 'oz' ? 'Бу ролда фаол рухсат танланмаган.' : 'No active permissions selected for this role.'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                            {language === 'uz' ? 'Mavjud custom rollar va ularning vazifalari:' : language === 'ru' ? 'Существующие пользовательские роли и их возможности:' : language === 'tr' ? 'Mavjud custom roller va ularning vakolatlari:' : language === 'oz' ? 'Мавжуд custom роллар ва уларнинг ваколатлари:' : 'Existing custom roles and their permissions:'}
+                          </p>
+                          <div className="space-y-2">
+                            {customRoles.map((role) => (
+                              <div key={role.id} className="rounded-xl bg-white/80 dark:bg-slate-900/60 border border-indigo-100 dark:border-indigo-900/20 p-3">
+                                <div className="flex items-center justify-between gap-3 mb-2">
+                                  <span className="text-xs font-black text-slate-900 dark:text-white">{role.name}</span>
+                                  <span className="text-[10px] text-slate-400 font-bold">{role._count?.users || 0}</span>
+                                </div>
+                                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold leading-relaxed">
+                                  {getEnabledPermissions(role.permissions).slice(0, 4).join(', ') || (language === 'uz' ? 'Ruxsatlar belgilanmagan' : language === 'ru' ? 'Разрешения не указаны' : language === 'tr' ? 'Izinler belgilanmagan' : language === 'oz' ? 'Рухсатлар белгиланмаган' : 'No permissions specified')}
+                                  {getEnabledPermissions(role.permissions).length > 4 ? '...' : ''}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
                 {branches.length > 0 && (
@@ -536,7 +623,7 @@ export default function Staff() {
                     {editRole ? 'Edit Role' : 'New Custom Role'}
                   </h3>
                 </div>
-                <button onClick={() => setShowRoleManager(false)} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                <button onClick={closeRoleManager} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
                   <X className="w-5 h-5 text-slate-400" />
                 </button>
               </div>
@@ -578,7 +665,7 @@ export default function Staff() {
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <button type="button" onClick={() => setShowRoleManager(false)} className="flex-1 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-700 dark:text-slate-300">
+                  <button type="button" onClick={closeRoleManager} className="flex-1 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-700 dark:text-slate-300">
                     {t.common.cancel}
                   </button>
                   <button type="submit" disabled={saving} className="flex-1 px-6 py-3 rounded-xl bg-indigo-600 text-white font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-indigo-700 transition-all disabled:opacity-50">
@@ -612,6 +699,39 @@ export default function Staff() {
                   {t.common.cancel}
                 </button>
                 <button onClick={handleDeactivate} className="flex-1 px-6 py-3 rounded-xl bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-rose-700 transition-all">
+                  {t.common.delete}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {deleteRoleId && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md"
+            onClick={e => { if (e.target === e.currentTarget) setDeleteRoleId(null); }}
+          >
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
+              className="w-full max-w-sm bg-white dark:bg-slate-900 rounded-[2rem] p-8 shadow-2xl border border-slate-100 dark:border-slate-800 text-center space-y-6"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mx-auto">
+                <Trash2 className="w-7 h-7 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">
+                  {language === 'uz' ? 'Rolni o‘chirish' : language === 'ru' ? 'Удалить роль' : language === 'tr' ? 'Rolni ochirish' : language === 'oz' ? 'Ролни учириш' : 'Delete role'}
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {language === 'uz' ? 'Bu rol foydalanuvchiga biriktirilmagan bo‘lsa, uni o‘chirishingiz mumkin.' : language === 'ru' ? 'Роль можно удалить, если она не назначена пользователям.' : language === 'tr' ? 'Bu rol hech kimga biriktirilmagan bolsa, uni ochirish mumkin.' : language === 'oz' ? 'Рол хеч кимга бириктирилмаган булса, уни учириш мумкин.' : 'You can delete this role if no users are assigned to it.'}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <button onClick={() => setDeleteRoleId(null)} className="flex-1 px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-700 font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all text-slate-700 dark:text-slate-300">
+                  {t.common.cancel}
+                </button>
+                <button onClick={() => handleDeleteRole(deleteRoleId)} className="flex-1 px-6 py-3 rounded-xl bg-rose-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-rose-700 transition-all">
                   {t.common.delete}
                 </button>
               </div>

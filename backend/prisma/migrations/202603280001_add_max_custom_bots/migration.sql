@@ -1,0 +1,2 @@
+ALTER TABLE "TariffPlan"
+ADD COLUMN "maxCustomBots" INTEGER NOT NULL DEFAULT 0;

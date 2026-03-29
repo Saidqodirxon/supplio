@@ -15,10 +15,12 @@ const common_1 = require("@nestjs/common");
 const telegraf_1 = require("telegraf");
 const prisma_service_1 = require("../prisma/prisma.service");
 const telegram_logger_service_1 = require("./telegram-logger.service");
+const plan_limits_service_1 = require("../common/services/plan-limits.service");
 let TelegramService = TelegramService_1 = class TelegramService {
-    constructor(prisma, loggerBot) {
+    constructor(prisma, loggerBot, planLimits) {
         this.prisma = prisma;
         this.loggerBot = loggerBot;
+        this.planLimits = planLimits;
         this.logger = new common_1.Logger(TelegramService_1.name);
         this.bots = new Map();
         this.carts = new Map();
@@ -710,6 +712,7 @@ let TelegramService = TelegramService_1 = class TelegramService {
         if (!data.token?.trim()) {
             throw new common_1.BadRequestException('Bot token is required.');
         }
+        await this.planLimits.checkBotLimit(companyId);
         const validation = await this.validateToken(data.token.trim());
         if (!validation.valid) {
             if (validation.networkError) {
@@ -803,6 +806,7 @@ exports.TelegramService = TelegramService;
 exports.TelegramService = TelegramService = TelegramService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        telegram_logger_service_1.TelegramLoggerService])
+        telegram_logger_service_1.TelegramLoggerService,
+        plan_limits_service_1.PlanLimitsService])
 ], TelegramService);
 //# sourceMappingURL=telegram.service.js.map

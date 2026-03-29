@@ -31,6 +31,94 @@ async function main() {
   });
 
   // ── 2. Tariff Plans ───────────────────────────────────────────────────────
+  const canonicalTariffs = [
+    {
+      planKey: "FREE",
+      order: 0,
+      nameUz: "Bepul",
+      nameRu: "Ð‘ÐµÑÐ¿Ð»Ð°Ñ‚Ð½Ð¾",
+      nameEn: "Free",
+      nameTr: "Ãœcretsiz",
+      nameUzCyr: "Ð‘ÐµÐ¿ÑƒÐ»",
+      price: "0",
+      priceMonthly: "0",
+      priceYearly: "0",
+      featuresUz: ["1 filial", "3 xodim", "50 dealer", "200 mahsulot", "Asosiy bildirishnomalar"],
+      featuresRu: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "3 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ°", "50 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "200 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "Ð‘Ð°Ð·Ð¾Ð²Ñ‹Ðµ ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ñ"],
+      featuresEn: ["1 branch", "3 staff", "50 dealers", "200 products", "Basic notifications"],
+      featuresTr: ["1 ÅŸube", "3 personel", "50 bayi", "200 Ã¼rÃ¼n", "Temel bildirimler"],
+      featuresUzCyr: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "3 Ñ…Ð¾Ð´Ð¸Ð¼", "50 Ð´Ð¸Ð»ÐµÑ€", "200 Ð¼Ð°Ò³ÑÑƒÐ»Ð¾Ñ‚", "ÐÑÐ¾ÑÐ¸Ð¹ Ð±Ð¸Ð»Ð´Ð¸Ñ€Ð¸ÑˆÐ½Ð¾Ð¼Ð°Ð»Ð°Ñ€"],
+      maxBranches: 1, maxCustomBots: 0, maxUsers: 3, maxDealers: 50, maxProducts: 200,
+      allowCustomBot: false, allowWebStore: true, allowAnalytics: false,
+      allowNotifications: true, allowMultiCompany: false, allowBulkImport: false,
+      trialDays: 14, isActive: true, isPopular: false,
+    },
+    {
+      planKey: "START",
+      order: 1,
+      nameUz: "Start",
+      nameRu: "Ð¡Ñ‚Ð°Ñ€Ñ‚",
+      nameEn: "Start",
+      nameTr: "BaÅŸlangÄ±Ã§",
+      nameUzCyr: "Ð¡Ñ‚Ð°Ñ€Ñ‚",
+      price: "9 999 so'm",
+      priceMonthly: "9999",
+      priceYearly: "99990",
+      featuresUz: ["1 filial", "5 xodim", "150 dealer", "500 mahsulot", "Web do'kon", "Boshlang'ich analitika"],
+      featuresRu: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "5 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²", "150 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "500 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "Ð’ÐµÐ±-Ð¼Ð°Ð³Ð°Ð·Ð¸Ð½", "Ð¡Ñ‚Ð°Ñ€Ñ‚Ð¾Ð²Ð°Ñ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÐ°"],
+      featuresEn: ["1 branch", "5 staff", "150 dealers", "500 products", "Web store", "Starter analytics"],
+      featuresTr: ["1 ÅŸube", "5 personel", "150 bayi", "500 Ã¼rÃ¼n", "Web maÄŸaza", "BaÅŸlangÄ±Ã§ analitiÄŸi"],
+      featuresUzCyr: ["1 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "5 Ñ…Ð¾Ð´Ð¸Ð¼", "150 Ð´Ð¸Ð»ÐµÑ€", "500 Ð¼Ð°Ò³ÑÑƒÐ»Ð¾Ñ‚", "Ð’ÐµÐ± Ð´ÑžÐºÐ¾Ð½", "Ð‘Ð¾ÑˆÐ»Ð°Ð½Ò“Ð¸Ñ‡ Ñ‚Ð°Ò³Ð»Ð¸Ð»"],
+      maxBranches: 1, maxCustomBots: 0, maxUsers: 5, maxDealers: 150, maxProducts: 500,
+      allowCustomBot: false, allowWebStore: true, allowAnalytics: true,
+      allowNotifications: true, allowMultiCompany: false, allowBulkImport: false,
+      trialDays: 14, isActive: true, isPopular: false,
+    },
+    {
+      planKey: "PRO",
+      order: 2,
+      nameUz: "Pro",
+      nameRu: "ÐŸÑ€Ð¾",
+      nameEn: "Pro",
+      nameTr: "Pro",
+      nameUzCyr: "ÐŸÑ€Ð¾",
+      price: "29 999 so'm",
+      priceMonthly: "29999",
+      priceYearly: "299990",
+      featuresUz: ["3 filial", "15 xodim", "1 000 dealer", "3 000 mahsulot", "1 ta Telegram bot", "Ommaviy import", "To'liq analitika"],
+      featuresRu: ["3 Ñ„Ð¸Ð»Ð¸Ð°Ð»Ð°", "15 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²", "1 000 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "3 000 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "1 Telegram-Ð±Ð¾Ñ‚", "ÐœÐ°ÑÑÐ¾Ð²Ñ‹Ð¹ Ð¸Ð¼Ð¿Ð¾Ñ€Ñ‚", "ÐŸÐ¾Ð»Ð½Ð°Ñ Ð°Ð½Ð°Ð»Ð¸Ñ‚Ð¸ÐºÐ°"],
+      featuresEn: ["3 branches", "15 staff", "1,000 dealers", "3,000 products", "1 Telegram bot", "Bulk import", "Full analytics"],
+      featuresTr: ["3 ÅŸube", "15 personel", "1.000 bayi", "3.000 Ã¼rÃ¼n", "1 Telegram botu", "Toplu iÃ§e aktarma", "Tam analitik"],
+      featuresUzCyr: ["3 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "15 Ñ…Ð¾Ð´Ð¸Ð¼", "1 000 Ð´Ð¸Ð»ÐµÑ€", "3 000 Ð¼Ð°Ò³ÑÑƒÐ»Ð¾Ñ‚", "1 Ñ‚Ð° Telegram Ð±Ð¾Ñ‚", "ÐžÐ¼Ð¼Ð°Ð²Ð¸Ð¹ Ð¸Ð¼Ð¿Ð¾Ñ€Ñ‚", "Ð¢ÑžÐ»Ð¸Ò› Ñ‚Ð°Ò³Ð»Ð¸Ð»"],
+      maxBranches: 3, maxCustomBots: 1, maxUsers: 15, maxDealers: 1000, maxProducts: 3000,
+      allowCustomBot: true, allowWebStore: true, allowAnalytics: true,
+      allowNotifications: true, allowMultiCompany: false, allowBulkImport: true,
+      trialDays: 14, isActive: true, isPopular: true,
+    },
+    {
+      planKey: "PREMIUM",
+      order: 3,
+      nameUz: "Premium",
+      nameRu: "ÐŸÑ€ÐµÐ¼Ð¸ÑƒÐ¼",
+      nameEn: "Premium",
+      nameTr: "Premium",
+      nameUzCyr: "ÐŸÑ€ÐµÐ¼Ð¸ÑƒÐ¼",
+      price: "99 999 so'm",
+      priceMonthly: "99999",
+      priceYearly: "999990",
+      featuresUz: ["10 filial", "50 xodim", "5 000 dealer", "15 000 mahsulot", "3 ta Telegram bot", "Ustuvor support", "Kengaytirilgan nazorat"],
+      featuresRu: ["10 Ñ„Ð¸Ð»Ð¸Ð°Ð»Ð¾Ð²", "50 ÑÐ¾Ñ‚Ñ€ÑƒÐ´Ð½Ð¸ÐºÐ¾Ð²", "5 000 Ð´Ð¸Ð»ÐµÑ€Ð¾Ð²", "15 000 Ñ‚Ð¾Ð²Ð°Ñ€Ð¾Ð²", "3 Telegram-Ð±Ð¾Ñ‚Ð°", "ÐŸÑ€Ð¸Ð¾Ñ€Ð¸Ñ‚ÐµÑ‚Ð½Ð°Ñ Ð¿Ð¾Ð´Ð´ÐµÑ€Ð¶ÐºÐ°", "Ð Ð°ÑÑˆÐ¸Ñ€ÐµÐ½Ð½Ñ‹Ð¹ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒ"],
+      featuresEn: ["10 branches", "50 staff", "5,000 dealers", "15,000 products", "3 Telegram bots", "Priority support", "Advanced controls"],
+      featuresTr: ["10 ÅŸube", "50 personel", "5.000 bayi", "15.000 Ã¼rÃ¼n", "3 Telegram botu", "Ã–ncelikli destek", "GeliÅŸmiÅŸ kontroller"],
+      featuresUzCyr: ["10 Ñ„Ð¸Ð»Ð¸Ð°Ð»", "50 Ñ…Ð¾Ð´Ð¸Ð¼", "5 000 Ð´Ð¸Ð»ÐµÑ€", "15 000 Ð¼Ð°Ò³ÑÑƒÐ»Ð¾Ñ‚", "3 Ñ‚Ð° Telegram Ð±Ð¾Ñ‚", "Ð£ÑÑ‚ÑƒÐ²Ð¾Ñ€ ÑÑ€Ð´Ð°Ð¼", "ÐšÐµÐ½Ð³Ð°Ð¹Ñ‚Ð¸Ñ€Ð¸Ð»Ð³Ð°Ð½ Ð½Ð°Ð·Ð¾Ñ€Ð°Ñ‚"],
+      maxBranches: 10, maxCustomBots: 3, maxUsers: 50, maxDealers: 5000, maxProducts: 15000,
+      allowCustomBot: true, allowWebStore: true, allowAnalytics: true,
+      allowNotifications: true, allowMultiCompany: false, allowBulkImport: true,
+      trialDays: 30, isActive: true, isPopular: false,
+    },
+  ];
+
+  /*
   const tariffData = [
     {
       planKey: "FREE",
@@ -118,13 +206,13 @@ async function main() {
     },
   ];
 
-  for (const t of tariffData) {
-    await (prisma as any).tariffPlan.upsert({
-      where: { planKey: t.planKey },
-      update: t,
-      create: t,
-    });
-  }
+  void tariffData;
+  */
+
+  await prisma.tariffPlan.deleteMany({});
+  await (prisma as any).tariffPlan.createMany({
+    data: canonicalTariffs,
+  });
 
   // ── 3. Testimonials ───────────────────────────────────────────────────────
   const testimonials = [

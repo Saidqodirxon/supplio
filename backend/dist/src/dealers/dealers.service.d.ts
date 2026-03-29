@@ -12,14 +12,15 @@ export declare class DealersService {
         address?: string;
     }): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         address: string | null;
         phone: string;
+        branchId: string;
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
@@ -28,7 +29,6 @@ export declare class DealersService {
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        branchId: string;
     }>;
     findAll(companyId: string, user: {
         roleType: string;
@@ -40,14 +40,15 @@ export declare class DealersService {
             name: string;
         };
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         address: string | null;
         phone: string;
+        branchId: string;
         creditLimit: number;
         telegramChatId: string | null;
         isApproved: boolean;
@@ -55,7 +56,6 @@ export declare class DealersService {
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        branchId: string;
     }[]>;
     getPendingApprovals(companyId: string): Promise<({
         branch: {
@@ -63,14 +63,15 @@ export declare class DealersService {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         address: string | null;
         phone: string;
+        branchId: string;
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
@@ -79,18 +80,18 @@ export declare class DealersService {
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        branchId: string;
     })[]>;
     approveDealer(id: string, companyId: string, userId: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         address: string | null;
         phone: string;
+        branchId: string;
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
@@ -99,7 +100,6 @@ export declare class DealersService {
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        branchId: string;
     }>;
     update(id: string, companyId: string, data: {
         name?: string;
@@ -113,14 +113,15 @@ export declare class DealersService {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         address: string | null;
         phone: string;
+        branchId: string;
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
@@ -129,18 +130,18 @@ export declare class DealersService {
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        branchId: string;
     }>;
     block(id: string, companyId: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         address: string | null;
         phone: string;
+        branchId: string;
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
@@ -149,18 +150,18 @@ export declare class DealersService {
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        branchId: string;
     }>;
     unblock(id: string, companyId: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         address: string | null;
         phone: string;
+        branchId: string;
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
@@ -169,18 +170,18 @@ export declare class DealersService {
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        branchId: string;
     }>;
     remove(id: string, companyId: string, userId: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         address: string | null;
         phone: string;
+        branchId: string;
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
@@ -189,7 +190,6 @@ export declare class DealersService {
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        branchId: string;
     }>;
     rejectDealer(id: string, companyId: string, userId: string): Promise<{
         success: boolean;

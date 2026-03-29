@@ -353,6 +353,7 @@ model TariffPlan {
   allowNotifications Boolean  @default(true)
   allowWebStore      Boolean  @default(true)
   maxBranches        Int      @default(1)
+  maxCustomBots      Int      @default(0)
   maxDealers         Int      @default(100)
   maxProducts        Int      @default(500)
   maxUsers           Int      @default(5)

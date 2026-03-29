@@ -4,6 +4,7 @@ export declare class BackupService {
     private readonly logger;
     private readonly backupDir;
     constructor(prisma: PrismaService);
+    private buildCompanyBackupFileName;
     handleDailyBackup(): Promise<void>;
     createFullBackup(): Promise<{
         zipPath: string;
@@ -16,6 +17,17 @@ export declare class BackupService {
         size: number;
         createdAt: Date;
     }>;
+    createCompanyBackup(companyId: string): Promise<{
+        name: string;
+        path: string;
+        createdAt: Date;
+        size: number;
+    }>;
+    createCompanyBackupAndSend(companyId: string): Promise<{
+        name: string;
+        size: number;
+        createdAt: Date;
+    }>;
     createBackup(): Promise<{
         name: string;
         path: string;
@@ -23,6 +35,7 @@ export declare class BackupService {
     }>;
     sendToTelegram(filePath: string, fileName: string, token?: string, chatId?: string): Promise<void>;
     dumpCompanyDatabase(companyId: string, slug: string): Promise<string>;
+    resolveBackupPath(name: string): string;
     listBackups(): Promise<{
         name: string;
         size: number;

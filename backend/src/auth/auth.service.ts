@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
@@ -65,5 +65,80 @@ export class AuthService {
         language: data.language,
       },
     });
+  }
+
+  async changePassword(
+    userId: string,
+    data: { currentPassword: string; newPassword: string }
+  ) {
+    if (!data.currentPassword || !data.newPassword) {
+      throw new BadRequestException("Both current and new passwords are required");
+    }
+
+    if (data.newPassword.length < 6) {
+      throw new BadRequestException("New password must be at least 6 characters");
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, passwordHash: true },
+    });
+
+    if (!user || !(await bcrypt.compare(data.currentPassword, user.passwordHash))) {
+      throw new UnauthorizedException("Current password is incorrect");
+    }
+
+    const passwordHash = await bcrypt.hash(data.newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash },
+    });
+
+    return { success: true };
+  }
+
+  async requestPasswordReset(userId: string, data?: { note?: string }) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { company: { select: { name: true, slug: true } } },
+    });
+
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+
+    const existing = await this.prisma.lead.findFirst({
+      where: {
+        phone: user.phone,
+        status: "NEW",
+        info: { contains: "PASSWORD_RESET_REQUEST" },
+      },
+    });
+
+    if (existing) {
+      return { success: true, alreadyRequested: true };
+    }
+
+    const infoLines = [
+      "PASSWORD_RESET_REQUEST",
+      `Company: ${user.company?.name || "-"}`,
+      `Slug: ${user.company?.slug || "-"}`,
+      `User: ${user.fullName || user.phone}`,
+      `Role: ${user.roleType}`,
+    ];
+
+    if (data?.note?.trim()) {
+      infoLines.push(`Note: ${data.note.trim()}`);
+    }
+
+    await this.prisma.lead.create({
+      data: {
+        fullName: user.fullName || `Password reset request`,
+        phone: user.phone,
+        info: infoLines.join(" | "),
+      },
+    });
+
+    return { success: true };
   }
 }

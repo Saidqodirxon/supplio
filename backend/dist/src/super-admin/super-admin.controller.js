@@ -20,6 +20,7 @@ const roles_guard_1 = require("../common/middleware/roles.guard");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
 const backup_service_1 = require("../common/services/backup/backup.service");
 const units_service_1 = require("../units/units.service");
+const fs_1 = require("fs");
 let SuperAdminController = class SuperAdminController {
     constructor(superAdminService, backupService, unitsService) {
         this.superAdminService = superAdminService;
@@ -34,6 +35,23 @@ let SuperAdminController = class SuperAdminController {
     }
     async sendBackupToTelegram() {
         return this.backupService.createBackupAndSend();
+    }
+    async triggerCompanyBackup(companyId) {
+        return this.backupService.createCompanyBackup(companyId);
+    }
+    async sendCompanyBackupToTelegram(companyId) {
+        return this.backupService.createCompanyBackupAndSend(companyId);
+    }
+    async downloadBackup(name, res) {
+        try {
+            const filePath = this.backupService.resolveBackupPath(name);
+            res.setHeader("Content-Type", "application/octet-stream");
+            res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(name)}"`);
+            return new common_1.StreamableFile((0, fs_1.createReadStream)(filePath));
+        }
+        catch {
+            throw new common_1.NotFoundException("Backup file not found");
+        }
     }
     async getSettings() {
         return this.superAdminService.getGlobalSettings();
@@ -99,6 +117,9 @@ let SuperAdminController = class SuperAdminController {
     }
     async createDistributor(body) {
         return this.superAdminService.createDistributor(body);
+    }
+    async resetDistributorOwnerPassword(id, body) {
+        return this.superAdminService.resetDistributorOwnerPassword(id, body.password);
     }
     async notifyDistributors(body) {
         return this.superAdminService.notifyDistributors(body);
@@ -199,6 +220,31 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "sendBackupToTelegram", null);
+__decorate([
+    (0, common_1.Post)("backups/company/:companyId/trigger"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("companyId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "triggerCompanyBackup", null);
+__decorate([
+    (0, common_1.Post)("backups/company/:companyId/send"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("companyId")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "sendCompanyBackupToTelegram", null);
+__decorate([
+    (0, common_1.Get)("backups/download"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Query)("name")),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "downloadBackup", null);
 __decorate([
     (0, common_1.Get)("settings"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
@@ -352,6 +398,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "createDistributor", null);
+__decorate([
+    (0, common_1.Patch)("distributors/:id/owner-password"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "resetDistributorOwnerPassword", null);
 __decorate([
     (0, common_1.Post)("notify-distributors"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),

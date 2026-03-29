@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
 import { TableSkeleton } from '../components/Skeleton';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { useScrollLock } from '../utils/useScrollLock';
 import { CustomSelect } from '../components/CustomSelect';
 import type { SelectOption } from '../components/CustomSelect';

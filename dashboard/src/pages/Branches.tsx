@@ -6,7 +6,7 @@ import type { Branch } from '../types';
 import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
 import { CardSkeleton } from '../components/Skeleton';
-import { toast } from 'sonner';
+import { toast } from '../utils/toast';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface BranchForm {

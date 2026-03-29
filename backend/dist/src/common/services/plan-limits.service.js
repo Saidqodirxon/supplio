@@ -16,6 +16,7 @@ const prisma_service_1 = require("../../prisma/prisma.service");
 const DEFAULT_LIMITS = {
     maxBranches: 1,
     maxUsers: 5,
+    maxCustomBots: 0,
     maxDealers: 50,
     maxProducts: 200,
     allowCustomBot: false,
@@ -37,9 +38,24 @@ let PlanLimitsService = PlanLimitsService_1 = class PlanLimitsService {
         });
         if (!company)
             return DEFAULT_LIMITS;
-        const plan = await this.prisma.tariffPlan.findUnique({
-            where: { planKey: company.subscriptionPlan },
-        });
+        const rows = await this.prisma.$queryRaw `
+      SELECT
+        "maxBranches",
+        "maxUsers",
+        COALESCE("maxCustomBots", 0) AS "maxCustomBots",
+        "maxDealers",
+        "maxProducts",
+        "allowCustomBot",
+        "allowWebStore",
+        "allowAnalytics",
+        "allowNotifications",
+        "allowMultiCompany",
+        "allowBulkImport"
+      FROM "TariffPlan"
+      WHERE "planKey" = ${company.subscriptionPlan}
+      LIMIT 1
+    `;
+        const plan = rows[0] ?? null;
         if (!plan) {
             this.logger.warn(`No TariffPlan found for planKey=${company.subscriptionPlan}, using defaults`);
             return DEFAULT_LIMITS;
@@ -47,6 +63,7 @@ let PlanLimitsService = PlanLimitsService_1 = class PlanLimitsService {
         return {
             maxBranches: plan.maxBranches,
             maxUsers: plan.maxUsers,
+            maxCustomBots: plan.maxCustomBots,
             maxDealers: plan.maxDealers,
             maxProducts: plan.maxProducts,
             allowCustomBot: plan.allowCustomBot,
@@ -57,8 +74,29 @@ let PlanLimitsService = PlanLimitsService_1 = class PlanLimitsService {
             allowBulkImport: plan.allowBulkImport,
         };
     }
-    limitError(resource, max) {
-        throw new common_1.HttpException({ message: `${resource} limit reached (${max}). Upgrade your plan.`, limitReached: true, resource }, 402);
+    getResourceLabel(resource) {
+        const labels = {
+            branches: "Branch",
+            users: "Staff",
+            dealers: "Dealer",
+            products: "Product",
+            customBot: "Telegram bot",
+            allowAnalytics: "Analytics",
+            allowWebStore: "Web store",
+            allowNotifications: "Notifications",
+            allowMultiCompany: "Multi-company",
+            allowBulkImport: "Bulk import",
+        };
+        return labels[resource] || resource;
+    }
+    limitError(resource, max, type = "limit") {
+        const label = this.getResourceLabel(resource);
+        const message = type === "feature"
+            ? `${label} is not available on your current plan. Please upgrade your tariff.`
+            : max > 0
+                ? `${label} limit reached. Your current plan allows up to ${max}. Please upgrade your tariff.`
+                : `${label} is not available on your current plan. Please upgrade your tariff.`;
+        throw new common_1.HttpException({ message, limitReached: true, resource, max, code: "PLAN_LIMIT_REACHED" }, 402);
     }
     async checkBranchLimit(companyId) {
         const limits = await this.getLimitsForCompany(companyId);
@@ -87,12 +125,23 @@ let PlanLimitsService = PlanLimitsService_1 = class PlanLimitsService {
     async checkBotAllowed(companyId) {
         const limits = await this.getLimitsForCompany(companyId);
         if (!limits.allowCustomBot)
-            this.limitError('customBot', 0);
+            this.limitError('customBot', 0, 'feature');
+    }
+    async checkBotLimit(companyId) {
+        const limits = await this.getLimitsForCompany(companyId);
+        if (!limits.allowCustomBot || limits.maxCustomBots <= 0) {
+            this.limitError('customBot', limits.maxCustomBots, 'feature');
+        }
+        const count = await this.prisma.customBot.count({
+            where: { companyId, deletedAt: null },
+        });
+        if (count >= limits.maxCustomBots)
+            this.limitError('customBot', limits.maxCustomBots);
     }
     async checkFeatureAllowed(companyId, feature) {
         const limits = await this.getLimitsForCompany(companyId);
         if (!limits[feature])
-            this.limitError(feature, 0);
+            this.limitError(feature, 0, 'feature');
     }
 };
 exports.PlanLimitsService = PlanLimitsService;

@@ -48,6 +48,7 @@ export default function Layout() {
   const { user, logout, language } = useAuthStore();
   const { isDark, toggleTheme } = useThemeStore();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [subscription, setSubscription] = useState<SubscriptionBadge | null>(null);
   const t = dashboardTranslations[language];
 
@@ -67,6 +68,12 @@ export default function Layout() {
       setSubscription({ plan: res.data.plan, status: res.data.status, daysLeft: res.data.daysLeft });
     }).catch(() => {});
   }, [isOwner]);
+
+  useEffect(() => {
+    api.get('/notifications/unread-count').then((res) => {
+      setUnreadCount(Number(res.data?.count || 0));
+    }).catch(() => {});
+  }, []);
 
   // Role-based navigation
   const allNavigation = [
@@ -342,20 +349,29 @@ export default function Layout() {
               className="p-3 rounded-xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-white dark:hover:bg-slate-900 transition-all relative group active:scale-95"
             >
               <Bell className="w-4.5 h-4.5 group-hover:animate-bounce" />
-              <span className="absolute top-3 right-3 w-2 h-2 bg-blue-600 rounded-full border-2 border-white dark:border-slate-950" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[1.2rem] h-5 px-1 rounded-full bg-blue-600 text-white text-[10px] font-black flex items-center justify-center border-2 border-white dark:border-slate-950">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </button>
           </div>
         </header>
 
         {/* Main content — single scroll area */}
-        <main className="flex-1 overflow-y-auto w-full scroll-smooth">
+        <main id="main-scroll" className="flex-1 overflow-y-auto w-full scroll-smooth">
           <div className="max-w-7xl mx-auto p-6 lg:p-10 pb-20">
             <Outlet />
           </div>
         </main>
       </div>
 
-      <NotificationDrawer isOpen={notifOpen} onClose={() => setNotifOpen(false)} isDark={isDark} />
+      <NotificationDrawer
+        isOpen={notifOpen}
+        onClose={() => setNotifOpen(false)}
+        isDark={isDark}
+        onUnreadCountChange={setUnreadCount}
+      />
     </div>
   );
 }
