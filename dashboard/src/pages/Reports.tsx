@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   TrendingUp, TrendingDown, Users, ShoppingCart, DollarSign,
   AlertTriangle, CheckCircle, BarChart3, Loader2, RefreshCw,
-  Award, CreditCard, Download, FileSpreadsheet,
+  Award, CreditCard, FileSpreadsheet,
 } from 'lucide-react';
 import api from '../services/api';
 import { toast } from '../utils/toast';
