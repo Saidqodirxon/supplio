@@ -19,6 +19,7 @@ import {
   EyeOff,
   Check,
   X,
+  Download,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
 import { dashboardTranslations } from "../i18n/translations";
@@ -52,136 +53,13 @@ const CASHBACK_HELP: Record<string, string> = {
   tr: "Cashback — SİZİN (distribütör) bayilerinize verdiğiniz bir bonustur. Örnek: %5 → 100.000 UZS siparişte bayi 5.000 UZS bonus kazanır, bu bonus sonraki siparişte indirim olarak uygulanır. Sistem size cashback vermez — siz bunu bayilerinize teşvik olarak verirsiniz.",
 };
 
-function UserProfileForm() {
-  const { user, language, updateUser } = useAuthStore();
-  const t = dashboardTranslations[language];
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    fullName: user?.fullName || "",
-    photoUrl: user?.photoUrl || "/favicon.png",
-  });
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const uploadData = new FormData();
-    uploadData.append("file", file);
-    try {
-      setLoading(true);
-      const res = await api.post("/upload/image", uploadData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setFormData((prev) => ({ ...prev, photoUrl: res.data.url }));
-      toast.success(t.common.save);
-    } catch {
-      toast.error(t.common.error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      await api.patch("/auth/profile", formData);
-      updateUser(formData);
-      toast.success(t.common.save);
-    } catch {
-      toast.error(t.common.error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="glass-card p-8 space-y-8 border border-slate-100 dark:border-white/5"
-    >
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-indigo-600/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-          <User className="w-4.5 h-4.5" />
-        </div>
-        <h2 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
-          {t.settings.profile}
-        </h2>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-8">
-        {/* Avatar */}
-        <div className="shrink-0 flex flex-col items-center gap-3">
-          <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 overflow-hidden relative group shadow-xl flex items-center justify-center">
-            {formData.photoUrl && !loading ? (
-              <img
-                src={
-                  formData.photoUrl.startsWith("http") ||
-                  formData.photoUrl.startsWith("/")
-                    ? formData.photoUrl
-                    : `/api${formData.photoUrl}`
-                }
-                alt="Profile"
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = "/favicon.png";
-                }}
-              />
-            ) : (
-              <User className="w-10 h-10 text-slate-300 dark:text-slate-600 animate-pulse" />
-            )}
-            <label className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm rounded-full">
-              <Camera className="w-6 h-6 text-white" />
-              <input
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
-            </label>
-          </div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-            Avatar
-          </p>
-        </div>
-
-        {/* Name */}
-        <div className="flex-1 space-y-2">
-          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-            {t.settings.profile} — {t.common.edit}
-          </label>
-          <input
-            type="text"
-            className="input-field w-full"
-            value={formData.fullName}
-            placeholder={t.superadmin.fullNameLabel}
-            onChange={(e) =>
-              setFormData({ ...formData, fullName: e.target.value })
-            }
-          />
-          <p className="text-[10px] text-slate-400 font-semibold">
-            {user?.phone} · {user?.roleType?.replace(/_/g, " ")}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-8 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
-        >
-          {loading ? t.common.loading : t.common.save}
-        </button>
-      </div>
-    </form>
-  );
-}
-
 function UserSecurityForm() {
   const { user, language, updateUser } = useAuthStore();
   const t = dashboardTranslations[language];
   const [savingProfile, setSavingProfile] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [fullName, setFullName] = useState(user?.fullName || "");
+  const [photoUrl, setPhotoUrl] = useState(user?.photoUrl || "");
   const [savingPassword, setSavingPassword] = useState(false);
   const [requestingReset, setRequestingReset] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -197,7 +75,30 @@ function UserSecurityForm() {
 
   useEffect(() => {
     setFullName(user?.fullName || "");
-  }, [user?.fullName]);
+    setPhotoUrl(user?.photoUrl || "");
+  }, [user?.fullName, user?.photoUrl]);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const uploadData = new FormData();
+    uploadData.append("file", file);
+    try {
+      setUploadingPhoto(true);
+      const res = await api.post("/upload/image", uploadData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      const newUrl = res.data.url;
+      setPhotoUrl(newUrl);
+      await api.patch("/auth/profile", { photoUrl: newUrl });
+      updateUser({ photoUrl: newUrl });
+      toast.success(language === 'ru' ? "Фото обновлено" : language === 'en' ? "Photo updated" : "Rasm yangilandi");
+    } catch {
+      toast.error(t.common.error);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
 
   const handleProfileSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,14 +165,41 @@ function UserSecurityForm() {
     <div className="glass-card p-8 space-y-8 border border-slate-100 dark:border-white/5">
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-indigo-600/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-          <ShieldCheck className="w-4.5 h-4.5" />
+          <User className="w-4.5 h-4.5" />
         </div>
         <h2 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
           {t.settings.profile}
         </h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Avatar + Name row */}
+      <div className="flex flex-col sm:flex-row gap-6 items-start">
+        {/* Avatar upload */}
+        <div className="shrink-0 flex flex-col items-center gap-2">
+          <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-white/10 overflow-hidden relative group shadow-lg flex items-center justify-center">
+            {uploadingPhoto ? (
+              <div className="w-full h-full flex items-center justify-center bg-slate-200 dark:bg-slate-700">
+                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : photoUrl ? (
+              <img
+                src={photoUrl.startsWith("http") || photoUrl.startsWith("/") ? photoUrl : `/api${photoUrl}`}
+                alt="Profile"
+                className="w-full h-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).src = "/favicon.png"; }}
+              />
+            ) : (
+              <User className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+            )}
+            <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm rounded-full">
+              <Camera className="w-5 h-5 text-white" />
+              <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+            </label>
+          </div>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avatar</p>
+        </div>
+
+        <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
             {t.superadmin.fullNameLabel}
@@ -291,6 +219,7 @@ function UserSecurityForm() {
           <div className="input-field w-full opacity-80 cursor-not-allowed">
             {user?.phone || "-"}
           </div>
+        </div>
         </div>
       </div>
 
@@ -469,8 +398,6 @@ function UserSecurityForm() {
   );
 }
 
-void UserProfileForm;
-
 export default function Settings() {
   const { user, language } = useAuthStore();
   const t = dashboardTranslations[language];
@@ -480,9 +407,13 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [success, setSuccess] = useState(false);
   const [company, setCompany] = useState<CompanySettings | null>(null);
+  const [backingUp, setBackingUp] = useState(false);
 
   const role = user?.roleType ?? "";
-  const isOwnerOrAdmin = role === "OWNER" || role === "SUPER_ADMIN";
+  // SUPER_ADMIN is a platform-level role — they manage via admin panel, not here.
+  // Only OWNER of a company can see/edit company settings in the dashboard.
+  const isCompanyOwner = role === "OWNER";
+  const isOwnerOrAdmin = isCompanyOwner; // kept for template compatibility
 
   useEffect(() => {
     const fetchCompany = async () => {
@@ -497,6 +428,30 @@ export default function Settings() {
     };
     fetchCompany();
   }, []);
+
+  const handleBackup = async () => {
+    try {
+      setBackingUp(true);
+      const res = await api.get("/company/backup");
+      const json = JSON.stringify(res.data, null, 2);
+      const blob = new Blob([json], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `supplio-backup-${company?.slug ?? "company"}-${new Date().toISOString().split("T")[0]}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success(
+        language === "ru"
+          ? `Backup tayyor: ${res.data.summary.orders} buyurtma, ${res.data.summary.dealers} diler`
+          : `Backup tayyor: ${res.data.summary.orders} ta buyurtma, ${res.data.summary.dealers} ta diler`
+      );
+    } catch {
+      toast.error(t.common.error);
+    } finally {
+      setBackingUp(false);
+    }
+  };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -831,6 +786,33 @@ export default function Settings() {
                   {t.settings.verified}
                 </span>
               </div>
+            </div>
+
+            {/* Backup card */}
+            <div className="glass-card p-7 border border-slate-100 dark:border-white/5 rounded-[2rem]">
+              <div className="flex items-center gap-3 mb-3">
+                <Download className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                <h4 className="font-black uppercase tracking-widest text-xs text-slate-700 dark:text-slate-300">
+                  {language === "ru" ? "Резервная копия" : language === "en" ? "Backup" : "Backup"}
+                </h4>
+              </div>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
+                {language === "ru"
+                  ? "Скачайте все данные вашей компании (дилеры, заказы, товары, платежи) в формате JSON."
+                  : language === "en"
+                    ? "Download all your company data (dealers, orders, products, payments) as JSON."
+                    : "Kompaniya ma'lumotlarini (dilerlar, buyurtmalar, mahsulotlar, to'lovlar) JSON formatida yuklab oling."}
+              </p>
+              <button
+                onClick={handleBackup}
+                disabled={backingUp}
+                className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
+              >
+                <Download className="w-3.5 h-3.5" />
+                {backingUp
+                  ? (language === "ru" ? "Загрузка..." : "Yuklanmoqda...")
+                  : (language === "ru" ? "Скачать backup" : language === "en" ? "Download backup" : "Backup yuklab olish")}
+              </button>
             </div>
           </div>
         )}

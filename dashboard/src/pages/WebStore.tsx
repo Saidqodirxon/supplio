@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Store, Globe, Copy, Check, ExternalLink, Instagram,
   Send, Link2, ToggleLeft, ToggleRight, Loader2, Save,
-  ShoppingCart, Package, TrendingUp, QrCode,
+  ShoppingCart, Package, TrendingUp, QrCode, Download, Bot, Clock,
 } from 'lucide-react';
 import api from '../services/api';
 import { useAuthStore } from '../store/authStore';
@@ -21,6 +21,8 @@ interface Company {
   telegram?: string;
   siteActive: boolean;
   subscriptionPlan: string;
+  workingHours?: string;
+  adminLogBotToken?: string;
 }
 
 interface StoreStats {
@@ -31,6 +33,14 @@ interface StoreStats {
 
 const fadeInUp = { initial: { opacity: 0, y: 16 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0.4 } };
 
+interface WebStoreData {
+  website?: string;
+  instagram?: string;
+  telegram?: string;
+  workingHours?: string;
+  adminLogBotToken?: string;
+}
+
 export default function WebStorePage() {
   const { language } = useAuthStore();
   const t = dashboardTranslations[language];
@@ -40,9 +50,9 @@ export default function WebStorePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [form, setForm] = useState({ website: '', instagram: '', telegram: '' });
+  const [form, setForm] = useState<WebStoreData>({ website: '', instagram: '', telegram: '', workingHours: '', adminLogBotToken: '' });
 
-  const storeUrl = company ? `https://supplio.uz/store/${company.slug}` : '';
+  const storeUrl = company ? `${window.location.origin}/store/${company.slug}` : '';
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -54,11 +64,17 @@ export default function WebStorePage() {
       ]);
       const c: Company = compRes.data;
       setCompany(c);
-      setForm({ website: c.website || '', instagram: c.instagram || '', telegram: c.telegram || '' });
+      setForm({
+        website: c.website || '',
+        instagram: c.instagram || '',
+        telegram: c.telegram || '',
+        workingHours: c.workingHours || '',
+        adminLogBotToken: c.adminLogBotToken || ''
+      });
 
       const orders = ordersRes.data?.items || [];
-      const storeOrders = orders.filter((o: any) => o.source === 'STORE' || o.channel === 'STORE');
-      const revenue = storeOrders.reduce((s: number, o: any) => s + (Number(o.totalAmount) || 0), 0);
+      const storeOrders = orders.filter((o: { source?: string; channel?: string }) => o.source === 'STORE' || o.channel === 'STORE');
+      const revenue = storeOrders.reduce((s: number, o: { totalAmount?: number | string }) => s + (Number(o.totalAmount) || 0), 0);
       setStats({
         totalOrders: storeOrders.length,
         totalProducts: productsRes.data?.total || 0,
@@ -101,6 +117,25 @@ export default function WebStorePage() {
     navigator.clipboard.writeText(storeUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadQR = async () => {
+    try {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=${encodeURIComponent(storeUrl)}&margin=20`;
+      const response = await fetch(qrUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${company?.slug || 'store'}-qr.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      toast.success(language === 'uz' ? 'QR Kod yuklab olindi' : 'QR Code downloaded');
+    } catch {
+      toast.error(t.common.error);
+    }
   };
 
   if (loading) {
@@ -182,10 +217,13 @@ export default function WebStorePage() {
           <div className="flex items-center gap-3 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-2xl px-5 py-4">
             <Globe className="w-4 h-4 text-blue-600 shrink-0" />
             <span className="flex-1 font-mono text-sm text-slate-700 dark:text-slate-300 truncate">{storeUrl}</span>
-            <button onClick={copyUrl} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all shrink-0">
+            <button onClick={copyUrl} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all shrink-0" title={language === 'uz' ? "Nusxa olish" : "Copy"}>
               {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4 text-slate-400" />}
             </button>
-            <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all shrink-0">
+            <button onClick={downloadQR} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all shrink-0" title={language === 'uz' ? "QR kodni yuklab olish" : "Download QR Code"}>
+              <Download className="w-4 h-4 text-blue-600" />
+            </button>
+            <a href={storeUrl} target="_blank" rel="noopener noreferrer" className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 transition-all shrink-0" title={language === 'uz' ? "Ochish" : "Open"}>
               <ExternalLink className="w-4 h-4 text-slate-400" />
             </a>
           </div>
@@ -228,6 +266,8 @@ export default function WebStorePage() {
             { key: 'website', label: language === 'uz' ? 'Vebsayt' : language === 'ru' ? 'Сайт' : language === 'tr' ? 'Web Sitesi' : 'Website', icon: Link2, placeholder: 'https://yoursite.com' },
             { key: 'instagram', label: 'Instagram', icon: Instagram, placeholder: '@yourhandle' },
             { key: 'telegram', label: 'Telegram', icon: Send, placeholder: '@yourbotortelegram' },
+            { key: 'workingHours', label: language === 'uz' ? 'Ish vaqti' : language === 'ru' ? 'Рабочее время' : language === 'tr' ? 'Çalışma Saatleri' : 'Working Hours', icon: Clock, placeholder: '09:00 - 18:00' },
+            { key: 'adminLogBotToken', label: language === 'uz' ? 'Loglar uchun Bot Token' : language === 'ru' ? 'Bot Token для логов' : language === 'tr' ? 'Loglar İçin Bot Token' : 'Log Bot Token', icon: Bot, placeholder: '123456:ABC...' },
           ].map((field) => (
             <div key={field.key} className="space-y-2">
               <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
@@ -235,7 +275,7 @@ export default function WebStorePage() {
               </label>
               <input
                 type="text"
-                value={(form as any)[field.key]}
+                value={form[field.key as keyof WebStoreData] || ''}
                 onChange={(e) => setForm(f => ({ ...f, [field.key]: e.target.value }))}
                 placeholder={field.placeholder}
                 className="w-full px-4 py-3 rounded-xl border border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm font-bold focus:border-blue-600 focus:outline-none transition-colors"

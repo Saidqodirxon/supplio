@@ -20,6 +20,44 @@ export const metadata: Metadata = {
     icon: "/favicon.png",
   },
   metadataBase: new URL("https://supplio.uz"),
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    other: {
+      "yandex-verification": process.env.NEXT_PUBLIC_YANDEX_VERIFICATION ?? "",
+    },
+  },
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Supplio",
+  url: "https://supplio.uz",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web, iOS, Android",
+  description:
+    "All-in-one B2B SaaS platform for manufacturers and distributors. Manage dealers, track credit limits, automate orders via Telegram.",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "UZS",
+  },
+  author: {
+    "@type": "Organization",
+    name: "Supplio",
+    url: "https://supplio.uz",
+    logo: "https://supplio.uz/favicon.png",
+    sameAs: [
+      "https://t.me/supplio_uz",
+      "https://instagram.com/supplio.uz",
+    ],
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: "+998901234567",
+      contactType: "customer support",
+      availableLanguage: ["Uzbek", "Russian", "English"],
+    },
+  },
 };
 
 export default function RootLayout({
@@ -29,6 +67,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`${outfit.className} bg-white antialiased`}>{children}</body>
     </html>
   );

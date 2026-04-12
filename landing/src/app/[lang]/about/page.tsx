@@ -35,7 +35,7 @@ const fadeInUp = {
 const TEAM = [
   {
     name: "Saidqodirxon Rahimov",
-    role: "CEO, Owner & Founder",
+    role: "CEO, Founder",
     avatar: "SR",
     color: "bg-blue-600",
   },

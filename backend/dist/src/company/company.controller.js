@@ -40,6 +40,9 @@ let CompanyController = class CompanyController {
     async deactivateStaff(req, id) {
         return this.companyService.deactivateStaff(req.user.companyId, id);
     }
+    async getBackup(req) {
+        return this.companyService.getBackup(req.user.companyId);
+    }
     async getFeatures(req) {
         return this.companyService.getFeatureFlags(req.user.companyId);
     }
@@ -108,6 +111,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], CompanyController.prototype, "deactivateStaff", null);
+__decorate([
+    (0, common_1.Get)("backup"),
+    (0, roles_decorator_1.Roles)("OWNER"),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CompanyController.prototype, "getBackup", null);
 __decorate([
     (0, common_1.Get)("features"),
     (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SALES"),

@@ -15,8 +15,10 @@ export declare class TelegramService implements OnModuleInit {
     initializeBots(): Promise<void>;
     private translations;
     private getT;
+    sendToAdmins(companyId: string, message: string): Promise<void>;
     private getLangFromCtx;
     private buildMainMenuKeyboard;
+    private buildAdminMenuKeyboard;
     initBot(botId: string, companyId: string, token: string, companyName: string): Promise<void>;
     private handleDebt;
     private handleProducts;

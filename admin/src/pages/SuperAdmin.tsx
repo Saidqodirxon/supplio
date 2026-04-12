@@ -68,7 +68,8 @@ type TabId =
   | "cms"
   | "distributors"
   | "notify"
-  | "upgrades";
+  | "upgrades"
+  | "support";
 
 const validTabs: TabId[] = [
   "overview",
@@ -85,22 +86,6 @@ const validTabs: TabId[] = [
   "notify",
   "upgrades",
 ];
-
-/** Parse structured ticket info from the `info` field */
-function parseTicketFields(info: string): Record<string, string> {
-  const parts = info.split(" | ");
-  const result: Record<string, string> = {};
-  parts.forEach((p) => {
-    const idx = p.indexOf(": ");
-    if (idx > -1) result[p.slice(0, idx)] = p.slice(idx + 2);
-  });
-  return result;
-}
-
-const IS_TICKET = (info?: string) =>
-  !!info &&
-  (info.startsWith("PASSWORD_RESET_REQUEST") ||
-    info.startsWith("SUPPORT_TICKET"));
 
 const LEAD_STATUS_COLORS: Record<string, string> = {
   NEW: "bg-blue-600/10 text-blue-600 border-blue-200 dark:border-blue-800",
@@ -218,6 +203,31 @@ interface LandingContent {
   footerDescRu: string;
   footerDescEn: string;
   footerDescTr: string;
+  heroGlobalBannerUz?: string;
+  heroGlobalBannerRu?: string;
+  heroGlobalBannerEn?: string;
+  heroGlobalBannerTr?: string;
+}
+
+interface SupportMessage {
+  id: string;
+  ticketId: string;
+  senderId: string | null;
+  senderType: "SUPER_ADMIN" | "DISTRIBUTOR";
+  message: string;
+  createdAt: string;
+}
+
+interface SupportTicket {
+  id: string;
+  companyId: string;
+  subject: string;
+  message: string;
+  status: "OPEN" | "IN_PROGRESS" | "CLOSED";
+  lastReplyAt: string;
+  createdAt: string;
+  company?: { name: string };
+  messages: SupportMessage[];
 }
 
 interface BackupItem {
@@ -369,6 +379,9 @@ export default function SuperAdmin() {
       createdAt: string;
     }>
   >([]);
+  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
+  const [replyMessage, setReplyMessage] = useState("");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pendingAction, setPendingAction] = useState<
@@ -519,7 +532,7 @@ export default function SuperAdmin() {
       if (activeTab === "news") {
         const res = await api.get("/super/news");
         setNews(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
-      } else if (activeTab === "leads" || activeTab === "tickets") {
+      } else if (activeTab === "leads") {
         const res = await api.get("/super/leads");
         setLeads(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
       } else if (activeTab === "settings") {
@@ -551,6 +564,9 @@ export default function SuperAdmin() {
       } else if (activeTab === "upgrades") {
         const res = await api.get("/super/upgrade-requests");
         setUpgradeRequests(Array.isArray(res.data) ? res.data : []);
+      } else if (activeTab === "tickets") {
+        const res = await api.get("/support/all");
+        setSupportTickets(Array.isArray(res.data) ? res.data : []);
       }
     } catch (err: unknown) {
       const msg =
@@ -583,11 +599,12 @@ export default function SuperAdmin() {
           ? "Yanlış şifre"
           : "Parol noto'g'ri";
 
-  const handleAuth = () => {
-    if (rootPass === "2007") {
+  const handleAuth = async () => {
+    try {
+      await api.post("/super/verify-root", { password: rootPass });
       setAuthorized(true);
       toast.success(t.superadmin.confirm);
-    } else {
+    } catch {
       toast.error(wrongPassMsg);
     }
   };
@@ -598,12 +615,13 @@ export default function SuperAdmin() {
   };
 
   const handleConfirmAction = async () => {
-    if (confirmPassword === "2007") {
+    try {
+      await api.post("/super/verify-root", { password: confirmPassword });
       if (pendingAction) await pendingAction();
       setIsConfirmModalOpen(false);
       setConfirmPassword("");
       setPendingAction(null);
-    } else {
+    } catch {
       toast.error(wrongPassMsg);
     }
   };
@@ -756,10 +774,14 @@ export default function SuperAdmin() {
     },
   ];
 
+  const activeItem = menuGroups
+    .flatMap((g) => g.items)
+    .find((i) => i.id === activeTab);
+
   if (!authorized) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-20 px-6 text-center">
-        <div className="w-24 h-24 rounded-3xl bg-blue-600/10 flex items-center justify-center text-blue-600 mb-8 border border-blue-600/20">
+      <div className="flex flex-col items-center justify-center min-h-[70vh] py-20 px-6 text-center">
+        <div className="w-24 h-24 rounded-3xl bg-blue-600/10 flex items-center justify-center text-blue-600 mb-8 border border-blue-600/20 shadow-xl shadow-blue-600/5">
           <Lock className="w-10 h-10" />
         </div>
         <h1 className="text-3xl font-black mb-4 tracking-tight">
@@ -789,130 +811,45 @@ export default function SuperAdmin() {
     );
   }
 
-  const activeItem = menuGroups
-    .flatMap((g) => g.items)
-    .find((i) => i.id === activeTab);
-
   return (
-    <div className="space-y-6">
-      {/* Compact Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/30">
-            <ShieldCheck className="w-6 h-6 text-white" />
+    <div className="space-y-8">
+      {/* Page Context Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100 dark:border-white/5">
+        <div className="flex items-center gap-5">
+          <div className={clsx(
+            "w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform hover:scale-105",
+            activeItem?.bg || "bg-blue-600"
+          )}>
+            {activeItem ? (
+              <activeItem.icon className={clsx("w-7 h-7", activeItem.color.includes('text-') ? activeItem.color : "text-white")} />
+            ) : (
+              <ShieldCheck className="w-7 h-7 text-white" />
+            )}
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight">
-              {t.superadmin.systemControl}
+            <h1 className="text-3xl font-black tracking-tight mb-1">
+              {activeItem?.label || t.superadmin.systemControl}
             </h1>
-            <p className="text-slate-500 text-sm font-medium">
-              {t.superadmin.systemControlDesc}
+            <p className="text-slate-500 font-bold text-sm">
+              {activeTab === 'overview' ? t.superadmin.systemControlDesc : `${t.superadmin.systemControl} • ${activeItem?.label}`}
             </p>
           </div>
         </div>
-        <div className="flex gap-3">
+
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={handleManualReset}
-            className="px-4 py-2.5 bg-rose-600/10 text-rose-600 border border-rose-600/20 rounded-xl flex items-center gap-2 font-bold text-sm hover:bg-rose-600 hover:text-white transition-all active:scale-95"
+            className="px-5 py-3 bg-rose-600/5 text-rose-600 border border-rose-600/10 rounded-xl flex items-center gap-2.5 font-black text-xs uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all active:scale-95 shadow-sm"
           >
             <RotateCcw className="w-4 h-4" /> {t.superadmin.demoReset}
           </button>
-          <button className="px-4 py-2.5 premium-gradient text-white rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-blue-600/20 active:scale-95 transition-all">
+          <button className="px-6 py-3 premium-gradient text-white rounded-xl flex items-center gap-2.5 font-black text-xs uppercase tracking-widest shadow-lg shadow-blue-600/20 hover:shadow-blue-600/40 transition-all active:scale-95">
             <Send className="w-4 h-4" /> {t.superadmin.globalNotifyBtn}
           </button>
         </div>
       </div>
 
-      {/* Sidebar + Content */}
-      <div className="flex gap-6 items-start">
-        {/* Left Sidebar */}
-        <div className="w-56 shrink-0 hidden lg:block">
-          <div className="bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl p-3 space-y-4 sticky top-6">
-            {menuGroups.map((group) => (
-              <div key={group.group}>
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-3 mb-1.5">
-                  {group.group}
-                </p>
-                <div className="space-y-0.5">
-                  {group.items.map((item) => {
-                    const isActive = activeTab === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          setActiveTab(item.id);
-                          setSearchParams({ tab: item.id });
-                        }}
-                        className={clsx(
-                          "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 relative",
-                          isActive
-                            ? "bg-slate-900 dark:bg-blue-600 text-white shadow-lg"
-                            : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5"
-                        )}
-                      >
-                        <div
-                          className={clsx(
-                            "w-7 h-7 rounded-lg flex items-center justify-center shrink-0",
-                            isActive ? "bg-white/20" : item.bg
-                          )}
-                        >
-                          <item.icon
-                            className={clsx(
-                              "w-3.5 h-3.5",
-                              isActive ? "text-white" : item.color
-                            )}
-                          />
-                        </div>
-                        <span className="truncate">{item.label}</span>
-                        {(item.badge ?? 0) > 0 && (
-                          <span className="ml-auto shrink-0 min-w-[18px] h-[18px] rounded-full bg-rose-600 text-white text-[10px] font-black flex items-center justify-center px-1">
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Mobile tab scroll */}
-        <div className="lg:hidden w-full flex gap-2 overflow-x-auto no-scrollbar pb-2">
-          {menuGroups
-            .flatMap((g) => g.items)
-            .map((item) => (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setSearchParams({ tab: item.id });
-                }}
-                className={clsx(
-                  "px-4 py-3 rounded-2xl font-black text-xs flex flex-col items-center gap-1.5 transition-all shrink-0 active:scale-95 min-w-[80px] relative",
-                  activeTab === item.id
-                    ? "bg-slate-900 dark:bg-blue-600 text-white shadow-xl"
-                    : "bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 text-slate-500"
-                )}
-              >
-                <item.icon
-                  className={clsx(
-                    "w-4 h-4",
-                    activeTab === item.id ? "text-white" : item.color
-                  )}
-                />
-                <span className="leading-none text-center">{item.label}</span>
-                {(item.badge ?? 0) > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-600 text-white text-[9px] font-black flex items-center justify-center">
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            ))}
-        </div>
-
-        {/* Main Content */}
+      <div className="min-w-0">
         <div className="flex-1 min-w-0">
           {/* Section header */}
           {activeItem && (
@@ -1112,7 +1049,7 @@ export default function SuperAdmin() {
 
               {activeTab === "leads" &&
                 (() => {
-                  const realLeads = leads.filter((l) => !IS_TICKET(l.info));
+                  const realLeads = leads;
                   return (
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
@@ -1280,207 +1217,150 @@ export default function SuperAdmin() {
                   );
                 })()}
 
-              {activeTab === "tickets" &&
-                (() => {
-                  const tickets = leads.filter((l) => IS_TICKET(l.info));
-                  return (
-                    <div className="space-y-4">
-                      <div>
-                        <h2 className="text-xl font-black tracking-tight">
-                          Arizalar
-                        </h2>
-                        <p className="text-xs text-slate-400 font-bold mt-0.5">
-                          Tizim foydalanuvchilaridan kelgan support arizalari
-                        </p>
-                      </div>
-
-                      {tickets.length === 0 ? (
-                        <div className="bg-white dark:bg-white/5 rounded-[2rem] border border-slate-100 dark:border-white/5 p-16 text-center">
-                          <BadgeCheck className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                          <p className="text-slate-400 font-black text-sm uppercase tracking-widest">
-                            Hali arizalar yo'q
-                          </p>
+              {activeTab === "tickets" && (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[700px]">
+                  {/* Ticket List */}
+                  <div className="lg:col-span-1 bg-white dark:bg-white/5 rounded-[2rem] border border-slate-100 dark:border-white/5 flex flex-col overflow-hidden">
+                    <div className="p-6 border-b border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-white/5">
+                      <h3 className="font-black text-sm uppercase tracking-widest text-slate-400">Distributor Murojaatlari</h3>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                      {supportTickets.length === 0 ? (
+                        <div className="p-10 text-center text-slate-400 font-bold uppercase text-[10px] tracking-widest">
+                          Murojaatlar mavjud emas
                         </div>
                       ) : (
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                          {tickets.map((ticket) => {
-                            const fields = parseTicketFields(ticket.info || "");
-                            const isResolved =
-                              ticket.status === "CONTACTED" ||
-                              ticket.status === "CLOSED" ||
-                              ticket.status === "CONVERTED";
-                            return (
-                              <div
-                                key={ticket.id}
-                                className={clsx(
-                                  "bg-white dark:bg-white/5 rounded-[1.5rem] border-2 p-6 space-y-4 transition-all",
-                                  isResolved
-                                    ? "border-emerald-100 dark:border-emerald-900/30 opacity-75"
-                                    : "border-violet-100 dark:border-violet-900/30 hover:border-violet-300 hover:shadow-lg"
-                                )}
-                              >
-                                {/* Header */}
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex items-center gap-3">
-                                    <div
-                                      className={clsx(
-                                        "w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shrink-0",
-                                        isResolved
-                                          ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
-                                          : "bg-violet-100 dark:bg-violet-900/30 text-violet-600"
-                                      )}
-                                    >
-                                      {isResolved ? (
-                                        <Check className="w-5 h-5" />
-                                      ) : (
-                                        <Lock className="w-4 h-4" />
-                                      )}
-                                    </div>
-                                    <div>
-                                      <p className="text-sm font-black text-slate-900 dark:text-white leading-tight">
-                                        {ticket.fullName}
-                                      </p>
-                                      <p className="text-[10px] font-bold text-slate-400">
-                                        {ticket.phone}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-2 shrink-0">
-                                    <span
-                                      className={clsx(
-                                        "px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border",
-                                        LEAD_STATUS_COLORS[ticket.status] ||
-                                          LEAD_STATUS_COLORS["CLOSED"]
-                                      )}
-                                    >
-                                      {isResolved ? "Hal qilindi" : "Yangi"}
-                                    </span>
-                                  </div>
-                                </div>
+                        supportTickets.map((ticket) => (
+                          <button
+                            key={ticket.id}
+                            onClick={() => setSelectedTicket(ticket)}
+                            className={clsx(
+                              "w-full text-left p-4 rounded-3xl border transition-all relative group",
+                              selectedTicket?.id === ticket.id
+                                ? "bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-200 dark:shadow-none"
+                                : "bg-white dark:bg-white/5 border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/10"
+                            )}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <span className={clsx(
+                                "px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-widest",
+                                ticket.status === 'CLOSED' ? "bg-slate-200 text-slate-600" : "bg-emerald-100 text-emerald-600 dark:bg-emerald-900/50"
+                              )}>
+                                {ticket.status}
+                              </span>
+                              <span className={clsx("text-[9px] font-bold", selectedTicket?.id === ticket.id ? "text-indigo-200" : "text-slate-400")}>
+                                {format(new Date(ticket.lastReplyAt), "HH:mm")}
+                              </span>
+                            </div>
+                            <h4 className="font-black text-sm truncate pr-4">{ticket.subject}</h4>
+                            <p className={clsx("text-[10px] font-bold mt-1 truncate", selectedTicket?.id === ticket.id ? "text-indigo-100" : "text-slate-500")}>
+                              🏢 {ticket.company?.name}
+                            </p>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
 
-                                {/* Ticket type badge */}
-                                <div className="flex items-center gap-2">
-                                  <span className="px-3 py-1 rounded-lg bg-violet-600/10 text-violet-600 text-[9px] font-black uppercase tracking-widest border border-violet-200 dark:border-violet-900/50">
-                                    🔐 Parol tiklash so'rovi
-                                  </span>
+                  {/* Chat Area */}
+                  <div className="lg:col-span-2 bg-white dark:bg-white/5 rounded-[2rem] border border-slate-100 dark:border-white/5 flex flex-col overflow-hidden">
+                    {selectedTicket ? (
+                      <>
+                        <div className="p-6 border-b border-slate-100 dark:border-white/10 flex items-center justify-between bg-slate-50/50 dark:bg-white/5">
+                          <div>
+                            <h2 className="font-black text-xl tracking-tight text-slate-900 dark:text-white">{selectedTicket.subject}</h2>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Distributor: {selectedTicket.company?.name}</p>
+                          </div>
+                          <div className="flex gap-2">
+                             {selectedTicket.status !== 'CLOSED' && (
+                               <button 
+                                 onClick={async () => {
+                                   await api.patch(`/support/status/${selectedTicket.id}`, { status: 'CLOSED' });
+                                   toast.success("Murojaat yopildi");
+                                   fetchData();
+                                   setSelectedTicket({...selectedTicket, status: 'CLOSED'});
+                                 }}
+                                 className="px-4 py-2 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all"
+                               >
+                                 Yopish
+                               </button>
+                             )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 dark:bg-black/10">
+                            {selectedTicket.messages?.map((msg: SupportMessage) => {
+                             const isMe = msg.senderType === "SUPER_ADMIN";
+                             return (
+                               <div key={msg.id} className={clsx("flex flex-col", isMe ? "items-end" : "items-start")}>
+                                 <div className={clsx(
+                                   "max-w-[85%] p-4 rounded-3xl text-sm font-bold leading-relaxed shadow-sm",
+                                  isMe 
+                                    ? "premium-gradient text-white rounded-tr-none" 
+                                    : "bg-white dark:bg-white/10 text-slate-900 dark:text-white rounded-tl-none border border-slate-100 dark:border-white/5"
+                                )}>
+                                  {msg.message}
                                 </div>
-
-                                {/* Parsed fields */}
-                                <div className="bg-slate-50 dark:bg-white/5 rounded-xl p-4 space-y-2">
-                                  {fields["Company"] && (
-                                    <div className="flex items-center gap-2 text-xs">
-                                      <span className="text-slate-400 font-bold w-20 shrink-0">
-                                        Kompaniya:
-                                      </span>
-                                      <span className="font-black text-slate-900 dark:text-white">
-                                        {fields["Company"]}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {fields["User"] && (
-                                    <div className="flex items-center gap-2 text-xs">
-                                      <span className="text-slate-400 font-bold w-20 shrink-0">
-                                        Foydalanuvchi:
-                                      </span>
-                                      <span className="font-black text-slate-900 dark:text-white">
-                                        {fields["User"]}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {fields["Role"] && (
-                                    <div className="flex items-center gap-2 text-xs">
-                                      <span className="text-slate-400 font-bold w-20 shrink-0">
-                                        Rol:
-                                      </span>
-                                      <span className="font-semibold text-blue-600 bg-blue-50 dark:bg-blue-900/20 px-2 py-0.5 rounded-lg">
-                                        {fields["Role"]}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {fields["Slug"] && (
-                                    <div className="flex items-center gap-2 text-xs">
-                                      <span className="text-slate-400 font-bold w-20 shrink-0">
-                                        Slug:
-                                      </span>
-                                      <span className="font-mono text-slate-500">
-                                        {fields["Slug"]}
-                                      </span>
-                                    </div>
-                                  )}
-                                  {fields["Note"] && (
-                                    <div className="flex items-start gap-2 text-xs">
-                                      <span className="text-slate-400 font-bold w-20 shrink-0 mt-0.5">
-                                        Izoh:
-                                      </span>
-                                      <span className="font-semibold text-slate-700 dark:text-slate-300 leading-relaxed">
-                                        {fields["Note"]}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Date + Actions */}
-                                <div className="flex items-center justify-between pt-1">
-                                  <p className="text-[10px] font-bold text-slate-400">
-                                    {format(
-                                      new Date(ticket.createdAt),
-                                      "dd MMM yyyy, HH:mm",
-                                      { locale: locales[language] || uz }
-                                    )}
-                                  </p>
-                                  <div className="flex gap-2">
-                                    {!isResolved && (
-                                      <button
-                                        onClick={async () => {
-                                          try {
-                                            await api.patch(
-                                              `/super/leads/${ticket.id}`,
-                                              { status: "CONTACTED" }
-                                            );
-                                            toast.success("Ariza hal qilindi");
-                                            fetchData();
-                                          } catch {
-                                            toast.error(t.common.error);
-                                          }
-                                        }}
-                                        className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-700 active:scale-95 transition-all flex items-center gap-1.5"
-                                      >
-                                        <Check className="w-3.5 h-3.5" /> Hal
-                                        qilindi
-                                      </button>
-                                    )}
-                                    <button
-                                      onClick={async () => {
-                                        if (
-                                          !window.confirm("Arizani o'chirish?")
-                                        )
-                                          return;
-                                        try {
-                                          await api.delete(
-                                            `/super/leads/${ticket.id}`
-                                          );
-                                          toast.success(t.superadmin.deleted);
-                                          fetchData();
-                                        } catch {
-                                          toast.error(
-                                            t.superadmin.failedToDelete
-                                          );
-                                        }
-                                      }}
-                                      className="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 border border-rose-200 dark:border-rose-900/50 rounded-xl hover:bg-rose-600 hover:text-white transition-all"
-                                    >
-                                      <Trash2 className="w-3.5 h-3.5" />
-                                    </button>
-                                  </div>
-                                </div>
+                                <span className="text-[9px] text-slate-400 mt-2 font-black px-2">
+                                  {format(new Date(msg.createdAt), "dd MMM, HH:mm")}
+                                </span>
                               </div>
                             );
                           })}
                         </div>
-                      )}
-                    </div>
-                  );
-                })()}
+
+                        {selectedTicket.status !== "CLOSED" && (
+                          <div className="p-4 bg-white dark:bg-white/5 border-t border-slate-100 dark:border-white/10 flex gap-3">
+                            <input
+                              type="text"
+                              value={replyMessage}
+                              onChange={(e) => setReplyMessage(e.target.value)}
+                              placeholder="Fikr bildiring..."
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && replyMessage.trim()) {
+                                   const msg = replyMessage;
+                                   setReplyMessage("");
+                                   api.post(`/support/message/${selectedTicket.id}`, { message: msg }).then(res => {
+                                      setSelectedTicket({
+                                        ...selectedTicket,
+                                        messages: [...selectedTicket.messages, res.data]
+                                      });
+                                   });
+                                }
+                              }}
+                              className="flex-1 px-6 py-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-2xl focus:border-indigo-600 outline-none transition-all dark:text-white font-bold"
+                            />
+                            <button
+                              onClick={() => {
+                                if (!replyMessage.trim()) return;
+                                const msg = replyMessage;
+                                setReplyMessage("");
+                                api.post(`/support/message/${selectedTicket.id}`, { message: msg }).then(res => {
+                                   setSelectedTicket({
+                                     ...selectedTicket,
+                                     messages: [...selectedTicket.messages, res.data]
+                                   });
+                                });
+                              }}
+                              className="w-14 h-14 premium-gradient text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                            >
+                              <Send size={20} />
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-10 space-y-4 text-center">
+                        <div className="w-24 h-24 bg-slate-50 dark:bg-white/5 rounded-[2.5rem] flex items-center justify-center mb-4 transition-transform hover:scale-110">
+                          <BadgeCheck size={48} className="opacity-10" />
+                        </div>
+                        <h3 className="font-black text-slate-900 dark:text-white text-lg">Murojaatni tanlang</h3>
+                        <p className="max-w-xs text-xs font-bold leading-relaxed uppercase tracking-widest opacity-60">Chap tomondagi ro'yxatdan kerakli murojaatni tanlab, javob berishingiz mumkin</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {activeTab === "backups" && (
                 <div className="space-y-8">
@@ -2595,7 +2475,7 @@ export default function SuperAdmin() {
                       onClick={async () => {
                         try {
                           setNotifySending(true);
-                          const payload: any = {
+                          const payload: { title: string; message: string; type: string; companyIds?: string[] } = {
                             title: notifyForm.title,
                             message: notifyForm.message,
                             type: notifyForm.type,

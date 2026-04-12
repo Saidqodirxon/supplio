@@ -19,7 +19,6 @@ import Products from "./pages/Products";
 import Expenses from "./pages/Expenses";
 import Notifications from "./pages/Notifications";
 import Subscription from "./pages/Subscription";
-import SuperAdmin from "./pages/SuperAdmin";
 import Settings from "./pages/Settings";
 import TelegramBots from "./pages/TelegramBots";
 import Approvals from "./pages/Approvals";
@@ -28,6 +27,7 @@ import OwnerDemo from "./pages/OwnerDemo";
 import Staff from "./pages/Staff";
 import DemoLanding from "./pages/DemoLanding";
 import HelpCenter from "./pages/HelpCenter";
+import SupportTickets from "./pages/SupportTickets";
 import Profile from "./pages/Profile";
 import { NotFound, SubscriptionExpired, AccountLocked } from "./pages/Error";
 import { useAuthStore } from "./store/authStore";
@@ -115,12 +115,56 @@ class ErrorBoundary extends React.Component<
   }
 }
 
+function SuperAdminBlock() {
+  const { logout } = useAuthStore();
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 font-outfit p-6">
+      <div className="max-w-md w-full text-center space-y-6">
+        <div className="w-20 h-20 rounded-3xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mx-auto">
+          <img src="/logo.png" alt="Supplio" className="w-12 h-12 object-contain" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            Admin panelga o'ting
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed">
+            SuperAdmin foydalanuvchilari distributor dashboardiga kira olmaydi.
+            Iltimos, maxsus admin panel orqali tizimni boshqaring.
+          </p>
+        </div>
+        <div className="flex flex-col gap-3">
+          <a
+            href={import.meta.env.VITE_ADMIN_URL || "http://localhost:5001"}
+            className="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-sm uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-blue-600/20 text-center block"
+          >
+            Admin panelga o'tish
+          </a>
+          <button
+            onClick={logout}
+            className="w-full py-3 px-6 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 rounded-2xl font-black text-xs uppercase tracking-widest transition-all hover:bg-slate-100 dark:hover:bg-white/5"
+          >
+            Chiqish
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((state) => state.token);
+  const user = useAuthStore((state) => state.user);
   const location = useLocation();
 
   if (!token) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // SUPER_ADMIN is a platform-level role — they must use the separate admin panel.
+  // In demo mode the role is overridden to OWNER so this check won't block demo.
+  const isDemo = localStorage.getItem("supplio_demo_mode") === "1";
+  if (user?.roleType === "SUPER_ADMIN" && !isDemo) {
+    return <SuperAdminBlock />;
   }
 
   return <>{children}</>;
@@ -358,6 +402,16 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="support"
+              element={
+                <ProtectedRoute
+                  allowedRoles={["OWNER", "MANAGER", "SUPER_ADMIN"]}
+                >
+                  <SupportTickets />
+                </ProtectedRoute>
+              }
+            />
 
             {/* Owner/Super Admin routes */}
             <Route
@@ -373,24 +427,6 @@ function App() {
               element={
                 <ProtectedRoute allowedRoles={["OWNER", "SUPER_ADMIN"]}>
                   <TelegramBots />
-                </ProtectedRoute>
-              }
-            />
-
-            {/* Super Admin only routes */}
-            <Route
-              path="super"
-              element={
-                <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
-                  <SuperAdmin />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="settings"
-              element={
-                <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}>
-                  <Settings />
                 </ProtectedRoute>
               }
             />

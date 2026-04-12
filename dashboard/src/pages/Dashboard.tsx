@@ -1,4 +1,4 @@
-import { ArrowUpRight, DollarSign, ShoppingCart, Users, Activity, TrendingUp } from 'lucide-react';
+import { ArrowUpRight, DollarSign, ShoppingCart, Users, Activity, TrendingUp, Package } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import type { Dealer } from '../types';
@@ -13,6 +13,9 @@ interface AnalyticsStats {
   activeDealers: number;
   debt: number;
   collected: number;
+  products: number;
+  periodOrders: number;
+  periodRevenue: number;
 }
 
 interface RecentOrder {
@@ -58,6 +61,8 @@ export default function Dashboard() {
   const totalOutstanding = stats?.debt ?? dealers.reduce((acc, d) => acc + (d.currentDebt || 0), 0);
   const totalDealers = stats?.activeDealers ?? dealers.length;
   const totalRevenue = stats?.revenue ?? 0;
+  const totalProducts = stats?.products ?? 0;
+  const periodOrders = stats?.periodOrders ?? 0;
 
   const statCards = [
     {
@@ -72,6 +77,20 @@ export default function Dashboard() {
       value: totalDealers.toString(),
       icon: Users,
       trend: `${totalDealers}`,
+      trendPositive: true,
+    },
+    {
+      name: language === 'ru' ? 'Заказы (период)' : language === 'en' ? 'Orders (period)' : "Buyurtmalar",
+      value: `${periodOrders} ${language === 'ru' ? 'шт' : language === 'en' ? 'pcs' : 'ta'}`,
+      icon: ShoppingCart,
+      trend: stats ? `${stats.periodRevenue.toLocaleString()} ${t.common.uzs}` : '—',
+      trendPositive: true,
+    },
+    {
+      name: language === 'ru' ? 'Продукты' : language === 'en' ? 'Products' : "Mahsulotlar",
+      value: `${totalProducts} ${language === 'ru' ? 'шт' : language === 'en' ? 'pcs' : 'ta'}`,
+      icon: Package,
+      trend: '—',
       trendPositive: true,
     },
     {
@@ -129,7 +148,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
         {statCards.map((item) => (
           <motion.div
             key={item.name}

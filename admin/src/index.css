@@ -1,0 +1,147 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Enterprise Premium Light Mode - Strictly High Contrast */
+    --background: 0 0% 100%; /* Pure white base */
+    --foreground: 222.2 84% 4.9%; /* Rich black-slate */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 1.25rem;
+    --card-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05),
+      0 20px 25px -5px rgb(0 0 0 / 0.03);
+  }
+
+  .dark {
+    /* Enterprise Slate Dark Mode - Smooth & Professional */
+    --background: 222 47% 11%; /* slate-900 */
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%; /* slate-900 */
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 13%; /* Slightly lighter background for popovers */
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%; /* slate-800 */
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%; /* slate-800 */
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%; /* slate-800 border-style */
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+    --card-shadow:
+      0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  }
+
+  .profile-img {
+    @apply rounded-full border-2 border-slate-200 dark:border-white/10 shadow-2xl transition-all;
+    aspect-ratio: 1/1;
+    object-fit: cover;
+  }
+
+  body {
+    @apply antialiased transition-colors duration-300;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: "Outfit", sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background-color: hsl(var(--card));
+    color: hsl(var(--card-foreground));
+    border: 1px solid hsl(var(--border));
+    @apply shadow-2xl transition-all duration-500 rounded-[2.5rem] overflow-hidden;
+    box-shadow: var(--card-shadow);
+  }
+
+  .premium-gradient {
+    @apply bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800;
+  }
+
+  .premium-button {
+    @apply relative overflow-hidden flex items-center justify-center gap-3 px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest text-white premium-gradient shadow-xl shadow-blue-600/20 active:scale-95 transition-all hover:shadow-blue-600/40 hover:-translate-y-1;
+  }
+ 
+  .input-field {
+    @apply w-full bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-2xl px-6 h-14 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all duration-300 text-slate-950 dark:text-slate-50 placeholder:text-slate-500 font-bold;
+  }
+
+  .input-field:not(input):not(textarea) {
+    @apply flex items-center;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Prevent scrollbar-induced layout shift for the inner scroll area */
+.main-scroll {
+  scrollbar-gutter: stable;
+}
+
+/* Scroll lock — applied to the inner scroll container when a modal is open */
+.scroll-locked {
+  overflow: hidden !important;
+}
+
+/* Prevent space-y utilities from adding margin-top to fixed overlays (modal portals) */
+.fixed {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Scrollbar Style */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors;
+}
+
+/* Final consistency overrides */
+:not(.dark) .input-field {
+  background-color: #f8fafc;
+}
+.dark .input-field {
+  background-color: #0f172a; /* slate-900 */
+}

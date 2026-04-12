@@ -45,6 +45,12 @@ export class CompanyController {
     return this.companyService.deactivateStaff(req.user.companyId, id);
   }
 
+  @Get("backup")
+  @Roles("OWNER")
+  async getBackup(@Req() req: any) {
+    return this.companyService.getBackup(req.user.companyId);
+  }
+
   @Get("features")
   @Roles("OWNER", "MANAGER", "SALES")
   async getFeatures(@Req() req: any) {

@@ -10,6 +10,7 @@ import {
   Query,
   Request,
   NotFoundException,
+  UnauthorizedException,
   Res,
   StreamableFile,
 } from "@nestjs/common";
@@ -30,6 +31,18 @@ export class SuperAdminController {
     private readonly backupService: BackupService,
     private readonly unitsService: UnitsService,
   ) {}
+
+  // ── Root Verification ─────────────────────────────────────────────────────
+
+  @Post("verify-root")
+  @Roles("SUPER_ADMIN")
+  async verifyRootPassword(@Body() body: { password: string }) {
+    const rootPass = process.env.ROOT_ADMIN_PASS;
+    if (!rootPass || body.password !== rootPass) {
+      throw new UnauthorizedException("Invalid root password");
+    }
+    return { ok: true };
+  }
 
   // ── Backups ───────────────────────────────────────────────────────────────
 

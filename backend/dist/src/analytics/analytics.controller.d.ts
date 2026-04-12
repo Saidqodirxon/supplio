@@ -25,6 +25,7 @@ export declare class AnalyticsController {
             periodRevenue: number;
             periodProfit: number;
             periodOrders: number;
+            totalOrders: number;
         };
         chart: {
             revenue: number;
@@ -36,6 +37,16 @@ export declare class AnalyticsController {
             status: import(".prisma/client").$Enums.OrderStatus;
             count: number;
             amount: number;
+        }[];
+        recentOrders: {
+            id: string;
+            totalAmount: number;
+            status: import(".prisma/client").$Enums.OrderStatus;
+            createdAt: Date;
+            dealer: {
+                name: string;
+                phone: string;
+            };
         }[];
         period: "7d" | "30d" | "1y" | "all";
     }>;
@@ -62,9 +73,9 @@ export declare class AnalyticsController {
             utilizationPercent: number;
             orders: {
                 id: string;
-                createdAt: Date;
                 totalAmount: number;
                 status: import(".prisma/client").$Enums.OrderStatus;
+                createdAt: Date;
             }[];
         }[];
         totalDebt: number;

@@ -1114,6 +1114,66 @@ export default function LandingPage() {
         </section>
       )}
 
+      {/* ===== Contact / Quick Contact ===== */}
+      {(contactPhone || contactEmail || socialTelegram || socialInstagram || socialLinkedin || socialTwitter) && (
+        <section className="py-16 sm:py-20 px-5 sm:px-6 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+          <div className="max-w-4xl mx-auto text-center space-y-8">
+            <div className="space-y-3">
+              <span className="text-xs font-black uppercase tracking-widest text-blue-200">
+                {lang === "uz" ? "Bog'lanish" : lang === "ru" ? "Связаться" : lang === "tr" ? "İletişim" : lang === "oz" ? "Боғланиш" : "Contact"}
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
+                {lang === "uz" ? "Tez bog'lanish" : lang === "ru" ? "Быстрая связь" : lang === "tr" ? "Hızlı İletişim" : lang === "oz" ? "Тез боғланиш" : "Get in Touch"}
+              </h2>
+              <p className="text-blue-200 max-w-lg mx-auto">
+                {lang === "uz" ? "Savollaringiz bo'lsa, biz bilan bog'laning. Yordam berishga tayyormiz!" : lang === "ru" ? "Есть вопросы? Свяжитесь с нами — мы готовы помочь!" : lang === "tr" ? "Sorularınız mı var? Bize ulaşın, yardıma hazırız!" : "Have questions? Contact us — we're ready to help!"}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-4">
+              {contactPhone && (
+                <a
+                  href={contactPhoneHref || "#"}
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl font-bold text-sm transition-all"
+                >
+                  <Phone className="w-4 h-4" />
+                  {contactPhone}
+                </a>
+              )}
+              {contactEmail && contactEmailHref && (
+                <a
+                  href={contactEmailHref}
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl font-bold text-sm transition-all"
+                >
+                  <Mail className="w-4 h-4" />
+                  {contactEmail}
+                </a>
+              )}
+              {socialTelegram && (
+                <a
+                  href={socialTelegram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white text-blue-700 hover:bg-blue-50 rounded-2xl font-black text-sm transition-all shadow-lg shadow-blue-900/20"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Telegram
+                </a>
+              )}
+              {socialInstagram && (
+                <a
+                  href={socialInstagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl font-bold text-sm transition-all"
+                >
+                  Instagram
+                </a>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ===== Footer ===== */}
       <footer className="py-16 sm:py-20 px-5 sm:px-6 border-t border-slate-100 bg-slate-50 text-left">
         <div className="max-w-7xl mx-auto flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr] gap-12 mb-16">

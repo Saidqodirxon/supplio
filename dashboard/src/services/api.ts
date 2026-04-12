@@ -30,7 +30,9 @@ api.interceptors.request.use((config) => {
   }
 
   // Block write operations in demo read-only mode before request is sent.
-  if (isDemoMode && !isDemoFullAccess && isMutatingMethod) {
+  // Auth endpoints are always allowed (login must work in demo mode).
+  const isAuthEndpoint = (config.url || '').includes('/auth/');
+  if (isDemoMode && !isDemoFullAccess && isMutatingMethod && !isAuthEndpoint) {
     sonnerToast.warning(
       "Demo rejim — faqat ko'rish uchun. Tahrirlash uchun to'liq demo so'rov yuboring.",
       {

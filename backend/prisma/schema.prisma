@@ -70,6 +70,36 @@ model Company {
   units                 Unit[]
   users                 User[]
   upgradeRequests       UpgradeRequest[]
+  workingHours          String?
+  adminLogBotToken      String?
+  facebook              String?
+  tiktok                String?
+  youtube               String?
+  supportTickets        SupportTicket[]
+}
+
+model SupportTicket {
+  id          String   @id @default(uuid())
+  companyId   String
+  subject     String
+  message     String
+  status      String   @default("OPEN") // OPEN, IN_PROGRESS, CLOSED
+  lastReplyAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  company     Company  @relation(fields: [companyId], references: [id])
+  messages    SupportMessage[]
+}
+
+model SupportMessage {
+  id          String   @id @default(uuid())
+  ticketId    String
+  senderId    String?  // User ID if sent by SuperAdmin or Distributor Staff
+  senderType  String   // SUPER_ADMIN, DISTRIBUTOR
+  message     String
+  imageUrl    String?  // Optional image attachment
+  createdAt   DateTime @default(now())
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id])
 }
 
 model Branch {

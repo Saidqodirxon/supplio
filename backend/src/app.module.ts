@@ -23,6 +23,7 @@ import { NotificationsModule } from "./notifications/notifications.module";
 import { StoreModule } from "./store/store.module";
 import { UploadModule } from "./upload/upload.module";
 import { PublicModule } from "./public/public.module";
+import { SupportModule } from "./support/support.module";
 
 import { AppController } from "./app.controller";
 import { DemoReadonlyMiddleware } from "./common/middleware/demo-readonly.middleware";
@@ -53,6 +54,7 @@ import { DemoReadonlyMiddleware } from "./common/middleware/demo-readonly.middle
     StoreModule,
     UploadModule,
     PublicModule,
+    SupportModule,
   ],
   controllers: [AppController],
   providers: [DemoReadonlyMiddleware],

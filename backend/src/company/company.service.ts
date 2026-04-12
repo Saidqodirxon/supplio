@@ -197,6 +197,50 @@ export class CompanyService {
     return this.prisma.customRole.delete({ where: { id: roleId } });
   }
 
+  async getBackup(companyId: string) {
+    const [company, dealers, products, orders, payments, expenses, branches, staff] = await Promise.all([
+      this.prisma.company.findUnique({
+        where: { id: companyId },
+        select: { id: true, name: true, slug: true, website: true, instagram: true, telegram: true, subscriptionPlan: true, createdAt: true },
+      }),
+      this.prisma.dealer.findMany({ where: { companyId, deletedAt: null }, orderBy: { createdAt: 'asc' } }),
+      this.prisma.product.findMany({ where: { companyId, deletedAt: null }, orderBy: { createdAt: 'asc' } }),
+      this.prisma.order.findMany({
+        where: { companyId, deletedAt: null },
+        orderBy: { createdAt: 'asc' },
+        include: { dealer: { select: { name: true, phone: true } } },
+      }),
+      this.prisma.payment.findMany({ where: { companyId, deletedAt: null }, orderBy: { createdAt: 'asc' } }),
+      this.prisma.expense.findMany({ where: { companyId, deletedAt: null }, orderBy: { createdAt: 'asc' } }),
+      this.prisma.branch.findMany({ where: { companyId }, orderBy: { createdAt: 'asc' } }),
+      this.prisma.user.findMany({
+        where: { companyId, isActive: true },
+        select: { id: true, phone: true, fullName: true, roleType: true, createdAt: true },
+      }),
+    ]);
+
+    return {
+      exportedAt: new Date().toISOString(),
+      company,
+      summary: {
+        dealers: dealers.length,
+        products: products.length,
+        orders: orders.length,
+        payments: payments.length,
+        expenses: expenses.length,
+        branches: branches.length,
+        staff: staff.length,
+      },
+      dealers,
+      products,
+      orders,
+      payments,
+      expenses,
+      branches,
+      staff,
+    };
+  }
+
   async getFeatureFlags(companyId: string) {
     const company = await this.prisma.company.findUnique({
       where: { id: companyId },

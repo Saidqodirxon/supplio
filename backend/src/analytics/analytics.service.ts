@@ -103,6 +103,17 @@ export class AnalyticsService {
       amount: g._sum.totalAmount ?? 0,
     }));
 
+    // Recent orders for reports page
+    const recentOrders = await this.prisma.order.findMany({
+      where: { companyId, deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+      select: {
+        id: true, totalAmount: true, status: true, createdAt: true,
+        dealer: { select: { name: true, phone: true } },
+      },
+    });
+
     return {
       stats: {
         revenue: totalRevenue,
@@ -116,9 +127,11 @@ export class AnalyticsService {
         periodRevenue,
         periodProfit,
         periodOrders: periodOrders.length,
+        totalOrders: allOrders.length,
       },
       chart,
       statusDistribution,
+      recentOrders,
       period,
     };
   }

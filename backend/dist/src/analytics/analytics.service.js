@@ -109,6 +109,15 @@ let AnalyticsService = class AnalyticsService {
             count: g._count.id,
             amount: g._sum.totalAmount ?? 0,
         }));
+        const recentOrders = await this.prisma.order.findMany({
+            where: { companyId, deletedAt: null },
+            orderBy: { createdAt: 'desc' },
+            take: 20,
+            select: {
+                id: true, totalAmount: true, status: true, createdAt: true,
+                dealer: { select: { name: true, phone: true } },
+            },
+        });
         return {
             stats: {
                 revenue: totalRevenue,
@@ -122,9 +131,11 @@ let AnalyticsService = class AnalyticsService {
                 periodRevenue,
                 periodProfit,
                 periodOrders: periodOrders.length,
+                totalOrders: allOrders.length,
             },
             chart,
             statusDistribution,
+            recentOrders,
             period,
         };
     }

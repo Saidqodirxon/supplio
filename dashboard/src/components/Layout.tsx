@@ -7,13 +7,10 @@ import {
   CreditCard,
   Box,
   TrendingUp,
-  ShieldCheck,
-  Settings,
   Moon,
   Sun,
   FlaskConical,
   Menu,
-  X,
   LogOut,
   Bell,
   Package,
@@ -23,7 +20,6 @@ import {
   UserCheck,
   BarChart3,
   UserCog,
-  ChevronRight,
   Zap,
   LifeBuoy,
 } from "lucide-react";
@@ -49,7 +45,14 @@ export default function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, language, getEffectiveRole } = useAuthStore();
-  const { isDark, toggleTheme } = useThemeStore();
+  const {
+    isDark,
+    toggleTheme,
+    isCollapsed,
+    toggleSidebar,
+    fontSize,
+    setFontSize,
+  } = useThemeStore();
   const [notifOpen, setNotifOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [subscription, setSubscription] = useState<SubscriptionBadge | null>(
@@ -177,9 +180,9 @@ export default function Layout() {
     },
     {
       name: helpCenterLabel,
-      href: "/help-center",
+      href: "/support",
       icon: LifeBuoy,
-      roles: ["ALL"],
+      roles: ["OWNER", "MANAGER", "SUPER_ADMIN"],
     },
     {
       name: t.sidebar.subscription,
@@ -211,7 +214,7 @@ export default function Layout() {
     if (path.includes("/expenses")) return t.sidebar.expenses;
     if (path.includes("/analytics")) return t.sidebar.analytics;
     if (path.includes("/notifications")) return t.sidebar.notifications;
-    if (path.includes("/help-center")) return helpCenterLabel;
+    if (path.includes("/support")) return helpCenterLabel;
     if (path.includes("/profile"))
       return language === "ru"
         ? "Профиль"
@@ -221,23 +224,12 @@ export default function Layout() {
             ? "Profil"
             : "Profil";
     if (path.includes("/subscription")) return t.sidebar.subscription;
-    if (path.includes("/super")) return t.sidebar.superadmin;
-    if (path.includes("/settings")) return t.sidebar.settings;
-    if (path.includes("/approvals")) return t.sidebar.approvals;
-    if (path.includes("/reports")) return t.sidebar.reports;
-    if (path.includes("/telegram-bots")) return t.sidebar.telegramBots;
-    if (path.includes("/staff")) return t.sidebar.staff;
     return "Dashboard";
   })();
 
   useEffect(() => {
     document.title = `${currentTitle} — Supplio`;
   }, [currentTitle]);
-
-  const superAdminNav = [
-    { name: t.sidebar.superadmin, href: "/super", icon: ShieldCheck },
-    { name: t.sidebar.settings, href: "/settings", icon: Settings },
-  ];
 
   // Subscription badge label
   const subLabel = (() => {
@@ -351,39 +343,48 @@ export default function Layout() {
       {/* Sidebar */}
       <div
         className={clsx(
-          "fixed inset-y-0 left-0 z-50 w-72 lg:translate-x-0 transition-transform duration-500 ease-in-out lg:static lg:block shrink-0",
+          "fixed inset-y-0 left-0 z-50 lg:translate-x-0 transition-all duration-500 ease-in-out lg:static lg:block shrink-0 overflow-hidden",
           "bg-background border-r border-border",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          isCollapsed ? "w-20" : "w-72"
         )}
       >
-        <div className="flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-full">
           {isDemo && (
-            <div className="bg-amber-500 text-white text-[9px] font-black uppercase tracking-[0.3em] py-1.5 text-center flex items-center justify-center gap-2 shrink-0">
-              <FlaskConical className="w-3 h-3" /> DEMO ENVIRONMENT
+            <div
+              className={clsx(
+                "bg-amber-500 text-white text-[9px] font-black uppercase tracking-[0.3em] py-1.5 text-center flex items-center justify-center gap-2 shrink-0",
+                isCollapsed && "px-1"
+              )}
+            >
+              <FlaskConical className="w-3 h-3" /> {!isCollapsed && "DEMO"}
             </div>
           )}
 
-          <div className="flex h-20 items-center px-8 shrink-0">
+          <div
+            className={clsx(
+              "flex h-20 items-center shrink-0 transition-all",
+              isCollapsed ? "px-4 justify-center" : "px-8"
+            )}
+          >
             <Link to="/dashboard" className="flex items-center group">
               <img
-                src="/logo.png"
+                src={isCollapsed ? "/favicon.png" : "/logo.png"}
                 alt="Supplio"
-                className="h-10 object-contain"
+                className={clsx(
+                  "object-contain transition-all duration-500",
+                  isCollapsed ? "h-8 w-8" : "h-10"
+                )}
               />
             </Link>
-            <button
-              className="lg:hidden ml-auto p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <X className="h-5 w-5 text-slate-400" />
-            </button>
           </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto no-scrollbar">
-            <p className="px-3 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 opacity-60">
-              {t.sidebar.company}
-            </p>
+          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar scroll-smooth">
+            {!isCollapsed && (
+              <p className="px-3 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 opacity-60">
+                {t.sidebar.company}
+              </p>
+            )}
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               const Icon = item.icon;
@@ -392,149 +393,102 @@ export default function Layout() {
                   key={item.href}
                   to={item.href}
                   onClick={() => setSidebarOpen(false)}
+                  title={isCollapsed ? item.name : ""}
                   className={clsx(
                     isActive
                       ? "premium-gradient text-white shadow-lg shadow-blue-600/20"
                       : "text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-500/5",
-                    "flex items-center gap-x-3 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 active:scale-95"
+                    "flex items-center rounded-xl p-3 text-sm font-bold transition-all duration-200 active:scale-95 group",
+                    isCollapsed ? "justify-center" : "gap-x-3 px-4"
                   )}
                 >
                   <Icon
                     className={clsx(
-                      "h-4 w-4 shrink-0",
+                      "shrink-0 transition-all",
+                      isCollapsed ? "h-5 w-5" : "h-4 w-4",
                       isActive
                         ? "text-white"
                         : "text-slate-400 group-hover:text-blue-500"
                     )}
                   />
-                  {item.name}
+                  {!isCollapsed && (
+                    <span className="truncate">{item.name}</span>
+                  )}
                 </Link>
               );
             })}
 
-            {(user?.roleType === "SUPER_ADMIN" ||
-              user?.roleType === "OWNER") && (
-              <div className="pt-6 space-y-1">
-                <p className="px-3 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 opacity-60">
-                  Admin
-                </p>
-                {superAdminNav.map((item) => {
-                  const isActive = location.pathname === item.href;
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      onClick={() => setSidebarOpen(false)}
-                      className={clsx(
-                        isActive
-                          ? "bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg"
-                          : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5",
-                        "flex items-center gap-x-3 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-200 active:scale-95"
-                      )}
-                    >
-                      <Icon
-                        className={clsx(
-                          "h-4 w-4 shrink-0",
-                          isActive
-                            ? "text-white dark:text-slate-900"
-                            : "text-slate-400"
-                        )}
-                      />
-                      {item.name}
-                    </Link>
-                  );
-                })}
+            {!isCollapsed && (
+              <div className="pt-6 pb-4 px-2">
+                <div className="p-4 rounded-2xl bg-blue-600/5 dark:bg-blue-500/10 border border-blue-500/10 space-y-3">
+                  <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md">
+                    <Zap className="w-4 h-4" />
+                  </div>
+                  <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                    {helpCenterLabel}
+                  </h4>
+                  <button
+                    onClick={() => navigate("/support")}
+                    className="w-full py-2 bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95 text-slate-500"
+                  >
+                    {t.common.viewMore}
+                  </button>
+                </div>
               </div>
             )}
-
-            <div className="pt-6 pb-4">
-              <div className="p-5 rounded-2xl bg-blue-600/5 dark:bg-blue-500/10 border border-blue-500/10 space-y-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-600/20">
-                  <Zap className="w-4 h-4" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-black text-slate-900 dark:text-white mb-0.5 tracking-tight">
-                    {language === "ru"
-                      ? "Центр поддержки"
-                      : language === "en"
-                        ? "Support center"
-                        : language === "tr"
-                          ? "Destek merkezi"
-                          : "Yordam markazi"}
-                  </h4>
-                  <p className="text-[10px] font-bold text-slate-400 leading-relaxed">
-                    {language === "ru"
-                      ? "Помощь и документация"
-                      : language === "en"
-                        ? "Help & documentation"
-                        : language === "tr"
-                          ? "Yardım ve belgeler"
-                          : "Yordam va qo'llanma"}
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate("/help-center")}
-                  className="w-full py-2.5 bg-white dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-white/10 transition-all active:scale-95"
-                >
-                  {language === "ru"
-                    ? "Открыть"
-                    : language === "en"
-                      ? "Open"
-                      : language === "tr"
-                        ? "Aç"
-                        : "Ochish"}
-                </button>
-              </div>
-            </div>
           </nav>
 
           {/* User Profile */}
-          <div
-            className={clsx(
-              "p-4 mx-4 mb-4 rounded-2xl border shrink-0 transition-all",
-              isDark
-                ? "bg-white/5 border-white/5"
-                : "bg-slate-50 border-slate-100"
-            )}
-          >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-white dark:bg-slate-950 flex items-center justify-center rounded-full overflow-hidden border-2 border-slate-100 dark:border-white/10 shadow-md shrink-0">
-                <img
-                  src={user?.photoUrl || "/favicon.png"}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-black text-slate-900 dark:text-white truncate leading-none mb-1.5">
-                  {user?.fullName || user?.phone}
-                </p>
-                <span className="text-[9px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-widest bg-blue-500/10 px-2 py-0.5 rounded-md">
-                  {user?.roleType?.replace(/_/g, " ") || "STAFF"}
-                </span>
-              </div>
+          {isCollapsed ? (
+            /* Collapsed: only avatar + logout icon */
+            <div className="px-2 pb-4 space-y-2 shrink-0">
+              <button
+                onClick={() => navigate("/profile")}
+                title={user?.fullName || user?.phone || "Profile"}
+                className="w-full flex items-center justify-center p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-all active:scale-95"
+              >
+                <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 shrink-0">
+                  <img src={user?.photoUrl || "/favicon.png"} alt="Profile" className="w-full h-full object-cover" />
+                </div>
+              </button>
+              <button
+                onClick={logout}
+                title={t.sidebar.signOut}
+                className="w-full flex items-center justify-center p-2.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all active:scale-95"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
             </div>
-            <button
-              onClick={() => navigate("/profile")}
-              className="w-full px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 bg-blue-500/10 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl transition-all active:scale-95 hover:bg-blue-500/20 mb-3"
-            >
-              {language === "ru"
-                ? "Профиль"
-                : language === "en"
-                  ? "Profile"
-                  : language === "tr"
-                    ? "Profil"
-                    : "Profil"}
-            </button>
-            <button
-              onClick={logout}
-              className="flex w-full items-center justify-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white premium-gradient rounded-xl transition-all active:scale-95 shadow-md shadow-blue-500/20"
-            >
-              <LogOut className="h-3.5 w-3.5" />
-              {t.sidebar.signOut}
-            </button>
-          </div>
+          ) : (
+            <div className="p-4 mx-3 mb-4 rounded-2xl border shrink-0 transition-all bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-white dark:bg-slate-950 flex items-center justify-center rounded-full overflow-hidden border-2 border-slate-100 dark:border-white/10 shadow-md shrink-0">
+                  <img src={user?.photoUrl || "/favicon.png"} alt="Profile" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-black text-slate-900 dark:text-white truncate leading-none mb-1.5">
+                    {user?.fullName || user?.phone}
+                  </p>
+                  <span className="text-[9px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-widest bg-blue-500/10 px-2 py-0.5 rounded-md">
+                    {user?.roleType?.replace(/_/g, " ") || "STAFF"}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate("/profile")}
+                className="w-full px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl transition-all active:scale-95 hover:bg-blue-500/20 mb-3"
+              >
+                {language === "ru" ? "Профиль" : language === "en" ? "Profile" : language === "tr" ? "Profil" : "Profil"}
+              </button>
+              <button
+                onClick={logout}
+                className="flex w-full items-center justify-center gap-2 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-white premium-gradient rounded-xl transition-all active:scale-95 shadow-md shadow-blue-500/20"
+              >
+                <LogOut className="h-3.5 w-3.5" />
+                {t.sidebar.signOut}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -556,7 +510,14 @@ export default function Layout() {
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="hidden lg:block">
+            <button
+              type="button"
+              className="hidden lg:flex p-2.5 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all active:scale-95"
+              onClick={toggleSidebar}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="hidden sm:block">
               <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
                 {currentTitle}
               </h1>
@@ -565,12 +526,33 @@ export default function Layout() {
 
           {/* Right: controls */}
           <div className="flex items-center gap-3">
+            {/* Font Scale Control */}
+            <div className="hidden md:flex items-center bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 rounded-xl px-1 py-1">
+              <button
+                onClick={() => setFontSize(Math.max(12, fontSize - 1))}
+                className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
+                title="Decrease font size"
+              >
+                <div className="text-[10px] font-black">A-</div>
+              </button>
+              <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />
+              <button
+                onClick={() => setFontSize(Math.min(20, fontSize + 1))}
+                className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
+                title="Increase font size"
+              >
+                <div className="text-xs font-black">A+</div>
+              </button>
+            </div>
+
+            <div className="h-6 w-px bg-slate-200 dark:bg-white/10 hidden md:block" />
+
             {/* Subscription badge — always visible for owners */}
             {isOwner && subLabel && (
               <button
                 onClick={() => navigate("/subscription")}
                 className={clsx(
-                  "hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl border transition-all active:scale-95 group",
+                  "hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border transition-all active:scale-95 group",
                   subLabel.isWarning
                     ? "bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-900/50 hover:bg-amber-100 dark:hover:bg-amber-900/30"
                     : "bg-blue-50/80 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/50 hover:bg-blue-100 dark:hover:bg-blue-900/30"
@@ -584,7 +566,7 @@ export default function Layout() {
                       : "text-blue-600 dark:text-blue-400"
                   )}
                 />
-                <div className="flex flex-col items-start leading-none">
+                <div className="hidden xl:flex flex-col items-start leading-none">
                   <span
                     className={clsx(
                       "text-[9px] font-black uppercase tracking-wider",
@@ -595,11 +577,7 @@ export default function Layout() {
                   >
                     {subLabel.plan}
                   </span>
-                  <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400 mt-0.5">
-                    {subLabel.extra}
-                  </span>
                 </div>
-                <ChevronRight className="w-3 h-3 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
               </button>
             )}
 
@@ -638,6 +616,7 @@ export default function Layout() {
         <main
           id="main-scroll"
           className="flex-1 overflow-y-auto w-full scroll-smooth"
+          style={{ zoom: `${Math.round((fontSize / 16) * 100)}%` }}
           onClickCapture={handleReadOnlyClickCapture}
           onSubmitCapture={handleReadOnlySubmitCapture}
         >

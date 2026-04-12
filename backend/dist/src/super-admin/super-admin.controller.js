@@ -27,6 +27,13 @@ let SuperAdminController = class SuperAdminController {
         this.backupService = backupService;
         this.unitsService = unitsService;
     }
+    async verifyRootPassword(body) {
+        const rootPass = process.env.ROOT_ADMIN_PASS;
+        if (!rootPass || body.password !== rootPass) {
+            throw new common_1.UnauthorizedException("Invalid root password");
+        }
+        return { ok: true };
+    }
     async getBackups() {
         return this.backupService.listBackups();
     }
@@ -186,6 +193,14 @@ let SuperAdminController = class SuperAdminController {
     }
 };
 exports.SuperAdminController = SuperAdminController;
+__decorate([
+    (0, common_1.Post)("verify-root"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "verifyRootPassword", null);
 __decorate([
     (0, common_1.Get)("backups"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
