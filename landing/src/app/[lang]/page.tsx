@@ -66,6 +66,20 @@ type SafePlan = {
   [key: string]: unknown;
 };
 
+function parsePriceValue(raw: unknown): number {
+  const value = String(raw ?? "").trim();
+  if (!value) return 0;
+  const normalized = value.replace(/[^\d]/g, "");
+  if (!normalized) return 0;
+  return Number(normalized) || 0;
+}
+
+function formatPriceDisplay(raw: unknown): string {
+  const amount = parsePriceValue(raw);
+  if (amount <= 0) return "0";
+  return amount.toLocaleString("en-US");
+}
+
 function getBotFeature(limit: number, lang: Language): string {
   if (limit <= 0) {
     return lang === "uz"
@@ -877,7 +891,15 @@ export default function LandingPage() {
                       plan.featuresUz) as string[])
                   : plan.features;
               const isPopular = plan.isPopular;
-              const price = (plan.priceMonthly as string) || plan.price || "0";
+              const monthlyAmount = parsePriceValue(plan.priceMonthly);
+              const fallbackAmount = parsePriceValue(plan.price);
+              const effectiveRawPrice =
+                monthlyAmount > 0
+                  ? plan.priceMonthly
+                  : fallbackAmount > 0
+                    ? plan.price
+                    : "0";
+              const price = formatPriceDisplay(effectiveRawPrice);
               const trialDays =
                 (plan.trialDays as number) || settings?.defaultTrialDays || 14;
               const maxCustomBots = Number(plan.maxCustomBots || 0);
