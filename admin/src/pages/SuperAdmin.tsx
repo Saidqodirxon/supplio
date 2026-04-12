@@ -2104,7 +2104,7 @@ export default function SuperAdmin() {
                       >
                         <div className="h-56 bg-slate-900 relative overflow-hidden">
                           <img
-                            src={item.image || "/logo.png"}
+                            src={item.image ? getAttachmentSrc(item.image) : "/logo.png"}
                             className="w-full h-full object-cover opacity-50 absolute inset-0"
                             alt=""
                           />
