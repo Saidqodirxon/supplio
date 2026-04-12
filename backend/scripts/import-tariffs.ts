@@ -26,8 +26,18 @@ function targetsByCount(count: number): SubscriptionPlan[] {
   if (count <= 0) return [];
   if (count === 1) return [SubscriptionPlan.START];
   if (count === 2) return [SubscriptionPlan.START, SubscriptionPlan.PRO];
-  if (count === 3) return [SubscriptionPlan.START, SubscriptionPlan.PRO, SubscriptionPlan.PREMIUM];
-  return [SubscriptionPlan.FREE, SubscriptionPlan.START, SubscriptionPlan.PRO, SubscriptionPlan.PREMIUM];
+  if (count === 3)
+    return [
+      SubscriptionPlan.START,
+      SubscriptionPlan.PRO,
+      SubscriptionPlan.PREMIUM,
+    ];
+  return [
+    SubscriptionPlan.FREE,
+    SubscriptionPlan.START,
+    SubscriptionPlan.PRO,
+    SubscriptionPlan.PREMIUM,
+  ];
 }
 
 async function main() {
@@ -64,7 +74,9 @@ async function main() {
   );
 
   if (!validEnumPlansInImport.length) {
-    const sorted = [...prepared].sort((a, b) => Number(a.order) - Number(b.order));
+    const sorted = [...prepared].sort(
+      (a, b) => Number(a.order) - Number(b.order)
+    );
     const targets = targetsByCount(sorted.length);
     const mapCount = Math.min(sorted.length, targets.length);
 
