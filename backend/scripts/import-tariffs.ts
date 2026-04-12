@@ -35,7 +35,9 @@ async function main() {
 
   const prepared = parsed.map((item, idx) => {
     const { id, createdAt, updatedAt, ...rest } = item;
-    const planKeyRaw = String(rest.planKey ?? "").trim().toUpperCase();
+    const planKeyRaw = String(rest.planKey ?? "")
+      .trim()
+      .toUpperCase();
     return {
       ...rest,
       planKey: planKeyRaw,
@@ -54,7 +56,9 @@ async function main() {
   );
 
   const fallbackPlan: SubscriptionPlan = (() => {
-    const sorted = [...prepared].sort((a, b) => Number(a.order) - Number(b.order));
+    const sorted = [...prepared].sort(
+      (a, b) => Number(a.order) - Number(b.order)
+    );
     for (const t of sorted) {
       const plan = String(t.planKey);
       if (isSubscriptionPlan(plan)) return plan;
@@ -89,7 +93,9 @@ async function main() {
   });
 
   console.log(`Imported ${prepared.length} tariffs from: ${inputPath}`);
-  console.log(`Fallback plan used for missing companies/subscriptions: ${fallbackPlan}`);
+  console.log(
+    `Fallback plan used for missing companies/subscriptions: ${fallbackPlan}`
+  );
 }
 
 main()

@@ -30,13 +30,27 @@ async function main() {
   // If all tariff keys are custom strings (e.g. STARTER/PROFESSIONAL/BUSINESS),
   // normalize them to enum-compatible keys by order so plan checks can work.
   if (!validPlans.length && tariffs.length > 0) {
-    const sorted = [...tariffs].sort((a, b) => Number(a.order) - Number(b.order));
+    const sorted = [...tariffs].sort(
+      (a, b) => Number(a.order) - Number(b.order)
+    );
 
     let targets: SubscriptionPlan[] = [];
     if (sorted.length === 1) targets = [SubscriptionPlan.START];
-    else if (sorted.length === 2) targets = [SubscriptionPlan.START, SubscriptionPlan.PRO];
-    else if (sorted.length === 3) targets = [SubscriptionPlan.START, SubscriptionPlan.PRO, SubscriptionPlan.PREMIUM];
-    else targets = [SubscriptionPlan.FREE, SubscriptionPlan.START, SubscriptionPlan.PRO, SubscriptionPlan.PREMIUM];
+    else if (sorted.length === 2)
+      targets = [SubscriptionPlan.START, SubscriptionPlan.PRO];
+    else if (sorted.length === 3)
+      targets = [
+        SubscriptionPlan.START,
+        SubscriptionPlan.PRO,
+        SubscriptionPlan.PREMIUM,
+      ];
+    else
+      targets = [
+        SubscriptionPlan.FREE,
+        SubscriptionPlan.START,
+        SubscriptionPlan.PRO,
+        SubscriptionPlan.PREMIUM,
+      ];
 
     const toNormalize = sorted.slice(0, targets.length);
     for (let i = 0; i < toNormalize.length; i += 1) {
@@ -68,20 +82,21 @@ async function main() {
 
   const fallbackPlan: SubscriptionPlan = validPlans[0];
 
-  const [companiesResult, subscriptionsResult, featureFlagsResult] = await prisma.$transaction([
-    prisma.company.updateMany({
-      where: { subscriptionPlan: { notIn: validPlans } },
-      data: { subscriptionPlan: fallbackPlan },
-    }),
-    prisma.subscription.updateMany({
-      where: { plan: { notIn: validPlans } },
-      data: { plan: fallbackPlan },
-    }),
-    prisma.featureFlag.updateMany({
-      where: { planLevel: { not: null, notIn: validPlans } },
-      data: { planLevel: fallbackPlan },
-    }),
-  ]);
+  const [companiesResult, subscriptionsResult, featureFlagsResult] =
+    await prisma.$transaction([
+      prisma.company.updateMany({
+        where: { subscriptionPlan: { notIn: validPlans } },
+        data: { subscriptionPlan: fallbackPlan },
+      }),
+      prisma.subscription.updateMany({
+        where: { plan: { notIn: validPlans } },
+        data: { plan: fallbackPlan },
+      }),
+      prisma.featureFlag.updateMany({
+        where: { planLevel: { not: null, notIn: validPlans } },
+        data: { planLevel: fallbackPlan },
+      }),
+    ]);
 
   console.log("Tariff consistency fix completed.");
   console.log("Valid plans:", validPlans.join(", "));
