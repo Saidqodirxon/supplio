@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict wdgrOdsBhmD6vs3c2EI6ppNuXrlfO7Oeg60azdOczCclJuCylMaUvAw3HVutPjP
+\restrict UeAz2tKCS1BkEDEKNunF8U5KksrDJ4xUi5JSEsGopBXGfcdRJkNgTMCFawWPB1Z
 
 -- Dumped from database version 18.3
 -- Dumped by pg_dump version 18.3
@@ -937,11 +937,6 @@ cc8274a6-19c3-4e45-a207-c9902126e0e4	2558c501-89df-4695-b56c-fbe600529b21	a8eb80
 b122c83b-1b3f-4943-90b5-6226085c997d	2558c501-89df-4695-b56c-fbe600529b21	5d6566ed-592b-4fa7-a851-a361a13eae9c	Alisher Kobilov	+998944445566	\N	50000000	50310000	\N	2026-03-28 18:21:44.638	2026-03-28 18:21:44.876	\N	\N	f	\N	\N	f	0
 5d76c986-4cad-446c-8442-21b4c0ee0cf9	2558c501-89df-4695-b56c-fbe600529b21	5d6566ed-592b-4fa7-a851-a361a13eae9c	Jasur Yuldashev	+998901111111	\N	30000000	51020000	\N	2026-03-28 18:21:44.638	2026-03-28 18:21:44.879	\N	\N	f	\N	\N	f	0
 604f7c8d-0d9b-4372-b18c-0e9f4b6bc56f	2558c501-89df-4695-b56c-fbe600529b21	5d6566ed-592b-4fa7-a851-a361a13eae9c	Nodira Hasanova	+998902222222	\N	20000000	2570000	\N	2026-03-28 18:21:44.638	2026-03-28 18:21:44.882	\N	\N	f	\N	\N	f	0
-dealer-677fe634-603d-4723-8c85-afff22b41391-1	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	Apex Retail	+998901112233	\N	10000000	4500000	\N	2026-03-29 19:00:00.235	2026-03-29 19:00:00.235	\N	\N	t	\N	\N	f	0
-dealer-677fe634-603d-4723-8c85-afff22b41391-2	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	Global Mart	+998904445566	\N	5000000	1200000	\N	2026-03-29 19:00:00.235	2026-03-29 19:00:00.235	\N	\N	t	\N	\N	f	0
-dealer-677fe634-603d-4723-8c85-afff22b41391-3	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	City Express	+998907778899	\N	2000000	2500000	\N	2026-03-29 19:00:00.235	2026-03-29 19:00:00.235	\N	\N	t	\N	\N	f	0
-dealer-677fe634-603d-4723-8c85-afff22b41391-4	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	Metro Store	+998909990011	\N	8000000	650000	\N	2026-03-29 19:00:00.235	2026-03-29 19:00:00.235	\N	\N	t	\N	\N	f	0
-dealer-677fe634-603d-4723-8c85-afff22b41391-5	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	FastTrade	+998902223344	\N	15000000	3200000	\N	2026-03-29 19:00:00.235	2026-03-29 19:00:00.235	\N	\N	t	\N	\N	f	0
 50e3208d-bf6c-4330-9d0f-2c0ef0e6be80	372dcf39-46c6-4fef-a349-808c82dc8d8a	b6ee5c42-edfe-4780-85f7-af78b91885c0	Saidqodirxon test	+998940116877	Kindudan	100000000	0	1551855614	2026-03-28 20:07:31.25	2026-03-31 18:18:52.766	\N	\N	t	2026-03-31 18:18:52.764	abf2f3b6-8458-419c-b7cf-37d134674bf8	f	0
 bad3b1da-4158-41cd-ac4f-c1550ccc47d5	33930263-cce8-4ffb-9b22-07ff6b07a268	fcecf24d-f041-4838-95da-549726630e12	Yusupov Asilbek	+99894000003	Toshkent, 4-uy	9000000	1800000	\N	2026-04-12 17:37:58.229	2026-04-12 17:37:58.229	\N	\N	t	\N	\N	f	60000
 476b7d56-98a3-4107-bee7-f2c0908416ff	33930263-cce8-4ffb-9b22-07ff6b07a268	e23a801b-22e3-4e63-8aa9-7c91855ab84b	Nazarov Sherzod	+99894000004	Toshkent, 5-uy	11000000	2400000	\N	2026-04-12 17:37:58.229	2026-04-12 17:37:58.229	\N	\N	t	\N	\N	f	80000
@@ -990,6 +985,11 @@ f48b30c0-e349-4ea0-9f74-c738acc90712	33930263-cce8-4ffb-9b22-07ff6b07a268	f6736e
 6dfe2784-51bf-4d6d-a613-a8dede9ba816	33930263-cce8-4ffb-9b22-07ff6b07a268	fcecf24d-f041-4838-95da-549726630e12	Diler 48	+99894000047	Toshkent, 48-uy	7000000	3000000	\N	2026-04-12 17:37:58.229	2026-04-12 17:37:58.229	\N	\N	t	\N	\N	f	140000
 b05a2a7a-e887-4189-9b84-bffc37cb01af	33930263-cce8-4ffb-9b22-07ff6b07a268	e23a801b-22e3-4e63-8aa9-7c91855ab84b	Diler 49	+99894000048	Toshkent, 49-uy	9000000	0	\N	2026-04-12 17:37:58.229	2026-04-12 17:37:58.229	\N	\N	t	\N	\N	f	0
 ad915ba5-8334-496d-8ee5-9daa01ce57dd	33930263-cce8-4ffb-9b22-07ff6b07a268	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	Diler 50	+99894000049	Toshkent, 50-uy	11000000	600000	\N	2026-04-12 17:37:58.229	2026-04-12 17:37:58.229	\N	\N	t	\N	\N	f	20000
+dealer-677fe634-603d-4723-8c85-afff22b41391-1	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	Apex Retail	+998901112233	\N	10000000	4500000	\N	2026-04-12 19:00:00.127	2026-04-12 19:00:00.127	\N	\N	t	\N	\N	f	0
+dealer-677fe634-603d-4723-8c85-afff22b41391-2	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	Global Mart	+998904445566	\N	5000000	1200000	\N	2026-04-12 19:00:00.127	2026-04-12 19:00:00.127	\N	\N	t	\N	\N	f	0
+dealer-677fe634-603d-4723-8c85-afff22b41391-3	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	City Express	+998907778899	\N	2000000	2500000	\N	2026-04-12 19:00:00.127	2026-04-12 19:00:00.127	\N	\N	t	\N	\N	f	0
+dealer-677fe634-603d-4723-8c85-afff22b41391-4	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	Metro Store	+998909990011	\N	8000000	650000	\N	2026-04-12 19:00:00.127	2026-04-12 19:00:00.127	\N	\N	t	\N	\N	f	0
+dealer-677fe634-603d-4723-8c85-afff22b41391-5	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	FastTrade	+998902223344	\N	15000000	3200000	\N	2026-04-12 19:00:00.127	2026-04-12 19:00:00.127	\N	\N	t	\N	\N	f	0
 \.
 
 
@@ -1140,19 +1140,6 @@ a6c3b3f4-4569-4d2d-b148-de2d75c93918	2558c501-89df-4695-b56c-fbe600529b21	\N	b12
 366be117-be3e-4e39-a2ff-80972c29e397	2558c501-89df-4695-b56c-fbe600529b21	\N	604f7c8d-0d9b-4372-b18c-0e9f4b6bc56f	PAYMENT	3000000	\N	\N	2026-03-28 18:21:44.88	\N	\N
 5110e6e1-7d37-405a-bc20-53d4147ddc93	2558c501-89df-4695-b56c-fbe600529b21	\N	14a0868a-c9ed-4962-92da-7d25d5e98e2c	PAYMENT	8000000	\N	\N	2026-03-28 18:21:44.884	\N	\N
 b5360d1c-df08-4eef-915c-1ae64a18cfe2	2558c501-89df-4695-b56c-fbe600529b21	\N	eb9fdd9f-8ae4-4252-a662-ac14a105d55e	PAYMENT	2000000	\N	\N	2026-03-28 18:21:44.886	\N	\N
-29d8ca09-d1f5-49cd-b71c-61a9ed3fdf2f	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-1	ORDER	4500000	\N	\N	2026-03-19 19:00:00.246	\N	\N
-2ded971f-a31c-4dac-88c1-3f02afaec229	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-2	ORDER	1200000	\N	\N	2026-03-21 19:00:00.246	\N	\N
-c7b6e130-0b94-45a2-a73b-04b96915ac30	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-3	ORDER	2500000	\N	\N	2026-03-22 19:00:00.246	\N	\N
-957ef1dd-05b8-4490-a070-e1ffaec62a1a	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-4	ORDER	650000	\N	\N	2026-03-23 19:00:00.246	\N	\N
-9b1595e9-2dd3-4366-9e87-0c60de758026	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-5	ORDER	3200000	\N	\N	2026-03-24 19:00:00.246	\N	\N
-7927f8ef-48a7-4489-b6e4-915a148315f7	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-1	ORDER	900000	\N	\N	2026-03-25 19:00:00.246	\N	\N
-85cf2786-14f0-4e51-bf8e-6312cba6753e	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-2	ORDER	1800000	\N	\N	2026-03-26 19:00:00.246	\N	\N
-5ed623ce-280f-45e8-b514-e8462024adf0	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-3	ORDER	360000	\N	\N	2026-03-27 19:00:00.246	\N	\N
-587adb3f-51fb-45ed-a44f-bada92fa030a	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-4	ORDER	2000000	\N	\N	2026-03-28 19:00:00.246	\N	\N
-6a6533ef-0c25-43d7-9eb0-d6caee7ad7ff	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-5	ORDER	500000	\N	\N	2026-03-29 19:00:00.246	\N	\N
-5b2287b5-8c1b-4750-902e-03bb029ef9a4	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-1	PAYMENT	4500000	\N	\N	2026-03-20 19:00:00.246	\N	\N
-ec8706d7-462d-41fb-9310-50ad7b5ac627	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-3	PAYMENT	2360000	\N	\N	2026-03-23 19:00:00.246	\N	\N
-08a74e12-5d36-4711-a395-9f2d99f4bb37	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-5	PAYMENT	3200000	\N	\N	2026-03-25 19:00:00.246	\N	\N
 114bbf5a-9972-4ed0-ba64-d822bfb46aa6	33930263-cce8-4ffb-9b22-07ff6b07a268	e23a801b-22e3-4e63-8aa9-7c91855ab84b	f844dda2-398f-41a2-b0cf-88fa3697fdcf	ORDER	134000	\N	\N	2025-10-14 17:37:58.239	\N	\N
 88c4ef28-3ce5-49c2-aff0-ee308ae22893	33930263-cce8-4ffb-9b22-07ff6b07a268	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	dafc9765-065a-4a7b-987e-299642d3dc4b	ORDER	300000	\N	\N	2025-10-15 17:37:58.264	\N	\N
 61c17b38-7c16-4ab0-9afe-d707d9031310	33930263-cce8-4ffb-9b22-07ff6b07a268	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	dafc9765-065a-4a7b-987e-299642d3dc4b	PAYMENT	180000	\N	\N	2025-10-15 20:37:58.264	\N	\N
@@ -1513,6 +1500,19 @@ c0a011df-2d14-4e93-ab49-72698169b837	33930263-cce8-4ffb-9b22-07ff6b07a268	f6736e
 9e63ce7d-c0f6-4fdb-a299-9e25ab18d4b7	33930263-cce8-4ffb-9b22-07ff6b07a268	e23a801b-22e3-4e63-8aa9-7c91855ab84b	b05a2a7a-e887-4189-9b84-bffc37cb01af	PAYMENT	689600	\N	\N	2026-04-11 20:37:59.039	\N	\N
 62a8db27-7105-414d-a117-62b6eb2ea20d	33930263-cce8-4ffb-9b22-07ff6b07a268	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	ad915ba5-8334-496d-8ee5-9daa01ce57dd	ORDER	1140000	\N	\N	2026-04-12 17:37:59.042	\N	\N
 d86d3748-7db2-41e1-b6d4-0dd31ab00fd8	33930263-cce8-4ffb-9b22-07ff6b07a268	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	ad915ba5-8334-496d-8ee5-9daa01ce57dd	PAYMENT	1026000	\N	\N	2026-04-12 20:37:59.042	\N	\N
+aa69586b-07ac-48ce-82cd-04bf253878f4	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-1	ORDER	4500000	\N	\N	2026-04-02 19:00:00.15	\N	\N
+602f5e1f-bc7d-492b-8a52-e1305dd5d747	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-2	ORDER	1200000	\N	\N	2026-04-04 19:00:00.15	\N	\N
+dc586580-04cd-4f2f-b5c0-012f3374c5f7	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-3	ORDER	2500000	\N	\N	2026-04-05 19:00:00.15	\N	\N
+c3610784-4b9e-4c74-8b14-2fa8194de671	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-4	ORDER	650000	\N	\N	2026-04-06 19:00:00.15	\N	\N
+f390bf11-a72a-4311-92eb-8a5578b45faa	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-5	ORDER	3200000	\N	\N	2026-04-07 19:00:00.15	\N	\N
+1aa3a4f1-2879-4c53-b8c2-f17fb80d8766	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-1	ORDER	900000	\N	\N	2026-04-08 19:00:00.15	\N	\N
+52c2ef50-b44b-403e-898b-4760017b7643	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-2	ORDER	1800000	\N	\N	2026-04-09 19:00:00.15	\N	\N
+f4b1d442-b08e-4aab-a757-46c0215fd928	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-3	ORDER	360000	\N	\N	2026-04-10 19:00:00.15	\N	\N
+ec88327d-809b-436d-8c75-d29192d8f227	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-4	ORDER	2000000	\N	\N	2026-04-11 19:00:00.15	\N	\N
+02f82037-ac7a-414a-bdbd-ed91b9f0218d	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-5	ORDER	500000	\N	\N	2026-04-12 19:00:00.15	\N	\N
+c67eaec3-55c0-43c9-9d81-ba54a24612b9	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-1	PAYMENT	4500000	\N	\N	2026-04-03 19:00:00.15	\N	\N
+b5be806a-9148-4b7a-bd69-cdd49bd9f6d4	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-3	PAYMENT	2360000	\N	\N	2026-04-06 19:00:00.15	\N	\N
+081eee19-6a13-4fe7-bb5e-000ccced7835	677fe634-603d-4723-8c85-afff22b41391	\N	dealer-677fe634-603d-4723-8c85-afff22b41391-5	PAYMENT	3200000	\N	\N	2026-04-08 19:00:00.15	\N	\N
 \.
 
 
@@ -1581,16 +1581,6 @@ d63d020a-4507-4d99-8315-8592d215d7ae	2558c501-89df-4695-b56c-fbe600529b21	b122c8
 f7b91f0f-6087-4c34-9967-587751119dca	2558c501-89df-4695-b56c-fbe600529b21	604f7c8d-0d9b-4372-b18c-0e9f4b6bc56f	5d6566ed-592b-4fa7-a851-a361a13eae9c	1960000	1260000	PENDING	[{"qty": 70, "cost": 18000, "name": "Domestos 750ml", "price": 28000, "productId": "25789aac-674b-41a0-932b-4bfeaf15a1fc"}]	2026-03-26 18:21:44.865	2026-03-28 18:21:44.866	\N	\N	\N
 1031a935-0f87-41cf-91b6-3e0a9c71b825	2558c501-89df-4695-b56c-fbe600529b21	03f6ef3f-54a8-47ca-8153-0983ace9b797	a8eb809c-172e-4d8a-a0b7-805f8286439f	8000000	5500000	PENDING	[{"qty": 1, "cost": 5500000, "name": "Samsung 55\\" 4K TV", "price": 8000000, "productId": "39ac2546-bbae-49c3-9748-3e77c45f55d1"}]	2026-03-27 18:21:44.867	2026-03-28 18:21:44.869	\N	\N	\N
 28aa837e-5d61-4b29-ae5e-f26f1aaec2ba	2558c501-89df-4695-b56c-fbe600529b21	193d572b-d791-4918-8f8c-fe5b018be616	5d6566ed-592b-4fa7-a851-a361a13eae9c	270000	180000	PENDING	[{"qty": 15, "cost": 12000, "name": "Lay's 160g Assorted", "price": 18000, "productId": "6ea27cfe-d78f-4b78-96c6-b2cc6139c930"}]	2026-03-28 18:21:44.869	2026-03-28 18:21:44.871	\N	\N	\N
-7dd1e9fa-2fec-4fe1-befd-f66d6b677ae3	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-1	17c263ab-70a9-4bdd-a67f-d8cb8e330972	4500000	3240000	DELIVERED	"[{\\"productId\\":null,\\"name\\":\\"Premium Box Set\\",\\"qty\\":18,\\"unit\\":\\"pcs\\",\\"price\\":250000,\\"total\\":4500000}]"	2026-03-19 19:00:00.246	2026-03-29 19:00:00.255	\N	\N	\N
-ab6d5e39-4b00-41e0-9f9c-ef26a1856df2	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-2	17c263ab-70a9-4bdd-a67f-d8cb8e330972	1200000	900000	PENDING	"[{\\"productId\\":null,\\"name\\":\\"Standard Pack\\",\\"qty\\":27,\\"unit\\":\\"pcs\\",\\"price\\":45000,\\"total\\":1215000}]"	2026-03-21 19:00:00.246	2026-03-29 19:00:00.266	\N	\N	\N
-f4994c69-db9b-4dba-8d83-996ea280bfa2	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-3	17c263ab-70a9-4bdd-a67f-d8cb8e330972	2500000	1900000	COMPLETED	"[{\\"productId\\":null,\\"name\\":\\"Industrial Set\\",\\"qty\\":2,\\"unit\\":\\"pcs\\",\\"price\\":1200000,\\"total\\":2400000}]"	2026-03-22 19:00:00.246	2026-03-29 19:00:00.273	\N	\N	\N
-a7aaa501-f3af-4a42-aeb0-b5e16dce6f5e	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-4	17c263ab-70a9-4bdd-a67f-d8cb8e330972	650000	480000	DELIVERED	"[{\\"productId\\":null,\\"name\\":\\"Mini Sample\\",\\"qty\\":54,\\"unit\\":\\"pcs\\",\\"price\\":12000,\\"total\\":648000}]"	2026-03-23 19:00:00.246	2026-03-29 19:00:00.278	\N	\N	\N
-cf2eb8d6-8c74-457d-8a07-2c9fb9b94482	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-5	17c263ab-70a9-4bdd-a67f-d8cb8e330972	3200000	2400000	DELIVERED	"[{\\"productId\\":null,\\"name\\":\\"Premium Box Set\\",\\"qty\\":13,\\"unit\\":\\"pcs\\",\\"price\\":250000,\\"total\\":3250000}]"	2026-03-24 19:00:00.246	2026-03-29 19:00:00.284	\N	\N	\N
-2e8a6a8f-7716-4f09-9999-036fa43e5181	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-1	17c263ab-70a9-4bdd-a67f-d8cb8e330972	900000	660000	ACCEPTED	"[{\\"productId\\":null,\\"name\\":\\"Standard Pack\\",\\"qty\\":20,\\"unit\\":\\"pcs\\",\\"price\\":45000,\\"total\\":900000}]"	2026-03-25 19:00:00.246	2026-03-29 19:00:00.291	\N	\N	\N
-6c67abc9-9ac5-4612-a061-7bcd317aed91	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-2	17c263ab-70a9-4bdd-a67f-d8cb8e330972	1800000	1350000	PREPARING	"[{\\"productId\\":null,\\"name\\":\\"Bulk Container\\",\\"qty\\":1,\\"unit\\":\\"pcs\\",\\"price\\":3500000,\\"total\\":3500000}]"	2026-03-26 19:00:00.246	2026-03-29 19:00:00.298	\N	\N	\N
-224e49d4-55c3-4677-8669-a2ac8d68ab04	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-3	17c263ab-70a9-4bdd-a67f-d8cb8e330972	360000	240000	SHIPPED	"[{\\"productId\\":null,\\"name\\":\\"Mini Sample\\",\\"qty\\":30,\\"unit\\":\\"pcs\\",\\"price\\":12000,\\"total\\":360000}]"	2026-03-27 19:00:00.246	2026-03-29 19:00:00.303	\N	\N	\N
-5e840391-0f7f-43d8-a1c2-d090708a8e62	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-4	17c263ab-70a9-4bdd-a67f-d8cb8e330972	2000000	1600000	PENDING	"[{\\"productId\\":null,\\"name\\":\\"Industrial Set\\",\\"qty\\":1,\\"unit\\":\\"pcs\\",\\"price\\":1200000,\\"total\\":1200000}]"	2026-03-28 19:00:00.246	2026-03-29 19:00:00.309	\N	\N	\N
-759f7ffe-d4a1-4c7c-8942-5c20a4494251	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-5	17c263ab-70a9-4bdd-a67f-d8cb8e330972	500000	350000	CANCELLED	"[{\\"productId\\":null,\\"name\\":\\"Standard Pack\\",\\"qty\\":11,\\"unit\\":\\"pcs\\",\\"price\\":45000,\\"total\\":495000}]"	2026-03-29 19:00:00.246	2026-03-29 19:00:00.315	\N	\N	\N
 a505ed5f-1c33-4c9b-b4f5-adfa171b9779	33930263-cce8-4ffb-9b22-07ff6b07a268	f844dda2-398f-41a2-b0cf-88fa3697fdcf	e23a801b-22e3-4e63-8aa9-7c91855ab84b	134000	83000	PENDING	[{"qty": 1, "name": "Elektronika mahsulot 1", "unit": "box", "price": 15000, "total": 15000, "productId": "083e0980-ef76-4b55-9984-7687fd62c047"}, {"qty": 1, "name": "Maishiy texnika mahsulot 14", "unit": "pcs", "price": 119000, "total": 119000, "productId": "dda131a0-5270-44f5-a47e-5ced8f8544c1"}]	2025-10-14 17:37:58.239	2026-04-12 17:37:58.24	\N	\N	\N
 0fec615a-bd19-43ed-92b2-08ef1fa4841e	33930263-cce8-4ffb-9b22-07ff6b07a268	dafc9765-065a-4a7b-987e-299642d3dc4b	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	300000	186000	ACCEPTED	[{"qty": 2, "name": "Oziq-ovqat mahsulot 2", "unit": "pcs", "price": 23000, "total": 46000, "productId": "c3ef2e06-a1cf-46c8-9b8d-1d907027f5f2"}, {"qty": 2, "name": "Sport mahsulot 15", "unit": "pcs", "price": 127000, "total": 254000, "productId": "3107f9a6-5f69-471b-82fc-efb24acb6c6f"}]	2025-10-15 17:37:58.264	2026-04-12 17:37:58.265	\N	\N	\N
 19ca8e1a-8227-411f-a1e4-83935ef965fe	33930263-cce8-4ffb-9b22-07ff6b07a268	70a187cc-5375-4254-9e3c-4b7c0ea1c60b	f6736eff-d631-4f50-86f6-ad3187d95ecf	498000	309000	PREPARING	[{"qty": 3, "name": "Kiyim mahsulot 3", "unit": "pcs", "price": 31000, "total": 93000, "productId": "3d14bc97-06e2-43b7-8976-7cac73e31c93"}, {"qty": 3, "name": "Elektronika mahsulot 16", "unit": "box", "price": 135000, "total": 405000, "productId": "c1fd16d4-acc8-4479-89e7-311714c6ff46"}]	2025-10-16 17:37:58.273	2026-04-12 17:37:58.274	\N	\N	\N
@@ -1598,6 +1588,12 @@ a505ed5f-1c33-4c9b-b4f5-adfa171b9779	33930263-cce8-4ffb-9b22-07ff6b07a268	f844dd
 f4e75380-2603-4532-8ac6-3428dda747a9	33930263-cce8-4ffb-9b22-07ff6b07a268	476b7d56-98a3-4107-bee7-f2c0908416ff	e23a801b-22e3-4e63-8aa9-7c91855ab84b	386000	239000	DELIVERED	[{"qty": 5, "name": "Sport mahsulot 5", "unit": "pcs", "price": 47000, "total": 235000, "productId": "2fbbc8a7-5d80-4027-90bf-592038d03dce"}, {"qty": 1, "name": "Kiyim mahsulot 18", "unit": "pcs", "price": 151000, "total": 151000, "productId": "3617506e-45b9-4ae5-b5b8-95e49604b231"}]	2025-10-18 17:37:58.285	2026-04-12 17:37:58.286	\N	\N	\N
 543b08c0-8650-4da1-a687-ea89b53e625a	33930263-cce8-4ffb-9b22-07ff6b07a268	cf1f2560-38cd-4a75-993b-3fa73e8a3a98	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	648000	402000	COMPLETED	[{"qty": 6, "name": "Elektronika mahsulot 6", "unit": "pcs", "price": 55000, "total": 330000, "productId": "8a7cad1c-2393-466d-8206-73092b9c771f"}, {"qty": 2, "name": "Maishiy texnika mahsulot 19", "unit": "box", "price": 159000, "total": 318000, "productId": "a0c6e78d-be69-4ffd-b323-10c67dea8c48"}]	2025-10-19 17:37:58.291	2026-04-12 17:37:58.292	\N	\N	\N
 ecf91ec3-cb6d-4494-9354-2f16a7104cd6	33930263-cce8-4ffb-9b22-07ff6b07a268	3868f60e-2952-4725-a074-0b57752220a5	f6736eff-d631-4f50-86f6-ad3187d95ecf	942000	585000	CANCELLED	[{"qty": 7, "name": "Oziq-ovqat mahsulot 7", "unit": "box", "price": 63000, "total": 441000, "productId": "2e3fd8cb-b7fa-42d4-b917-09b40ed15d73"}, {"qty": 3, "name": "Sport mahsulot 20", "unit": "pcs", "price": 167000, "total": 501000, "productId": "abb1c752-bcbf-48fb-a108-426a7c9cbe57"}]	2025-10-20 17:37:58.293	2026-04-12 17:37:58.294	\N	\N	\N
+96dfe889-ebda-4f26-9bca-05938f1f91b7	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-5	17c263ab-70a9-4bdd-a67f-d8cb8e330972	3200000	2400000	DELIVERED	"[{\\"productId\\":null,\\"name\\":\\"Premium Box Set\\",\\"qty\\":13,\\"unit\\":\\"pcs\\",\\"price\\":250000,\\"total\\":3250000}]"	2026-04-07 19:00:00.15	2026-04-12 19:00:00.197	\N	\N	\N
+233012b0-4d67-4559-ba73-8afe51548cd3	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-1	17c263ab-70a9-4bdd-a67f-d8cb8e330972	900000	660000	ACCEPTED	"[{\\"productId\\":null,\\"name\\":\\"Standard Pack\\",\\"qty\\":20,\\"unit\\":\\"pcs\\",\\"price\\":45000,\\"total\\":900000}]"	2026-04-08 19:00:00.15	2026-04-12 19:00:00.203	\N	\N	\N
+b55b161e-649c-47d2-9401-6d8c97661470	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-2	17c263ab-70a9-4bdd-a67f-d8cb8e330972	1800000	1350000	PREPARING	"[{\\"productId\\":null,\\"name\\":\\"Bulk Container\\",\\"qty\\":1,\\"unit\\":\\"pcs\\",\\"price\\":3500000,\\"total\\":3500000}]"	2026-04-09 19:00:00.15	2026-04-12 19:00:00.209	\N	\N	\N
+c6ab46ce-e1da-44dc-9b63-679c76ffd24f	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-3	17c263ab-70a9-4bdd-a67f-d8cb8e330972	360000	240000	SHIPPED	"[{\\"productId\\":null,\\"name\\":\\"Mini Sample\\",\\"qty\\":30,\\"unit\\":\\"pcs\\",\\"price\\":12000,\\"total\\":360000}]"	2026-04-10 19:00:00.15	2026-04-12 19:00:00.216	\N	\N	\N
+846b7d14-d2e1-4082-8943-b4b0f41380e8	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-4	17c263ab-70a9-4bdd-a67f-d8cb8e330972	2000000	1600000	PENDING	"[{\\"productId\\":null,\\"name\\":\\"Industrial Set\\",\\"qty\\":1,\\"unit\\":\\"pcs\\",\\"price\\":1200000,\\"total\\":1200000}]"	2026-04-11 19:00:00.15	2026-04-12 19:00:00.222	\N	\N	\N
+8b960ede-1b1b-4a82-aff0-0c1f9a905a8c	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-5	17c263ab-70a9-4bdd-a67f-d8cb8e330972	500000	350000	CANCELLED	"[{\\"productId\\":null,\\"name\\":\\"Standard Pack\\",\\"qty\\":11,\\"unit\\":\\"pcs\\",\\"price\\":45000,\\"total\\":495000}]"	2026-04-12 19:00:00.15	2026-04-12 19:00:00.228	\N	\N	\N
 98e4b3ce-4d8a-4b74-96b0-d35679c70dd3	33930263-cce8-4ffb-9b22-07ff6b07a268	3b1a538d-0dfe-42c9-97c0-7eb3b7850139	fcecf24d-f041-4838-95da-549726630e12	1268000	788000	PENDING	[{"qty": 8, "name": "Kiyim mahsulot 8", "unit": "pcs", "price": 71000, "total": 568000, "productId": "7f1e5b9f-dccf-4291-97f8-e1a6141e7587"}, {"qty": 4, "name": "Elektronika mahsulot 21", "unit": "pcs", "price": 175000, "total": 700000, "productId": "0a9126c0-c935-4b61-9531-969d13072044"}]	2025-10-21 17:37:58.3	2026-04-12 17:37:58.301	\N	\N	\N
 e4ab8e61-f518-4a43-b160-3a71e5ec9f35	33930263-cce8-4ffb-9b22-07ff6b07a268	569bf392-d510-4e78-b4c8-f580014e1c6a	e23a801b-22e3-4e63-8aa9-7c91855ab84b	262000	163000	ACCEPTED	[{"qty": 1, "name": "Maishiy texnika mahsulot 9", "unit": "pcs", "price": 79000, "total": 79000, "productId": "a2c21b37-562d-4f08-9706-0cd9665abc2a"}, {"qty": 1, "name": "Oziq-ovqat mahsulot 22", "unit": "box", "price": 183000, "total": 183000, "productId": "d518f072-fcf5-422c-89a1-33108afd4656"}]	2025-10-22 17:37:58.305	2026-04-12 17:37:58.306	\N	\N	\N
 606271f9-0ee5-4a4f-8cd4-77b431059dab	33930263-cce8-4ffb-9b22-07ff6b07a268	d6520409-350c-4741-8854-0621e3ec4328	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	556000	346000	PREPARING	[{"qty": 2, "name": "Sport mahsulot 10", "unit": "box", "price": 87000, "total": 174000, "productId": "0736c191-d62b-4fae-ab89-600f86bd1574"}, {"qty": 2, "name": "Kiyim mahsulot 23", "unit": "pcs", "price": 191000, "total": 382000, "productId": "92aec405-fede-4789-ac9d-9a4901c5d055"}]	2025-10-23 17:37:58.31	2026-04-12 17:37:58.311	\N	\N	\N
@@ -1791,6 +1787,10 @@ e75228d4-d517-4fa5-bea0-06dbf10f0acf	33930263-cce8-4ffb-9b22-07ff6b07a268	901851
 17c8a79e-15e0-46b9-a748-f1eeaa0a512b	33930263-cce8-4ffb-9b22-07ff6b07a268	6dfe2784-51bf-4d6d-a613-a8dede9ba816	fcecf24d-f041-4838-95da-549726630e12	616000	832000	ACCEPTED	[{"qty": 6, "name": "Kiyim mahsulot 98", "unit": "pcs", "price": 71000, "total": 426000, "productId": "c4fe027b-bd26-474c-8a3a-5623df3deeb3"}, {"qty": 2, "name": "Elektronika mahsulot 11", "unit": "pcs", "price": 95000, "total": 190000, "productId": "7cb93dea-a617-4a46-8e70-eb9bb3662310"}]	2026-04-10 17:37:59.034	2026-04-12 17:37:59.035	\N	\N	\N
 999a11e5-e81c-4300-8cc2-d7b89950dc82	33930263-cce8-4ffb-9b22-07ff6b07a268	b05a2a7a-e887-4189-9b84-bffc37cb01af	e23a801b-22e3-4e63-8aa9-7c91855ab84b	862000	1060000	PREPARING	[{"qty": 7, "name": "Maishiy texnika mahsulot 99", "unit": "pcs", "price": 79000, "total": 553000, "productId": "66d94936-85d5-4eb8-9c9f-8dc4e59e1c76"}, {"qty": 3, "name": "Oziq-ovqat mahsulot 12", "unit": "pcs", "price": 103000, "total": 309000, "productId": "2cfb68ee-4fcd-492a-a10e-06bcb5e1b1b9"}]	2026-04-11 17:37:59.039	2026-04-12 17:37:59.039	\N	\N	\N
 bb1f5358-d70c-4c79-872c-b8cadce2b448	33930263-cce8-4ffb-9b22-07ff6b07a268	ad915ba5-8334-496d-8ee5-9daa01ce57dd	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	1140000	1308000	SHIPPED	[{"qty": 8, "name": "Sport mahsulot 100", "unit": "box", "price": 87000, "total": 696000, "productId": "cd0327d9-ab0e-4351-8f1e-da0d93e47fdf"}, {"qty": 4, "name": "Kiyim mahsulot 13", "unit": "box", "price": 111000, "total": 444000, "productId": "e71e737e-f2d3-4980-866c-0224dac39cc7"}]	2026-04-12 17:37:59.042	2026-04-12 17:37:59.042	\N	\N	\N
+b7c967b2-6eb9-4dec-a9a5-8faa02491ac1	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-1	17c263ab-70a9-4bdd-a67f-d8cb8e330972	4500000	3240000	DELIVERED	"[{\\"productId\\":null,\\"name\\":\\"Premium Box Set\\",\\"qty\\":18,\\"unit\\":\\"pcs\\",\\"price\\":250000,\\"total\\":4500000}]"	2026-04-02 19:00:00.15	2026-04-12 19:00:00.158	\N	\N	\N
+6b219e99-004e-44a9-8dcc-d42641998bd6	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-2	17c263ab-70a9-4bdd-a67f-d8cb8e330972	1200000	900000	PENDING	"[{\\"productId\\":null,\\"name\\":\\"Standard Pack\\",\\"qty\\":27,\\"unit\\":\\"pcs\\",\\"price\\":45000,\\"total\\":1215000}]"	2026-04-04 19:00:00.15	2026-04-12 19:00:00.172	\N	\N	\N
+13365d35-360a-4c77-b7b0-0b81d223228c	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-3	17c263ab-70a9-4bdd-a67f-d8cb8e330972	2500000	1900000	COMPLETED	"[{\\"productId\\":null,\\"name\\":\\"Industrial Set\\",\\"qty\\":2,\\"unit\\":\\"pcs\\",\\"price\\":1200000,\\"total\\":2400000}]"	2026-04-05 19:00:00.15	2026-04-12 19:00:00.178	\N	\N	\N
+a88fb0f8-a382-4263-aee0-10e9a2fb77e2	677fe634-603d-4723-8c85-afff22b41391	dealer-677fe634-603d-4723-8c85-afff22b41391-4	17c263ab-70a9-4bdd-a67f-d8cb8e330972	650000	480000	DELIVERED	"[{\\"productId\\":null,\\"name\\":\\"Mini Sample\\",\\"qty\\":54,\\"unit\\":\\"pcs\\",\\"price\\":12000,\\"total\\":648000}]"	2026-04-06 19:00:00.15	2026-04-12 19:00:00.184	\N	\N	\N
 \.
 
 
@@ -1804,7 +1804,6 @@ COPY public."Payment" (id, "companyId", "branchId", "dealerId", amount, method, 
 e2494d8b-ae31-462e-8503-40204c6004a7	2558c501-89df-4695-b56c-fbe600529b21	5d6566ed-592b-4fa7-a851-a361a13eae9c	604f7c8d-0d9b-4372-b18c-0e9f4b6bc56f	3000000	CLICK	\N	2026-03-28 18:21:44.88	\N	\N	\N
 b3cd267a-843c-44a6-b1a7-b4080d574d5f	2558c501-89df-4695-b56c-fbe600529b21	5d6566ed-592b-4fa7-a851-a361a13eae9c	14a0868a-c9ed-4962-92da-7d25d5e98e2c	8000000	PAYME	\N	2026-03-28 18:21:44.883	\N	\N	\N
 a57cc476-456a-4430-adaf-65be332cc7fb	2558c501-89df-4695-b56c-fbe600529b21	a8eb809c-172e-4d8a-a0b7-805f8286439f	eb9fdd9f-8ae4-4252-a662-ac14a105d55e	2000000	CASH	\N	2026-03-28 18:21:44.885	\N	\N	\N
-35eac52b-1df1-4f93-90d7-5b067c6fc6e9	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	dealer-677fe634-603d-4723-8c85-afff22b41391-1	4500000	cash	\N	2026-03-20 19:00:00.246	\N	\N	Demo payment
 2dd77013-9108-442b-a9e7-65c495675447	33930263-cce8-4ffb-9b22-07ff6b07a268	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	dafc9765-065a-4a7b-987e-299642d3dc4b	180000	bank	\N	2025-10-15 20:37:58.264	\N	\N	To'lov
 84c35f67-f709-4591-98de-603ace6fd455	33930263-cce8-4ffb-9b22-07ff6b07a268	f6736eff-d631-4f50-86f6-ad3187d95ecf	70a187cc-5375-4254-9e3c-4b7c0ea1c60b	348600	card	\N	2025-10-16 20:37:58.273	\N	\N	To'lov
 7a871142-26fa-4aed-9e8e-86a20b74337b	33930263-cce8-4ffb-9b22-07ff6b07a268	fcecf24d-f041-4838-95da-549726630e12	bad3b1da-4158-41cd-ac4f-c1550ccc47d5	582400	cash	\N	2025-10-17 20:37:58.28	\N	\N	To'lov
@@ -1965,6 +1964,7 @@ e16fcacd-e347-4949-b4dc-927bf9eedeb8	33930263-cce8-4ffb-9b22-07ff6b07a268	fcecf2
 faee6b85-f7d2-4487-a15f-bad7c85d28f3	33930263-cce8-4ffb-9b22-07ff6b07a268	fcecf24d-f041-4838-95da-549726630e12	6dfe2784-51bf-4d6d-a613-a8dede9ba816	431200	card	\N	2026-04-10 20:37:59.034	\N	\N	To'lov
 1f03af84-2e32-4539-b7db-22d28d6257f8	33930263-cce8-4ffb-9b22-07ff6b07a268	e23a801b-22e3-4e63-8aa9-7c91855ab84b	b05a2a7a-e887-4189-9b84-bffc37cb01af	689600	cash	\N	2026-04-11 20:37:59.039	\N	\N	To'lov
 b1877432-76eb-49a7-8fff-234cb0637420	33930263-cce8-4ffb-9b22-07ff6b07a268	3c5ad1b5-8047-486b-ba82-f25d8ef0fa1d	ad915ba5-8334-496d-8ee5-9daa01ce57dd	1026000	bank	\N	2026-04-12 20:37:59.042	\N	\N	To'lov
+5ee260df-8f81-4c8b-ad98-ba2952539ffd	677fe634-603d-4723-8c85-afff22b41391	17c263ab-70a9-4bdd-a67f-d8cb8e330972	dealer-677fe634-603d-4723-8c85-afff22b41391-1	4500000	cash	\N	2026-04-03 19:00:00.15	\N	\N	Demo payment
 \.
 
 
@@ -1984,11 +1984,6 @@ c79ec824-1f07-40ef-94f0-984b15da0f85	2558c501-89df-4695-b56c-fbe600529b21	Ariel 
 6ea27cfe-d78f-4b78-96c6-b2cc6139c930	2558c501-89df-4695-b56c-fbe600529b21	Lay's 160g Assorted	LAY-160	\N	12000	18000	600	dona	2026-03-28 18:21:44.633	2026-03-28 18:21:44.633	\N	\N	ba94a06a-7c18-4c9c-bf48-3fd5974d53ae	\N	t	\N	\N	\N	f
 85b8d292-dfb9-4273-9620-1adab5224e96	2558c501-89df-4695-b56c-fbe600529b21	Coca-Cola 1.5L	CCA-1.5L	\N	8000	13000	1200	shisha	2026-03-28 18:21:44.633	2026-03-28 18:21:44.633	\N	\N	ba94a06a-7c18-4c9c-bf48-3fd5974d53ae	\N	t	\N	\N	\N	f
 37ee59fd-bb25-43c7-8e51-d0ca8f4593cb	372dcf39-46c6-4fef-a349-808c82dc8d8a	KreazyMax	\N	Ajoyib muzqaymoq	400	500	1000	dona	2026-03-29 09:42:12.205	2026-03-29 09:52:49.222	\N	\N	9caad36e-f91c-4af8-924e-42540dcfe0c3	/uploads/8be7ea24-ce7f-465c-9663-4cd807244dac.jpg	t	c63adc41-0bf3-4b66-be2b-32e336af9266	ab5c9bd4-8333-4134-a5ed-60d54e62eceb	\N	f
-4741adae-e873-46a4-a9bf-ca0f0d8754eb	677fe634-603d-4723-8c85-afff22b41391	Premium Box Set	PBS-001	\N	180000	250000	150	box	2026-03-29 19:00:00.244	2026-03-29 19:00:00.244	\N	\N	\N	\N	t	\N	\N	\N	f
-dc5ae022-330d-407d-ae27-f2d810ef9ddc	677fe634-603d-4723-8c85-afff22b41391	Standard Pack	SP-002	\N	30000	45000	2000	pcs	2026-03-29 19:00:00.244	2026-03-29 19:00:00.244	\N	\N	\N	\N	t	\N	\N	\N	f
-53298878-6ddd-4847-8e10-ddac2442f8d4	677fe634-603d-4723-8c85-afff22b41391	Industrial Set	IS-003	\N	950000	1200000	45	set	2026-03-29 19:00:00.244	2026-03-29 19:00:00.244	\N	\N	\N	\N	t	\N	\N	\N	t
-d6e0b51f-63ad-4b17-b9c9-5cea115b97d5	677fe634-603d-4723-8c85-afff22b41391	Mini Sample	MS-004	\N	8000	12000	5000	pcs	2026-03-29 19:00:00.244	2026-03-29 19:00:00.244	\N	\N	\N	\N	t	\N	\N	\N	f
-1c4770c9-52cc-4484-883e-bb368214e621	677fe634-603d-4723-8c85-afff22b41391	Bulk Container	BC-005	\N	2800000	3500000	12	cnt	2026-03-29 19:00:00.244	2026-03-29 19:00:00.244	\N	\N	\N	\N	t	\N	\N	\N	f
 083e0980-ef76-4b55-9984-7687fd62c047	33930263-cce8-4ffb-9b22-07ff6b07a268	Elektronika mahsulot 1	TEST-0001	\N	9000	15000	20	box	2026-04-12 17:37:58.212	2026-04-12 17:37:58.212	\N	\N	\N	\N	t	\N	\N	\N	t
 c3ef2e06-a1cf-46c8-9b8d-1d907027f5f2	33930263-cce8-4ffb-9b22-07ff6b07a268	Oziq-ovqat mahsulot 2	TEST-0002	\N	14000	23000	23	pcs	2026-04-12 17:37:58.212	2026-04-12 17:37:58.212	\N	\N	\N	\N	t	\N	\N	\N	f
 3d14bc97-06e2-43b7-8976-7cac73e31c93	33930263-cce8-4ffb-9b22-07ff6b07a268	Kiyim mahsulot 3	TEST-0003	\N	19000	31000	26	pcs	2026-04-12 17:37:58.212	2026-04-12 17:37:58.212	\N	\N	\N	\N	t	\N	\N	\N	f
@@ -2089,6 +2084,11 @@ a27d8322-3c93-49b2-8537-2786d00d0498	33930263-cce8-4ffb-9b22-07ff6b07a268	Maishi
 c4fe027b-bd26-474c-8a3a-5623df3deeb3	33930263-cce8-4ffb-9b22-07ff6b07a268	Kiyim mahsulot 98	TEST-0098	\N	119000	71000	71	pcs	2026-04-12 17:37:58.212	2026-04-12 17:37:58.212	\N	\N	\N	\N	t	\N	\N	\N	f
 66d94936-85d5-4eb8-9c9f-8dc4e59e1c76	33930263-cce8-4ffb-9b22-07ff6b07a268	Maishiy texnika mahsulot 99	TEST-0099	\N	124000	79000	74	pcs	2026-04-12 17:37:58.212	2026-04-12 17:37:58.212	\N	\N	\N	\N	t	\N	\N	\N	f
 cd0327d9-ab0e-4351-8f1e-da0d93e47fdf	33930263-cce8-4ffb-9b22-07ff6b07a268	Sport mahsulot 100	TEST-0100	\N	129000	87000	77	box	2026-04-12 17:37:58.212	2026-04-12 17:37:58.212	\N	\N	\N	\N	t	\N	\N	\N	f
+f85fb2c0-067f-4ea7-b6cc-9b2de51314e0	677fe634-603d-4723-8c85-afff22b41391	Premium Box Set	PBS-001	\N	180000	250000	150	box	2026-04-12 19:00:00.141	2026-04-12 19:00:00.141	\N	\N	\N	\N	t	\N	\N	\N	f
+da4872e3-5f1d-47f5-af48-ebcdcc74c970	677fe634-603d-4723-8c85-afff22b41391	Standard Pack	SP-002	\N	30000	45000	2000	pcs	2026-04-12 19:00:00.141	2026-04-12 19:00:00.141	\N	\N	\N	\N	t	\N	\N	\N	f
+35ef663b-72a6-4e21-b93b-e1538efede1f	677fe634-603d-4723-8c85-afff22b41391	Industrial Set	IS-003	\N	950000	1200000	45	set	2026-04-12 19:00:00.141	2026-04-12 19:00:00.141	\N	\N	\N	\N	t	\N	\N	\N	t
+09c2afd3-524b-4fa8-9b77-2da4009e1958	677fe634-603d-4723-8c85-afff22b41391	Mini Sample	MS-004	\N	8000	12000	5000	pcs	2026-04-12 19:00:00.141	2026-04-12 19:00:00.141	\N	\N	\N	\N	t	\N	\N	\N	f
+47f5ad50-23af-496a-9b00-b39955e9bdef	677fe634-603d-4723-8c85-afff22b41391	Bulk Container	BC-005	\N	2800000	3500000	12	cnt	2026-04-12 19:00:00.141	2026-04-12 19:00:00.141	\N	\N	\N	\N	t	\N	\N	\N	f
 \.
 
 
@@ -2136,6 +2136,7 @@ c2eead5f-fe23-4f66-b025-0ceb9946ff6e	a011f57d-20ee-4b9d-91eb-65c9c545112c	\N	DIS
 22bdb8c9-6c2e-4d0a-b3d0-c29404bceb1c	a011f57d-20ee-4b9d-91eb-65c9c545112c	9e8748b4-d2a2-42f3-8f1c-790ce36321db	DISTRIBUTOR	haaaa 	2026-04-12 18:11:08.803
 a42d553e-a09f-4d9d-bfe0-840d1cb97660	a011f57d-20ee-4b9d-91eb-65c9c545112c	9e8748b4-d2a2-42f3-8f1c-790ce36321db	DISTRIBUTOR	 	2026-04-12 18:14:13.487
 289a624a-04b5-4f13-ae88-4e41d5cc8947	a011f57d-20ee-4b9d-91eb-65c9c545112c	9e8748b4-d2a2-42f3-8f1c-790ce36321db	DISTRIBUTOR	a	2026-04-12 18:14:23.233
+f6b204cd-dc32-488f-8bd8-c7325b75485e	a011f57d-20ee-4b9d-91eb-65c9c545112c	6cb09fb1-1ca2-4ec1-8997-4e55140ba6bc	SUPER_ADMIN	A	2026-04-12 18:32:43.014
 \.
 
 
@@ -2144,7 +2145,7 @@ a42d553e-a09f-4d9d-bfe0-840d1cb97660	a011f57d-20ee-4b9d-91eb-65c9c545112c	9e8748
 --
 
 COPY public."SupportTicket" (id, "companyId", subject, message, status, "lastReplyAt", "createdAt", "updatedAt") FROM stdin;
-a011f57d-20ee-4b9d-91eb-65c9c545112c	33930263-cce8-4ffb-9b22-07ff6b07a268	Ajoyib	Ajoyib	OPEN	2026-04-12 18:14:23.233	2026-04-12 17:49:08.926	2026-04-12 18:14:23.235
+a011f57d-20ee-4b9d-91eb-65c9c545112c	33930263-cce8-4ffb-9b22-07ff6b07a268	Ajoyib	Ajoyib	IN_PROGRESS	2026-04-12 18:32:43.025	2026-04-12 17:49:08.926	2026-04-12 18:32:43.026
 \.
 
 
@@ -2153,7 +2154,7 @@ a011f57d-20ee-4b9d-91eb-65c9c545112c	33930263-cce8-4ffb-9b22-07ff6b07a268	Ajoyib
 --
 
 COPY public."SystemSettings" (id, "maintenanceMode", "backupFrequency", "lastBackupAt", "defaultTrialDays", "newsEnabled", "superAdminPhone", "systemVersion", "globalNotifyUz", "globalNotifyRu", "globalNotifyEn", "globalNotifyTr", "updatedAt", "termsUz", "termsRu", "termsEn", "termsUzCyr", "privacyUz", "privacyRu", "privacyEn", "privacyUzCyr") FROM stdin;
-GLOBAL	f	DAILY	2026-03-29 20:00:03.592	14	t	+998901112233	1.0.0	\N	\N	\N	\N	2026-03-29 20:00:03.593	\N	\N	\N	\N	\N	\N	\N	\N
+GLOBAL	f	DAILY	2026-03-29 20:00:03.592	14	t	+998200116877	1.0.0	\N	\N	\N	\N	2026-04-12 18:35:52.462	\N	\N	\N	\N	\N	\N	\N	\N
 \.
 
 
@@ -2959,5 +2960,5 @@ REVOKE USAGE ON SCHEMA public FROM PUBLIC;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict wdgrOdsBhmD6vs3c2EI6ppNuXrlfO7Oeg60azdOczCclJuCylMaUvAw3HVutPjP
+\unrestrict UeAz2tKCS1BkEDEKNunF8U5KksrDJ4xUi5JSEsGopBXGfcdRJkNgTMCFawWPB1Z
 

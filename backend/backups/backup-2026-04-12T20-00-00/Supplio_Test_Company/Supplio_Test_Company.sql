@@ -1,6 +1,6 @@
 -- Supplio Company Export
 -- Company: Supplio Test Company
--- Exported: 2026-04-12T18:31:14.440Z
+-- Exported: 2026-04-12T20:00:00.586Z
 -- ID: 33930263-cce8-4ffb-9b22-07ff6b07a268
 
 -- Branch (4 rows)
