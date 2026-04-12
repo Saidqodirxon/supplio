@@ -12,6 +12,8 @@ export default defineConfig({
       "*.supplio.uz",
       "app.supplio.uz",
       "demo.supplio.uz",
+      "admin.supplio.uz",
+      "www.admin.supplio.uz",
     ],
   },
   preview: {
@@ -22,6 +24,8 @@ export default defineConfig({
       "*.supplio.uz",
       "app.supplio.uz",
       "demo.supplio.uz",
+      "admin.supplio.uz",
+      "www.admin.supplio.uz",
     ],
   },
   plugins: [
