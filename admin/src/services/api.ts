@@ -1,8 +1,29 @@
 import axios from "axios";
 import { toast as sonnerToast } from "sonner";
 
+function resolveApiBaseUrl() {
+  const envUrl = import.meta.env.VITE_API_URL as string | undefined;
+  if (envUrl && envUrl.trim()) return envUrl;
+
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (
+      host === "admin.supplio.uz" ||
+      host === "www.admin.supplio.uz" ||
+      host.endsWith(".supplio.uz")
+    ) {
+      return "https://api.supplio.uz/api";
+    }
+  }
+
+  return "http://localhost:5000/api";
+}
+
+export const API_BASE_URL = resolveApiBaseUrl();
+export const BACKEND_BASE_URL = API_BASE_URL.replace(/\/api$/, "");
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+  baseURL: API_BASE_URL,
 });
 
 // Interceptor to add JWT token to requests
