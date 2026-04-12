@@ -97,6 +97,30 @@ build_dashboard() {
     cd "$REPO_DIR"
 }
 
+# ADMIN
+build_admin() {
+    log "${BOLD}ADMIN (Vite)${RESET} build qilinmoqda..."
+    cd "$REPO_DIR/admin"
+
+    npm install --silent --legacy-peer-deps 2>/dev/null || true
+
+    # Optional production env
+    [ -f ".env.production" ] && cp .env.production .env
+
+    # Build - xatosi bo'lsa ham davom etsin
+    if npm run build 2>/dev/null; then
+        ok "Admin build muvaffaqiyatli."
+    else
+        warn "Admin build da xatolik! Eski dist ishlatilmoqda..."
+    fi
+
+    pm2 stop Admin3050 2>/dev/null || true
+    pm2 delete Admin3050 2>/dev/null || true
+    pm2 start "$REPO_DIR/admin/node_modules/.bin/vite" --name Admin3050 -- preview --port 3050
+    ok "Admin started (port 3050)."
+    cd "$REPO_DIR"
+}
+
 # LANDING
 build_landing() {
     log "${BOLD}LANDING (Next.js)${RESET} build qilinmoqda..."
@@ -126,6 +150,7 @@ echo ""
 
 build_backend && \
 build_dashboard && \
+build_admin && \
 build_landing
 
 # ── 4. Natijani ko'rsatish ────────────────────────────────────
@@ -140,5 +165,6 @@ pm2 list
 echo ""
 ok "Quyidagi manzillar orqali tekshiring:"
 ok "  Dashboard: http://localhost:3030"
+ok "  Admin:     http://localhost:3050"
 ok "  Landing:   http://localhost:3040"
 ok "  Backend:   http://localhost:5050/api"

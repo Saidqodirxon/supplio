@@ -143,6 +143,31 @@ update_dashboard() {
     cd "$REPO_DIR"
 }
 
+# ADMIN
+update_admin() {
+    log "${BOLD}ADMIN (Vite)${RESET} yangilanmoqda..."
+    cd "$REPO_DIR/admin"
+
+    rm -rf dist node_modules
+    npm install --silent --legacy-peer-deps
+
+    # Optional production env
+    [ -f ".env.production" ] && cp .env.production .env && ok "Admin: .env.production nusxalandi."
+
+    # Build - xatosi bo'lsa ham davom etsin
+    if npm run build 2>/dev/null; then
+        ok "Admin build muvaffaqiyatli."
+    else
+        warn "Admin build da xatolik! Eski dist ishlatilmoqda..."
+    fi
+
+    pm2 stop Admin3050 2>/dev/null || true
+    pm2 delete Admin3050 2>/dev/null || true
+    pm2 start "$REPO_DIR/admin/node_modules/.bin/vite" --name Admin3050 -- preview --port 3050
+    ok "Admin ishga tushdi (port 3050)."
+    cd "$REPO_DIR"
+}
+
 # LANDING
 update_landing() {
     log "${BOLD}LANDING (Next.js)${RESET} yangilanmoqda..."
@@ -195,6 +220,10 @@ fi
 
 # DASHBOARD - HAMISHA BUILD
 update_dashboard
+DEPLOYED=1
+
+# ADMIN - HAMISHA BUILD
+update_admin
 DEPLOYED=1
 
 # LANDING - HAMISHA BUILD

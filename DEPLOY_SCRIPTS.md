@@ -17,7 +17,7 @@ bash /root/supplio/deploy.sh --skip-seeds
 **Nima qiladi**:
 
 - ✅ Git pull
-- ✅ Backend, Dashboard, Landing build
+- ✅ Backend, Dashboard, Admin, Landing build
 - ✅ **Barcha seeds ishlatadi** (seed → seed:demo → seed:landing)
 - ✅ Build xatosi bo'lsa ham eski dist ishlatadi, to'xtamadi
 - ✅ PM2 orqali restart/start
@@ -36,7 +36,7 @@ bash /root/supplio/deploy-build.sh
 **Nima qiladi**:
 
 - ✅ Git pull
-- ✅ Backend, Dashboard, Landing build **ONLY**
+- ✅ Backend, Dashboard, Admin, Landing build **ONLY**
 - ❌ **SEEDLAR TO'XTALGAN** (data qoladi)
 - ✅ Build xatosi bo'lsa ham davom etadi
 - ✅ PM2 orqali restart/start
@@ -101,6 +101,7 @@ Quyidagilar PM2 orqali run bo'ladi:
 
 - **Backend5050** - NestJS (port 5050)
 - **Dashboard3030** - React/Vite (port 3030)
+- **Admin3050** - React/Vite (port 3050)
 - **Landing3040** - Next.js (port 3040)
 
 **Qulayliq**:
@@ -161,7 +162,7 @@ Har safar deploy qilishdan oldin:
 - [ ] `.env.production` file mavjud
 - [ ] PM2 installed (`pm2 -v`)
 - [ ] Database alive (`pm2 logs Backend5050`)
-- [ ] Ports available (3030, 3040, 5050)
+- [ ] Ports available (3030, 3040, 3050, 5050)
 - [ ] RAM etarli (≥2GB)
 
 ---
