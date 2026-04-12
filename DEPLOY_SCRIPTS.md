@@ -21,6 +21,7 @@ bash /root/supplio/deploy.sh --skip-seeds
 - ✅ **Barcha seeds ishlatadi** (seed → seed:demo → seed:landing)
 - ✅ Build xatosi bo'lsa ham eski dist ishlatadi, to'xtamadi
 - ✅ PM2 orqali restart/start
+- ✅ Prisma migrate + db push orqali schema sinxronlanadi
 
 ---
 
@@ -40,6 +41,7 @@ bash /root/supplio/deploy-build.sh
 - ❌ **SEEDLAR TO'XTALGAN** (data qoladi)
 - ✅ Build xatosi bo'lsa ham davom etadi
 - ✅ PM2 orqali restart/start
+- ✅ Prisma migrate + db push orqali schema sinxronlanadi
 
 ---
 

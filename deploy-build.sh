@@ -52,6 +52,13 @@ build_backend() {
             fail "Prisma migrate deploy ishlamadi. Avval migration xatosini tuzating."
         fi
 
+        log "Prisma schema DB bilan sinxronlanmoqda (db push)..."
+        if npx prisma db push; then
+            ok "Prisma db push yakunlandi."
+        else
+            fail "Prisma db push da xatolik. DATABASE_URL va schema holatini tekshiring."
+        fi
+
         if npx prisma generate; then
             ok "Prisma client generate yakunlandi."
         else

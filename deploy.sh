@@ -61,6 +61,13 @@ update_backend() {
             fail "Prisma migrate deploy ishlamadi. Seeddan oldin migration xatolarini tuzating."
         fi
 
+        log "Prisma schema DB bilan sinxronlanmoqda (db push)..."
+        if npx prisma db push; then
+            ok "Prisma db push yakunlandi."
+        else
+            fail "Prisma db push da xatolik. DATABASE_URL va schema holatini tekshiring."
+        fi
+
         if npx prisma generate; then
             ok "Prisma client generate yakunlandi."
         else
@@ -93,6 +100,11 @@ run_backend_seeds() {
     log "Seeddan oldin Prisma migration holati tekshirilmoqda..."
     if ! npx prisma migrate deploy; then
         fail "Migration qo'llanmagani uchun seedlar to'xtatildi."
+    fi
+
+    log "Seeddan oldin Prisma schema DB bilan sinxronlanmoqda (db push)..."
+    if ! npx prisma db push; then
+        fail "Prisma db push ishlamadi. Shu sabab seedlar to'xtatildi."
     fi
     
     # Barcha seedlarni ishlatish (seed.ts -> seed_demo.ts -> seed_landing.ts)
