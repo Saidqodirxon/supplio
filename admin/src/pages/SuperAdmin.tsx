@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ShieldCheck,
   Database,
@@ -34,6 +34,7 @@ import {
   BadgeCheck,
   Download,
   Eye,
+  Image as ImageIcon,
 } from "lucide-react";
 import clsx from "clsx";
 import { useScrollLock } from "../utils/useScrollLock";
@@ -48,6 +49,11 @@ import { uz, ru, enUS, tr } from "date-fns/locale";
 import type { Locale } from "date-fns";
 import { formatPhoneNumber, unformatPhoneNumber } from "../utils/formatters";
 import ImageUploader from "../components/ImageUploader";
+
+const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api$/, "");
+const LANDING_PREVIEW_URL =
+  import.meta.env.VITE_LANDING_URL ||
+  (typeof window !== "undefined" ? window.location.origin.replace("://admin.", "://") : "/");
 
 const fadeInUp = {
   initial: { opacity: 0, y: 10 },
@@ -215,6 +221,7 @@ interface SupportMessage {
   senderId: string | null;
   senderType: "SUPER_ADMIN" | "DISTRIBUTOR";
   message: string;
+  imageUrl?: string;
   createdAt: string;
 }
 
@@ -271,15 +278,22 @@ const emptyDistForm: DistributorForm = {
 interface ActivityLog {
   id: string;
   action: string;
-  entityType: string;
-  entityId?: string;
+  resource?: string;
+  metadata?: Record<string, unknown> | null;
   userId?: string;
-  companyId?: string;
-  ipAddress?: string;
-  userAgent?: string;
+  ip?: string | null;
   createdAt: string;
-  user?: { phone: string };
-  company?: { name: string };
+  user?: { phone: string; fullName?: string };
+}
+
+interface OverviewSummary {
+  totalCompanies: number;
+  totalLeads: number;
+  openTickets: number;
+  pendingUpgrades: number;
+  activeSubscriptions: number;
+  collectedPayments: number;
+  subscriptionRevenue: number;
 }
 
 interface ServerMetric {
@@ -314,6 +328,14 @@ export default function SuperAdmin() {
       ? (tabParam as TabId)
       : "overview";
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
+
+  useEffect(() => {
+    const nextTab: TabId =
+      tabParam && validTabs.includes(tabParam as TabId)
+        ? (tabParam as TabId)
+        : "overview";
+    setActiveTab(nextTab);
+  }, [tabParam]);
 
   const [authorized, setAuthorized] = useState(false);
   const [rootPass, setRootPass] = useState("");
@@ -380,8 +402,18 @@ export default function SuperAdmin() {
     }>
   >([]);
   const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
+  const [overviewSummary, setOverviewSummary] = useState<OverviewSummary | null>(null);
+  const [activitiesPage, setActivitiesPage] = useState(1);
+  const [activitiesTotal, setActivitiesTotal] = useState(0);
+  const [leadsPage, setLeadsPage] = useState(1);
+  const [leadsTotal, setLeadsTotal] = useState(0);
+  const [ticketsPage, setTicketsPage] = useState(1);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
   const [replyMessage, setReplyMessage] = useState("");
+  const [replyImagePreview, setReplyImagePreview] = useState<string | null>(null);
+  const [replyImageFile, setReplyImageFile] = useState<File | null>(null);
+  const [sendingReply, setSendingReply] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [pendingAction, setPendingAction] = useState<
@@ -526,6 +558,134 @@ export default function SuperAdmin() {
       isResetPasswordModalOpen
   );
 
+  const getLeadStatusLabel = (status: string) => {
+    switch (status) {
+      case "NEW":
+        return language === "ru" ? "Новый" : language === "en" ? "New" : "Yangi";
+      case "CONTACTED":
+        return language === "ru" ? "Связались" : language === "en" ? "Contacted" : "Bog'lanildi";
+      case "QUALIFIED":
+        return language === "ru" ? "Квалифицирован" : language === "en" ? "Qualified" : "Saralandi";
+      case "CONVERTED":
+        return language === "ru" ? "Konvert qilingan" : language === "en" ? "Converted" : "Mijozga aylandi";
+      case "REJECTED":
+        return language === "ru" ? "Отклонён" : language === "en" ? "Rejected" : "Rad etildi";
+      default:
+        return status;
+    }
+  };
+
+  const getAttachmentSrc = (url?: string) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${BACKEND}${url.startsWith("/") ? url : `/${url}`}`;
+  };
+
+  const handleReplyImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Rasm 5MB dan katta bo'lmasligi kerak");
+      return;
+    }
+    setReplyImageFile(file);
+    setReplyImagePreview(URL.createObjectURL(file));
+  };
+
+  const paginatedTickets = supportTickets.slice((ticketsPage - 1) * 10, ticketsPage * 10);
+  const ticketTotalPages = Math.max(1, Math.ceil(supportTickets.length / 10));
+
+  const renderPagination = (
+    currentPage: number,
+    totalItems: number,
+    pageSize: number,
+    onChange: (page: number) => void,
+  ) => {
+    const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+    if (totalPages <= 1) return null;
+
+    const startPage = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+    const endPage = Math.min(totalPages, startPage + 4);
+
+    return (
+      <div className="flex items-center justify-end gap-2 p-4">
+        <button
+          type="button"
+          onClick={() => onChange(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-black disabled:opacity-40"
+        >
+          Prev
+        </button>
+        {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map((page) => (
+          <button
+            key={page}
+            type="button"
+            onClick={() => onChange(page)}
+            className={clsx(
+              "min-w-[38px] px-3 py-2 rounded-xl text-xs font-black border",
+              page === currentPage
+                ? "premium-gradient text-white border-transparent"
+                : "border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300",
+            )}
+          >
+            {page}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => onChange(Math.min(totalPages, currentPage + 1))}
+          disabled={currentPage === totalPages}
+          className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-black disabled:opacity-40"
+        >
+          Next
+        </button>
+      </div>
+    );
+  };
+
+  const sendTicketReply = async () => {
+    if (!selectedTicket || (!replyMessage.trim() && !replyImageFile)) return;
+
+    try {
+      setSendingReply(true);
+      let imageUrl: string | undefined;
+
+      if (replyImageFile) {
+        const form = new FormData();
+        form.append("file", replyImageFile);
+        const uploadRes = await api.post("/upload/image", form, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        imageUrl = uploadRes.data?.url;
+      }
+
+      const messageText = replyMessage.trim() || " ";
+      const res = await api.post(`/support/message/${selectedTicket.id}`, {
+        message: messageText,
+        imageUrl,
+      });
+
+      setSelectedTicket({
+        ...selectedTicket,
+        messages: [
+          ...selectedTicket.messages,
+          { ...res.data, imageUrl: res.data?.imageUrl || imageUrl },
+        ],
+        status: "IN_PROGRESS",
+      });
+      setReplyMessage("");
+      setReplyImageFile(null);
+      setReplyImagePreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      fetchData();
+    } catch {
+      toast.error("Xabar yuborilmadi");
+    } finally {
+      setSendingReply(false);
+    }
+  };
+
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
@@ -533,26 +693,34 @@ export default function SuperAdmin() {
         const res = await api.get("/super/news");
         setNews(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
       } else if (activeTab === "leads") {
-        const res = await api.get("/super/leads");
+        const res = await api.get("/super/leads", {
+          params: { page: leadsPage, limit: 10 },
+        });
         setLeads(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
+        setLeadsTotal(Number(res.data?.total || 0));
       } else if (activeTab === "settings") {
         const res = await api.get("/super/settings");
         setSettings(res.data);
       } else if (activeTab === "backups") {
         await refreshBackups();
       } else if (activeTab === "activities") {
-        const res = await api.get("/super/audit-logs");
-        setActivities(
-          Array.isArray(res.data) ? res.data : (res.data?.items ?? [])
-        );
+        const res = await api.get("/super/audit-logs", {
+          params: { page: activitiesPage, limit: 10 },
+        });
+        setActivities(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
+        setActivitiesTotal(Number(res.data?.total || 0));
       } else if (activeTab === "tariffs") {
         const res = await api.get("/super/tariffs");
         setTariffs(
           Array.isArray(res.data) ? res.data : (res.data?.items ?? [])
         );
       } else if (activeTab === "overview") {
-        const res = await api.get("/super/metrics");
-        setMetrics(res.data);
+        const [metricsRes, summaryRes] = await Promise.all([
+          api.get("/super/metrics"),
+          api.get("/super/overview-summary"),
+        ]);
+        setMetrics(metricsRes.data);
+        setOverviewSummary(summaryRes.data);
       } else if (activeTab === "cms") {
         const res = await api.get("/super/landing");
         if (res.data) setLandingContent(res.data);
@@ -566,7 +734,11 @@ export default function SuperAdmin() {
         setUpgradeRequests(Array.isArray(res.data) ? res.data : []);
       } else if (activeTab === "tickets") {
         const res = await api.get("/support/all");
-        setSupportTickets(Array.isArray(res.data) ? res.data : []);
+        const nextTickets = Array.isArray(res.data) ? res.data : [];
+        setSupportTickets(nextTickets);
+        setSelectedTicket((current) =>
+          current ? nextTickets.find((ticket) => ticket.id === current.id) || current : current
+        );
       }
     } catch (err: unknown) {
       const msg =
@@ -575,7 +747,7 @@ export default function SuperAdmin() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, refreshBackups]);
+  }, [activeTab, refreshBackups, activitiesPage, leadsPage]);
 
   const { user } = useAuthStore();
 
@@ -885,15 +1057,15 @@ export default function SuperAdmin() {
                         <Monitor className="w-6 h-6" />
                       </div>
                       <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-xl uppercase tracking-widest">
-                        {t.superadmin.activeBadge}
+                        Live
                       </span>
                     </div>
                     <div>
                       <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">
-                        {t.superadmin.livePerformance}
+                        Kompaniyalar
                       </h3>
                       <p className="text-3xl font-black tracking-tighter">
-                        842 req/sec
+                        {overviewSummary?.totalCompanies ?? 0}
                       </p>
                     </div>
                   </div>
@@ -901,18 +1073,56 @@ export default function SuperAdmin() {
                   <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 flex items-center justify-center text-indigo-600">
-                        <Server className="w-6 h-6" />
+                        <CreditCard className="w-6 h-6" />
                       </div>
                       <span className="text-[10px] font-black text-blue-500 bg-blue-500/10 px-3 py-1.5 rounded-xl uppercase tracking-widest">
-                        {t.superadmin.systemStatus}
+                        Tarif
                       </span>
                     </div>
                     <div>
                       <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">
-                        {t.superadmin.serverMetrics}
+                        Tariflardan tushum
                       </h3>
                       <p className="text-3xl font-black tracking-tighter">
-                        14d 6h 22m
+                        {(overviewSummary?.subscriptionRevenue ?? 0).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="w-12 h-12 rounded-2xl bg-emerald-600/10 flex items-center justify-center text-emerald-600">
+                        <BadgeCheck className="w-6 h-6" />
+                      </div>
+                      <span className="text-[10px] font-black text-emerald-500 bg-emerald-500/10 px-3 py-1.5 rounded-xl uppercase tracking-widest">
+                        Open
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">
+                        Ochiq ticketlar
+                      </h3>
+                      <p className="text-3xl font-black tracking-tighter">
+                        {overviewSummary?.openTickets ?? 0}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 space-y-6">
+                    <div className="flex items-center justify-between">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-600/10 flex items-center justify-center text-amber-600">
+                        <TrendingUp className="w-6 h-6" />
+                      </div>
+                      <span className="text-[10px] font-black text-amber-500 bg-amber-500/10 px-3 py-1.5 rounded-xl uppercase tracking-widest">
+                        Pipeline
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">
+                        Lidlar / so'rovlar
+                      </h3>
+                      <p className="text-3xl font-black tracking-tighter">
+                        {(overviewSummary?.totalLeads ?? 0) + (overviewSummary?.pendingUpgrades ?? 0)}
                       </p>
                     </div>
                   </div>
@@ -998,6 +1208,13 @@ export default function SuperAdmin() {
                         </tr>
                       </thead>
                       <tbody>
+                        {activities.length === 0 && (
+                          <tr>
+                            <td colSpan={5} className="px-8 py-16 text-center text-sm font-bold text-slate-400">
+                              Audit loglar hozircha yo'q
+                            </td>
+                          </tr>
+                        )}
                         {activities.map((log: ActivityLog) => (
                           <tr
                             key={log.id}
@@ -1013,7 +1230,7 @@ export default function SuperAdmin() {
                                     {log.action}
                                   </p>
                                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                                    {log.entityType}
+                                    {log.resource || "system"}
                                   </p>
                                 </div>
                               </div>
@@ -1022,12 +1239,12 @@ export default function SuperAdmin() {
                               <div className="flex items-center gap-3">
                                 <User className="w-4 h-4 text-slate-400" />
                                 <span className="text-sm font-bold">
-                                  {log.user?.phone || "System"}
+                                  {log.user?.fullName || log.user?.phone || "System"}
                                 </span>
                               </div>
                             </td>
                             <td className="px-8 py-6 text-sm font-bold">
-                              {log.company?.name || "-"}
+                              {log.resource || "-"}
                             </td>
                             <td className="px-8 py-6 text-xs font-bold text-slate-500 italic">
                               {format(new Date(log.createdAt), "dd.MM HH:mm", {
@@ -1035,15 +1252,16 @@ export default function SuperAdmin() {
                               })}
                             </td>
                             <td className="px-8 py-6">
-                              <button className="p-3 bg-slate-100 dark:bg-white/10 rounded-xl opacity-0 group-hover:opacity-100 transition-all">
-                                <ChevronRight className="w-4 h-4" />
-                              </button>
+                              <div className="text-xs text-slate-500 font-semibold max-w-xs break-words">
+                                {log.metadata ? JSON.stringify(log.metadata) : log.ip || "-"}
+                              </div>
                             </td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
                   </div>
+                  {renderPagination(activitiesPage, activitiesTotal, 10, setActivitiesPage)}
                 </div>
               )}
 
@@ -1151,7 +1369,7 @@ export default function SuperAdmin() {
                                           LEAD_STATUS_COLORS["CLOSED"]
                                       )}
                                     >
-                                      {lead.status}
+                                      {getLeadStatusLabel(lead.status)}
                                     </span>
                                   </td>
                                   <td className="px-8 py-5 text-xs font-bold text-slate-400 whitespace-nowrap">
@@ -1211,6 +1429,7 @@ export default function SuperAdmin() {
                               ))}
                             </tbody>
                           </table>
+                          {renderPagination(leadsPage, leadsTotal, 10, setLeadsPage)}
                         </div>
                       )}
                     </div>
@@ -1230,7 +1449,7 @@ export default function SuperAdmin() {
                           Murojaatlar mavjud emas
                         </div>
                       ) : (
-                        supportTickets.map((ticket) => (
+                        paginatedTickets.map((ticket) => (
                           <button
                             key={ticket.id}
                             onClick={() => setSelectedTicket(ticket)}
@@ -1260,6 +1479,7 @@ export default function SuperAdmin() {
                         ))
                       )}
                     </div>
+                    {renderPagination(ticketsPage, supportTickets.length, 10, setTicketsPage)}
                   </div>
 
                   {/* Chat Area */}
@@ -1291,15 +1511,23 @@ export default function SuperAdmin() {
                         <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 dark:bg-black/10">
                             {selectedTicket.messages?.map((msg: SupportMessage) => {
                              const isMe = msg.senderType === "SUPER_ADMIN";
+                             const attachmentSrc = getAttachmentSrc(msg.imageUrl);
                              return (
                                <div key={msg.id} className={clsx("flex flex-col", isMe ? "items-end" : "items-start")}>
                                  <div className={clsx(
-                                   "max-w-[85%] p-4 rounded-3xl text-sm font-bold leading-relaxed shadow-sm",
+                                   "max-w-[85%] rounded-3xl text-sm font-bold leading-relaxed shadow-sm overflow-hidden",
                                   isMe 
                                     ? "premium-gradient text-white rounded-tr-none" 
                                     : "bg-white dark:bg-white/10 text-slate-900 dark:text-white rounded-tl-none border border-slate-100 dark:border-white/5"
                                 )}>
-                                  {msg.message}
+                                  {msg.imageUrl && (
+                                    <a href={attachmentSrc} target="_blank" rel="noreferrer">
+                                      <img src={attachmentSrc} alt="ticket attachment" className="w-full max-h-80 object-contain bg-black/5" />
+                                    </a>
+                                  )}
+                                  {msg.message.trim() !== " " && (
+                                    <div className="p-4">{msg.message}</div>
+                                  )}
                                 </div>
                                 <span className="text-[9px] text-slate-400 mt-2 font-black px-2">
                                   {format(new Date(msg.createdAt), "dd MMM, HH:mm")}
@@ -1310,42 +1538,58 @@ export default function SuperAdmin() {
                         </div>
 
                         {selectedTicket.status !== "CLOSED" && (
-                          <div className="p-4 bg-white dark:bg-white/5 border-t border-slate-100 dark:border-white/10 flex gap-3">
+                          <div className="p-4 bg-white dark:bg-white/5 border-t border-slate-100 dark:border-white/10 space-y-3">
+                            {replyImagePreview && (
+                              <div className="relative inline-block">
+                                <img src={replyImagePreview} alt="preview" className="h-24 rounded-2xl object-cover border border-slate-200 dark:border-white/10" />
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setReplyImagePreview(null);
+                                    setReplyImageFile(null);
+                                    if (fileInputRef.current) fileInputRef.current.value = "";
+                                  }}
+                                  className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center"
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            )}
+                            <div className="flex gap-3">
+                            <input
+                              ref={fileInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={handleReplyImageChange}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => fileInputRef.current?.click()}
+                              className="w-14 h-14 bg-slate-100 dark:bg-white/5 text-slate-500 rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                            >
+                              <ImageIcon size={20} />
+                            </button>
                             <input
                               type="text"
                               value={replyMessage}
                               onChange={(e) => setReplyMessage(e.target.value)}
                               placeholder="Fikr bildiring..."
                               onKeyDown={(e) => {
-                                if (e.key === 'Enter' && replyMessage.trim()) {
-                                   const msg = replyMessage;
-                                   setReplyMessage("");
-                                   api.post(`/support/message/${selectedTicket.id}`, { message: msg }).then(res => {
-                                      setSelectedTicket({
-                                        ...selectedTicket,
-                                        messages: [...selectedTicket.messages, res.data]
-                                      });
-                                   });
+                                if (e.key === 'Enter' && (replyMessage.trim() || replyImageFile)) {
+                                  void sendTicketReply();
                                 }
                               }}
                               className="flex-1 px-6 py-4 bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 rounded-2xl focus:border-indigo-600 outline-none transition-all dark:text-white font-bold"
                             />
                             <button
-                              onClick={() => {
-                                if (!replyMessage.trim()) return;
-                                const msg = replyMessage;
-                                setReplyMessage("");
-                                api.post(`/support/message/${selectedTicket.id}`, { message: msg }).then(res => {
-                                   setSelectedTicket({
-                                     ...selectedTicket,
-                                     messages: [...selectedTicket.messages, res.data]
-                                   });
-                                });
-                              }}
-                              className="w-14 h-14 premium-gradient text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all"
+                              onClick={() => void sendTicketReply()}
+                              disabled={sendingReply || (!replyMessage.trim() && !replyImageFile)}
+                              className="w-14 h-14 premium-gradient text-white rounded-2xl flex items-center justify-center shadow-lg active:scale-95 transition-all disabled:opacity-50"
                             >
-                              <Send size={20} />
+                              {sendingReply ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send size={20} />}
                             </button>
+                            </div>
                           </div>
                         )}
                       </>
@@ -2556,6 +2800,46 @@ export default function SuperAdmin() {
                     </button>
                   </div>
 
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div className="bg-white dark:bg-white/5 p-6 rounded-[2rem] border border-slate-100 dark:border-white/5 space-y-3">
+                      <h3 className="text-sm font-black uppercase tracking-widest text-teal-600">
+                        CMS nima qiladi
+                      </h3>
+                      <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
+                        Bu bo'lim landing bosh sahifadagi hero matnlari, footer tavsifi va kontakt bloklarini boshqaradi.
+                        Saqlagandan keyin o'zgarishlar public landing sahifada ko'rinadi.
+                      </p>
+                      <a
+                        href={LANDING_PREVIEW_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-600 text-white text-xs font-black uppercase tracking-widest"
+                      >
+                        <Eye className="w-4 h-4" /> Landingni ko'rish
+                      </a>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-teal-50 to-white dark:from-teal-900/20 dark:to-white/5 p-6 rounded-[2rem] border border-teal-100 dark:border-teal-900/30 space-y-3">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-teal-600">
+                        Jonli preview
+                      </p>
+                      <p className="text-xs font-black text-slate-500 uppercase tracking-widest">
+                        {landingContent.heroBadgeUz || "Badge"}
+                      </p>
+                      <h3 className="text-2xl font-black text-slate-900 dark:text-white">
+                        {landingContent.heroTitleUz || "Hero sarlavha shu yerda ko'rinadi"}
+                      </h3>
+                      <p className="text-sm font-semibold text-slate-600 dark:text-slate-300 leading-relaxed">
+                        {landingContent.heroSubtitleUz || "Hero subtitle preview"}
+                      </p>
+                      <div className="flex flex-wrap gap-3 text-xs font-bold text-slate-500">
+                        <span>{landingContent.contactPhone || "Telefon"}</span>
+                        <span>{landingContent.contactEmail || "Email"}</span>
+                        <span>{landingContent.contactAddress || "Manzil"}</span>
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Hero Section */}
                   <div className="bg-white dark:bg-white/5 p-8 rounded-[2.5rem] border border-slate-100 dark:border-white/5 space-y-6">
                     <h3 className="text-sm font-black text-teal-600 uppercase tracking-widest">
@@ -2962,7 +3246,7 @@ export default function SuperAdmin() {
                             : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:border-slate-400"
                         )}
                       >
-                        {s}
+                        {getLeadStatusLabel(s)}
                       </button>
                     ))}
                   </div>
@@ -3793,6 +4077,9 @@ export default function SuperAdmin() {
                     <option value="NEW">{t.superadmin.leadNew}</option>
                     <option value="CONTACTED">
                       {t.superadmin.leadContacted}
+                    </option>
+                    <option value="QUALIFIED">
+                      {getLeadStatusLabel("QUALIFIED")}
                     </option>
                     <option value="CONVERTED">
                       {t.superadmin.leadConverted}

@@ -49,6 +49,7 @@ export default function Profile() {
     phone: isUz ? "Telefon (o'zgartirib bo'lmaydi)" : isRu ? "Телефон (нельзя менять)" : "Phone (read-only)",
     companyName: isUz ? "Kompaniya nomi" : isRu ? "Название компании" : "Company Name",
     website: isUz ? "Veb-sayt" : isRu ? "Веб-сайт" : "Website",
+    websiteReadonly: isUz ? "Bu manzil avtomatik yaratiladi va foydalanuvchi tomonidan o'zgartirilmaydi" : isRu ? "Этот адрес создаётся автоматически и не редактируется пользователем" : "This address is generated automatically and cannot be edited by the user",
     currentPw: isUz ? "Joriy parol" : isRu ? "Текущий пароль" : "Current password",
     newPw: isUz ? "Yangi parol" : isRu ? "Новый пароль" : "New password",
     confirmPw: isUz ? "Yangi parolni takrorla" : isRu ? "Повтори новый пароль" : "Confirm new password",
@@ -136,6 +137,8 @@ export default function Profile() {
     } catch { toast.error(isUz ? "Joriy parol noto'g'ri" : isRu ? "Неверный текущий пароль" : "Wrong current password"); }
     finally { setSavingPw(false); }
   };
+
+  const websiteUrl = company?.website?.trim() || (company?.slug ? `https://app.supplio.uz/${company.slug}` : "");
 
   return (
     <div className="max-w-3xl mx-auto space-y-8 animate-in fade-in duration-500">
@@ -244,13 +247,23 @@ export default function Profile() {
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                     <Globe className="w-3 h-3" /> {t.website}
                   </label>
-                  <input
-                    type="text"
-                    className="input-field w-full"
-                    value={company.website || ""}
-                    onChange={e => setCompany({ ...company, website: e.target.value })}
-                    placeholder="https://example.com"
-                  />
+                  <div className="space-y-2">
+                    <a
+                      href={websiteUrl || undefined}
+                      target="_blank"
+                      rel="noreferrer"
+                      className={clsx(
+                        "input-field w-full gap-3",
+                        websiteUrl ? "hover:border-blue-300 hover:bg-blue-50/60 dark:hover:bg-slate-900/70" : "pointer-events-none opacity-70"
+                      )}
+                    >
+                      <span className="truncate">{websiteUrl || "https://app.supplio.uz/company-page"}</span>
+                      {websiteUrl && <Globe className="w-4 h-4 shrink-0 text-blue-500" />}
+                    </a>
+                    <p className="text-[11px] font-medium leading-5 text-slate-400">
+                      {t.websiteReadonly}
+                    </p>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">

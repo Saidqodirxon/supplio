@@ -368,6 +368,12 @@ export class SuperAdminController {
     return this.superAdminService.getServerMetrics();
   }
 
+  @Get("overview-summary")
+  @Roles("SUPER_ADMIN")
+  async getOverviewSummary() {
+    return this.superAdminService.getOverviewSummary();
+  }
+
   @Get("release-notes")
   @Roles("SUPER_ADMIN")
   async getReleaseNotes() {

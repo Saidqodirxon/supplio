@@ -173,6 +173,9 @@ let SuperAdminController = class SuperAdminController {
     async getMetrics() {
         return this.superAdminService.getServerMetrics();
     }
+    async getOverviewSummary() {
+        return this.superAdminService.getOverviewSummary();
+    }
     async getReleaseNotes() {
         return this.superAdminService.getReleaseNotes();
     }
@@ -510,6 +513,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "getMetrics", null);
+__decorate([
+    (0, common_1.Get)("overview-summary"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "getOverviewSummary", null);
 __decorate([
     (0, common_1.Get)("release-notes"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),

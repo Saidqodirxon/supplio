@@ -10,6 +10,7 @@ interface Message {
   message: string;
   senderType: "SUPER_ADMIN" | "DISTRIBUTOR";
   createdAt: string;
+  imageUrl?: string;
 }
 
 interface Ticket {
@@ -23,6 +24,7 @@ interface Ticket {
 }
 
 export default function SupportTickets() {
+  const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api$/, "");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -43,6 +45,9 @@ export default function SupportTickets() {
     try {
       const res = await api.get("/support/company/tickets");
       setTickets(res.data);
+      setSelectedTicket((current) =>
+        current ? res.data.find((ticket: Ticket) => ticket.id === current.id) || current : current
+      );
     } catch (error) {
       toast.error("Murojaatlarni yuklashda xatolik yuz berdi");
     } finally {
@@ -103,9 +108,13 @@ export default function SupportTickets() {
       if (imageUrl) payload.imageUrl = imageUrl;
 
       const res = await api.post(`/support/message/${selectedTicket.id}`, payload);
+      const nextMessage: Message = {
+        ...res.data,
+        imageUrl: res.data?.imageUrl || imageUrl,
+      };
       setSelectedTicket({
         ...selectedTicket,
-        messages: [...selectedTicket.messages, res.data],
+        messages: [...selectedTicket.messages, nextMessage],
         status: "OPEN",
       });
       setNewMessage("");
@@ -119,6 +128,12 @@ export default function SupportTickets() {
       setSending(false);
       setUploadingImage(false);
     }
+  };
+
+  const getAttachmentSrc = (url?: string) => {
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${BACKEND}${url.startsWith("/") ? url : `/${url}`}`;
   };
 
   const getStatusBadge = (status: string) => {
@@ -213,7 +228,8 @@ export default function SupportTickets() {
               <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50 dark:bg-slate-900/10">
                 {selectedTicket.messages.map((msg) => {
                   const isMe = msg.senderType === "DISTRIBUTOR";
-                  const hasImage = (msg as any).imageUrl;
+                  const hasImage = Boolean(msg.imageUrl);
+                  const attachmentSrc = getAttachmentSrc(msg.imageUrl);
                   return (
                     <div key={msg.id} className={clsx("flex flex-col", isMe ? "items-end" : "items-start")}>
                       <div className={clsx(
@@ -223,9 +239,9 @@ export default function SupportTickets() {
                           : "bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-tl-none border border-slate-100 dark:border-slate-600"
                       )}>
                         {hasImage && (
-                          <a href={(msg as any).imageUrl} target="_blank" rel="noopener noreferrer">
+                          <a href={attachmentSrc} target="_blank" rel="noopener noreferrer">
                             <img
-                              src={(msg as any).imageUrl}
+                              src={attachmentSrc}
                               alt="attachment"
                               className="max-w-full max-h-64 object-contain w-full"
                             />
@@ -365,4 +381,3 @@ export default function SupportTickets() {
     </div>
   );
 }
-

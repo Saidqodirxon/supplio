@@ -288,6 +288,9 @@ export default function Layout() {
     );
   };
 
+  const mainZoom = Math.round((fontSize / 16) * 100);
+  const chromeZoom = Math.max(0.92, Math.min(1.1, 1 + (fontSize - 16) * 0.025));
+
   const handleReadOnlyClickCapture = (
     e: React.MouseEvent<HTMLElement, MouseEvent>
   ) => {
@@ -379,7 +382,10 @@ export default function Layout() {
             </Link>
           </div>
 
-          <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar scroll-smooth">
+          <nav
+            className="flex-1 px-3 py-4 space-y-1 overflow-y-auto no-scrollbar scroll-smooth"
+            style={{ zoom: chromeZoom }}
+          >
             {!isCollapsed && (
               <p className="px-3 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 opacity-60">
                 {t.sidebar.company}
@@ -460,7 +466,10 @@ export default function Layout() {
               </button>
             </div>
           ) : (
-            <div className="p-4 mx-3 mb-4 rounded-2xl border shrink-0 transition-all bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5">
+            <div
+              className="p-4 mx-3 mb-4 rounded-2xl border shrink-0 transition-all bg-slate-50 dark:bg-white/5 border-slate-100 dark:border-white/5"
+              style={{ zoom: chromeZoom }}
+            >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 bg-white dark:bg-slate-950 flex items-center justify-center rounded-full overflow-hidden border-2 border-slate-100 dark:border-white/10 shadow-md shrink-0">
                   <img src={user?.photoUrl || "/favicon.png"} alt="Profile" className="w-full h-full object-cover" />
@@ -502,7 +511,7 @@ export default function Layout() {
           )}
         >
           {/* Left: Mobile menu + page title */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4" style={{ zoom: chromeZoom }}>
             <button
               type="button"
               className="lg:hidden p-2.5 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl"
@@ -525,7 +534,7 @@ export default function Layout() {
           </div>
 
           {/* Right: controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3" style={{ zoom: chromeZoom }}>
             {/* Font Scale Control */}
             <div className="hidden md:flex items-center bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 rounded-xl px-1 py-1">
               <button
@@ -616,7 +625,7 @@ export default function Layout() {
         <main
           id="main-scroll"
           className="flex-1 overflow-y-auto w-full scroll-smooth"
-          style={{ zoom: `${Math.round((fontSize / 16) * 100)}%` }}
+          style={{ zoom: `${mainZoom}%` }}
           onClickCapture={handleReadOnlyClickCapture}
           onSubmitCapture={handleReadOnlySubmitCapture}
         >

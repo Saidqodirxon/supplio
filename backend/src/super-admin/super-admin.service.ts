@@ -301,6 +301,36 @@ export class SuperAdminService {
     });
   }
 
+  async getOverviewSummary() {
+    const [
+      totalCompanies,
+      totalLeads,
+      openTickets,
+      pendingUpgrades,
+      collectedPayments,
+      subscriptionRevenue,
+      activeSubscriptions,
+    ] = await Promise.all([
+      this.prisma.company.count({ where: { deletedAt: null } }),
+      this.prisma.lead.count({ where: { deletedAt: null } }),
+      (this.prisma as any).supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
+      (this.prisma as any).upgradeRequest.count({ where: { status: "PENDING" } }),
+      this.prisma.payment.aggregate({ _sum: { amount: true } }),
+      this.prisma.subscription.aggregate({ _sum: { amount: true } }),
+      this.prisma.subscription.count({ where: { status: "ACTIVE" as any } }),
+    ]);
+
+    return {
+      totalCompanies,
+      totalLeads,
+      openTickets,
+      pendingUpgrades,
+      activeSubscriptions,
+      collectedPayments: collectedPayments._sum.amount ?? 0,
+      subscriptionRevenue: subscriptionRevenue._sum.amount ?? 0,
+    };
+  }
+
   // â”€â”€ Release Notes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async getReleaseNotes() {

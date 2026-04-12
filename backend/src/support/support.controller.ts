@@ -28,11 +28,11 @@ export class SupportController {
   // Common message endpoint
   @Post('message/:id')
   @ApiOperation({ summary: 'Add a message to a ticket' })
-  addMessage(@Req() req: any, @Param('id') ticketId: string, @Body() data: { message: string }) {
+  addMessage(@Req() req: any, @Param('id') ticketId: string, @Body() data: { message: string; imageUrl?: string }) {
     const senderId = req.user.id;
     // Check if user is super admin or distributor
     const senderType = req.user.roleType === 'SUPER_ADMIN' ? 'SUPER_ADMIN' : 'DISTRIBUTOR';
-    return this.supportService.addMessage(ticketId, senderId, senderType, data.message);
+    return this.supportService.addMessage(ticketId, senderId, senderType, data.message, data.imageUrl);
   }
 
   @Get('ticket/:id')

@@ -255,6 +255,26 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             orderBy: { timestamp: "desc" },
         });
     }
+    async getOverviewSummary() {
+        const [totalCompanies, totalLeads, openTickets, pendingUpgrades, collectedPayments, subscriptionRevenue, activeSubscriptions,] = await Promise.all([
+            this.prisma.company.count({ where: { deletedAt: null } }),
+            this.prisma.lead.count({ where: { deletedAt: null } }),
+            this.prisma.supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
+            this.prisma.upgradeRequest.count({ where: { status: "PENDING" } }),
+            this.prisma.payment.aggregate({ _sum: { amount: true } }),
+            this.prisma.subscription.aggregate({ _sum: { amount: true } }),
+            this.prisma.subscription.count({ where: { status: "ACTIVE" } }),
+        ]);
+        return {
+            totalCompanies,
+            totalLeads,
+            openTickets,
+            pendingUpgrades,
+            activeSubscriptions,
+            collectedPayments: collectedPayments._sum.amount ?? 0,
+            subscriptionRevenue: subscriptionRevenue._sum.amount ?? 0,
+        };
+    }
     async getReleaseNotes() {
         return this.prisma.releaseNote.findMany({ orderBy: { createdAt: "desc" } });
     }

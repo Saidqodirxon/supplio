@@ -18,6 +18,7 @@ import {
   FileCode,
   TrendingUp,
   Send,
+  User,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAuthStore } from "../store/authStore";
@@ -32,7 +33,7 @@ export default function Layout() {
   const [badges, setBadges] = useState({ tickets: 0, upgrades: 0 });
   const location = useLocation();
   const { user, logout, language } = useAuthStore();
-  const { isDark, toggleTheme, isCollapsed, toggleSidebar, fontSize, setFontSize } = useThemeStore();
+  const { isDark, toggleTheme, isCollapsed, toggleSidebar } = useThemeStore();
   const t = dashboardTranslations[language];
 
   // Fetch badge counts for sidebar
@@ -60,7 +61,10 @@ export default function Layout() {
   }, []);
 
   // Map of routes to titles for the header
-  const getTitle = (search: string) => {
+  const getTitle = (pathname: string, search: string) => {
+    if (pathname === "/profile") {
+      return language === "ru" ? "Профиль" : language === "en" ? "Profile" : "Profil";
+    }
     const tab = new URLSearchParams(search).get("tab");
     if (!tab || tab === "overview") return t.superadmin.overview;
     if (tab === "distributors") return t.superadmin.distributors;
@@ -78,7 +82,7 @@ export default function Layout() {
     return t.sidebar.overview;
   };
 
-  const currentTitle = getTitle(location.search);
+  const currentTitle = getTitle(location.pathname, location.search);
 
   const navigation = [
     { name: t.superadmin.overview, href: "/?tab=overview", icon: ShieldCheck, badge: 0 },
@@ -196,11 +200,22 @@ export default function Layout() {
           {/* User Info + Logout */}
           <div className="p-3 border-t border-border space-y-1">
             {!isCollapsed && user && (
-              <div className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-white/5 mb-1">
+              <Link to="/profile" className="block px-4 py-2 rounded-xl bg-slate-50 dark:bg-white/5 mb-1 hover:bg-slate-100 dark:hover:bg-white/10 transition-all">
                 <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">{user.fullName || "Super Admin"}</p>
                 <p className="text-[10px] text-slate-400 truncate">{user.phone}</p>
-              </div>
+              </Link>
             )}
+            <Link
+              to="/profile"
+              onClick={() => setSidebarOpen(false)}
+              className={clsx(
+                "w-full flex items-center p-3 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/5 transition-all active:scale-95",
+                isCollapsed ? "justify-center" : "gap-3 px-5"
+              )}
+            >
+              <User className="h-5 w-5 shrink-0" />
+              {!isCollapsed && <span className="text-sm font-extrabold uppercase tracking-widest">{language === "ru" ? "Профиль" : "Profil"}</span>}
+            </Link>
             <button
               onClick={logout}
               className={clsx(
@@ -241,25 +256,6 @@ export default function Layout() {
           </div>
 
           <div className="flex items-center gap-3">
-             {/* Font Scale Control */}
-             <div className="hidden md:flex items-center bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 rounded-xl px-1 py-1">
-              <button
-                onClick={() => setFontSize(Math.max(12, fontSize - 1))}
-                className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-              >
-                <div className="text-[10px] font-black">A-</div>
-              </button>
-              <div className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />
-              <button
-                onClick={() => setFontSize(Math.min(20, fontSize + 1))}
-                className="p-2 text-slate-400 hover:text-blue-600 transition-colors"
-              >
-                <div className="text-xs font-black">A+</div>
-              </button>
-            </div>
-
-            <div className="h-6 w-px bg-slate-200 dark:bg-white/10 hidden md:block" />
-
             <LangSelect />
 
             <button
@@ -280,7 +276,7 @@ export default function Layout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto no-scrollbar bg-slate-50/30 dark:bg-slate-900/20" style={{ fontSize: 'var(--content-font-size, 16px)' }}>
+        <main className="flex-1 overflow-y-auto no-scrollbar bg-slate-50/30 dark:bg-slate-900/20">
           <div className="max-w-[1600px] mx-auto p-6 lg:p-10">
             <Outlet />
           </div>

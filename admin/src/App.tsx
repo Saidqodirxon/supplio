@@ -6,6 +6,7 @@ import { useAuthStore } from './store/authStore';
 import { useThemeStore } from './store/themeStore';
 import { useEffect } from 'react';
 import Layout from './components/Layout';
+import Profile from './pages/Profile';
 
 function ProtectedRoute({ allowedRoles, children }: { allowedRoles: string[], children: React.ReactNode }) {
   const { token, user, getEffectiveRole } = useAuthStore();
@@ -40,6 +41,7 @@ export default function App() {
         }
       >
         <Route index element={<SuperAdmin />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
       <Route path="/not-found" element={<NotFound />} />
       <Route path="*" element={<Navigate to="/" replace />} />

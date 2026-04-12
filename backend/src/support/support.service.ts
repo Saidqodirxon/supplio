@@ -62,13 +62,20 @@ export class SupportService {
     });
   }
 
-  async addMessage(ticketId: string, senderId: string | null, senderType: 'SUPER_ADMIN' | 'DISTRIBUTOR', message: string) {
+  async addMessage(
+    ticketId: string,
+    senderId: string | null,
+    senderType: 'SUPER_ADMIN' | 'DISTRIBUTOR',
+    message: string,
+    imageUrl?: string,
+  ) {
     const msg = await (this.prisma as any).supportMessage.create({
       data: {
         ticketId,
         senderId,
         senderType,
         message,
+        imageUrl,
       },
     });
 
