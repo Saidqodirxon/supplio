@@ -15,7 +15,10 @@
     "seed": "ts-node prisma/seed.ts",
     "seed:super": "ts-node prisma/seed_super.ts",
     "seed:demo": "ts-node prisma/seed_demo.ts",
-    "seed:landing": "ts-node scripts/seed-landing.ts"
+    "seed:landing": "ts-node scripts/seed-landing.ts",
+    "tariffs:export": "ts-node scripts/export-tariffs.ts",
+    "tariffs:import": "ts-node scripts/import-tariffs.ts",
+    "tariffs:fix-missing": "ts-node scripts/fix-missing-plan-users.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
