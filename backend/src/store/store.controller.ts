@@ -293,7 +293,7 @@ export class StoreController {
       );
     }
 
-    const pendingDealer = await this.prisma.dealer.create({
+    const pendingDealer = await (this.prisma.dealer.create as any)({
       data: {
         companyId: company.id,
         branchId: defaultBranch.id,
