@@ -85,7 +85,13 @@ export class NotificationsController {
   @Post()
   async createNotification(
     @Req() req: AuthenticatedRequest,
-    @Body() body: { title: string; message: string; type?: string; receiverDealerId?: string }
+    @Body()
+    body: {
+      title: string;
+      message: string;
+      type?: string;
+      receiverDealerId?: string;
+    }
   ) {
     await this.ensureNotificationsAllowed(req.companyId);
     if (body.receiverDealerId) {
@@ -157,7 +163,13 @@ export class NotificationsController {
   @Post("templates")
   async createTemplate(
     @Req() req: AuthenticatedRequest,
-    @Body() body: { name: string; type: string; message: Record<string, string>; isActive?: boolean }
+    @Body()
+    body: {
+      name: string;
+      type: string;
+      message: Record<string, string>;
+      isActive?: boolean;
+    }
   ) {
     await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.createTemplate(req.companyId, body);
@@ -167,14 +179,23 @@ export class NotificationsController {
   async updateTemplate(
     @Req() req: AuthenticatedRequest,
     @Param("id") id: string,
-    @Body() body: { name?: string; type?: string; message?: Record<string, string>; isActive?: boolean }
+    @Body()
+    body: {
+      name?: string;
+      type?: string;
+      message?: Record<string, string>;
+      isActive?: boolean;
+    }
   ) {
     await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.updateTemplate(req.companyId, id, body);
   }
 
   @Delete("templates/:id")
-  async deleteTemplate(@Req() req: AuthenticatedRequest, @Param("id") id: string) {
+  async deleteTemplate(
+    @Req() req: AuthenticatedRequest,
+    @Param("id") id: string
+  ) {
     await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.deleteTemplate(req.companyId, id);
   }

@@ -317,10 +317,12 @@ export class TelegramService implements OnModuleInit {
     ).replace(/\/+$/, "");
   }
 
-  private isCompanyAccessBlocked(company: {
-    subscriptionStatus?: string | null;
-    trialExpiresAt?: Date | null;
-  } | null) {
+  private isCompanyAccessBlocked(
+    company: {
+      subscriptionStatus?: string | null;
+      trialExpiresAt?: Date | null;
+    } | null
+  ) {
     if (!company) return true;
     if (company.subscriptionStatus === "LOCKED") return true;
     if (

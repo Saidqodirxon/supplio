@@ -22,7 +22,7 @@ export class TenantGuard implements CanActivate {
 
     if (user.roleType === "SUPER_ADMIN") {
       // Allow SuperAdmin to impersonate any company via header
-      const targetCompanyId = request.headers['x-company-id'] || user.companyId;
+      const targetCompanyId = request.headers["x-company-id"] || user.companyId;
       if (targetCompanyId) {
         request.companyId = targetCompanyId as string;
       }

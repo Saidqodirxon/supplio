@@ -39,14 +39,18 @@ export class AuthService {
 
       const companyExpired =
         !!user.company?.trialExpiresAt &&
-        ["TRIAL", "ACTIVE"].includes(String(user.company?.subscriptionStatus || "")) &&
+        ["TRIAL", "ACTIVE"].includes(
+          String(user.company?.subscriptionStatus || "")
+        ) &&
         new Date() > new Date(user.company.trialExpiresAt);
 
       if (
         user.roleType !== "SUPER_ADMIN" &&
         (user.company?.subscriptionStatus === "LOCKED" || companyExpired)
       ) {
-        throw new UnauthorizedException("Subscription expired or account locked");
+        throw new UnauthorizedException(
+          "Subscription expired or account locked"
+        );
       }
 
       const payload = {

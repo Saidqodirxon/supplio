@@ -23,10 +23,12 @@ export class StoreController {
     private planLimits: PlanLimitsService
   ) {}
 
-  private isCompanyAccessBlocked(company: {
-    subscriptionStatus?: string | null;
-    trialExpiresAt?: Date | null;
-  } | null) {
+  private isCompanyAccessBlocked(
+    company: {
+      subscriptionStatus?: string | null;
+      trialExpiresAt?: Date | null;
+    } | null
+  ) {
     if (!company) return true;
     if (company.subscriptionStatus === "LOCKED") return true;
     if (
@@ -66,7 +68,10 @@ export class StoreController {
       throw new ForbiddenException("Store temporarily suspended");
     }
 
-    await this.planLimits.checkFeatureAllowed(company.id as string, "allowWebStore");
+    await this.planLimits.checkFeatureAllowed(
+      company.id as string,
+      "allowWebStore"
+    );
 
     return company;
   }
@@ -94,7 +99,7 @@ export class StoreController {
   async getProducts(
     @Param("slug") slug: string,
     @Query("categoryId") categoryId?: string,
-    @Query("search") search?: string,
+    @Query("search") search?: string
   ) {
     const company = await this.prisma.company.findFirst({
       where: { slug, deletedAt: null, siteActive: true },

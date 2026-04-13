@@ -29,7 +29,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     const companyExpired =
       !!user.company?.trialExpiresAt &&
-      ["TRIAL", "ACTIVE"].includes(String(user.company?.subscriptionStatus || "")) &&
+      ["TRIAL", "ACTIVE"].includes(
+        String(user.company?.subscriptionStatus || "")
+      ) &&
       new Date() > new Date(user.company.trialExpiresAt);
 
     if (

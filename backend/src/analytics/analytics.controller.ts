@@ -28,28 +28,42 @@ export class AnalyticsController {
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER", "SALES")
   async getDashboardStats(
     @Req() req: AuthenticatedRequest,
-    @Query("period") period?: string,
+    @Query("period") period?: string
   ) {
     const companyId = req.companyId || req.user.companyId;
     await this.ensureAnalyticsAllowed(companyId);
-    const p = (["7d", "30d", "1y", "all"].includes(period ?? "") ? period : "7d") as any;
+    const p = (
+      ["7d", "30d", "1y", "all"].includes(period ?? "") ? period : "7d"
+    ) as any;
     return this.analyticsService.getDashboardStats(companyId, p);
   }
 
   @Get("top-dealers")
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER")
-  async getTopDealers(@Req() req: AuthenticatedRequest, @Query("limit") limit?: string) {
+  async getTopDealers(
+    @Req() req: AuthenticatedRequest,
+    @Query("limit") limit?: string
+  ) {
     const companyId = req.companyId || req.user.companyId;
     await this.ensureAnalyticsAllowed(companyId);
-    return this.analyticsService.getTopDealers(companyId, limit ? Number(limit) : 5);
+    return this.analyticsService.getTopDealers(
+      companyId,
+      limit ? Number(limit) : 5
+    );
   }
 
   @Get("top-products")
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER", "SALES")
-  async getTopProducts(@Req() req: AuthenticatedRequest, @Query("limit") limit?: string) {
+  async getTopProducts(
+    @Req() req: AuthenticatedRequest,
+    @Query("limit") limit?: string
+  ) {
     const companyId = req.companyId || req.user.companyId;
     await this.ensureAnalyticsAllowed(companyId);
-    return this.analyticsService.getTopProducts(companyId, limit ? Number(limit) : 5);
+    return this.analyticsService.getTopProducts(
+      companyId,
+      limit ? Number(limit) : 5
+    );
   }
 
   @Get("debts")
