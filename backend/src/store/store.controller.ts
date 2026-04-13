@@ -233,6 +233,7 @@ export class StoreController {
         id: true,
         name: true,
         phone: true,
+        telegramChatId: true,
         creditLimit: true,
         currentDebt: true,
         branchId: true,
