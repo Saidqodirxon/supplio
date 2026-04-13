@@ -59,8 +59,19 @@ interface Dealer {
 type OrderState = "idle" | "loading" | "success" | "error";
 
 function normalizeApiBaseUrl(rawUrl?: string) {
-  const fallback = "http://localhost:5000";
-  const value = (rawUrl || fallback).trim().replace(/\/+$/, "");
+  const envValue = (rawUrl || "").trim();
+  const inBrowser = typeof window !== "undefined";
+  const host = inBrowser ? window.location.hostname : "";
+  const isProdHost =
+    host === "supplio.uz" ||
+    host.endsWith(".supplio.uz") ||
+    host === "www.supplio.uz";
+  const isLocalEnvValue =
+    !envValue ||
+    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(envValue);
+
+  const fallback = isProdHost ? "https://api.supplio.uz" : "http://localhost:5000";
+  const value = (isLocalEnvValue ? fallback : envValue).replace(/\/+$/, "");
   return value.endsWith("/api") ? value.slice(0, -4) : value;
 }
 

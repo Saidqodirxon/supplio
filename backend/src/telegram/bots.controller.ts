@@ -63,4 +63,10 @@ export class BotsController {
   async broadcast(@Req() req: any, @Body() body: { message: string }) {
     return this.telegramService.broadcast(req.companyId, body.message);
   }
+
+  @Post("bots/reload")
+  @Roles("OWNER", "SUPER_ADMIN")
+  async reloadBots(@Req() req: any) {
+    return this.telegramService.reloadCompanyBots(req.companyId);
+  }
 }

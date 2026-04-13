@@ -1496,6 +1496,26 @@ export class TelegramService implements OnModuleInit {
     return this.bots.get(botId);
   }
 
+  async ensureBotInitialized(botId: string): Promise<Telegraf | undefined> {
+    const existing = this.bots.get(botId);
+    if (existing) return existing;
+
+    const botRecord = await this.prisma.customBot.findFirst({
+      where: { id: botId, isActive: true, deletedAt: null },
+      include: { company: true },
+    });
+    if (!botRecord) return undefined;
+
+    await this.initBot(
+      botRecord.id,
+      botRecord.companyId,
+      botRecord.token,
+      botRecord.company?.name || botRecord.companyId
+    );
+
+    return this.bots.get(botId);
+  }
+
   async validateToken(token: string): Promise<{
     valid: boolean;
     networkError?: boolean;
@@ -1542,6 +1562,32 @@ export class TelegramService implements OnModuleInit {
       where: { companyId, deletedAt: null },
       orderBy: { createdAt: "desc" },
     });
+  }
+
+  async reloadCompanyBots(companyId: string) {
+    const records = await this.prisma.customBot.findMany({
+      where: { companyId, deletedAt: null, isActive: true },
+      include: { company: true },
+    });
+
+    for (const record of records) {
+      const existing = this.bots.get(record.id);
+      if (existing) {
+        try {
+          existing.stop();
+        } catch {}
+        this.bots.delete(record.id);
+      }
+
+      await this.initBot(
+        record.id,
+        record.companyId,
+        record.token,
+        record.company?.name || record.companyId
+      );
+    }
+
+    return { reloaded: records.length };
   }
 
   async createBot(

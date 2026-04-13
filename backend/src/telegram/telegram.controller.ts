@@ -14,9 +14,13 @@ export class TelegramController {
     @Body() update: Update
   ) {
     this.logger.log(`Received update for bot ID: ${id}`);
-    const bot = this.telegramService.getBot(id);
+    const bot =
+      this.telegramService.getBot(id) ||
+      (await this.telegramService.ensureBotInitialized(id));
     if (bot) {
       await bot.handleUpdate(update);
+    } else {
+      this.logger.warn(`Bot not initialized for webhook id=${id}`);
     }
     return { ok: true };
   }
