@@ -12,7 +12,7 @@ import { Prisma } from "@prisma/client";
 export class DealersService {
   constructor(
     private prisma: PrismaService,
-    private planLimits: PlanLimitsService,
+    private planLimits: PlanLimitsService
   ) {}
 
   async create(
@@ -175,20 +175,26 @@ export class DealersService {
     return updated;
   }
 
-  async update(id: string, companyId: string, data: {
-    name?: string;
-    phone?: string;
-    branchId?: string;
-    creditLimit?: number;
-    address?: string;
-  }) {
+  async update(
+    id: string,
+    companyId: string,
+    data: {
+      name?: string;
+      phone?: string;
+      branchId?: string;
+      creditLimit?: number;
+      address?: string;
+    }
+  ) {
     return this.prisma.dealer.update({
       where: { id, companyId },
       data: {
         ...(data.name && { name: data.name }),
         ...(data.phone && { phone: data.phone }),
         ...(data.branchId && { branchId: data.branchId }),
-        ...(data.creditLimit !== undefined && { creditLimit: data.creditLimit }),
+        ...(data.creditLimit !== undefined && {
+          creditLimit: data.creditLimit,
+        }),
         ...(data.address !== undefined && { address: data.address }),
       },
       include: { branch: { select: { name: true } } },

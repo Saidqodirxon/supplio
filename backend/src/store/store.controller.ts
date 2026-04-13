@@ -203,7 +203,9 @@ export class StoreController {
 
       if (dealerByChat) {
         if (dealerByChat.isBlocked) {
-          throw new ForbiddenException("Hisob bloklangan. Distributor bilan bog'laning.");
+          throw new ForbiddenException(
+            "Hisob bloklangan. Distributor bilan bog'laning."
+          );
         }
         if (!dealerByChat.isApproved) {
           throw new ForbiddenException(
@@ -241,7 +243,9 @@ export class StoreController {
 
     if (dealer) {
       if (dealer.isBlocked) {
-        throw new ForbiddenException("Hisob bloklangan. Distributor bilan bog'laning.");
+        throw new ForbiddenException(
+          "Hisob bloklangan. Distributor bilan bog'laning."
+        );
       }
 
       // Link telegram chat if user came from Telegram web app.
@@ -253,7 +257,9 @@ export class StoreController {
       }
 
       if (!dealer.isApproved) {
-        const pending = await (this.prisma as any).dealerApprovalRequest.findFirst({
+        const pending = await (
+          this.prisma as any
+        ).dealerApprovalRequest.findFirst({
           where: { dealerId: dealer.id, status: "PENDING" },
         });
         if (!pending) {
@@ -282,7 +288,9 @@ export class StoreController {
       orderBy: { createdAt: "asc" },
     });
     if (!defaultBranch?.id) {
-      throw new BadRequestException("Filial topilmadi. Distributor bilan bog'laning.");
+      throw new BadRequestException(
+        "Filial topilmadi. Distributor bilan bog'laning."
+      );
     }
 
     const pendingDealer = await this.prisma.dealer.create({

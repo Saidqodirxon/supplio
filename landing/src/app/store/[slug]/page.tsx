@@ -161,7 +161,8 @@ export default function StorePage() {
 
   useEffect(() => {
     const autoIdentifyByTelegram = async () => {
-      if (!isTelegramWebApp || !telegramUserId || isIdentified || dealer) return;
+      if (!isTelegramWebApp || !telegramUserId || isIdentified || dealer)
+        return;
       try {
         const res = await fetch(`${API}/api/store/${companySlug}/identify`, {
           method: "POST",

@@ -597,9 +597,12 @@ export class TelegramService implements OnModuleInit {
           });
 
           if (!branch?.id) {
-            return ctx.reply("Filial topilmadi. Distributor bilan bog'laning.", {
-              reply_markup: { remove_keyboard: true },
-            });
+            return ctx.reply(
+              "Filial topilmadi. Distributor bilan bog'laning.",
+              {
+                reply_markup: { remove_keyboard: true },
+              }
+            );
           }
 
           const suggestedName =
@@ -1014,7 +1017,9 @@ export class TelegramService implements OnModuleInit {
       const safeLang = allowed.includes(lang) ? lang : "uz";
       this.chatLangPrefs.set(chatId, safeLang);
 
-      await (ctx as any).reply("✅ Til saqlandi. Davom etish uchun /start bosing.");
+      await (ctx as any).reply(
+        "✅ Til saqlandi. Davom etish uchun /start bosing."
+      );
       return;
     }
 
@@ -1026,9 +1031,12 @@ export class TelegramService implements OnModuleInit {
       if (action === "debt") await this.handleDebt(ctx, companyId);
       if (action === "payments") await this.handlePayments(ctx, companyId);
       if (action === "lang") {
-        await (ctx as any).reply("Tilni tanlang / Выберите язык / Choose language", {
-          reply_markup: this.buildLanguageKeyboard(),
-        });
+        await (ctx as any).reply(
+          "Tilni tanlang / Выберите язык / Choose language",
+          {
+            reply_markup: this.buildLanguageKeyboard(),
+          }
+        );
       }
       if (action === "help") {
         const companyName =
