@@ -1,8 +1,8 @@
 import { Controller, Post, Param, Body, Logger } from "@nestjs/common";
 import { TelegramService } from "./telegram.service";
-import { Update } from "telegraf/typings/core/types/typegram";
+import type { Update } from "telegraf/types";
 
-@Controller("webhook")
+@Controller(["webhook", "webhook/telegram"])
 export class TelegramController {
   private readonly logger = new Logger(TelegramController.name);
 

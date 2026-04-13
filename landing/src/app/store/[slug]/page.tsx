@@ -104,14 +104,48 @@ export default function StorePage() {
     ? `https://t.me/${company.telegram.replace("@", "")}`
     : "https://t.me";
 
+  const detectTelegramWebApp = () => {
+    if (typeof window === "undefined") return false;
+    const w = window as any;
+    if (w?.Telegram?.WebApp) return true;
+
+    const params = new URLSearchParams(window.location.search);
+    return (
+      params.has("tgWebAppData") ||
+      params.has("tgWebAppPlatform") ||
+      params.has("tgWebAppVersion") ||
+      params.has("tgWebAppStartParam")
+    );
+  };
+
   useEffect(() => {
-    const isTg =
-      typeof window !== "undefined" &&
-      Boolean((window as any)?.Telegram?.WebApp);
-    setIsTelegramWebApp(isTg);
-    if (!isTg) {
-      setIsIdentified(true);
-    }
+    let attempts = 0;
+    const maxAttempts = 20;
+
+    const syncMode = () => {
+      const isTg = detectTelegramWebApp();
+      if (isTg) {
+        setIsTelegramWebApp(true);
+        setIsIdentified(false);
+        return true;
+      }
+      return false;
+    };
+
+    if (syncMode()) return;
+
+    const timer = window.setInterval(() => {
+      attempts += 1;
+      if (syncMode() || attempts >= maxAttempts) {
+        window.clearInterval(timer);
+        if (!detectTelegramWebApp()) {
+          setIsTelegramWebApp(false);
+          setIsIdentified(true);
+        }
+      }
+    }, 250);
+
+    return () => window.clearInterval(timer);
   }, []);
 
   useEffect(() => {

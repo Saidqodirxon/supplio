@@ -258,6 +258,7 @@ export default function TelegramBots() {
   const [storeUrl, setStoreUrl] = useState("");
   const [broadcastMsg, setBroadcastMsg] = useState("");
   const [broadcasting, setBroadcasting] = useState(false);
+  const [reloadingBots, setReloadingBots] = useState(false);
   const [broadcastResult, setBroadcastResult] = useState<{
     sent: number;
     failed: number;
@@ -374,6 +375,20 @@ export default function TelegramBots() {
     }
   };
 
+  const handleReloadBots = async () => {
+    setReloadingBots(true);
+    try {
+      const res = await api.post("/telegram/bots/reload");
+      const count = Number(res?.data?.reloaded ?? 0);
+      toast.success(`Botlar qayta yuklandi: ${count} ta`);
+      await fetchBots();
+    } catch (e) {
+      toast.error(errorText(e, "Botlarni reload qilishda xatolik"));
+    } finally {
+      setReloadingBots(false);
+    }
+  };
+
   const maskToken = (token: string) => {
     const parts = token.split(":");
     if (parts.length !== 2) return "••••••••••";
@@ -393,6 +408,18 @@ export default function TelegramBots() {
           </p>
         </div>
         <div className="flex gap-3">
+          <button
+            onClick={handleReloadBots}
+            disabled={reloadingBots}
+            className="px-4 py-3 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-all active:scale-95 text-xs font-black uppercase tracking-widest inline-flex items-center gap-2 disabled:opacity-60"
+          >
+            {reloadingBots ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RefreshCw className="w-4 h-4" />
+            )}
+            Botlarni reload
+          </button>
           <button
             onClick={fetchBots}
             className="p-3 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-all active:scale-95"
