@@ -12,6 +12,7 @@ const notifications_controller_1 = require("./notifications.controller");
 const notifications_service_1 = require("./notifications.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const telegram_module_1 = require("../telegram/telegram.module");
+const plan_limits_service_1 = require("../common/services/plan-limits.service");
 let NotificationsModule = class NotificationsModule {
 };
 exports.NotificationsModule = NotificationsModule;
@@ -19,7 +20,7 @@ exports.NotificationsModule = NotificationsModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule, telegram_module_1.TelegramModule],
         controllers: [notifications_controller_1.NotificationsController],
-        providers: [notifications_service_1.NotificationService],
+        providers: [notifications_service_1.NotificationService, plan_limits_service_1.PlanLimitsService],
         exports: [notifications_service_1.NotificationService],
     })
 ], NotificationsModule);

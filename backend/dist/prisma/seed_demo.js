@@ -4,7 +4,7 @@ const client_1 = require("@prisma/client");
 const bcrypt = require("bcrypt");
 const prisma = new client_1.PrismaClient();
 const DEMO_PHONE = "+998901000000";
-const DEMO_PASSWORD = "demo1234";
+const DEMO_PASSWORD = "demoUser";
 function isMissingTableError(error) {
     if (!(error instanceof client_1.Prisma.PrismaClientKnownRequestError))
         return false;
@@ -85,7 +85,7 @@ async function main() {
         data: {
             phone: DEMO_PHONE,
             passwordHash,
-            fullName: "Demo Distributor",
+            fullName: "demoUser",
             roleType: client_1.RoleType.OWNER,
             companyId: company.id,
             branchId: branches[0].id,
@@ -239,6 +239,7 @@ async function main() {
     console.log("Company:  Supplio Demo");
     console.log("Phone:   ", DEMO_PHONE);
     console.log("Password:", DEMO_PASSWORD);
+    console.log("User:     demoUser");
     console.log("URL:      demo.supplio.uz");
     console.log("========================\n");
 }

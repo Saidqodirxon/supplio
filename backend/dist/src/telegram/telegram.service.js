@@ -24,18 +24,19 @@ let TelegramService = TelegramService_1 = class TelegramService {
         this.logger = new common_1.Logger(TelegramService_1.name);
         this.bots = new Map();
         this.carts = new Map();
+        this.chatLangPrefs = new Map();
         this.translations = {
             uz: {
-                welcome: "Assalomu alaykum! Botga xush kelibsiz.\nIltimos, telefon raqamingizni yuboring:",
-                sendPhone: "📞 Telefon raqamni yuborish",
+                welcome: "Assalomu alaykum!\nBuyurtma berishni boshlash uchun telefon raqamingizni yuboring.",
+                sendPhone: "📞 Telefon raqamimni yuborish",
                 suspended: "⚠️ Ushbu bot xizmati vaqtinchalik to'xtatilgan. Iltimos, menejer bilan bog'laning.",
                 notRegistered: "❌ Siz diler sifatida ro'yxatdan o'tmagansiz.\nIltimos, kompaniya menejeri bilan bog'laning.",
-                loginSuccess: " muvaffaqiyatli tizimga kirdingiz!",
+                loginSuccess: " botga ulandi.",
                 pendingApproval: "⏳ Sizning so'rovingiz ko'rib chiqilmoqda. Distributor tasdiqlashini kuting.",
                 approvalSent: "✅ Ro'yxatdan o'tish so'rovingiz distributorga yuborildi.\n⏳ Tasdiqlash kutilyapti. Xabar beriladi.",
                 accessDenied: "⛔ Sizda bu botdan foydalanish huquqi yo'q.\nDistributor bilan bog'laning.",
                 blocked: "🚫 Hisobingiz bloklangan. Menejer bilan bog'laning.",
-                commands: "\n\n📋 Asosiy menyudan foydalaning.",
+                commands: "\n\n📋 Quyidagi tugmalar orqali ishlang.",
                 kbdDebt: "💰 Qarzim",
                 kbdPayments: "💸 To'lovlarim",
                 kbdProducts: "📦 Mahsulotlar",
@@ -114,16 +115,16 @@ let TelegramService = TelegramService_1 = class TelegramService {
                 kbdCart: "🛒 Сават",
             },
             ru: {
-                welcome: "Здравствуйте! Добро пожаловать.\nПожалуйста, отправьте ваш номер телефона:",
-                sendPhone: "📞 Отправить номер",
+                welcome: "Здравствуйте!\nЧтобы начать оформление заказа, отправьте номер телефона.",
+                sendPhone: "📞 Отправить мой номер",
                 suspended: "⚠️ Сервис временно приостановлен. Свяжитесь с менеджером.",
                 notRegistered: "❌ Вы не зарегистрированы как дилер. Свяжитесь с менеджером компании.",
-                loginSuccess: ", вы успешно вошли в систему!",
+                loginSuccess: " бот подключен.",
                 pendingApproval: "⏳ Ваша заявка рассматривается. Ожидайте подтверждения от дистрибьютора.",
                 approvalSent: "✅ Заявка на регистрацию отправлена дистрибьютору.\n⏳ Ожидайте подтверждения.",
                 accessDenied: "⛔ У вас нет доступа к этому боту.\nСвяжитесь с дистрибьютором.",
                 blocked: "🚫 Ваш аккаунт заблокирован. Свяжитесь с менеджером.",
-                commands: "\n\n📋 Используйте главное меню.",
+                commands: "\n\n📋 Используйте кнопки ниже.",
                 kbdDebt: "💰 Мой долг",
                 kbdPayments: "💸 Платежи",
                 kbdProducts: "📦 Продукты",
@@ -158,16 +159,16 @@ let TelegramService = TelegramService_1 = class TelegramService {
                 kbdCart: "🛒 Корзина",
             },
             tr: {
-                welcome: "Merhaba! Hoş geldiniz.\nLütfen telefon numaranızı gönderin:",
-                sendPhone: "📞 Numara gönder",
+                welcome: "Merhaba!\nSipariş vermek için telefon numaranızı gönderin.",
+                sendPhone: "📞 Numaramı gönder",
                 suspended: "⚠️ Bu bot geçici olarak askıya alınmıştır. Yöneticiyle iletişime geçin.",
                 notRegistered: "❌ Bayi olarak kayıtlı değilsiniz.\nŞirket yöneticisiyle iletişime geçin.",
-                loginSuccess: " sisteme başarıyla giriş yaptınız!",
+                loginSuccess: " bot bağlı.",
                 pendingApproval: "⏳ Başvurunuz inceleniyor. Distribütörün onayını bekleyin.",
                 approvalSent: "✅ Kayıt başvurunuz distribütöre gönderildi.\n⏳ Onay bekleniyor.",
                 accessDenied: "⛔ Bu botu kullanma izniniz yok.\nDistribütörünüzle iletişime geçin.",
                 blocked: "🚫 Hesabınız engellendi. Yöneticiyle iletişime geçin.",
-                commands: "\n\n📋 Ana menüyü kullanın.",
+                commands: "\n\n📋 Aşağıdaki düğmeleri kullanın.",
                 kbdDebt: "💰 Borcum",
                 kbdPayments: "💸 Ödemelerim",
                 kbdProducts: "📦 Ürünler",
@@ -202,16 +203,16 @@ let TelegramService = TelegramService_1 = class TelegramService {
                 kbdCart: "🛒 Sepet",
             },
             en: {
-                welcome: "Hello! Welcome.\nPlease share your phone number:",
-                sendPhone: "📞 Share phone number",
+                welcome: "Hello!\nTo start ordering, please share your phone number.",
+                sendPhone: "📞 Share my number",
                 suspended: "⚠️ This bot is temporarily suspended. Please contact the manager.",
                 notRegistered: "❌ You are not registered as a dealer.\nPlease contact the company manager.",
-                loginSuccess: " you have successfully logged in!",
+                loginSuccess: " bot connected.",
                 pendingApproval: "⏳ Your request is under review. Please wait for the distributor's approval.",
                 approvalSent: "✅ Your registration request has been sent to the distributor.\n⏳ Awaiting approval.",
                 accessDenied: "⛔ You don't have permission to use this bot.\nContact your distributor.",
                 blocked: "🚫 Your account is blocked. Please contact the manager.",
-                commands: "\n\n📋 Use the main menu.",
+                commands: "\n\n📋 Use the buttons below.",
                 kbdDebt: "💰 My Debt",
                 kbdPayments: "💸 Payments",
                 kbdProducts: "📦 Products",
@@ -266,20 +267,48 @@ let TelegramService = TelegramService_1 = class TelegramService {
             await this.initBot(bot.id, bot.companyId, bot.token, bot.company.name);
         }
     }
-    getT(lang = 'uz') {
-        return this.translations[lang] ?? this.translations['uz'];
+    getT(lang = "uz") {
+        return this.translations[lang] ?? this.translations["uz"];
+    }
+    getPublicStoreBaseUrl() {
+        return (process.env.PUBLIC_STORE_URL ||
+            process.env.LANDING_URL ||
+            process.env.APP_URL ||
+            process.env.PUBLIC_SITE_URL ||
+            process.env.FRONTEND_URL ||
+            "https://supplio.uz").replace(/\/+$/, "");
+    }
+    isCompanyAccessBlocked(company) {
+        if (!company)
+            return true;
+        if (company.subscriptionStatus === "LOCKED")
+            return true;
+        if (company.trialExpiresAt &&
+            ["TRIAL", "ACTIVE"].includes(String(company.subscriptionStatus || "")) &&
+            new Date() > new Date(company.trialExpiresAt)) {
+            return true;
+        }
+        return false;
     }
     async sendToAdmins(companyId, message) {
         try {
-            const admins = await this.prisma.user.findMany({ where: { companyId, roleType: { in: ['OWNER', 'MANAGER'] }, deletedAt: null } });
+            const admins = await this.prisma.user.findMany({
+                where: {
+                    companyId,
+                    roleType: { in: ["OWNER", "MANAGER"] },
+                    deletedAt: null,
+                },
+            });
             if (admins.length === 0)
                 return;
-            const adminPhones = admins.map(a => `${a.phone.slice(-9)}`);
+            const adminPhones = admins.map((a) => `${a.phone.slice(-9)}`);
             const adminDealers = await this.prisma.dealer.findMany({
-                where: { companyId, telegramChatId: { not: null } }
+                where: { companyId, telegramChatId: { not: null } },
             });
-            const targetDealers = adminDealers.filter(d => adminPhones.some(p => d.phone.includes(p)));
-            const botRecord = await this.prisma.customBot.findFirst({ where: { companyId, isActive: true } });
+            const targetDealers = adminDealers.filter((d) => adminPhones.some((p) => d.phone.includes(p)));
+            const botRecord = await this.prisma.customBot.findFirst({
+                where: { companyId, isActive: true },
+            });
             if (!botRecord)
                 return;
             const bot = this.bots.get(botRecord.id);
@@ -287,7 +316,11 @@ let TelegramService = TelegramService_1 = class TelegramService {
                 return;
             for (const dealer of targetDealers) {
                 if (dealer.telegramChatId) {
-                    bot.telegram.sendMessage(dealer.telegramChatId, message, { parse_mode: 'Markdown' }).catch(() => { });
+                    bot.telegram
+                        .sendMessage(dealer.telegramChatId, message, {
+                        parse_mode: "Markdown",
+                    })
+                        .catch(() => { });
                 }
             }
         }
@@ -296,32 +329,84 @@ let TelegramService = TelegramService_1 = class TelegramService {
         }
     }
     getLangFromCtx(ctx) {
-        const code = ctx.from?.language_code ?? 'uz';
-        let lang = 'uz';
-        if (code.startsWith('ru'))
-            lang = 'ru';
-        else if (code.startsWith('tr'))
-            lang = 'tr';
-        else if (code.startsWith('en'))
-            lang = 'en';
-        return this.translations[lang] ?? this.translations['uz'];
+        const chatId = String(ctx.chat?.id ?? ctx.from?.id ?? "");
+        const preferred = chatId ? this.chatLangPrefs.get(chatId) : undefined;
+        if (preferred && this.translations[preferred]) {
+            return this.translations[preferred];
+        }
+        const code = ctx.from?.language_code ?? "uz";
+        let lang = "uz";
+        if (code.startsWith("ru"))
+            lang = "ru";
+        else if (code.startsWith("tr"))
+            lang = "tr";
+        else if (code.startsWith("en"))
+            lang = "en";
+        return this.translations[lang] ?? this.translations["uz"];
+    }
+    buildLanguageKeyboard() {
+        return {
+            inline_keyboard: [
+                [
+                    { text: "🇺🇿 O'zbek", callback_data: "lang:set:uz" },
+                    { text: "🇷🇺 Русский", callback_data: "lang:set:ru" },
+                ],
+                [
+                    { text: "🇹🇷 Türkçe", callback_data: "lang:set:tr" },
+                    { text: "🇬🇧 English", callback_data: "lang:set:en" },
+                ],
+            ],
+        };
     }
     buildMainMenuKeyboard(t) {
         return {
             inline_keyboard: [
-                [{ text: t.kbdProducts || "📦 Mahsulotlar", callback_data: "menu:products" }, { text: t.kbdCart || "🛒 Savat", callback_data: "menu:cart" }],
-                [{ text: t.kbdOrders || "📋 Buyurtmalar", callback_data: "menu:orders" }, { text: t.kbdDebt || "💰 Qarzim", callback_data: "menu:debt" }],
-                [{ text: t.kbdPayments || "💸 To'lovlar", callback_data: "menu:payments" }, { text: "⚙️ Til / Язык", callback_data: "menu:lang" }]
-            ]
+                [
+                    {
+                        text: t.kbdProducts || "📦 Mahsulotlar",
+                        callback_data: "menu:products",
+                    },
+                    { text: t.kbdCart || "🛒 Savat", callback_data: "menu:cart" },
+                ],
+                [
+                    {
+                        text: t.kbdOrders || "📋 Buyurtmalar",
+                        callback_data: "menu:orders",
+                    },
+                    { text: t.kbdDebt || "💰 Qarzim", callback_data: "menu:debt" },
+                ],
+                [
+                    {
+                        text: t.kbdPayments || "💸 To'lovlar",
+                        callback_data: "menu:payments",
+                    },
+                    { text: "⚙️ Til / Язык", callback_data: "menu:lang" },
+                ],
+            ],
         };
     }
     buildAdminMenuKeyboard() {
         return {
             inline_keyboard: [
-                [{ text: "📊 Do'kon Holati (On/Off)", callback_data: "admin:toggle_store" }],
-                [{ text: "🌐 Web Do'kon (QR & URL)", callback_data: "admin:store_link" }],
-                [{ text: "👥 Yangi dilerlar (Tasdiqlash)", callback_data: "admin:dealers" }]
-            ]
+                [
+                    {
+                        text: "📊 Do'kon Holati (On/Off)",
+                        callback_data: "admin:toggle_store",
+                    },
+                ],
+                [
+                    {
+                        text: "🌐 Web Do'kon (QR & URL)",
+                        callback_data: "admin:store_link",
+                    },
+                ],
+                [
+                    {
+                        text: "👥 Yangi dilerlar (Tasdiqlash)",
+                        callback_data: "admin:dealers",
+                    },
+                ],
+            ],
         };
     }
     async initBot(botId, companyId, token, companyName) {
@@ -336,12 +421,20 @@ let TelegramService = TelegramService_1 = class TelegramService {
             }
             const bot = new telegraf_1.Telegraf(token);
             bot.start(async (ctx) => {
-                const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+                const company = await this.prisma.company.findUnique({
+                    where: { id: companyId },
+                });
+                const chatId = String(ctx.chat.id);
+                if (!this.chatLangPrefs.has(chatId)) {
+                    await ctx.reply("Tilni tanlang / Выберите язык / Choose language", {
+                        reply_markup: this.buildLanguageKeyboard(),
+                    });
+                    return;
+                }
                 const t = this.getLangFromCtx(ctx);
-                if (company?.subscriptionStatus === "LOCKED" || (company?.subscriptionStatus === "TRIAL" && new Date() > company.trialExpiresAt)) {
+                if (this.isCompanyAccessBlocked(company)) {
                     return ctx.reply(t.suspended);
                 }
-                const chatId = String(ctx.chat.id);
                 const existingDealer = await this.prisma.dealer.findFirst({
                     where: { telegramChatId: chatId, companyId, deletedAt: null },
                 });
@@ -350,27 +443,33 @@ let TelegramService = TelegramService_1 = class TelegramService {
                         return ctx.reply(t.blocked);
                     if (!existingDealer.isApproved) {
                         const pending = await this.prisma.dealerApprovalRequest.findFirst({
-                            where: { dealerId: existingDealer.id, status: 'PENDING' },
+                            where: { dealerId: existingDealer.id, status: "PENDING" },
                         });
                         return ctx.reply(pending ? t.pendingApproval : t.accessDenied);
                     }
-                    const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
+                    const limits = await this.planLimits.getLimitsForCompany(companyId);
+                    const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
                     await ctx.reply(`👋 *${existingDealer.name}*${t.loginSuccess}${t.commands}`, {
-                        parse_mode: 'Markdown',
+                        parse_mode: "Markdown",
                         reply_markup: this.buildMainMenuKeyboard(t),
                     });
-                    await ctx.reply(`🛍 ${companyName}`, {
-                        reply_markup: {
-                            inline_keyboard: [[{ text: '🛍 Online do\'kon', web_app: { url: storeUrl } }]],
-                        },
-                    });
+                    if (limits.allowWebStore) {
+                        await ctx.reply(`🛍 ${companyName}`, {
+                            reply_markup: {
+                                inline_keyboard: [
+                                    [{ text: "🛍 Online do'kon", web_app: { url: storeUrl } }],
+                                ],
+                            },
+                        });
+                    }
                     return;
                 }
                 await ctx.reply(`🏢 *${companyName}*\n\n${t.welcome}`, {
-                    parse_mode: 'Markdown',
+                    parse_mode: "Markdown",
                     reply_markup: {
                         keyboard: [[{ text: t.sendPhone, request_contact: true }]],
-                        resize_keyboard: true, one_time_keyboard: true,
+                        resize_keyboard: true,
+                        one_time_keyboard: true,
                     },
                 });
             });
@@ -382,67 +481,158 @@ let TelegramService = TelegramService_1 = class TelegramService {
                 const t = this.getLangFromCtx(ctx);
                 const chatId = String(ctx.chat.id);
                 const dealerMatch = await this.prisma.dealer.findFirst({
-                    where: { phone: { contains: phone.slice(-9) }, companyId, deletedAt: null },
+                    where: {
+                        phone: { contains: phone.slice(-9) },
+                        companyId,
+                    },
                 });
                 const userMatch = await this.prisma.user.findFirst({
-                    where: { phone: { contains: phone.slice(-9) }, companyId, deletedAt: null },
+                    where: {
+                        phone: { contains: phone.slice(-9) },
+                        companyId,
+                        deletedAt: null,
+                    },
                 });
                 let dealer = dealerMatch;
                 if (!dealer && userMatch) {
-                    dealer = await this.prisma.dealer.create({
-                        data: {
-                            companyId,
-                            branchId: userMatch.branchId || (await this.prisma.branch.findFirst({ where: { companyId } }))?.id || '',
-                            name: userMatch.fullName || "Admin",
-                            phone,
-                            isApproved: true,
-                            telegramChatId: chatId
+                    const branchId = userMatch.branchId ||
+                        (await this.prisma.branch.findFirst({ where: { companyId } }))
+                            ?.id ||
+                        "";
+                    try {
+                        dealer = await this.prisma.dealer.create({
+                            data: {
+                                companyId,
+                                branchId,
+                                name: userMatch.fullName || "Admin",
+                                phone: `+${phone}`,
+                                isApproved: true,
+                                telegramChatId: chatId,
+                            },
+                        });
+                    }
+                    catch (e) {
+                        if (e.code === "P2002") {
+                            dealer = await this.prisma.dealer.findFirst({
+                                where: { phone: { contains: phone.slice(-9) }, companyId },
+                            });
+                            if (!dealer)
+                                throw e;
                         }
-                    });
+                        else
+                            throw e;
+                    }
                 }
-                if (!dealer)
-                    return ctx.reply(t.notRegistered, { reply_markup: { remove_keyboard: true } });
-                await this.prisma.dealer.update({ where: { id: dealer.id }, data: { telegramChatId: chatId } });
+                if (!dealer) {
+                    const branch = await this.prisma.branch.findFirst({
+                        where: { companyId, deletedAt: null },
+                        orderBy: { createdAt: "asc" },
+                    });
+                    if (!branch?.id) {
+                        return ctx.reply("Filial topilmadi. Distributor bilan bog'laning.", {
+                            reply_markup: { remove_keyboard: true },
+                        });
+                    }
+                    const suggestedName = `${contact.first_name || ""} ${contact.last_name || ""}`.trim() ||
+                        `Dealer ${phone.slice(-4)}`;
+                    try {
+                        dealer = await this.prisma.dealer.create({
+                            data: {
+                                companyId,
+                                branchId: branch.id,
+                                name: suggestedName,
+                                phone: `+${phone}`,
+                                telegramChatId: chatId,
+                                isApproved: false,
+                            },
+                        });
+                    }
+                    catch (e) {
+                        if (e.code === "P2002") {
+                            dealer = await this.prisma.dealer.findFirst({
+                                where: { phone: { contains: phone.slice(-9) }, companyId },
+                            });
+                            if (!dealer)
+                                throw e;
+                        }
+                        else
+                            throw e;
+                    }
+                }
+                await this.prisma.dealer.update({
+                    where: { id: dealer.id },
+                    data: { telegramChatId: chatId },
+                });
                 if (dealer.isBlocked)
-                    return ctx.reply(t.blocked, { reply_markup: { remove_keyboard: true } });
+                    return ctx.reply(t.blocked, {
+                        reply_markup: { remove_keyboard: true },
+                    });
                 if (!dealer.isApproved) {
                     const existing = await this.prisma.dealerApprovalRequest.findFirst({
-                        where: { dealerId: dealer.id, status: 'PENDING' },
+                        where: { dealerId: dealer.id, status: "PENDING" },
                     });
                     if (!existing) {
                         await this.prisma.dealerApprovalRequest.create({
-                            data: { companyId, dealerId: dealer.id, status: 'PENDING', requestedAt: new Date() },
+                            data: {
+                                companyId,
+                                dealerId: dealer.id,
+                                status: "PENDING",
+                                requestedAt: new Date(),
+                            },
                         });
-                        const compInfo = await this.prisma.company.findUnique({ where: { id: companyId } });
+                        const compInfo = await this.prisma.company.findUnique({
+                            where: { id: companyId },
+                        });
                         const companyNameLabel = compInfo?.name || "Kompaniya";
-                        this.loggerBot.sendDealerApprovalRequest({
-                            name: dealer.name, phone: dealer.phone, companyName: companyNameLabel,
-                        }).catch(() => { });
+                        this.loggerBot
+                            .sendDealerApprovalRequest({
+                            name: dealer.name,
+                            phone: dealer.phone,
+                            companyName: companyNameLabel,
+                        })
+                            .catch(() => { });
                         this.sendToAdmins(companyId, `🔔 *Yangi diler ro'yxatdan o'tdi!*\n\nIsmi: ${dealer.name}\nTel: ${dealer.phone}\n\nIltimos, bot menyusidan xabardor qiling yoki Admin paneldan tasdiqlang.`).catch(() => { });
                     }
-                    return ctx.reply(`👤 *${dealer.name}*\n\n${t.approvalSent}`, { parse_mode: 'Markdown' });
-                }
-                const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-                const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
-                try {
-                    await bot.telegram.setChatMenuButton({
-                        chatId: ctx.chat.id,
-                        menuButton: { type: "web_app", text: "🌐 Web Do'kon", web_app: { url: storeUrl } }
+                    return ctx.reply(`👤 *${dealer.name}*\n\n${t.approvalSent}`, {
+                        parse_mode: "Markdown",
                     });
                 }
-                catch (e) { }
+                const company = await this.prisma.company.findUnique({
+                    where: { id: companyId },
+                });
+                if (this.isCompanyAccessBlocked(company)) {
+                    return ctx.reply(t.suspended, {
+                        reply_markup: { remove_keyboard: true },
+                    });
+                }
+                const limits = await this.planLimits.getLimitsForCompany(companyId);
+                const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
+                if (limits.allowWebStore) {
+                    try {
+                        await bot.telegram.setChatMenuButton({
+                            chatId: ctx.chat.id,
+                            menuButton: {
+                                type: "web_app",
+                                text: "🌐 Web Do'kon",
+                                web_app: { url: storeUrl },
+                            },
+                        });
+                    }
+                    catch (e) { }
+                }
                 await ctx.reply(`✅ *${dealer.name}*${t.loginSuccess}\n\nQuyidagi tugmalardan foydalaning:`, {
-                    parse_mode: 'Markdown',
+                    parse_mode: "Markdown",
                     reply_markup: { remove_keyboard: true },
                 });
                 await ctx.reply(`🛍 *${companyName}* - Bosh menyu`, {
-                    parse_mode: 'Markdown',
+                    parse_mode: "Markdown",
                     reply_markup: this.buildMainMenuKeyboard(t),
                 });
-                if (userMatch && (userMatch.roleType === 'OWNER' || userMatch.roleType === 'MANAGER')) {
+                if (userMatch &&
+                    (userMatch.roleType === "OWNER" || userMatch.roleType === "MANAGER")) {
                     await ctx.reply(`👨‍💼 *Admin Panel*\nSiz tizim boshqaruvchisi sifatida tanildingiz:`, {
-                        parse_mode: 'Markdown',
-                        reply_markup: this.buildAdminMenuKeyboard()
+                        parse_mode: "Markdown",
+                        reply_markup: this.buildAdminMenuKeyboard(),
                     });
                 }
             });
@@ -455,41 +645,64 @@ let TelegramService = TelegramService_1 = class TelegramService {
             bot.command("help", async (ctx) => {
                 const t = this.getLangFromCtx(ctx);
                 ctx.reply(`Bosh menyuni ko'rish uchun quyidagi tugmani bosing:`, {
-                    reply_markup: this.buildMainMenuKeyboard(t)
+                    reply_markup: this.buildMainMenuKeyboard(t),
                 });
             });
             bot.command("menu", async (ctx) => {
                 const t = this.getLangFromCtx(ctx);
                 const chatId = String(ctx.chat.id);
                 const dealer = await this.prisma.dealer.findFirst({
-                    where: { telegramChatId: chatId, companyId, deletedAt: null, isApproved: true, isBlocked: false },
+                    where: {
+                        telegramChatId: chatId,
+                        companyId,
+                        deletedAt: null,
+                        isApproved: true,
+                        isBlocked: false,
+                    },
                 });
                 if (!dealer) {
                     return ctx.reply(t.startOver);
                 }
-                await ctx.reply(`🛍 *${companyName}* - Bosh menyu`, { parse_mode: 'Markdown', reply_markup: this.buildMainMenuKeyboard(t) });
+                await ctx.reply(`🛍 *${companyName}* - Bosh menyu`, {
+                    parse_mode: "Markdown",
+                    reply_markup: this.buildMainMenuKeyboard(t),
+                });
             });
             bot.on("callback_query", async (ctx) => await this.handleCallback(ctx, companyId));
             try {
-                const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-                const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
-                await bot.telegram.setChatMenuButton({
-                    menuButton: { type: "web_app", text: "🛍 Web Do'kon", web_app: { url: storeUrl } },
-                });
-                this.logger.log(`✅ Global menu button set for ${companyName}: ${storeUrl}`);
+                const [company, limits] = await Promise.all([
+                    this.prisma.company.findUnique({ where: { id: companyId } }),
+                    this.planLimits.getLimitsForCompany(companyId),
+                ]);
+                if (limits.allowWebStore) {
+                    const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
+                    await bot.telegram.setChatMenuButton({
+                        menuButton: {
+                            type: "web_app",
+                            text: "🛍 Web Do'kon",
+                            web_app: { url: storeUrl },
+                        },
+                    });
+                    this.logger.log(`✅ Global menu button set for ${companyName}: ${storeUrl}`);
+                }
             }
             catch (e) {
                 const msg = e instanceof Error ? e.message : String(e);
                 this.logger.warn(`⚠️ Could not set global menu button for ${companyName}: ${msg}`);
             }
-            if (process.env.NODE_ENV === "production" && (process.env.BOT_WEBHOOK_URL || process.env.APP_URL)) {
-                const baseUrl = process.env.BOT_WEBHOOK_URL || (process.env.APP_URL + "/webhook");
-                const webhookUrl = baseUrl.endsWith("/") ? `${baseUrl}${botId}` : `${baseUrl}/${botId}`;
+            if (process.env.NODE_ENV === "production" &&
+                (process.env.BOT_WEBHOOK_URL || process.env.APP_URL)) {
+                const baseUrl = process.env.BOT_WEBHOOK_URL || process.env.APP_URL + "/webhook";
+                const webhookUrl = baseUrl.endsWith("/")
+                    ? `${baseUrl}${botId}`
+                    : `${baseUrl}/${botId}`;
                 await bot.telegram.setWebhook(webhookUrl);
                 this.logger.log(`✅ Webhook set for ${companyName} (Bot: ${botId}): ${webhookUrl}`);
             }
             else {
-                bot.launch().catch((e) => this.logger.warn(`Polling launch failed for ${companyName}: ${e.message}`));
+                bot
+                    .launch()
+                    .catch((e) => this.logger.warn(`Polling launch failed for ${companyName}: ${e.message}`));
                 this.logger.log(`✅ Bot launched (polling) for ${companyName}`);
             }
             this.bots.set(botId, bot);
@@ -509,12 +722,12 @@ let TelegramService = TelegramService_1 = class TelegramService {
         const ratio = limit > 0 ? Math.round((debt / limit) * 100) : 0;
         const bar = this.progressBar(ratio);
         const cashback = dealer.cashbackBalance ?? 0;
-        const cashbackLine = cashback > 0 ? `\n🎁 Cashback: *${cashback.toLocaleString()} so'm*` : '';
+        const cashbackLine = cashback > 0 ? `\n🎁 Cashback: *${cashback.toLocaleString()} so'm*` : "";
         await ctx.reply(`💰 *${dealer.name}*\n\n` +
             `${t.debtTitle}: *${debt.toLocaleString()} so'm*\n` +
-            `${t.limitTitle}: *${limit > 0 ? limit.toLocaleString() + " so'm" : 'Cheksiz'}*\n\n` +
-            `${limit > 0 ? bar + ' ' + ratio + '%\n\n' : ''}` +
-            `${debt > 0 && limit > 0 && debt > limit ? t.overLimit : limit > 0 ? t.withinLimit : ''}` +
+            `${t.limitTitle}: *${limit > 0 ? limit.toLocaleString() + " so'm" : "Cheksiz"}*\n\n` +
+            `${limit > 0 ? bar + " " + ratio + "%\n\n" : ""}` +
+            `${debt > 0 && limit > 0 && debt > limit ? t.overLimit : limit > 0 ? t.withinLimit : ""}` +
             cashbackLine, { parse_mode: "Markdown" });
     }
     async handleProducts(ctx, companyId) {
@@ -531,27 +744,33 @@ let TelegramService = TelegramService_1 = class TelegramService {
             return ctx.reply(t.noProducts);
         }
         await ctx.reply(t.productList, { parse_mode: "Markdown" });
-        const backendUrl = (process.env.APP_URL || process.env.FRONTEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+        const backendUrl = (process.env.APP_URL ||
+            process.env.FRONTEND_URL ||
+            "http://localhost:5000").replace(/\/$/, "");
         for (const p of products) {
             const effectivePrice = p.discountPrice ?? p.price;
             const isPromo = p.isPromo && p.discountPrice;
             const priceStr = isPromo
                 ? `~~${p.price.toLocaleString()}~~ → *${effectivePrice.toLocaleString()} so'm* 🔥`
                 : `*${p.price.toLocaleString()} so'm*`;
-            const caption = `${isPromo ? '🏷 *AKSIYA!* ' : ''}*${p.name}*\n` +
+            const caption = `${isPromo ? "🏷 *AKSIYA!* " : ""}*${p.name}*\n` +
                 `💵 ${priceStr} / ${p.unit}\n` +
                 `📦 ${p.stock} ${p.unit}`;
-            const buttons = [[
+            const buttons = [
+                [
                     { text: `${t.addToCart} (+1)`, callback_data: `add:${p.id}:1` },
-                    { text: '+5', callback_data: `add:${p.id}:5` },
-                    { text: '+10', callback_data: `add:${p.id}:10` },
-                ]];
+                    { text: "+5", callback_data: `add:${p.id}:5` },
+                    { text: "+10", callback_data: `add:${p.id}:10` },
+                ],
+            ];
             if (p.imageUrl) {
-                const photoUrl = p.imageUrl.startsWith('http') ? p.imageUrl : `${backendUrl}${p.imageUrl}`;
+                const photoUrl = p.imageUrl.startsWith("http")
+                    ? p.imageUrl
+                    : `${backendUrl}${p.imageUrl}`;
                 try {
                     await ctx.replyWithPhoto(photoUrl, {
                         caption,
-                        parse_mode: 'Markdown',
+                        parse_mode: "Markdown",
                         reply_markup: { inline_keyboard: buttons },
                     });
                     continue;
@@ -560,11 +779,13 @@ let TelegramService = TelegramService_1 = class TelegramService {
                 }
             }
             await ctx.reply(caption, {
-                parse_mode: 'Markdown',
+                parse_mode: "Markdown",
                 reply_markup: { inline_keyboard: buttons },
             });
         }
-        await ctx.reply(`🛒 ${t.cartTitle.replace(/\*/g, '')}`, { parse_mode: 'Markdown' });
+        await ctx.reply(`🛒 ${t.cartTitle.replace(/\*/g, "")}`, {
+            parse_mode: "Markdown",
+        });
     }
     async handleOrders(ctx, companyId) {
         const dealer = await this.getDealerByChatId(ctx, companyId);
@@ -582,7 +803,11 @@ let TelegramService = TelegramService_1 = class TelegramService {
         let msg = `${t.recentOrders}\n\n`;
         for (const order of orders) {
             const date = order.createdAt.toLocaleDateString("uz-UZ");
-            const statusIcon = order.status === "DELIVERED" ? "✅" : order.status === "PENDING" ? "⏳" : "📦";
+            const statusIcon = order.status === "DELIVERED"
+                ? "✅"
+                : order.status === "PENDING"
+                    ? "⏳"
+                    : "📦";
             msg += `${statusIcon} *#${order.id.slice(-6).toUpperCase()}*\n`;
             msg += `   📅 ${date} | 💰 ${order.totalAmount.toLocaleString()} so'm\n`;
             msg += `   📊 ${order.status}\n\n`;
@@ -629,47 +854,73 @@ let TelegramService = TelegramService_1 = class TelegramService {
         const data = query.data;
         const chatId = String(query.from.id);
         const t = this.getLangFromCtx(ctx);
-        if (data.startsWith('menu:')) {
-            const action = data.split(':')[1];
-            if (action === 'products')
+        if (data.startsWith("lang:set:")) {
+            const lang = data.split(":")[2] || "uz";
+            const allowed = ["uz", "ru", "tr", "en"];
+            const safeLang = allowed.includes(lang) ? lang : "uz";
+            this.chatLangPrefs.set(chatId, safeLang);
+            await ctx.reply("✅ Til saqlandi. Davom etish uchun /start bosing.");
+            return;
+        }
+        if (data.startsWith("menu:")) {
+            const action = data.split(":")[1];
+            if (action === "products")
                 await this.handleProducts(ctx, companyId);
-            if (action === 'cart')
+            if (action === "cart")
                 await this.handleCart(ctx, companyId);
-            if (action === 'orders')
+            if (action === "orders")
                 await this.handleOrders(ctx, companyId);
-            if (action === 'debt')
+            if (action === "debt")
                 await this.handleDebt(ctx, companyId);
-            if (action === 'payments')
+            if (action === "payments")
                 await this.handlePayments(ctx, companyId);
-            if (action === 'lang')
-                await ctx.reply("Iltimos, tilni tanlang:");
-            if (action === 'help') {
-                const companyName = (await this.prisma.company.findUnique({ where: { id: companyId }, select: { name: true } }))?.name || "Company";
+            if (action === "lang") {
+                await ctx.reply("Tilni tanlang / Выберите язык / Choose language", {
+                    reply_markup: this.buildLanguageKeyboard(),
+                });
+            }
+            if (action === "help") {
+                const companyName = (await this.prisma.company.findUnique({
+                    where: { id: companyId },
+                    select: { name: true },
+                }))?.name || "Company";
                 await this.handleHelp(ctx, companyName);
             }
             return;
         }
-        if (data.startsWith('admin:')) {
-            const action = data.split(':')[1];
-            if (action === 'toggle_store') {
-                const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+        if (data.startsWith("admin:")) {
+            const action = data.split(":")[1];
+            if (action === "toggle_store") {
+                const company = await this.prisma.company.findUnique({
+                    where: { id: companyId },
+                });
                 if (company) {
-                    await this.prisma.company.update({ where: { id: companyId }, data: { siteActive: !company.siteActive } });
-                    await ctx.reply(`📊 Do'kon hozir: ${!company.siteActive ? '✅ ONLINE (Faol)' : '❌ OFFLINE (Yopiq)'}`);
+                    await this.prisma.company.update({
+                        where: { id: companyId },
+                        data: { siteActive: !company.siteActive },
+                    });
+                    await ctx.reply(`📊 Do'kon hozir: ${!company.siteActive ? "✅ ONLINE (Faol)" : "❌ OFFLINE (Yopiq)"}`);
                 }
             }
-            if (action === 'store_link') {
-                const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-                const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
+            if (action === "store_link") {
+                const limits = await this.planLimits.getLimitsForCompany(companyId);
+                if (!limits.allowWebStore) {
+                    await ctx.reply("⚠️ Joriy tarifda Web do'kon funksiyasi mavjud emas.");
+                    return;
+                }
+                const company = await this.prisma.company.findUnique({
+                    where: { id: companyId },
+                });
+                const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
                 const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(storeUrl)}`;
                 await ctx.replyWithPhoto(qrUrl, {
-                    caption: `🌐 Do'kon manzili: ${storeUrl}\n\nQuyidagi QR Kodni dilerlaringizga berishingiz mumkin.`
+                    caption: `🌐 Do'kon manzili: ${storeUrl}\n\nQuyidagi QR Kodni dilerlaringizga berishingiz mumkin.`,
                 });
             }
-            if (action === 'dealers') {
+            if (action === "dealers") {
                 const pending = await this.prisma.dealerApprovalRequest.findMany({
-                    where: { companyId, status: 'PENDING' },
-                    include: { dealer: true }
+                    where: { companyId, status: "PENDING" },
+                    include: { dealer: true },
                 });
                 if (!pending || pending.length === 0) {
                     await ctx.reply(`✅ Hozirda tasdiqlash uchun yangi dilerlar yo'q.`);
@@ -685,8 +936,8 @@ let TelegramService = TelegramService_1 = class TelegramService {
             }
             return;
         }
-        if (data.startsWith('add:')) {
-            const [, productId, qtyStr] = data.split(':');
+        if (data.startsWith("add:")) {
+            const [, productId, qtyStr] = data.split(":");
             const qty = parseInt(qtyStr, 10) || 1;
             const product = await this.prisma.product.findFirst({
                 where: { id: productId, companyId, deletedAt: null },
@@ -699,19 +950,19 @@ let TelegramService = TelegramService_1 = class TelegramService {
             await ctx.reply(`${t.cartUpdated} *${product.name}* ×${cart.get(productId)}\n🛒 Savatda jami: ${cartTotal} ta mahsulot`, { parse_mode: "Markdown" });
             return;
         }
-        if (data.startsWith('remove:')) {
-            const productId = data.split(':')[1];
+        if (data.startsWith("remove:")) {
+            const productId = data.split(":")[1];
             const cart = this.getCart(companyId, chatId);
             cart.delete(productId);
             await ctx.reply(t.cartRemoved);
             return;
         }
-        if (data === 'clear_cart') {
+        if (data === "clear_cart") {
             this.clearCart(companyId, chatId);
             await ctx.reply(t.cartCleared);
             return;
         }
-        if (data === 'checkout') {
+        if (data === "checkout") {
             await this.handleCheckoutByChat(ctx, companyId, chatId);
             return;
         }
@@ -744,7 +995,10 @@ let TelegramService = TelegramService_1 = class TelegramService {
             total += lineTotal;
             msg += `• *${p.name}* × ${qty}\n`;
             msg += `  💵 ${lineTotal.toLocaleString()} so'm\n\n`;
-            removeButtons.push({ text: `❌ ${p.name}`, callback_data: `remove:${productId}` });
+            removeButtons.push({
+                text: `❌ ${p.name}`,
+                callback_data: `remove:${productId}`,
+            });
         }
         msg += `${t.cartTotal} *${total.toLocaleString()} so'm*`;
         await ctx.reply(msg, {
@@ -768,7 +1022,9 @@ let TelegramService = TelegramService_1 = class TelegramService {
     }
     async handleCheckoutByChat(ctx, companyId, chatId) {
         const t = this.getLangFromCtx(ctx);
-        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+        const company = await this.prisma.company.findUnique({
+            where: { id: companyId },
+        });
         if (!company?.siteActive) {
             return ctx.reply("⚠️ Do'kon hozirda OFFLINE yopiq holatda. Iltimos, keyinroq urinib ko'ring.");
         }
@@ -804,7 +1060,14 @@ let TelegramService = TelegramService_1 = class TelegramService {
                 continue;
             const lineTotal = p.price * qty;
             totalAmount += lineTotal;
-            orderItems.push({ productId, name: p.name, qty, unit: p.unit || 'pcs', price: p.price, total: lineTotal });
+            orderItems.push({
+                productId,
+                name: p.name,
+                qty,
+                unit: p.unit || "pcs",
+                price: p.price,
+                total: lineTotal,
+            });
         }
         const newDebt = (dealer.currentDebt || 0) + totalAmount;
         if (dealer.creditLimit && newDebt > dealer.creditLimit) {
@@ -820,7 +1083,7 @@ let TelegramService = TelegramService_1 = class TelegramService {
                         branchId: dealer.branchId,
                         totalAmount,
                         totalCost: 0,
-                        status: 'PENDING',
+                        status: "PENDING",
                         items: orderItems,
                     },
                 });
@@ -830,7 +1093,10 @@ let TelegramService = TelegramService_1 = class TelegramService {
                         data: { stock: { decrement: item.qty } },
                     });
                     if (updatedProduct.stock < 10) {
-                        lowStockProducts.push({ name: updatedProduct.name, stock: updatedProduct.stock });
+                        lowStockProducts.push({
+                            name: updatedProduct.name,
+                            stock: updatedProduct.stock,
+                        });
                     }
                 }
                 await tx.dealer.update({
@@ -841,7 +1107,7 @@ let TelegramService = TelegramService_1 = class TelegramService {
                     data: {
                         companyId,
                         dealerId: dealer.id,
-                        type: 'ORDER',
+                        type: "ORDER",
                         amount: totalAmount,
                         note: `Telegram buyurtma #${created.id.slice(-6).toUpperCase()}`,
                     },
@@ -851,34 +1117,42 @@ let TelegramService = TelegramService_1 = class TelegramService {
             this.clearCart(companyId, chatId);
             if (lowStockProducts.length > 0) {
                 let warnMsg = `⚠️ *Diqqat: Mahsulot kam qolmoqda!*\n\nQuyidagi mahsulotlar zaxirasi tugamoqda:\n`;
-                lowStockProducts.forEach(p => warnMsg += `• ${p.name}: ${p.stock} ta qoldi\n`);
+                lowStockProducts.forEach((p) => (warnMsg += `• ${p.name}: ${p.stock} ta qoldi\n`));
                 this.sendToAdmins(companyId, warnMsg).catch(() => { });
             }
-            this.prisma.company.findUnique({ where: { id: companyId }, select: { name: true, cashbackPercent: true } })
+            this.prisma.company
+                .findUnique({
+                where: { id: companyId },
+                select: { name: true, cashbackPercent: true },
+            })
                 .then(async (company) => {
                 const cashbackPct = company?.cashbackPercent ?? 0;
                 if (cashbackPct > 0) {
-                    const earned = Math.floor(totalAmount * cashbackPct / 100);
+                    const earned = Math.floor((totalAmount * cashbackPct) / 100);
                     if (earned > 0) {
-                        await this.prisma.dealer.update({
+                        await this.prisma.dealer
+                            .update({
                             where: { id: dealer.id },
                             data: { cashbackBalance: { increment: earned } },
-                        }).catch(() => { });
+                        })
+                            .catch(() => { });
                     }
                 }
-                this.loggerBot.sendOrderNotification({
+                this.loggerBot
+                    .sendOrderNotification({
                     id: order.id,
                     companyName: company?.name || companyId,
                     dealerName: dealer.name,
                     totalAmount,
                     itemCount: orderItems.length,
-                }).catch(() => { });
+                })
+                    .catch(() => { });
             })
                 .catch(() => { });
             const orderNum = order.id.slice(-6).toUpperCase();
             const itemLines = orderItems
-                .map(item => `▪ ${item.name} — ${item.qty} ${item.unit} × ${item.price.toLocaleString()} = *${item.total.toLocaleString()} so'm*`)
-                .join('\n');
+                .map((item) => `▪ ${item.name} — ${item.qty} ${item.unit} × ${item.price.toLocaleString()} = *${item.total.toLocaleString()} so'm*`)
+                .join("\n");
             const newDebtAfter = (dealer.currentDebt || 0) + totalAmount;
             await ctx.reply(`✅ *BUYURTMA QABUL QILINDI*\n` +
                 `━━━━━━━━━━━━━━━\n` +
@@ -903,7 +1177,9 @@ let TelegramService = TelegramService_1 = class TelegramService {
         if (!bot)
             return;
         try {
-            await bot.telegram.sendMessage(chatId, message, { parse_mode: "Markdown" });
+            await bot.telegram.sendMessage(chatId, message, {
+                parse_mode: "Markdown",
+            });
         }
         catch (e) {
             this.logger.error(`Failed to send external message for bot ${botId}: ${e.message}`);
@@ -911,7 +1187,7 @@ let TelegramService = TelegramService_1 = class TelegramService {
     }
     async broadcast(companyId, message) {
         const botRecord = await this.prisma.customBot.findFirst({
-            where: { companyId, isActive: true, deletedAt: null }
+            where: { companyId, isActive: true, deletedAt: null },
         });
         if (!botRecord)
             return { sent: 0, failed: 0 };
@@ -928,7 +1204,9 @@ let TelegramService = TelegramService_1 = class TelegramService {
             if (!dealer.telegramChatId)
                 continue;
             try {
-                await bot.telegram.sendMessage(dealer.telegramChatId, message, { parse_mode: "Markdown" });
+                await bot.telegram.sendMessage(dealer.telegramChatId, message, {
+                    parse_mode: "Markdown",
+                });
                 sent++;
             }
             catch {
@@ -939,7 +1217,7 @@ let TelegramService = TelegramService_1 = class TelegramService {
     }
     async sendOrderStatusUpdate(companyId, orderId, newStatus, dealerId) {
         const botRecord = await this.prisma.customBot.findFirst({
-            where: { companyId, isActive: true, deletedAt: null }
+            where: { companyId, isActive: true, deletedAt: null },
         });
         if (!botRecord)
             return;
@@ -953,21 +1231,23 @@ let TelegramService = TelegramService_1 = class TelegramService {
         if (!dealer?.telegramChatId)
             return;
         const statusEmoji = {
-            PENDING: '⏳',
-            ACCEPTED: '✅',
-            PREPARING: '🔧',
-            SHIPPED: '🚚',
-            DELIVERED: '📦',
-            COMPLETED: '✅',
-            CANCELLED: '❌',
-            RETURNED: '↩️',
+            PENDING: "⏳",
+            ACCEPTED: "✅",
+            PREPARING: "🔧",
+            SHIPPED: "🚚",
+            DELIVERED: "📦",
+            COMPLETED: "✅",
+            CANCELLED: "❌",
+            RETURNED: "↩️",
         };
-        const emoji = statusEmoji[newStatus] ?? '📋';
+        const emoji = statusEmoji[newStatus] ?? "📋";
         const msg = `${emoji} *Buyurtma holati yangilandi*\n\n` +
             `📋 Buyurtma: *#${orderId.slice(-6).toUpperCase()}*\n` +
             `📊 Yangi holat: *${newStatus}*`;
         try {
-            await bot.telegram.sendMessage(dealer.telegramChatId, msg, { parse_mode: "Markdown" });
+            await bot.telegram.sendMessage(dealer.telegramChatId, msg, {
+                parse_mode: "Markdown",
+            });
         }
         catch (e) {
             this.logger.warn(`Could not notify dealer ${dealerId} of status update: ${e.message}`);
@@ -980,11 +1260,21 @@ let TelegramService = TelegramService_1 = class TelegramService {
         const t = this.getLangFromCtx(ctx);
         const isPremium = company?.subscriptionPlan === "PREMIUM";
         const watermark = isPremium ? "" : "\n\n⚡️ _Supplio.uz_";
-        await ctx.reply(`ℹ️ *${companyName} Bot - ${t.helpTitle}*\n\n` + t.helpCommands + watermark, { parse_mode: "Markdown" });
+        await ctx.reply(`ℹ️ *${companyName} Bot - ${t.helpTitle}*\n\n` +
+            t.helpCommands +
+            watermark, { parse_mode: "Markdown" });
     }
     async getDealerByChatId(ctx, companyId) {
         const chatId = String(ctx.chat?.id);
         const t = this.getLangFromCtx(ctx);
+        const company = await this.prisma.company.findUnique({
+            where: { id: companyId },
+            select: { subscriptionStatus: true, trialExpiresAt: true },
+        });
+        if (this.isCompanyAccessBlocked(company)) {
+            await ctx.reply(t.suspended);
+            return null;
+        }
         const dealer = await this.prisma.dealer.findFirst({
             where: { telegramChatId: chatId, companyId, deletedAt: null },
         });
@@ -1010,37 +1300,50 @@ let TelegramService = TelegramService_1 = class TelegramService {
     getBot(botId) {
         return this.bots.get(botId);
     }
+    async ensureBotInitialized(botId) {
+        const existing = this.bots.get(botId);
+        if (existing)
+            return existing;
+        const botRecord = await this.prisma.customBot.findFirst({
+            where: { id: botId, isActive: true, deletedAt: null },
+            include: { company: true },
+        });
+        if (!botRecord)
+            return undefined;
+        await this.initBot(botRecord.id, botRecord.companyId, botRecord.token, botRecord.company?.name || botRecord.companyId);
+        return this.bots.get(botId);
+    }
     async validateToken(token) {
         try {
             const tempBot = new telegraf_1.Telegram(token);
             const botInfo = await Promise.race([
                 tempBot.getMe(),
-                new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 10000)),
+                new Promise((_, reject) => setTimeout(() => reject(new Error("TIMEOUT")), 10000)),
             ]);
             return {
                 valid: true,
                 botInfo: {
                     id: botInfo.id,
-                    username: botInfo.username || '',
+                    username: botInfo.username || "",
                     first_name: botInfo.first_name,
                 },
             };
         }
         catch (err) {
             this.logger.warn(`Token validation failed for token ${token.slice(0, 5)}...: ${err.message}`);
-            const isNetworkError = err.message === 'TIMEOUT' ||
+            const isNetworkError = err.message === "TIMEOUT" ||
                 !err.response ||
-                err.code === 'ECONNREFUSED' ||
-                err.code === 'ETIMEDOUT' ||
-                err.code === 'ENOTFOUND';
+                err.code === "ECONNREFUSED" ||
+                err.code === "ETIMEDOUT" ||
+                err.code === "ENOTFOUND";
             return { valid: false, networkError: isNetworkError };
         }
     }
     getBotStatus(botId) {
         const bot = this.bots.get(botId);
         if (!bot)
-            return 'not_found';
-        return 'connected';
+            return "not_found";
+        return "connected";
     }
     async getBotsForCompany(companyId) {
         return this.prisma.customBot.findMany({
@@ -1048,20 +1351,38 @@ let TelegramService = TelegramService_1 = class TelegramService {
             orderBy: { createdAt: "desc" },
         });
     }
+    async reloadCompanyBots(companyId) {
+        const records = await this.prisma.customBot.findMany({
+            where: { companyId, deletedAt: null, isActive: true },
+            include: { company: true },
+        });
+        for (const record of records) {
+            const existing = this.bots.get(record.id);
+            if (existing) {
+                try {
+                    existing.stop();
+                }
+                catch { }
+                this.bots.delete(record.id);
+            }
+            await this.initBot(record.id, record.companyId, record.token, record.company?.name || record.companyId);
+        }
+        return { reloaded: records.length };
+    }
     async createBot(companyId, data) {
         if (!data.token?.trim()) {
-            throw new common_1.BadRequestException('Bot token is required.');
+            throw new common_1.BadRequestException("Bot token is required.");
         }
         await this.planLimits.checkBotLimit(companyId);
         const validation = await this.validateToken(data.token.trim());
         if (!validation.valid) {
             if (validation.networkError) {
-                throw new common_1.BadRequestException('Cannot reach Telegram API to verify this token. Check server internet connectivity, then try again.');
+                throw new common_1.BadRequestException("Cannot reach Telegram API to verify this token. Check server internet connectivity, then try again.");
             }
-            throw new common_1.BadRequestException('Invalid Telegram bot token. Please get a valid token from @BotFather.');
+            throw new common_1.BadRequestException("Invalid Telegram bot token. Please get a valid token from @BotFather.");
         }
         const username = validation.botInfo?.username;
-        const resolvedName = data.botName || validation.botInfo?.first_name || 'Store Bot';
+        const resolvedName = data.botName || validation.botInfo?.first_name || "Store Bot";
         try {
             this.logger.log(`Creating bot for company: ${companyId}`);
             const bot = await this.prisma.customBot.create({
@@ -1071,12 +1392,14 @@ let TelegramService = TelegramService_1 = class TelegramService {
                     botName: resolvedName,
                     username,
                     description: data.description,
-                    isActive: true
+                    isActive: true,
                 },
             });
             this.logger.log(`Bot record created in DB: ${bot.id}. Initializing instance...`);
             try {
-                const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+                const company = await this.prisma.company.findUnique({
+                    where: { id: companyId },
+                });
                 if (!company) {
                     this.logger.error(`Company not found after creating bot record! ID: ${companyId}`);
                 }
@@ -1091,22 +1414,38 @@ let TelegramService = TelegramService_1 = class TelegramService {
         }
         catch (e) {
             this.logger.error(`Error in createBot: ${e.message}`, e.stack);
-            if (e.code === 'P2002') {
-                throw new common_1.BadRequestException('This bot token is already registered to another company.');
+            if (e.code === "P2002") {
+                throw new common_1.BadRequestException("This bot token is already registered to another company.");
             }
-            if (e.code === 'P2003') {
-                throw new common_1.BadRequestException('Foreign key constraint failed. Check if companyId is valid.');
+            if (e.code === "P2003") {
+                throw new common_1.BadRequestException("Foreign key constraint failed. Check if companyId is valid.");
             }
             throw e;
         }
     }
     async updateBot(id, companyId, data) {
-        const bot = await this.prisma.customBot.findFirst({ where: { id, companyId, deletedAt: null } });
+        const bot = await this.prisma.customBot.findFirst({
+            where: { id, companyId, deletedAt: null },
+        });
         if (!bot)
             throw new Error("Bot not found");
+        if (data.isActive === true && !bot.isActive) {
+            const limits = await this.planLimits.getLimitsForCompany(companyId);
+            if (!limits.allowCustomBot || limits.maxCustomBots <= 0) {
+                throw new common_1.BadRequestException("Telegram bot is not available on your current plan. Please upgrade your tariff.");
+            }
+            const activeCount = await this.prisma.customBot.count({
+                where: { companyId, deletedAt: null, isActive: true },
+            });
+            if (activeCount >= limits.maxCustomBots) {
+                throw new common_1.BadRequestException(`Telegram bot limit reached. Your current plan allows up to ${limits.maxCustomBots}. Please upgrade your tariff.`);
+            }
+        }
         const updated = await this.prisma.customBot.update({ where: { id }, data });
         if (data.isActive === true || data.token) {
-            const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+            const company = await this.prisma.company.findUnique({
+                where: { id: companyId },
+            });
             await this.initBot(updated.id, companyId, updated.token, company?.name ?? companyId);
         }
         else if (data.isActive === false) {
@@ -1122,18 +1461,38 @@ let TelegramService = TelegramService_1 = class TelegramService {
         return updated;
     }
     async removeBot(id, companyId) {
-        const bot = await this.prisma.customBot.findFirst({ where: { id, companyId, deletedAt: null } });
+        const bot = await this.prisma.customBot.findFirst({
+            where: { id, companyId, deletedAt: null },
+        });
         if (!bot)
             throw new Error("Bot not found");
         const existing = this.bots.get(id);
         if (existing) {
+            try {
+                await existing.telegram.deleteWebhook({ drop_pending_updates: true });
+            }
+            catch { }
             try {
                 existing.stop();
             }
             catch { }
             this.bots.delete(id);
         }
-        return this.prisma.customBot.update({ where: { id }, data: { deletedAt: new Date(), isActive: false } });
+        return this.prisma.customBot.update({
+            where: { id },
+            data: { deletedAt: new Date(), isActive: false },
+        });
+    }
+    async getAllBotsAdmin() {
+        const bots = await this.prisma.customBot.findMany({
+            where: { deletedAt: null },
+            include: { company: { select: { id: true, name: true, slug: true } } },
+            orderBy: { createdAt: "desc" },
+        });
+        return bots.map((b) => ({
+            ...b,
+            status: this.getBotStatus(b.id),
+        }));
     }
     async notifyDealerApprovalResult(companyId, dealerId, approved) {
         const botRecord = await this.prisma.customBot.findFirst({
@@ -1165,9 +1524,11 @@ let TelegramService = TelegramService_1 = class TelegramService {
             en: `❌ *${dealer.name}*, your request has been rejected.\n\nPlease contact your distributor for more information.`,
         };
         const msgs = approved ? approvedMsgs : rejectedMsgs;
-        const text = Object.values(msgs).join('\n\n────────────\n\n');
+        const text = Object.values(msgs).join("\n\n────────────\n\n");
         try {
-            await bot.telegram.sendMessage(dealer.telegramChatId, text, { parse_mode: 'Markdown' });
+            await bot.telegram.sendMessage(dealer.telegramChatId, text, {
+                parse_mode: "Markdown",
+            });
         }
         catch (e) {
             this.logger.warn(`Could not notify dealer ${dealerId} of approval result: ${e.message}`);

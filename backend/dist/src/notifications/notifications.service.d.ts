@@ -86,9 +86,9 @@ export declare class NotificationService {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
         message: import("@prisma/client/runtime/library").JsonValue;
         type: string;
-        updatedAt: Date;
     }[]>;
     createTemplate(companyId: string, body: {
         name: string;
@@ -102,9 +102,9 @@ export declare class NotificationService {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
         message: import("@prisma/client/runtime/library").JsonValue;
         type: string;
-        updatedAt: Date;
     }>;
     updateTemplate(companyId: string, id: string, body: {
         name?: string;
@@ -121,10 +121,10 @@ export declare class NotificationService {
         id: string;
         companyId: string;
         createdAt: Date;
+        status: string;
         message: string;
         templateId: string | null;
         dealerId: string | null;
-        status: string;
     })[]>;
     runDebtReminders(): Promise<void>;
     runPromoNotifications(): Promise<void>;

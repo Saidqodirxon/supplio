@@ -10,13 +10,17 @@ export declare class TelegramService implements OnModuleInit {
     private readonly logger;
     private bots;
     private carts;
+    private chatLangPrefs;
     constructor(prisma: PrismaService, loggerBot: TelegramLoggerService, planLimits: PlanLimitsService);
     onModuleInit(): Promise<void>;
     initializeBots(): Promise<void>;
     private translations;
     private getT;
+    private getPublicStoreBaseUrl;
+    private isCompanyAccessBlocked;
     sendToAdmins(companyId: string, message: string): Promise<void>;
     private getLangFromCtx;
+    private buildLanguageKeyboard;
     private buildMainMenuKeyboard;
     private buildAdminMenuKeyboard;
     initBot(botId: string, companyId: string, token: string, companyName: string): Promise<void>;
@@ -40,6 +44,7 @@ export declare class TelegramService implements OnModuleInit {
     private getDealerByChatId;
     private progressBar;
     getBot(botId: string): Telegraf | undefined;
+    ensureBotInitialized(botId: string): Promise<Telegraf | undefined>;
     validateToken(token: string): Promise<{
         valid: boolean;
         networkError?: boolean;
@@ -49,7 +54,7 @@ export declare class TelegramService implements OnModuleInit {
             first_name: string;
         };
     }>;
-    getBotStatus(botId: string): 'connected' | 'stopped' | 'not_found';
+    getBotStatus(botId: string): "connected" | "stopped" | "not_found";
     getBotsForCompany(companyId: string): Promise<{
         id: string;
         companyId: string;
@@ -64,6 +69,9 @@ export declare class TelegramService implements OnModuleInit {
         description: string | null;
         webhookUrl: string | null;
     }[]>;
+    reloadCompanyBots(companyId: string): Promise<{
+        reloaded: number;
+    }>;
     createBot(companyId: string, data: {
         token: string;
         botName?: string;
@@ -120,6 +128,26 @@ export declare class TelegramService implements OnModuleInit {
         description: string | null;
         webhookUrl: string | null;
     }>;
+    getAllBotsAdmin(): Promise<{
+        status: "connected" | "stopped" | "not_found";
+        company: {
+            id: string;
+            name: string;
+            slug: string;
+        };
+        id: string;
+        companyId: string;
+        token: string;
+        username: string | null;
+        isActive: boolean;
+        hasWebApp: boolean;
+        watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
+        webhookUrl: string | null;
+    }[]>;
     notifyDealerApprovalResult(companyId: string, dealerId: string, approved: boolean): Promise<void>;
     stopAll(): Promise<void>;
 }

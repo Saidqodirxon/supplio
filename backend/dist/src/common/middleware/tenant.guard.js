@@ -24,7 +24,7 @@ let TenantGuard = class TenantGuard {
             throw new common_1.ForbiddenException("SEC_ERR: Authentication missing");
         }
         if (user.roleType === "SUPER_ADMIN") {
-            const targetCompanyId = request.headers['x-company-id'] || user.companyId;
+            const targetCompanyId = request.headers["x-company-id"] || user.companyId;
             if (targetCompanyId) {
                 request.companyId = targetCompanyId;
             }
@@ -47,11 +47,12 @@ let TenantGuard = class TenantGuard {
             throw new common_1.ServiceUnavailableException("SYSTEM_MAINTENANCE: Try again in 30 minutes.");
         }
         const now = new Date();
-        if (company.subscriptionStatus === client_1.SubscriptionStatus.TRIAL &&
+        if ((company.subscriptionStatus === client_1.SubscriptionStatus.TRIAL ||
+            company.subscriptionStatus === client_1.SubscriptionStatus.ACTIVE) &&
             now > company.trialExpiresAt) {
             throw new common_1.ForbiddenException({
                 statusCode: 403,
-                message: "TRIAL_EXPIRED: Your 14-day evaluation has ended.",
+                message: "SUBSCRIPTION_EXPIRED: Your subscription period has ended.",
                 trialEnd: company.trialExpiresAt,
                 action: "UPGRADE_PLAN",
             });

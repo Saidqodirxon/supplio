@@ -14,10 +14,13 @@ exports.SuperAdminService = void 0;
 const common_1 = require("@nestjs/common");
 const schedule_1 = require("@nestjs/schedule");
 const bcrypt = require("bcrypt");
+const ExcelJS = require("exceljs");
 const prisma_service_1 = require("../prisma/prisma.service");
+const analytics_service_1 = require("../analytics/analytics.service");
 let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
-    constructor(prisma) {
+    constructor(prisma, analyticsService) {
         this.prisma = prisma;
+        this.analyticsService = analyticsService;
         this.logger = new common_1.Logger(SuperAdminService_1.name);
     }
     async getGlobalSettings() {
@@ -34,7 +37,10 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
     }
     async updateGlobalSettings(data) {
         const { id, updatedAt, ...safeData } = data;
-        return this.prisma.systemSettings.update({ where: { id: "GLOBAL" }, data: safeData });
+        return this.prisma.systemSettings.update({
+            where: { id: "GLOBAL" },
+            data: safeData,
+        });
     }
     async directUpdate(model, id, field, value) {
         const modelKey = model.charAt(0).toLowerCase() + model.slice(1);
@@ -46,10 +52,15 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             processedValue = true;
         else if (value === "false")
             processedValue = false;
-        else if (typeof value === "string" && value.trim() !== "" && !isNaN(Number(value))) {
+        else if (typeof value === "string" &&
+            value.trim() !== "" &&
+            !isNaN(Number(value))) {
             processedValue = Number(value);
         }
-        return prismaModel.update({ where: { id }, data: { [field]: processedValue } });
+        return prismaModel.update({
+            where: { id },
+            data: { [field]: processedValue },
+        });
     }
     async getAllCompanies(query = {}) {
         const { search, plan, status, page = 1, limit = 20 } = query;
@@ -84,9 +95,18 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             include: {
                 users: {
                     where: { deletedAt: null },
-                    select: { id: true, phone: true, fullName: true, roleType: true, isActive: true },
+                    select: {
+                        id: true,
+                        phone: true,
+                        fullName: true,
+                        roleType: true,
+                        isActive: true,
+                    },
                 },
-                branches: { where: { deletedAt: null }, select: { id: true, name: true } },
+                branches: {
+                    where: { deletedAt: null },
+                    select: { id: true, name: true },
+                },
                 _count: {
                     select: { dealers: true, orders: true, products: true },
                 },
@@ -116,6 +136,28 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             },
         });
     }
+    async extendCompanySubscription(id, expiresAt, plan, status = "ACTIVE") {
+        return this.prisma.$transaction(async (tx) => {
+            const company = await tx.company.update({
+                where: { id },
+                data: {
+                    ...(plan ? { subscriptionPlan: plan } : {}),
+                    subscriptionStatus: status,
+                    trialExpiresAt: expiresAt,
+                },
+            });
+            await tx.subscription.create({
+                data: {
+                    companyId: id,
+                    plan: (plan ?? company.subscriptionPlan),
+                    status: status,
+                    amount: 0,
+                    expiresAt,
+                },
+            });
+            return company;
+        });
+    }
     async setCompanyStatus(id, status) {
         return this.prisma.company.update({
             where: { id },
@@ -142,7 +184,11 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             where,
             include: {
                 users: {
-                    where: { deletedAt: null, isActive: true, roleType: { notIn: ["SELLER", "SALES", "DELIVERY"] } },
+                    where: {
+                        deletedAt: null,
+                        isActive: true,
+                        roleType: { notIn: ["SELLER", "SALES", "DELIVERY"] },
+                    },
                     select: { id: true },
                 },
             },
@@ -219,10 +265,166 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
     }
     async updateTariff(id, data) {
         const { id: _id, createdAt, updatedAt, ...updateData } = data;
-        return this.prisma.tariffPlan.update({ where: { id }, data: updateData });
+        return this.prisma.tariffPlan.update({
+            where: { id },
+            data: updateData,
+        });
     }
     async deleteTariff(id) {
         return this.prisma.tariffPlan.delete({ where: { id } });
+    }
+    async exportOverviewToWorkbook() {
+        const [summary, distributors, tariffs] = await Promise.all([
+            this.getOverviewSummary(),
+            this.prisma.company.findMany({
+                where: { deletedAt: null },
+                orderBy: { createdAt: "desc" },
+                select: {
+                    id: true,
+                    name: true,
+                    slug: true,
+                    subscriptionPlan: true,
+                    subscriptionStatus: true,
+                    trialExpiresAt: true,
+                    createdAt: true,
+                },
+                take: 100,
+            }),
+            this.getAllTariffs(),
+        ]);
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = "Supplio";
+        workbook.created = new Date();
+        const summarySheet = workbook.addWorksheet("Overview");
+        summarySheet.columns = [
+            { header: "Metric", key: "metric", width: 28 },
+            { header: "Value", key: "value", width: 18 },
+        ];
+        summarySheet.addRows([
+            { metric: "Total Companies", value: summary.totalCompanies },
+            { metric: "Total Leads", value: summary.totalLeads },
+            { metric: "Open Tickets", value: summary.openTickets },
+            { metric: "Pending Upgrades", value: summary.pendingUpgrades },
+            { metric: "Active Subscriptions", value: summary.activeSubscriptions },
+            { metric: "Collected Payments", value: summary.collectedPayments },
+            { metric: "Subscription Revenue", value: summary.subscriptionRevenue },
+        ]);
+        const distributorsSheet = workbook.addWorksheet("Distributors");
+        distributorsSheet.columns = [
+            { header: "Name", key: "name", width: 30 },
+            { header: "Slug", key: "slug", width: 20 },
+            { header: "Plan", key: "plan", width: 14 },
+            { header: "Status", key: "status", width: 14 },
+            { header: "Expires At", key: "expiresAt", width: 22 },
+            { header: "Created At", key: "createdAt", width: 22 },
+        ];
+        distributorsSheet.addRows(distributors.map((company) => ({
+            name: company.name,
+            slug: company.slug,
+            plan: company.subscriptionPlan,
+            status: company.subscriptionStatus,
+            expiresAt: company.trialExpiresAt?.toISOString?.() ?? "",
+            createdAt: company.createdAt.toISOString(),
+        })));
+        const tariffsSheet = workbook.addWorksheet("Tariffs");
+        tariffsSheet.columns = [
+            { header: "Plan", key: "plan", width: 14 },
+            { header: "Name", key: "name", width: 24 },
+            { header: "Price Monthly", key: "priceMonthly", width: 16 },
+            { header: "Price Yearly", key: "priceYearly", width: 16 },
+            { header: "Trial Days", key: "trialDays", width: 14 },
+            { header: "Max Branches", key: "maxBranches", width: 14 },
+            { header: "Max Users", key: "maxUsers", width: 12 },
+            { header: "Max Dealers", key: "maxDealers", width: 14 },
+            { header: "Max Products", key: "maxProducts", width: 14 },
+            { header: "Bots", key: "maxCustomBots", width: 10 },
+        ];
+        tariffsSheet.addRows(tariffs.map((tariff) => ({
+            plan: tariff.planKey,
+            name: tariff.nameUz || tariff.nameEn || tariff.planKey,
+            priceMonthly: tariff.priceMonthly,
+            priceYearly: tariff.priceYearly,
+            trialDays: tariff.trialDays,
+            maxBranches: tariff.maxBranches,
+            maxUsers: tariff.maxUsers,
+            maxDealers: tariff.maxDealers,
+            maxProducts: tariff.maxProducts,
+            maxCustomBots: tariff.maxCustomBots,
+        })));
+        return workbook;
+    }
+    async exportDistributorAnalyticsToWorkbook(companyId, period = "30d") {
+        const company = await this.prisma.company.findUnique({
+            where: { id: companyId },
+            select: { id: true, name: true, slug: true },
+        });
+        if (!company)
+            throw new common_1.NotFoundException("Company not found");
+        const [dashboard, topDealers, topProducts, debtReport] = await Promise.all([
+            this.analyticsService.getDashboardStats(companyId, period),
+            this.analyticsService.getTopDealers(companyId, 10),
+            this.analyticsService.getTopProducts(companyId, 10),
+            this.analyticsService.getDebtReport(companyId),
+        ]);
+        const workbook = new ExcelJS.Workbook();
+        workbook.creator = "Supplio";
+        workbook.created = new Date();
+        const summarySheet = workbook.addWorksheet("Summary");
+        summarySheet.columns = [
+            { header: "Metric", key: "metric", width: 28 },
+            { header: "Value", key: "value", width: 20 },
+        ];
+        summarySheet.addRows([
+            { metric: "Company", value: company.name },
+            { metric: "Slug", value: company.slug },
+            { metric: "Period", value: dashboard.period },
+            { metric: "Revenue", value: dashboard.stats.revenue },
+            { metric: "Profit", value: dashboard.stats.profit },
+            { metric: "Gross Profit", value: dashboard.stats.grossProfit },
+            { metric: "Total Expenses", value: dashboard.stats.totalExpenses },
+            { metric: "Active Dealers", value: dashboard.stats.activeDealers },
+            { metric: "Debt", value: dashboard.stats.debt },
+            { metric: "Collected", value: dashboard.stats.collected },
+            { metric: "Products", value: dashboard.stats.products },
+            { metric: "Period Revenue", value: dashboard.stats.periodRevenue },
+            { metric: "Period Profit", value: dashboard.stats.periodProfit },
+            { metric: "Period Orders", value: dashboard.stats.periodOrders },
+            { metric: "Total Orders", value: dashboard.stats.totalOrders },
+        ]);
+        const chartSheet = workbook.addWorksheet("Chart");
+        chartSheet.columns = [
+            { header: "Date", key: "date", width: 18 },
+            { header: "Revenue", key: "revenue", width: 16 },
+            { header: "Profit", key: "profit", width: 16 },
+            { header: "Orders", key: "orders", width: 12 },
+        ];
+        chartSheet.addRows(dashboard.chart);
+        const dealersSheet = workbook.addWorksheet("Top Dealers");
+        dealersSheet.columns = [
+            { header: "Name", key: "name", width: 28 },
+            { header: "Orders", key: "totalOrders", width: 12 },
+            { header: "Amount", key: "totalAmount", width: 16 },
+            { header: "Debt", key: "currentDebt", width: 16 },
+            { header: "Credit Limit", key: "creditLimit", width: 16 },
+        ];
+        dealersSheet.addRows(topDealers);
+        const productsSheet = workbook.addWorksheet("Top Products");
+        productsSheet.columns = [
+            { header: "Name", key: "name", width: 28 },
+            { header: "Qty", key: "qty", width: 12 },
+            { header: "Revenue", key: "revenue", width: 16 },
+        ];
+        productsSheet.addRows(topProducts);
+        const debtsSheet = workbook.addWorksheet("Debts");
+        debtsSheet.columns = [
+            { header: "Name", key: "name", width: 28 },
+            { header: "Phone", key: "phone", width: 18 },
+            { header: "Current Debt", key: "currentDebt", width: 16 },
+            { header: "Credit Limit", key: "creditLimit", width: 16 },
+            { header: "Utilization %", key: "utilizationPercent", width: 14 },
+        ];
+        debtsSheet.addRows(debtReport.dealers);
+        return workbook;
     }
     async getLandingContent() {
         return this.prisma.landingContent.upsert({
@@ -244,7 +446,9 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
     async setFeature(data) {
         const { companyId, featureKey, isEnabled } = data;
         return this.prisma.featureFlag.upsert({
-            where: { featureKey_companyId: { featureKey, companyId: companyId ?? null } },
+            where: {
+                featureKey_companyId: { featureKey, companyId: companyId ?? null },
+            },
             update: { isEnabled },
             create: { featureKey, isEnabled, companyId: companyId ?? null },
         });
@@ -259,8 +463,12 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
         const [totalCompanies, totalLeads, openTickets, pendingUpgrades, collectedPayments, subscriptionRevenue, activeSubscriptions,] = await Promise.all([
             this.prisma.company.count({ where: { deletedAt: null } }),
             this.prisma.lead.count({ where: { deletedAt: null } }),
-            this.prisma.supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
-            this.prisma.upgradeRequest.count({ where: { status: "PENDING" } }),
+            this.prisma.supportTicket.count({
+                where: { status: { in: ["OPEN", "IN_PROGRESS"] } },
+            }),
+            this.prisma.upgradeRequest.count({
+                where: { status: "PENDING" },
+            }),
             this.prisma.payment.aggregate({ _sum: { amount: true } }),
             this.prisma.subscription.aggregate({ _sum: { amount: true } }),
             this.prisma.subscription.count({ where: { status: "ACTIVE" } }),
@@ -288,8 +496,19 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
         const company = await this.prisma.company.findUnique({
             where: { id: companyId },
             include: {
-                _count: { select: { dealers: true, users: true, branches: true, products: true } },
-                users: { where: { deletedAt: null, roleType: "OWNER" }, select: { phone: true, fullName: true }, take: 1 },
+                _count: {
+                    select: {
+                        dealers: true,
+                        users: true,
+                        branches: true,
+                        products: true,
+                    },
+                },
+                users: {
+                    where: { deletedAt: null, roleType: "OWNER" },
+                    select: { phone: true, fullName: true },
+                    take: 1,
+                },
             },
         });
         if (!company)
@@ -318,7 +537,16 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
     async getUpgradeRequests() {
         return this.prisma.upgradeRequest.findMany({
             orderBy: { createdAt: "desc" },
-            include: { company: { select: { name: true, slug: true, subscriptionPlan: true, subscriptionStatus: true } } },
+            include: {
+                company: {
+                    select: {
+                        name: true,
+                        slug: true,
+                        subscriptionPlan: true,
+                        subscriptionStatus: true,
+                    },
+                },
+            },
         });
     }
     async updateUpgradeRequest(id, data) {
@@ -477,7 +705,11 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             where,
             include: {
                 users: {
-                    where: { deletedAt: null, isActive: true, roleType: { notIn: ["SELLER", "SALES", "DELIVERY"] } },
+                    where: {
+                        deletedAt: null,
+                        isActive: true,
+                        roleType: { notIn: ["SELLER", "SALES", "DELIVERY"] },
+                    },
                     select: { id: true },
                 },
             },
@@ -496,7 +728,9 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
         }
         if (notifications.length === 0)
             return { count: 0 };
-        const result = await this.prisma.notification.createMany({ data: notifications });
+        const result = await this.prisma.notification.createMany({
+            data: notifications,
+        });
         return { count: result.count, companies: companies.length };
     }
     async runBillingReminders() {
@@ -524,7 +758,8 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
                 const plural = days > 1 ? "s" : "";
                 for (const company of companies) {
                     for (const user of company.users) {
-                        await this.prisma.notification.create({
+                        await this.prisma.notification
+                            .create({
                             data: {
                                 companyId: company.id,
                                 receiverUserId: user.id,
@@ -532,7 +767,8 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
                                 message: `Sizning Supplio obunangiz ${days} kun${plural} ichida tugaydi. Xizmatdan foydalanishni davom ettirish uchun obunani yangilang.`,
                                 type: "WARNING",
                             },
-                        }).catch(() => { });
+                        })
+                            .catch(() => { });
                     }
                 }
             }
@@ -553,6 +789,7 @@ __decorate([
 ], SuperAdminService.prototype, "runBillingReminders", null);
 exports.SuperAdminService = SuperAdminService = SuperAdminService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        analytics_service_1.AnalyticsService])
 ], SuperAdminService);
 //# sourceMappingURL=super-admin.service.js.map

@@ -90,6 +90,9 @@ let SuperAdminController = class SuperAdminController {
     async setCompanyPlan(id, body) {
         return this.superAdminService.setCompanyPlan(id, body.plan, body.status);
     }
+    async extendDistributorSubscription(id, body) {
+        return this.superAdminService.extendCompanySubscription(id, new Date(body.expiresAt), body.plan, body.status || "ACTIVE");
+    }
     async setCompanyStatus(id, body) {
         return this.superAdminService.setCompanyStatus(id, body.status);
     }
@@ -118,6 +121,32 @@ let SuperAdminController = class SuperAdminController {
     }
     async createDistributor(body) {
         return this.superAdminService.createDistributor(body);
+    }
+    async exportOverviewExcel(res) {
+        const workbook = await this.superAdminService.exportOverviewToWorkbook();
+        const buffer = await workbook.xlsx.writeBuffer();
+        const fileName = `SUPPLIO_OVERVIEW_${new Date().toISOString().split("T")[0]}.xlsx`;
+        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+        return new common_1.StreamableFile(Buffer.from(buffer));
+    }
+    async exportDistributorExcel(id, period, res) {
+        const company = await this.superAdminService.getCompanyById(id);
+        const workbook = await this.superAdminService.exportDistributorAnalyticsToWorkbook(id, period || "30d");
+        const buffer = await workbook.xlsx.writeBuffer();
+        const safeSlug = company.slug.replace(/[^a-zA-Z0-9_.-]/g, "_");
+        const fileName = `SUPPLIO_${safeSlug.toUpperCase()}_${new Date().toISOString().split("T")[0]}.xlsx`;
+        res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+        return new common_1.StreamableFile(Buffer.from(buffer));
+    }
+    async exportDistributorSql(id, res) {
+        const company = await this.superAdminService.getCompanyById(id);
+        const filePath = await this.backupService.dumpCompanyDatabase(id, company.slug);
+        const fileName = filePath.split(/[/\\]/).pop() || `${company.slug}.sql`;
+        res.setHeader("Content-Type", "application/sql");
+        res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+        return new common_1.StreamableFile((0, fs_1.createReadStream)(filePath));
     }
     async resetDistributorOwnerPassword(id, body) {
         return this.superAdminService.resetDistributorOwnerPassword(id, body.password);
@@ -321,6 +350,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "setCompanyPlan", null);
 __decorate([
+    (0, common_1.Patch)("distributors/:id/subscription"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "extendDistributorSubscription", null);
+__decorate([
     (0, common_1.Patch)("company/:id/status"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
     __param(0, (0, common_1.Param)("id")),
@@ -389,6 +427,33 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "createDistributor", null);
+__decorate([
+    (0, common_1.Get)("overview/export"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "exportOverviewExcel", null);
+__decorate([
+    (0, common_1.Get)("distributors/:id/export"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Query)("period")),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "exportDistributorExcel", null);
+__decorate([
+    (0, common_1.Get)("distributors/:id/export-sql"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "exportDistributorSql", null);
 __decorate([
     (0, common_1.Patch)("distributors/:id/owner-password"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),

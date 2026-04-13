@@ -11,13 +11,14 @@ const common_1 = require("@nestjs/common");
 const analytics_service_1 = require("./analytics.service");
 const analytics_controller_1 = require("./analytics.controller");
 const prisma_module_1 = require("../prisma/prisma.module");
+const plan_limits_service_1 = require("../common/services/plan-limits.service");
 let AnalyticsModule = class AnalyticsModule {
 };
 exports.AnalyticsModule = AnalyticsModule;
 exports.AnalyticsModule = AnalyticsModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule],
-        providers: [analytics_service_1.AnalyticsService],
+        providers: [analytics_service_1.AnalyticsService, plan_limits_service_1.PlanLimitsService],
         controllers: [analytics_controller_1.AnalyticsController],
     })
 ], AnalyticsModule);

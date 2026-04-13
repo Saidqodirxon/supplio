@@ -62,25 +62,25 @@ export declare class CompanyService {
         daysLeft: number;
         history: {
             createdAt: Date;
-            plan: import(".prisma/client").$Enums.SubscriptionPlan;
             status: import(".prisma/client").$Enums.SubscriptionStatus;
             amount: number;
+            plan: import(".prisma/client").$Enums.SubscriptionPlan;
             expiresAt: Date;
         }[];
     }>;
     getUsers(companyId: string): Promise<{
         id: string;
         createdAt: Date;
-        branchId: string;
         phone: string;
         fullName: string;
         roleType: import(".prisma/client").$Enums.RoleType;
-        customRoleId: string;
         customRole: {
             id: string;
             name: string;
             permissions: import("@prisma/client/runtime/library").JsonValue;
         };
+        branchId: string;
+        customRoleId: string;
     }[]>;
     createStaff(companyId: string, data: {
         phone: string;
@@ -92,16 +92,16 @@ export declare class CompanyService {
     }): Promise<{
         id: string;
         createdAt: Date;
-        branchId: string;
         phone: string;
         fullName: string;
         roleType: import(".prisma/client").$Enums.RoleType;
-        customRoleId: string;
         customRole: {
             id: string;
             name: string;
             permissions: import("@prisma/client/runtime/library").JsonValue;
         };
+        branchId: string;
+        customRoleId: string;
     }>;
     deactivateStaff(companyId: string, userId: string): Promise<{
         id: string;
@@ -109,16 +109,16 @@ export declare class CompanyService {
         updatedAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
-        companyId: string;
-        branchId: string | null;
         phone: string;
+        companyId: string;
         passwordHash: string;
         fullName: string | null;
         photoUrl: string | null;
         roleType: import(".prisma/client").$Enums.RoleType;
-        customRoleId: string | null;
         isActive: boolean;
         language: string;
+        branchId: string | null;
+        customRoleId: string | null;
     }>;
     getCustomRoles(companyId: string): Promise<({
         _count: {
@@ -190,18 +190,18 @@ export declare class CompanyService {
             updatedAt: Date;
             deletedAt: Date | null;
             deletedBy: string | null;
+            address: string | null;
+            phone: string;
             companyId: string;
             branchId: string;
-            phone: string;
-            address: string | null;
             creditLimit: number;
             currentDebt: number;
-            telegramChatId: string | null;
             isApproved: boolean;
+            cashbackBalance: number;
+            telegramChatId: string | null;
             approvedAt: Date | null;
             approvedBy: string | null;
             isBlocked: boolean;
-            cashbackBalance: number;
         }[];
         products: {
             id: string;
@@ -237,13 +237,13 @@ export declare class CompanyService {
             deletedAt: Date | null;
             deletedBy: string | null;
             companyId: string;
-            status: import(".prisma/client").$Enums.OrderStatus;
             branchId: string;
-            dealerId: string;
             totalAmount: number;
             totalCost: number;
+            status: import(".prisma/client").$Enums.OrderStatus;
             items: import("@prisma/client/runtime/library").JsonValue;
             note: string | null;
+            dealerId: string;
         })[];
         payments: {
             id: string;
@@ -251,12 +251,12 @@ export declare class CompanyService {
             deletedAt: Date | null;
             deletedBy: string | null;
             companyId: string;
-            amount: number;
             branchId: string | null;
-            dealerId: string;
             note: string | null;
-            method: string;
+            dealerId: string;
+            amount: number;
             reference: string | null;
+            method: string;
         }[];
         expenses: {
             id: string;
@@ -264,10 +264,10 @@ export declare class CompanyService {
             deletedAt: Date | null;
             deletedBy: string | null;
             companyId: string;
-            amount: number;
             branchId: string | null;
             description: string | null;
             category: string;
+            amount: number;
         }[];
         branches: {
             id: string;
@@ -276,9 +276,9 @@ export declare class CompanyService {
             updatedAt: Date;
             deletedAt: Date | null;
             deletedBy: string | null;
-            companyId: string;
-            phone: string | null;
             address: string | null;
+            phone: string | null;
+            companyId: string;
         }[];
         staff: {
             id: string;

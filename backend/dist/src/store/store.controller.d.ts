@@ -1,11 +1,15 @@
 import { PrismaService } from "../prisma/prisma.service";
+import { PlanLimitsService } from "../common/services/plan-limits.service";
 export declare class StoreController {
     private prisma;
+    private planLimits;
     private readonly logger;
-    constructor(prisma: PrismaService);
+    constructor(prisma: PrismaService, planLimits: PlanLimitsService);
+    private isCompanyAccessBlocked;
     getCompanyInfo(slug: string): Promise<{
-        name: string;
+        id: string;
         slug: string;
+        name: string;
         logo: string;
         website: string;
         instagram: string;
@@ -19,28 +23,21 @@ export declare class StoreController {
     }[]>;
     getProducts(slug: string, categoryId?: string, search?: string): Promise<{
         id: string;
-        description: string;
         name: string;
-        category: {
-            id: string;
-            name: string;
-        };
         sku: string;
+        description: string;
         price: number;
         stock: number;
         unit: string;
         categoryId: string;
         imageUrl: string;
+        category: {
+            id: string;
+            name: string;
+        };
     }[]>;
-    identifyDealer(slug: string, phone: string): Promise<{
-        id: string;
-        name: string;
-        phone: string;
-        branchId: string;
-        creditLimit: number;
-        currentDebt: number;
-    }>;
-    placeOrder(slug: string, body: {
+    identifyDealer(slug: string, phone: string, telegramUserId?: string, name?: string, region?: string, district?: string, contactPhone?: string, channel?: string): Promise<any>;
+    placeOrder(slug: string, channel: string | undefined, body: {
         dealerId: string;
         items: {
             productId: string;
@@ -48,11 +45,11 @@ export declare class StoreController {
         }[];
     }): Promise<{
         id: string;
-        companyId: string;
         createdAt: Date;
-        deletedAt: Date | null;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;

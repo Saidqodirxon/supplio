@@ -17,26 +17,36 @@ const common_1 = require("@nestjs/common");
 const notifications_service_1 = require("./notifications.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const tenant_guard_1 = require("../common/middleware/tenant.guard");
+const plan_limits_service_1 = require("../common/services/plan-limits.service");
 let NotificationsController = class NotificationsController {
-    constructor(notifService) {
+    constructor(notifService, planLimits) {
         this.notifService = notifService;
+        this.planLimits = planLimits;
+    }
+    async ensureNotificationsAllowed(companyId) {
+        await this.planLimits.checkFeatureAllowed(companyId, "allowNotifications");
     }
     async getMyNotifications(req, page, limit) {
+        await this.ensureNotificationsAllowed(req.companyId);
         return this.notifService.getUserNotifications(req.user.id, req.companyId, page ? parseInt(page, 10) : 1, limit ? parseInt(limit, 10) : 20);
     }
     async getUnreadCount(req) {
+        await this.ensureNotificationsAllowed(req.companyId);
         const count = await this.notifService.getUnreadCount(req.user.id, req.companyId);
         return { count };
     }
     async markAsRead(id, req) {
+        await this.ensureNotificationsAllowed(req.companyId);
         await this.notifService.markAsRead(id, req.user.id);
         return { success: true };
     }
     async markAllAsRead(req) {
+        await this.ensureNotificationsAllowed(req.companyId);
         await this.notifService.markAllAsRead(req.user.id, req.companyId);
         return { success: true };
     }
     async createNotification(req, body) {
+        await this.ensureNotificationsAllowed(req.companyId);
         if (body.receiverDealerId) {
             return this.notifService.createForDealer({
                 companyId: req.companyId,
@@ -56,6 +66,7 @@ let NotificationsController = class NotificationsController {
         });
     }
     async sendToUser(req, body) {
+        await this.ensureNotificationsAllowed(req.companyId);
         return this.notifService.createForUser({
             companyId: req.companyId,
             senderId: req.user.id,
@@ -66,6 +77,7 @@ let NotificationsController = class NotificationsController {
         });
     }
     async broadcast(req, body) {
+        await this.ensureNotificationsAllowed(req.companyId);
         return this.notifService.broadcastToCompany({
             companyId: req.companyId,
             senderId: req.user.id,
@@ -75,18 +87,23 @@ let NotificationsController = class NotificationsController {
         });
     }
     async getTemplates(req) {
+        await this.ensureNotificationsAllowed(req.companyId);
         return this.notifService.getTemplates(req.companyId);
     }
     async createTemplate(req, body) {
+        await this.ensureNotificationsAllowed(req.companyId);
         return this.notifService.createTemplate(req.companyId, body);
     }
     async updateTemplate(req, id, body) {
+        await this.ensureNotificationsAllowed(req.companyId);
         return this.notifService.updateTemplate(req.companyId, id, body);
     }
     async deleteTemplate(req, id) {
+        await this.ensureNotificationsAllowed(req.companyId);
         return this.notifService.deleteTemplate(req.companyId, id);
     }
     async getTemplateLogs(req, templateId) {
+        await this.ensureNotificationsAllowed(req.companyId);
         return this.notifService.getTemplateLogs(req.companyId, templateId);
     }
 };
@@ -189,6 +206,7 @@ __decorate([
 exports.NotificationsController = NotificationsController = __decorate([
     (0, common_1.Controller)("notifications"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, tenant_guard_1.TenantGuard),
-    __metadata("design:paramtypes", [notifications_service_1.NotificationService])
+    __metadata("design:paramtypes", [notifications_service_1.NotificationService,
+        plan_limits_service_1.PlanLimitsService])
 ], NotificationsController);
 //# sourceMappingURL=notifications.controller.js.map

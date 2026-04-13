@@ -21,10 +21,10 @@ export declare class DealersController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        branchId: string;
-        phone: string;
         updatedAt: Date;
         deletedBy: string | null;
+        branchId: string;
+        phone: string;
         address: string | null;
         creditLimit: number;
         currentDebt: number;
@@ -46,10 +46,10 @@ export declare class DealersController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        branchId: string;
-        phone: string;
         updatedAt: Date;
         deletedBy: string | null;
+        branchId: string;
+        phone: string;
         address: string | null;
         creditLimit: number;
         telegramChatId: string | null;
@@ -69,10 +69,10 @@ export declare class DealersController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        branchId: string;
-        phone: string;
         updatedAt: Date;
         deletedBy: string | null;
+        branchId: string;
+        phone: string;
         address: string | null;
         creditLimit: number;
         currentDebt: number;
@@ -93,10 +93,10 @@ export declare class DealersController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        branchId: string;
-        phone: string;
         updatedAt: Date;
         deletedBy: string | null;
+        branchId: string;
+        phone: string;
         address: string | null;
         creditLimit: number;
         currentDebt: number;
@@ -113,10 +113,10 @@ export declare class DealersController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        branchId: string;
-        phone: string;
         updatedAt: Date;
         deletedBy: string | null;
+        branchId: string;
+        phone: string;
         address: string | null;
         creditLimit: number;
         currentDebt: number;
@@ -127,16 +127,18 @@ export declare class DealersController {
         isBlocked: boolean;
         cashbackBalance: number;
     }>;
-    approve(req: AuthenticatedRequest, id: string): Promise<{
+    approve(req: AuthenticatedRequest, id: string, body: {
+        creditLimit?: number;
+    }): Promise<{
         id: string;
         companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        branchId: string;
-        phone: string;
         updatedAt: Date;
         deletedBy: string | null;
+        branchId: string;
+        phone: string;
         address: string | null;
         creditLimit: number;
         currentDebt: number;
@@ -156,10 +158,10 @@ export declare class DealersController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        branchId: string;
-        phone: string;
         updatedAt: Date;
         deletedBy: string | null;
+        branchId: string;
+        phone: string;
         address: string | null;
         creditLimit: number;
         currentDebt: number;
@@ -176,10 +178,10 @@ export declare class DealersController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
-        branchId: string;
-        phone: string;
         updatedAt: Date;
         deletedBy: string | null;
+        branchId: string;
+        phone: string;
         address: string | null;
         creditLimit: number;
         currentDebt: number;

@@ -11,10 +11,10 @@ export declare class PaymentsService {
         branchId?: string;
     }): Promise<{
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
+        companyId: string;
         branchId: string | null;
         note: string | null;
         dealerId: string;
@@ -42,10 +42,10 @@ export declare class PaymentsService {
         };
     } & {
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
+        companyId: string;
         branchId: string | null;
         note: string | null;
         dealerId: string;

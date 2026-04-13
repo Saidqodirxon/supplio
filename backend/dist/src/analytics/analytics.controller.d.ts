@@ -1,5 +1,6 @@
 import { AnalyticsService } from "./analytics.service";
 import { Request } from "express";
+import { PlanLimitsService } from "../common/services/plan-limits.service";
 interface AuthenticatedRequest extends Request {
     user: {
         id: string;
@@ -11,7 +12,9 @@ interface AuthenticatedRequest extends Request {
 }
 export declare class AnalyticsController {
     private readonly analyticsService;
-    constructor(analyticsService: AnalyticsService);
+    private readonly planLimits;
+    constructor(analyticsService: AnalyticsService, planLimits: PlanLimitsService);
+    private ensureAnalyticsAllowed;
     getDashboardStats(req: AuthenticatedRequest, period?: string): Promise<{
         stats: {
             revenue: number;

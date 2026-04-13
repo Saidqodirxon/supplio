@@ -93,4 +93,27 @@ export declare class BotsController {
         sent: number;
         failed: number;
     }>;
+    reloadBots(req: any): Promise<{
+        reloaded: number;
+    }>;
+    getAllBotsAdmin(): Promise<{
+        status: "connected" | "stopped" | "not_found";
+        company: {
+            id: string;
+            name: string;
+            slug: string;
+        };
+        id: string;
+        companyId: string;
+        token: string;
+        username: string | null;
+        isActive: boolean;
+        hasWebApp: boolean;
+        watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
+        webhookUrl: string | null;
+    }[]>;
 }

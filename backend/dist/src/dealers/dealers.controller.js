@@ -40,8 +40,8 @@ let DealersController = class DealersController {
     async remove(req, id) {
         return this.dealersService.remove(id, req.companyId, req.user.id);
     }
-    async approve(req, id) {
-        const result = await this.dealersService.approveDealer(id, req.companyId, req.user.id);
+    async approve(req, id, body) {
+        const result = await this.dealersService.approveDealer(id, req.companyId, req.user.id, body?.creditLimit);
         this.telegramService.notifyDealerApprovalResult(req.companyId, id, true).catch(() => { });
         return result;
     }
@@ -107,8 +107,9 @@ __decorate([
     (0, roles_decorator_1.Roles)("SUPER_ADMIN", "OWNER", "MANAGER"),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)("id")),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [Object, String, Object]),
     __metadata("design:returntype", Promise)
 ], DealersController.prototype, "approve", null);
 __decorate([

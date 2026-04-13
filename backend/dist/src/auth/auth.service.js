@@ -26,8 +26,23 @@ let AuthService = AuthService_1 = class AuthService {
         }
         const user = await this.prisma.user.findUnique({
             where: { phone },
+            include: {
+                company: {
+                    select: { subscriptionStatus: true, trialExpiresAt: true },
+                },
+            },
         });
         if (user && (await bcrypt.compare(pass, user.passwordHash))) {
+            if (!user.isActive) {
+                throw new common_1.UnauthorizedException("User is deactivated");
+            }
+            const companyExpired = !!user.company?.trialExpiresAt &&
+                ["TRIAL", "ACTIVE"].includes(String(user.company?.subscriptionStatus || "")) &&
+                new Date() > new Date(user.company.trialExpiresAt);
+            if (user.roleType !== "SUPER_ADMIN" &&
+                (user.company?.subscriptionStatus === "LOCKED" || companyExpired)) {
+                throw new common_1.UnauthorizedException("Subscription expired or account locked");
+            }
             const payload = {
                 sub: user.id,
                 phone: user.phone,

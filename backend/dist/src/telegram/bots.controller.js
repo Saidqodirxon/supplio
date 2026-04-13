@@ -25,16 +25,19 @@ let BotsController = class BotsController {
     }
     async getBots(req) {
         const bots = await this.telegramService.getBotsForCompany(req.companyId);
-        return bots.map(b => ({ ...b, status: this.telegramService.getBotStatus(b.id) }));
+        return bots.map((b) => ({
+            ...b,
+            status: this.telegramService.getBotStatus(b.id),
+        }));
     }
     async validateToken(body) {
         return this.telegramService.validateToken(body.token);
     }
     async getBotStatus(req) {
         const bots = await this.telegramService.getBotsForCompany(req.companyId);
-        const firstBot = bots.find(b => b.isActive);
+        const firstBot = bots.find((b) => b.isActive);
         if (!firstBot)
-            return { status: 'not_found' };
+            return { status: "not_found" };
         return { status: this.telegramService.getBotStatus(firstBot.id) };
     }
     async createBot(req, body) {
@@ -48,6 +51,12 @@ let BotsController = class BotsController {
     }
     async broadcast(req, body) {
         return this.telegramService.broadcast(req.companyId, body.message);
+    }
+    async reloadBots(req) {
+        return this.telegramService.reloadCompanyBots(req.companyId);
+    }
+    async getAllBotsAdmin() {
+        return this.telegramService.getAllBotsAdmin();
     }
 };
 exports.BotsController = BotsController;
@@ -112,6 +121,21 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], BotsController.prototype, "broadcast", null);
+__decorate([
+    (0, common_1.Post)("bots/reload"),
+    (0, roles_decorator_1.Roles)("OWNER", "SUPER_ADMIN"),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "reloadBots", null);
+__decorate([
+    (0, common_1.Get)("admin/bots"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "getAllBotsAdmin", null);
 exports.BotsController = BotsController = __decorate([
     (0, common_1.Controller)("telegram"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, tenant_guard_1.TenantGuard, roles_guard_1.RolesGuard),

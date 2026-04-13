@@ -26,8 +26,9 @@ let DealersService = class DealersService {
         if (!branch || branch.companyId !== companyId) {
             throw new common_1.ForbiddenException("Branch access denied or not found");
         }
-        const existing = await this.prisma.dealer.findUnique({
-            where: { phone: data.phone },
+        const normalizedPhone = data.phone.replace(/\s+/g, "").replace(/^\+?/, "+");
+        const existing = await this.prisma.dealer.findFirst({
+            where: { companyId, phone: normalizedPhone, deletedAt: null },
         });
         if (existing) {
             throw new common_1.BadRequestException("Dealer with this phone already exists");
@@ -37,7 +38,7 @@ let DealersService = class DealersService {
                 companyId,
                 branchId: data.branchId,
                 name: data.name,
-                phone: data.phone,
+                phone: normalizedPhone,
                 creditLimit: data.creditLimit || 0,
                 address: data.address,
             },
@@ -100,9 +101,10 @@ let DealersService = class DealersService {
             include: {
                 branch: { select: { name: true } },
             },
+            orderBy: { createdAt: 'desc' },
         });
     }
-    async approveDealer(id, companyId, userId) {
+    async approveDealer(id, companyId, userId, creditLimit) {
         const dealer = await this.prisma.dealer.findFirst({
             where: { id, companyId, deletedAt: null },
         });
@@ -115,6 +117,7 @@ let DealersService = class DealersService {
                 isApproved: true,
                 approvedAt: new Date(),
                 approvedBy: userId,
+                ...(creditLimit !== undefined && creditLimit > 0 ? { creditLimit } : {}),
             },
         });
         await this.prisma.dealerApprovalRequest.create({
@@ -136,7 +139,9 @@ let DealersService = class DealersService {
                 ...(data.name && { name: data.name }),
                 ...(data.phone && { phone: data.phone }),
                 ...(data.branchId && { branchId: data.branchId }),
-                ...(data.creditLimit !== undefined && { creditLimit: data.creditLimit }),
+                ...(data.creditLimit !== undefined && {
+                    creditLimit: data.creditLimit,
+                }),
                 ...(data.address !== undefined && { address: data.address }),
             },
             include: { branch: { select: { name: true } } },

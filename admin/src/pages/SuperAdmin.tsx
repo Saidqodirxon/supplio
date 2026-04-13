@@ -35,6 +35,10 @@ import {
   Download,
   Eye,
   Image as ImageIcon,
+  Bot,
+  CheckCircle2,
+  XCircle,
+  Circle,
 } from "lucide-react";
 import clsx from "clsx";
 import { useScrollLock } from "../utils/useScrollLock";
@@ -77,7 +81,8 @@ type TabId =
   | "distributors"
   | "notify"
   | "upgrades"
-  | "support";
+  | "support"
+  | "bots";
 
 const validTabs: TabId[] = [
   "overview",
@@ -93,6 +98,7 @@ const validTabs: TabId[] = [
   "distributors",
   "notify",
   "upgrades",
+  "bots",
 ];
 
 const LEAD_STATUS_COLORS: Record<string, string> = {
@@ -441,6 +447,18 @@ export default function SuperAdmin() {
     name: string;
   } | null>(null);
   const [resetPasswordValue, setResetPasswordValue] = useState("");
+
+  const [adminBots, setAdminBots] = useState<
+    Array<{
+      id: string;
+      botName: string | null;
+      username: string | null;
+      isActive: boolean;
+      status: string;
+      createdAt: string;
+      company: { id: string; name: string; slug: string };
+    }>
+  >([]);
 
   const [newsLangTab, setNewsLangTab] = useState<
     "Uz" | "En" | "Ru" | "Tr" | "UzCyr"
@@ -813,6 +831,9 @@ export default function SuperAdmin() {
       } else if (activeTab === "upgrades") {
         const res = await api.get("/super/upgrade-requests");
         setUpgradeRequests(Array.isArray(res.data) ? res.data : []);
+      } else if (activeTab === "bots") {
+        const res = await api.get("/telegram/admin/bots");
+        setAdminBots(Array.isArray(res.data) ? res.data : []);
       } else if (activeTab === "tickets") {
         const res = await api.get("/support/all");
         const nextTickets = Array.isArray(res.data) ? res.data : [];
@@ -952,6 +973,19 @@ export default function SuperAdmin() {
           icon: BadgeCheck,
           color: "text-violet-600",
           bg: "bg-violet-50 dark:bg-violet-900/20",
+        },
+        {
+          id: "bots",
+          label:
+            language === "ru"
+              ? "Telegram боты"
+              : language === "en"
+                ? "Telegram Bots"
+                : "Telegram Botlar",
+          icon: Bot,
+          color: "text-sky-600",
+          bg: "bg-sky-50 dark:bg-sky-900/20",
+          badge: adminBots.filter((b) => b.isActive).length || 0,
         },
       ],
     },
@@ -3440,6 +3474,112 @@ export default function SuperAdmin() {
                             </button>
                           </div>
                         )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+              {activeTab === "bots" && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-bold">
+                      {language === "ru"
+                        ? `Всего ботов: ${adminBots.length}`
+                        : language === "en"
+                          ? `Total bots: ${adminBots.length}`
+                          : `Jami botlar: ${adminBots.length}`}
+                    </p>
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await api.get("/telegram/admin/bots");
+                          setAdminBots(Array.isArray(res.data) ? res.data : []);
+                          toast.success("Yangilandi");
+                        } catch {
+                          toast.error("Xato");
+                        }
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-sky-50 dark:bg-sky-900/20 text-sky-600 rounded-xl hover:bg-sky-100 dark:hover:bg-sky-900/40 transition-all"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      {language === "ru"
+                        ? "Обновить"
+                        : language === "en"
+                          ? "Refresh"
+                          : "Yangilash"}
+                    </button>
+                  </div>
+                  {adminBots.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5">
+                      <Bot className="w-12 h-12 text-slate-300 mb-4" />
+                      <p className="text-slate-500 font-bold">
+                        {language === "ru"
+                          ? "Нет подключённых ботов"
+                          : language === "en"
+                            ? "No bots connected"
+                            : "Ulangan bot yo'q"}
+                      </p>
+                    </div>
+                  ) : (
+                    adminBots.map((bot) => (
+                      <div
+                        key={bot.id}
+                        className="bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl p-5 flex items-center gap-4"
+                      >
+                        <div className="w-11 h-11 rounded-2xl bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center text-sky-600 shrink-0">
+                          <Bot className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-black text-sm text-slate-800 dark:text-white truncate">
+                              {bot.botName || bot.username || bot.id}
+                            </span>
+                            {bot.username && (
+                              <span className="text-[10px] font-bold text-slate-400">
+                                @{bot.username}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                            <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">
+                              {bot.company.name}
+                            </span>
+                            <span className="text-slate-300">·</span>
+                            <span className="text-[10px] text-slate-400">
+                              {new Date(bot.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="shrink-0">
+                          {bot.status === "connected" ? (
+                            <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-xl">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              {language === "ru"
+                                ? "Работает"
+                                : language === "en"
+                                  ? "Connected"
+                                  : "Ulangan"}
+                            </span>
+                          ) : bot.status === "stopped" ? (
+                            <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-xl">
+                              <XCircle className="w-3.5 h-3.5" />
+                              {language === "ru"
+                                ? "Остановлен"
+                                : language === "en"
+                                  ? "Stopped"
+                                  : "To'xtatilgan"}
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
+                              <Circle className="w-3.5 h-3.5" />
+                              {language === "ru"
+                                ? "Не найден"
+                                : language === "en"
+                                  ? "Not Found"
+                                  : "Topilmadi"}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     ))
                   )}

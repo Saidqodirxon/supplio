@@ -1,5 +1,6 @@
 import { NotificationService } from "./notifications.service";
 import { Request } from "express";
+import { PlanLimitsService } from "../common/services/plan-limits.service";
 interface AuthenticatedRequest extends Request {
     user: {
         id: string;
@@ -11,7 +12,9 @@ interface AuthenticatedRequest extends Request {
 }
 export declare class NotificationsController {
     private readonly notifService;
-    constructor(notifService: NotificationService);
+    private readonly planLimits;
+    constructor(notifService: NotificationService, planLimits: PlanLimitsService);
+    private ensureNotificationsAllowed;
     getMyNotifications(req: AuthenticatedRequest, page?: string, limit?: string): Promise<{
         notifications: ({
             sender: {
@@ -93,9 +96,9 @@ export declare class NotificationsController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
         message: import("@prisma/client/runtime/library").JsonValue;
         type: string;
-        updatedAt: Date;
     }[]>;
     createTemplate(req: AuthenticatedRequest, body: {
         name: string;
@@ -109,9 +112,9 @@ export declare class NotificationsController {
         createdAt: Date;
         deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
         message: import("@prisma/client/runtime/library").JsonValue;
         type: string;
-        updatedAt: Date;
     }>;
     updateTemplate(req: AuthenticatedRequest, id: string, body: {
         name?: string;
@@ -128,10 +131,10 @@ export declare class NotificationsController {
         id: string;
         companyId: string;
         createdAt: Date;
+        status: string;
         message: string;
         templateId: string | null;
         dealerId: string | null;
-        status: string;
     })[]>;
 }
 export {};

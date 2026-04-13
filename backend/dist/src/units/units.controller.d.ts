@@ -5,10 +5,10 @@ export declare class UnitsController {
     findAll(req: any): Promise<{
         symbol: string;
         id: string;
-        companyId: string | null;
+        name: string;
         createdAt: Date;
         deletedAt: Date | null;
-        name: string;
+        companyId: string | null;
     }[]>;
     create(req: any, body: {
         name: string;
@@ -16,10 +16,10 @@ export declare class UnitsController {
     }): Promise<{
         symbol: string;
         id: string;
-        companyId: string | null;
+        name: string;
         createdAt: Date;
         deletedAt: Date | null;
-        name: string;
+        companyId: string | null;
     }>;
     update(req: any, id: string, body: {
         name?: string;
@@ -27,17 +27,17 @@ export declare class UnitsController {
     }): Promise<{
         symbol: string;
         id: string;
-        companyId: string | null;
+        name: string;
         createdAt: Date;
         deletedAt: Date | null;
-        name: string;
+        companyId: string | null;
     }>;
     remove(req: any, id: string): Promise<{
         symbol: string;
         id: string;
-        companyId: string | null;
+        name: string;
         createdAt: Date;
         deletedAt: Date | null;
-        name: string;
+        companyId: string | null;
     }>;
 }

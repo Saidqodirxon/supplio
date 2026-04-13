@@ -26,9 +26,21 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
     async validate(payload) {
         const user = await this.prisma.user.findUnique({
             where: { id: payload.sub },
+            include: {
+                company: {
+                    select: { subscriptionStatus: true, trialExpiresAt: true },
+                },
+            },
         });
-        if (!user) {
+        if (!user || !user.isActive) {
             throw new common_1.UnauthorizedException();
+        }
+        const companyExpired = !!user.company?.trialExpiresAt &&
+            ["TRIAL", "ACTIVE"].includes(String(user.company?.subscriptionStatus || "")) &&
+            new Date() > new Date(user.company.trialExpiresAt);
+        if (user.roleType !== "SUPER_ADMIN" &&
+            (user.company?.subscriptionStatus === "LOCKED" || companyExpired)) {
+            throw new common_1.UnauthorizedException("Subscription expired or account locked");
         }
         return {
             id: user.id,

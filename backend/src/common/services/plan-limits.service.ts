@@ -25,7 +25,7 @@ const DEFAULT_LIMITS: PlanLimits = {
   maxProducts: 200,
   allowCustomBot: false,
   allowWebStore: true,
-  allowAnalytics: false,
+  allowAnalytics: true,
   allowNotifications: true,
   allowMultiCompany: false,
   allowBulkImport: false,

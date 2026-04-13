@@ -88,4 +88,10 @@ export class BotsController {
   async reloadBots(@Req() req: any) {
     return this.telegramService.reloadCompanyBots(req.companyId);
   }
+
+  @Get("admin/bots")
+  @Roles("SUPER_ADMIN")
+  async getAllBotsAdmin() {
+    return this.telegramService.getAllBotsAdmin();
+  }
 }

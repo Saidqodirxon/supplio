@@ -19,25 +19,37 @@ const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const roles_guard_1 = require("../common/middleware/roles.guard");
 const tenant_guard_1 = require("../common/middleware/tenant.guard");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
+const plan_limits_service_1 = require("../common/services/plan-limits.service");
 let AnalyticsController = class AnalyticsController {
-    constructor(analyticsService) {
+    constructor(analyticsService, planLimits) {
         this.analyticsService = analyticsService;
+        this.planLimits = planLimits;
+    }
+    async ensureAnalyticsAllowed(req) {
+        if (req.user.roleType === "SUPER_ADMIN")
+            return;
+        const companyId = req.companyId || req.user.companyId;
+        await this.planLimits.checkFeatureAllowed(companyId, "allowAnalytics");
     }
     async getDashboardStats(req, period) {
         const companyId = req.companyId || req.user.companyId;
+        await this.ensureAnalyticsAllowed(req);
         const p = (["7d", "30d", "1y", "all"].includes(period ?? "") ? period : "7d");
         return this.analyticsService.getDashboardStats(companyId, p);
     }
     async getTopDealers(req, limit) {
         const companyId = req.companyId || req.user.companyId;
+        await this.ensureAnalyticsAllowed(req);
         return this.analyticsService.getTopDealers(companyId, limit ? Number(limit) : 5);
     }
     async getTopProducts(req, limit) {
         const companyId = req.companyId || req.user.companyId;
+        await this.ensureAnalyticsAllowed(req);
         return this.analyticsService.getTopProducts(companyId, limit ? Number(limit) : 5);
     }
     async getDebtReport(req) {
         const companyId = req.companyId || req.user.companyId;
+        await this.ensureAnalyticsAllowed(req);
         return this.analyticsService.getDebtReport(companyId);
     }
     async getRootStats() {
@@ -90,6 +102,7 @@ __decorate([
 exports.AnalyticsController = AnalyticsController = __decorate([
     (0, common_1.Controller)("analytics"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, tenant_guard_1.TenantGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [analytics_service_1.AnalyticsService])
+    __metadata("design:paramtypes", [analytics_service_1.AnalyticsService,
+        plan_limits_service_1.PlanLimitsService])
 ], AnalyticsController);
 //# sourceMappingURL=analytics.controller.js.map

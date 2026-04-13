@@ -12,6 +12,7 @@ const client_1 = require("@prisma/client");
 let PrismaService = class PrismaService extends client_1.PrismaClient {
     async onModuleInit() {
         await this.$connect();
+        await this._applySchemaPatches();
         this.$use(async (params, next) => {
             const modelsWithSoftDelete = [
                 "Company",
@@ -81,6 +82,21 @@ let PrismaService = class PrismaService extends client_1.PrismaClient {
             }
             return next(params);
         });
+    }
+    async _applySchemaPatches() {
+        const patches = [
+            `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "region" TEXT`,
+            `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "district" TEXT`,
+            `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "contactPhone" TEXT`,
+            `ALTER TABLE "SupportMessage" ADD COLUMN IF NOT EXISTS "imageUrl" TEXT`,
+        ];
+        for (const sql of patches) {
+            try {
+                await this.$executeRawUnsafe(sql);
+            }
+            catch {
+            }
+        }
     }
     async onModuleDestroy() {
         await this.$disconnect();

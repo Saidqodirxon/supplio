@@ -1,5 +1,5 @@
 import { TelegramService } from "./telegram.service";
-import { Update } from "telegraf/typings/core/types/typegram";
+import type { Update } from "telegraf/types";
 export declare class TelegramController {
     private readonly telegramService;
     private readonly logger;

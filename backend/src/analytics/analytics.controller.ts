@@ -20,7 +20,9 @@ export class AnalyticsController {
     private readonly planLimits: PlanLimitsService
   ) {}
 
-  private async ensureAnalyticsAllowed(companyId: string) {
+  private async ensureAnalyticsAllowed(req: AuthenticatedRequest) {
+    if (req.user.roleType === "SUPER_ADMIN") return;
+    const companyId = req.companyId || req.user.companyId;
     await this.planLimits.checkFeatureAllowed(companyId, "allowAnalytics");
   }
 
@@ -31,7 +33,7 @@ export class AnalyticsController {
     @Query("period") period?: string
   ) {
     const companyId = req.companyId || req.user.companyId;
-    await this.ensureAnalyticsAllowed(companyId);
+    await this.ensureAnalyticsAllowed(req);
     const p = (
       ["7d", "30d", "1y", "all"].includes(period ?? "") ? period : "7d"
     ) as any;
@@ -45,7 +47,7 @@ export class AnalyticsController {
     @Query("limit") limit?: string
   ) {
     const companyId = req.companyId || req.user.companyId;
-    await this.ensureAnalyticsAllowed(companyId);
+    await this.ensureAnalyticsAllowed(req);
     return this.analyticsService.getTopDealers(
       companyId,
       limit ? Number(limit) : 5
@@ -59,7 +61,7 @@ export class AnalyticsController {
     @Query("limit") limit?: string
   ) {
     const companyId = req.companyId || req.user.companyId;
-    await this.ensureAnalyticsAllowed(companyId);
+    await this.ensureAnalyticsAllowed(req);
     return this.analyticsService.getTopProducts(
       companyId,
       limit ? Number(limit) : 5
@@ -70,7 +72,7 @@ export class AnalyticsController {
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER", "SALES")
   async getDebtReport(@Req() req: AuthenticatedRequest) {
     const companyId = req.companyId || req.user.companyId;
-    await this.ensureAnalyticsAllowed(companyId);
+    await this.ensureAnalyticsAllowed(req);
     return this.analyticsService.getDebtReport(companyId);
   }
 

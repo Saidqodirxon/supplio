@@ -23,9 +23,13 @@ let TelegramController = TelegramController_1 = class TelegramController {
     }
     async handleWebhook(id, update) {
         this.logger.log(`Received update for bot ID: ${id}`);
-        const bot = this.telegramService.getBot(id);
+        const bot = this.telegramService.getBot(id) ||
+            (await this.telegramService.ensureBotInitialized(id));
         if (bot) {
             await bot.handleUpdate(update);
+        }
+        else {
+            this.logger.warn(`Bot not initialized for webhook id=${id}`);
         }
         return { ok: true };
     }
@@ -40,7 +44,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TelegramController.prototype, "handleWebhook", null);
 exports.TelegramController = TelegramController = TelegramController_1 = __decorate([
-    (0, common_1.Controller)("webhook"),
+    (0, common_1.Controller)(["webhook", "webhook/telegram"]),
     __metadata("design:paramtypes", [telegram_service_1.TelegramService])
 ], TelegramController);
 //# sourceMappingURL=telegram.controller.js.map
