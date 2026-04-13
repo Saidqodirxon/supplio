@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { UserCheck, Phone, Building2, Clock, CheckCircle, XCircle, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
+import { UserCheck, Phone, Building2, Clock, CheckCircle, XCircle, Loader2, RefreshCw, AlertCircle, MapPin, CreditCard } from 'lucide-react';
 import api from '../services/api';
 import { toast } from '../utils/toast';
 import { useAuthStore } from '../store/authStore';
@@ -11,6 +11,9 @@ interface PendingDealer {
   name: string;
   phone: string;
   address?: string;
+  region?: string;
+  district?: string;
+  contactPhone?: string;
   creditLimit: number;
   createdAt: string;
   branch: { name: string };
@@ -32,6 +35,14 @@ const T = {
     creditLimit: 'Credit Limit',
     branch: 'Branch',
     registered: 'Registered',
+    region: 'Region',
+    district: 'District',
+    contactPhone: 'Contact Phone',
+    setCreditLimit: 'Set Credit Limit',
+    creditLimitDesc: 'Set the credit limit for this dealer. They will only be able to purchase up to this amount.',
+    limitPlaceholder: 'e.g. 5 000 000',
+    cancel: 'Cancel',
+    confirm: 'Approve',
   },
   uz: {
     title: 'Diler Tasdiqlari',
@@ -48,6 +59,14 @@ const T = {
     creditLimit: 'Kredit limiti',
     branch: 'Filial',
     registered: 'Ro\'yxatdan o\'tgan',
+    region: 'Viloyat',
+    district: 'Tuman',
+    contactPhone: 'Aloqa raqami',
+    setCreditLimit: 'Kredit limitini belgilang',
+    creditLimitDesc: 'Diler uchun kredit limitini kiriting. U faqat shu miqdorgacha xarid qila oladi.',
+    limitPlaceholder: 'Masalan: 5 000 000',
+    cancel: 'Bekor qilish',
+    confirm: 'Tasdiqlash',
   },
   oz: {
     title: 'Дилер Тасдиқлари',
@@ -64,6 +83,14 @@ const T = {
     creditLimit: 'Кредит лимити',
     branch: 'Филиал',
     registered: 'Рўйхатдан ўтган',
+    region: 'Вилоят',
+    district: 'Туман',
+    contactPhone: 'Алоқа рақами',
+    setCreditLimit: 'Кредит лимитини белгиланг',
+    creditLimitDesc: 'Дилер учун кредит лимитини киритинг.',
+    limitPlaceholder: 'Масалан: 5 000 000',
+    cancel: 'Бекор қилиш',
+    confirm: 'Тасдиқлаш',
   },
   tr: {
     title: 'Bayi Onayları',
@@ -80,6 +107,14 @@ const T = {
     creditLimit: 'Kredi Limiti',
     branch: 'Şube',
     registered: 'Kayıt Tarihi',
+    region: 'Bölge',
+    district: 'İlçe',
+    contactPhone: 'İletişim Telefonu',
+    setCreditLimit: 'Kredi Limiti Belirle',
+    creditLimitDesc: 'Bu bayi için kredi limitini girin.',
+    limitPlaceholder: 'Örn: 5 000 000',
+    cancel: 'İptal',
+    confirm: 'Onayla',
   },
   ru: {
     title: 'Одобрение Дилеров',
@@ -96,6 +131,14 @@ const T = {
     creditLimit: 'Кредитный лимит',
     branch: 'Филиал',
     registered: 'Зарегистрирован',
+    region: 'Область',
+    district: 'Район',
+    contactPhone: 'Контактный телефон',
+    setCreditLimit: 'Установить кредитный лимит',
+    creditLimitDesc: 'Введите кредитный лимит для этого дилера.',
+    limitPlaceholder: 'Напр: 5 000 000',
+    cancel: 'Отмена',
+    confirm: 'Одобрить',
   },
 } as const;
 type Lang = keyof typeof T;
@@ -111,6 +154,10 @@ export default function Approvals() {
   const [actionId, setActionId] = useState<string | null>(null);
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
 
+  // Approval modal state
+  const [approveModal, setApproveModal] = useState<PendingDealer | null>(null);
+  const [creditLimitInput, setCreditLimitInput] = useState('');
+
   const fetchPending = useCallback(async () => {
     setLoading(true);
     try {
@@ -125,11 +172,20 @@ export default function Approvals() {
 
   useEffect(() => { fetchPending(); }, [fetchPending]);
 
-  const approveDealer = async (id: string) => {
+  const openApproveModal = (dealer: PendingDealer) => {
+    setApproveModal(dealer);
+    setCreditLimitInput(dealer.creditLimit > 0 ? String(dealer.creditLimit) : '');
+  };
+
+  const confirmApprove = async () => {
+    if (!approveModal) return;
+    const id = approveModal.id;
+    setApproveModal(null);
     setActionId(id);
     setActionType('approve');
     try {
-      await api.post(`/dealers/${id}/approve`);
+      const limit = parseFloat(creditLimitInput.replace(/\s/g, '')) || 0;
+      await api.post(`/dealers/${id}/approve`, { creditLimit: limit });
       toast.success(t.approved);
       setDealers(prev => prev.filter(d => d.id !== id));
     } catch {
@@ -214,20 +270,29 @@ export default function Approvals() {
                         {t.pending}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 flex-wrap text-sm text-slate-500 dark:text-slate-400">
+                    <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-sm text-slate-500 dark:text-slate-400">
                       <span className="flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5" />
+                        <Phone className="w-3.5 h-3.5 shrink-0" />
                         <span className="font-bold">{dealer.phone}</span>
                       </span>
+                      {dealer.contactPhone && dealer.contactPhone !== dealer.phone && (
+                        <span className="flex items-center gap-1.5">
+                          <Phone className="w-3.5 h-3.5 shrink-0 text-blue-500" />
+                          <span className="font-bold">{dealer.contactPhone}</span>
+                        </span>
+                      )}
                       {dealer.branch && (
                         <span className="flex items-center gap-1.5">
-                          <Building2 className="w-3.5 h-3.5" />
+                          <Building2 className="w-3.5 h-3.5 shrink-0" />
                           <span className="font-bold">{dealer.branch.name}</span>
                         </span>
                       )}
-                      <span className="font-bold">
-                        {t.creditLimit}: {dealer.creditLimit.toLocaleString()} so'm
-                      </span>
+                      {dealer.region && (
+                        <span className="flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 shrink-0" />
+                          <span className="font-bold">{dealer.region}{dealer.district ? `, ${dealer.district}` : ''}</span>
+                        </span>
+                      )}
                       <span className="text-xs text-slate-400">
                         {t.registered}: {new Date(dealer.createdAt).toLocaleDateString()}
                       </span>
@@ -255,7 +320,7 @@ export default function Approvals() {
                     {actionId === dealer.id && actionType === 'reject' ? t.rejecting : t.reject}
                   </button>
                   <button
-                    onClick={() => approveDealer(dealer.id)}
+                    onClick={() => openApproveModal(dealer)}
                     disabled={actionId === dealer.id}
                     className={clsx(
                       'flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-black transition-all active:scale-95',
@@ -274,6 +339,81 @@ export default function Approvals() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Credit Limit Modal */}
+      {approveModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md border border-slate-100 dark:border-white/10 overflow-hidden">
+            <div className="p-6 border-b border-slate-100 dark:border-white/10 bg-emerald-50 dark:bg-emerald-900/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-600 flex items-center justify-center">
+                  <CreditCard className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <h2 className="font-black text-slate-900 dark:text-white">{t.setCreditLimit}</h2>
+                  <p className="text-sm text-emerald-700 dark:text-emerald-400 font-semibold">{approveModal.name}</p>
+                </div>
+              </div>
+            </div>
+            <div className="p-6 space-y-5">
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t.creditLimitDesc}</p>
+
+              {/* Dealer info summary */}
+              <div className="rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10 p-4 space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-slate-400">{t.branch}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{approveModal.branch?.name || '—'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">{t.region}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">
+                    {[approveModal.region, approveModal.district].filter(Boolean).join(', ') || '—'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-400">{t.contactPhone}</span>
+                  <span className="font-bold text-slate-700 dark:text-slate-300">{approveModal.contactPhone || approveModal.phone}</span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">{t.creditLimit} (UZS)</label>
+                <input
+                  type="number"
+                  min={0}
+                  step={100000}
+                  value={creditLimitInput}
+                  onChange={e => setCreditLimitInput(e.target.value)}
+                  placeholder={t.limitPlaceholder}
+                  className="w-full px-4 py-3.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-2xl text-slate-900 dark:text-white font-bold text-lg focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                  autoFocus
+                />
+                {creditLimitInput && (
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                    = {Number(creditLimitInput).toLocaleString()} UZS
+                  </p>
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => setApproveModal(null)}
+                  className="flex-1 py-3.5 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300 rounded-2xl font-black hover:bg-slate-200 dark:hover:bg-white/10 transition-all active:scale-95"
+                >
+                  {t.cancel}
+                </button>
+                <button
+                  onClick={confirmApprove}
+                  className="flex-1 py-3.5 bg-emerald-600 text-white rounded-2xl font-black hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 active:scale-95 flex items-center justify-center gap-2"
+                >
+                  <UserCheck className="w-4 h-4" />
+                  {t.confirm}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

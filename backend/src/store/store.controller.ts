@@ -156,6 +156,9 @@ export class StoreController {
     @Body("phone") phone: string,
     @Body("telegramUserId") telegramUserId?: string,
     @Body("name") name?: string,
+    @Body("region") region?: string,
+    @Body("district") district?: string,
+    @Body("contactPhone") contactPhone?: string,
     @Headers("x-supplio-channel") channel?: string
   ) {
     if (channel !== "telegram-webapp") {
@@ -208,9 +211,7 @@ export class StoreController {
           );
         }
         if (!dealerByChat.isApproved) {
-          throw new ForbiddenException(
-            "So'rovingiz yuborilgan. Distributor tasdiqlashini kuting."
-          );
+          return { pending: true, message: "Ma'lumotlaringiz distributorga yuborildi. Ular siz bilan bog'lanadi." };
         }
 
         const { isApproved, isBlocked, ...dealerPayload } = dealerByChat as any;
@@ -273,9 +274,7 @@ export class StoreController {
             },
           });
         }
-        throw new ForbiddenException(
-          "So'rovingiz yuborilgan. Distributor tasdiqlashini kuting."
-        );
+        return { pending: true, message: "Ma'lumotlaringiz distributorga yuborildi. Ular siz bilan bog'lanadi." };
       }
 
       const { isApproved, isBlocked, ...dealerPayload } = dealer as any;
@@ -302,6 +301,9 @@ export class StoreController {
         phone: cleanPhone.startsWith("+") ? cleanPhone : `+${cleanPhone}`,
         telegramChatId: chatId || null,
         isApproved: false,
+        region: region || null,
+        district: district || null,
+        contactPhone: contactPhone || null,
       },
     });
 
@@ -314,9 +316,7 @@ export class StoreController {
       },
     });
 
-    throw new ForbiddenException(
-      "Ro'yxatdan o'tish so'rovi yuborildi. Distributor tasdiqlashini kuting."
-    );
+    return { pending: true, message: "Ma'lumotlaringiz distributorga yuborildi. Ular siz bilan bog'lanadi." };
   }
 
   /** Place order from public store */

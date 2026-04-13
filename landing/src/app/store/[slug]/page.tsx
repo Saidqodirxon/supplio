@@ -98,6 +98,13 @@ export default function StorePage() {
   const [isTelegramWebApp, setIsTelegramWebApp] = useState(false);
   const [telegramUserId, setTelegramUserId] = useState<string>("");
   const [telegramUserName, setTelegramUserName] = useState<string>("");
+  // Registration form extra fields
+  const [regName, setRegName] = useState("");
+  const [regRegion, setRegRegion] = useState("");
+  const [regDistrict, setRegDistrict] = useState("");
+  const [regContactPhone, setRegContactPhone] = useState("");
+  // Pending (awaiting approval) state
+  const [isPending, setIsPending] = useState(false);
 
   const API = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
   const imgUrl = (url?: string | null) =>
@@ -178,8 +185,12 @@ export default function StorePage() {
         });
         if (res.ok) {
           const data = await res.json();
-          setDealer(data);
-          setIsIdentified(true);
+          if (data.pending) {
+            setIsPending(true);
+          } else {
+            setDealer(data);
+            setIsIdentified(true);
+          }
         }
       } catch {}
     };
@@ -277,21 +288,28 @@ export default function StorePage() {
         body: JSON.stringify({
           phone,
           telegramUserId,
-          name: telegramUserName,
+          name: regName || telegramUserName,
+          region: regRegion || undefined,
+          district: regDistrict || undefined,
+          contactPhone: regContactPhone || undefined,
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        setDealer(data);
-        setIsIdentified(true);
+        if (data.pending) {
+          setIsPending(true);
+        } else {
+          setDealer(data);
+          setIsIdentified(true);
+        }
       } else {
         const err = await res.json();
         setPhoneError(
-          err.message || "Dealer not found. Please check your number."
+          err.message || "Raqam topilmadi. Qayta tekshiring."
         );
       }
     } catch {
-      setPhoneError("Connection error. Please try again.");
+      setPhoneError("Ulanishda xatolik. Qayta urinib ko'ring.");
     }
   };
 
@@ -675,72 +693,150 @@ export default function StorePage() {
         </motion.div>
       )}
 
-      {/* Identification Screen */}
+      {/* Identification / Registration Screen */}
       <AnimatePresence>
         {isTelegramWebApp && !isIdentified && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-60 flex items-center justify-center bg-white p-6"
+            className="fixed inset-0 z-60 flex items-center justify-center bg-white p-6 overflow-y-auto"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="max-w-md w-full text-center space-y-8"
+              className="max-w-md w-full space-y-6 py-8"
             >
-              <div className="space-y-4">
-                <div className="w-20 h-20 bg-linear-to-br from-blue-600 to-blue-700 rounded-3xl flex items-center justify-center text-white mx-auto shadow-2xl shadow-blue-600/30">
-                  <Package className="w-10 h-10" />
+              {isPending ? (
+                /* Pending / waiting state */
+                <div className="text-center space-y-6">
+                  <div className="w-24 h-24 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto">
+                    <CheckCircle className="w-12 h-12 text-emerald-500" />
+                  </div>
+                  <div className="space-y-3">
+                    <h2 className="text-2xl font-bold text-slate-900">
+                      So'rovingiz yuborildi!
+                    </h2>
+                    <p className="text-slate-500 text-sm leading-relaxed">
+                      Ma'lumotlaringiz distributorga yuborildi. Ular siz bilan bog'lanadi va tasdiqlashdan so'ng katalogdan foydalana olasiz.
+                    </p>
+                  </div>
+                  <div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 text-left">
+                    <p className="text-xs font-semibold text-amber-700">
+                      Tasdiqlash jarayoni odatda 1–2 ish kuni davom etadi. Distributor siz bilan bog'lanadi.
+                    </p>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Powered by{" "}
+                    <Link href="/" className="text-blue-600 hover:underline font-semibold">
+                      Supplio
+                    </Link>
+                  </p>
                 </div>
-                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">
-                  Welcome!
-                </h2>
-                <p className="text-slate-500 font-medium text-sm leading-relaxed">
-                  Enter your phone number to access the{" "}
-                  {company?.name || "store"} catalog
-                </p>
-              </div>
-              <form onSubmit={handleIdentify} className="space-y-4">
-                <div>
-                  <input
-                    required
-                    type="tel"
-                    placeholder="+998 90 123 45 67"
-                    value={phone}
-                    onChange={(e) => {
-                      setPhone(e.target.value);
-                      setPhoneError("");
-                    }}
-                    className={`w-full px-6 py-4 bg-slate-50 border rounded-2xl text-lg font-bold text-slate-900 focus:outline-none focus:ring-4 focus:ring-blue-500/10 transition-all text-center ${phoneError ? "border-rose-400 focus:border-rose-400" : "border-slate-200 focus:border-blue-500"}`}
-                  />
-                  {phoneError && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -5 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="mt-2 text-sm text-rose-600 font-medium flex items-center justify-center gap-1.5"
+              ) : (
+                /* Registration form */
+                <>
+                  <div className="text-center space-y-3">
+                    <div className="w-20 h-20 bg-linear-to-br from-blue-600 to-blue-700 rounded-3xl flex items-center justify-center text-white mx-auto shadow-2xl shadow-blue-600/30">
+                      <Package className="w-10 h-10" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-900">
+                      {company?.name || "Katalog"}ga xush kelibsiz!
+                    </h2>
+                    <p className="text-slate-500 text-sm">
+                      Ma'lumotlaringizni to'ldiring, distributor siz bilan bog'lanadi
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleIdentify} className="space-y-3">
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Ism Familiya *</label>
+                      <input
+                        required
+                        type="text"
+                        placeholder="Masalan: Sardor Yusupov"
+                        value={regName}
+                        onChange={e => { setRegName(e.target.value); setPhoneError(""); }}
+                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Viloyat *</label>
+                        <input
+                          required
+                          type="text"
+                          placeholder="Masalan: Toshkent"
+                          value={regRegion}
+                          onChange={e => setRegRegion(e.target.value)}
+                          className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Tuman *</label>
+                        <input
+                          required
+                          type="text"
+                          placeholder="Masalan: Yunusobod"
+                          value={regDistrict}
+                          onChange={e => setRegDistrict(e.target.value)}
+                          className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Telefon raqami *</label>
+                      <input
+                        required
+                        type="tel"
+                        placeholder="+998 90 123 45 67"
+                        value={phone}
+                        onChange={e => { setPhone(e.target.value); setPhoneError(""); }}
+                        className={`w-full px-4 py-3.5 bg-slate-50 border rounded-2xl text-slate-900 font-bold text-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all ${phoneError ? "border-rose-400" : "border-slate-200 focus:border-blue-500"}`}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Aloqa raqami (ixtiyoriy)</label>
+                      <input
+                        type="tel"
+                        placeholder="+998 91 234 56 78"
+                        value={regContactPhone}
+                        onChange={e => setRegContactPhone(e.target.value)}
+                        className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                      />
+                      <p className="text-xs text-slate-400 mt-1">Distributor shu raqamga murojaat qiladi</p>
+                    </div>
+
+                    {phoneError && (
+                      <motion.p
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-sm text-rose-600 font-medium flex items-center gap-1.5"
+                      >
+                        <AlertCircle className="w-4 h-4" />
+                        {phoneError}
+                      </motion.p>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold text-base hover:bg-blue-700 transition-all shadow-xl shadow-blue-600/20 active:scale-95"
                     >
-                      <AlertCircle className="w-4 h-4" />
-                      {phoneError}
-                    </motion.p>
-                  )}
-                </div>
-                <button
-                  type="submit"
-                  className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold text-base hover:bg-blue-600 transition-all shadow-xl shadow-slate-900/10 active:scale-95"
-                >
-                  Access Catalog
-                </button>
-              </form>
-              <p className="text-xs text-slate-400">
-                Powered by{" "}
-                <Link
-                  href="/"
-                  className="text-blue-600 hover:underline font-semibold"
-                >
-                  Supplio
-                </Link>
-              </p>
+                      So'rov yuborish
+                    </button>
+                  </form>
+
+                  <p className="text-xs text-slate-400 text-center">
+                    Powered by{" "}
+                    <Link href="/" className="text-blue-600 hover:underline font-semibold">
+                      Supplio
+                    </Link>
+                  </p>
+                </>
+              )}
             </motion.div>
           </motion.div>
         )}

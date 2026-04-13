@@ -62,8 +62,8 @@ export class DealersController {
 
   @Post(":id/approve")
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER")
-  async approve(@Req() req: AuthenticatedRequest, @Param("id") id: string) {
-    const result = await this.dealersService.approveDealer(id, req.companyId, req.user.id);
+  async approve(@Req() req: AuthenticatedRequest, @Param("id") id: string, @Body() body: { creditLimit?: number }) {
+    const result = await this.dealersService.approveDealer(id, req.companyId, req.user.id, body?.creditLimit);
     this.telegramService.notifyDealerApprovalResult(req.companyId, id, true).catch(() => {});
     return result;
   }

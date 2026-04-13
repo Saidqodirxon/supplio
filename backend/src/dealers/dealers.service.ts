@@ -140,10 +140,11 @@ export class DealersService {
       include: {
         branch: { select: { name: true } },
       },
+      orderBy: { createdAt: 'desc' },
     });
   }
 
-  async approveDealer(id: string, companyId: string, userId: string) {
+  async approveDealer(id: string, companyId: string, userId: string, creditLimit?: number) {
     const dealer = await this.prisma.dealer.findFirst({
       where: { id, companyId, deletedAt: null },
     });
@@ -158,6 +159,7 @@ export class DealersService {
         isApproved: true,
         approvedAt: new Date(),
         approvedBy: userId,
+        ...(creditLimit !== undefined && creditLimit > 0 ? { creditLimit } : {}),
       },
     });
 

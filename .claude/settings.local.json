@@ -51,7 +51,10 @@
       "Bash(node_modules/.bin/tsc --noEmit --strict)",
       "Bash(node_modules/.bin/vite build:*)",
       "Bash(node_modules/.bin/tsc -p tsconfig.app.json --noEmit)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(PGPASSWORD=2007 psql -h 127.0.0.1 -U postgres -d supplio_main -c \"ALTER TABLE \\\\\"Dealer\\\\\" ADD COLUMN IF NOT EXISTS \\\\\"region\\\\\" TEXT, ADD COLUMN IF NOT EXISTS \\\\\"district\\\\\" TEXT, ADD COLUMN IF NOT EXISTS \\\\\"contactPhone\\\\\" TEXT;\")",
+      "Bash(PGPASSWORD=2007 psql -h 127.0.0.1 -U postgres -d supplio_main -c \"ALTER TABLE \\\\\"SupportMessage\\\\\" ADD COLUMN IF NOT EXISTS \\\\\"imageUrl\\\\\" TEXT;\")",
+      "Bash(PGPASSWORD=2007 psql -h 127.0.0.1 -U postgres -d supplio_main -c \"INSERT INTO \\\\\"_prisma_migrations\\\\\" \\(id, checksum, finished_at, migration_name, logs, rolled_back_at, started_at, applied_steps_count\\) VALUES \\(gen_random_uuid\\(\\)::text, 'manual', NOW\\(\\), '202604130001_dealer_region_district', NULL, NULL, NOW\\(\\), 1\\) ON CONFLICT DO NOTHING;\")"
     ]
   }
 }

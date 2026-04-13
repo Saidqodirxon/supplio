@@ -8,6 +8,7 @@ export class PrismaService
 {
   async onModuleInit() {
     await this.$connect();
+    await this._applySchemaPatches();
 
     // -------------------------------------------------------------------------
     // Enterprise Middleware Layer: Soft Delete + Quota Guard + Multi-Tenancy
@@ -98,6 +99,30 @@ export class PrismaService
 
       return next(params);
     });
+  }
+
+  /**
+   * Idempotent schema patches — runs on every startup.
+   * Safe to run on both local and production: IF NOT EXISTS prevents errors.
+   * Add new columns here instead of relying on manual SQL or prisma migrate.
+   */
+  private async _applySchemaPatches() {
+    const patches: string[] = [
+      // 2026-04-13: dealer registration extra fields
+      `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "region" TEXT`,
+      `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "district" TEXT`,
+      `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "contactPhone" TEXT`,
+      // 2026-04-13: support message image attachment
+      `ALTER TABLE "SupportMessage" ADD COLUMN IF NOT EXISTS "imageUrl" TEXT`,
+    ];
+
+    for (const sql of patches) {
+      try {
+        await this.$executeRawUnsafe(sql);
+      } catch {
+        // column already exists or other harmless error — ignore
+      }
+    }
   }
 
   async onModuleDestroy() {

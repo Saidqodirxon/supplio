@@ -202,6 +202,9 @@ model Dealer {
   name             String
   phone            String
   address          String?
+  region           String?
+  district         String?
+  contactPhone     String?
   creditLimit      Float                   @default(0)
   currentDebt      Float                   @default(0)
   telegramChatId   String?
