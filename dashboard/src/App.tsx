@@ -121,7 +121,11 @@ function SuperAdminBlock() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 font-outfit p-6">
       <div className="max-w-md w-full text-center space-y-6">
         <div className="w-20 h-20 rounded-3xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mx-auto">
-          <img src="/logo.png" alt="Supplio" className="w-12 h-12 object-contain" />
+          <img
+            src="/logo.png"
+            alt="Supplio"
+            className="w-12 h-12 object-contain"
+          />
         </div>
         <div className="space-y-2">
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -261,7 +265,9 @@ function App() {
             >
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Dashboard />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="dealers" element={<Dealers />} />
+              <Route path="approvals" element={<Approvals />} />
               <Route path="orders" element={<Orders />} />
               <Route path="payments" element={<Payments />} />
               <Route path="branches" element={<Branches />} />
@@ -271,6 +277,11 @@ function App() {
               <Route path="notifications" element={<Notifications />} />
               <Route path="help-center" element={<HelpCenter />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="subscription" element={<Subscription />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="staff" element={<Staff />} />
+              <Route path="support" element={<SupportTickets />} />
+              <Route path="telegram-bots" element={<TelegramBots />} />
               <Route path="*" element={<NotFound />} />
             </Route>
             {/* Catch-all for demo domain shows demo landing */}

@@ -4,6 +4,11 @@ import { languageSlugs } from "./i18n/translations";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Public store pages must stay reachable without a locale prefix.
+  if (pathname.startsWith("/store")) {
+    return NextResponse.next();
+  }
+
   // 1. Root redirect to /uz (default)
   if (pathname === "/") {
     return NextResponse.redirect(new URL("/uz", request.url));
@@ -13,7 +18,7 @@ export function middleware(request: NextRequest) {
   const pathnameIsMissingValidLocale = Object.keys(languageSlugs).every(
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
   );
- 
+
   // We should also check if it's not a public asset
   const isPublicAsset =
     pathname.startsWith("/_next") ||
@@ -23,8 +28,7 @@ export function middleware(request: NextRequest) {
   if (pathnameIsMissingValidLocale && !isPublicAsset) {
     return NextResponse.redirect(new URL("/uz", request.url));
   }
-} 
-
+}
 
 export const config = {
   matcher: [

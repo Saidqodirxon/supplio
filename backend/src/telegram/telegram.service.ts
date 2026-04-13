@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, Logger, BadRequestException } from "@nestjs/common";
+import {
+  Injectable,
+  OnModuleInit,
+  Logger,
+  BadRequestException,
+} from "@nestjs/common";
 import { Telegraf, Context, Telegram } from "telegraf";
 import { PrismaService } from "../prisma/prisma.service";
 import { TelegramLoggerService } from "./telegram-logger.service";
@@ -14,7 +19,7 @@ export class TelegramService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private loggerBot: TelegramLoggerService,
-    private planLimits: PlanLimitsService,
+    private planLimits: PlanLimitsService
   ) {}
 
   async onModuleInit() {
@@ -39,16 +44,22 @@ export class TelegramService implements OnModuleInit {
 
   private translations = {
     uz: {
-      welcome: "Assalomu alaykum! Botga xush kelibsiz.\nIltimos, telefon raqamingizni yuboring:",
-      sendPhone: "📞 Telefon raqamni yuborish",
-      suspended: "⚠️ Ushbu bot xizmati vaqtinchalik to'xtatilgan. Iltimos, menejer bilan bog'laning.",
-      notRegistered: "❌ Siz diler sifatida ro'yxatdan o'tmagansiz.\nIltimos, kompaniya menejeri bilan bog'laning.",
-      loginSuccess: " muvaffaqiyatli tizimga kirdingiz!",
-      pendingApproval: "⏳ Sizning so'rovingiz ko'rib chiqilmoqda. Distributor tasdiqlashini kuting.",
-      approvalSent: "✅ Ro'yxatdan o'tish so'rovingiz distributorga yuborildi.\n⏳ Tasdiqlash kutilyapti. Xabar beriladi.",
-      accessDenied: "⛔ Sizda bu botdan foydalanish huquqi yo'q.\nDistributor bilan bog'laning.",
+      welcome:
+        "Assalomu alaykum!\nBuyurtma berishni boshlash uchun telefon raqamingizni yuboring.",
+      sendPhone: "📞 Telefon raqamimni yuborish",
+      suspended:
+        "⚠️ Ushbu bot xizmati vaqtinchalik to'xtatilgan. Iltimos, menejer bilan bog'laning.",
+      notRegistered:
+        "❌ Siz diler sifatida ro'yxatdan o'tmagansiz.\nIltimos, kompaniya menejeri bilan bog'laning.",
+      loginSuccess: " botga ulandi.",
+      pendingApproval:
+        "⏳ Sizning so'rovingiz ko'rib chiqilmoqda. Distributor tasdiqlashini kuting.",
+      approvalSent:
+        "✅ Ro'yxatdan o'tish so'rovingiz distributorga yuborildi.\n⏳ Tasdiqlash kutilyapti. Xabar beriladi.",
+      accessDenied:
+        "⛔ Sizda bu botdan foydalanish huquqi yo'q.\nDistributor bilan bog'laning.",
       blocked: "🚫 Hisobingiz bloklangan. Menejer bilan bog'laning.",
-      commands: "\n\n📋 Asosiy menyudan foydalaning.",
+      commands: "\n\n📋 Quyidagi tugmalar orqali ishlang.",
       kbdDebt: "💰 Qarzim",
       kbdPayments: "💸 To'lovlarim",
       kbdProducts: "📦 Mahsulotlar",
@@ -66,9 +77,11 @@ export class TelegramService implements OnModuleInit {
       recentPayments: "💸 *Oxirgi to'lovlar:*",
       startOver: "⚠️ Avval /start bosing va telefon raqamingizni yuboring.",
       helpTitle: "Yordam",
-      helpCommands: "📋 Buyruqlar:\n\n💰 Qarzim — qarzni ko'rish\n💸 To'lovlarim — to'lovlar tarixi\n📦 Mahsulotlar — mahsulotlar ro'yxati\n📋 Buyurtmalarim — buyurtmalar tarixi\n🛒 Savat — savatni ko'rish\n\n📞 Muammo bo'lsa: kompaniya menejeriga murojaat qiling.",
+      helpCommands:
+        "📋 Buyruqlar:\n\n💰 Qarzim — qarzni ko'rish\n💸 To'lovlarim — to'lovlar tarixi\n📦 Mahsulotlar — mahsulotlar ro'yxati\n📋 Buyurtmalarim — buyurtmalar tarixi\n🛒 Savat — savatni ko'rish\n\n📞 Muammo bo'lsa: kompaniya menejeriga murojaat qiling.",
       addToCart: "🛒 Savatga",
-      cartEmpty: "🛒 Savat bo'sh.\nMahsulotlarni 📦 Mahsulotlar tugmasi orqali qo'shing.",
+      cartEmpty:
+        "🛒 Savat bo'sh.\nMahsulotlarni 📦 Mahsulotlar tugmasi orqali qo'shing.",
       cartTitle: "🛒 *Savatingiz:*",
       cartTotal: "💰 *Jami:*",
       cartCheckout: "✅ Buyurtma berish",
@@ -77,20 +90,27 @@ export class TelegramService implements OnModuleInit {
       cartUpdated: "✅ Savatga qo'shildi!",
       cartRemoved: "❌ O'chirildi.",
       checkoutSuccess: "✅ Buyurtma qabul qilindi!\n\n*Buyurtma #",
-      checkoutFail: "❌ Buyurtma berishda xatolik. Iltimos, qayta urinib ko'ring.",
+      checkoutFail:
+        "❌ Buyurtma berishda xatolik. Iltimos, qayta urinib ko'ring.",
       checkoutEmpty: "🛒 Savat bo'sh. Avval mahsulot tanlang.",
       limitExceeded: "⚠️ Kredit limiti yetarli emas! Avval qarzni to'lang.",
       kbdCart: "🛒 Savat",
     },
     oz: {
-      welcome: "Ассалому алайкум! Ботга хуш келибсиз.\nИлтимос, телефон рақамингизни юборинг:",
+      welcome:
+        "Ассалому алайкум! Ботга хуш келибсиз.\nИлтимос, телефон рақамингизни юборинг:",
       sendPhone: "📞 Телефон рақамни юбориш",
-      suspended: "⚠️ Ушбу бот хизмати вақтинча тўхтатилган. Менежер билан боғланинг.",
-      notRegistered: "❌ Сиз дилер сифатида рўйхатдан ўтмагансиз.\nКомпания менежери билан боғланинг.",
+      suspended:
+        "⚠️ Ушбу бот хизмати вақтинча тўхтатилган. Менежер билан боғланинг.",
+      notRegistered:
+        "❌ Сиз дилер сифатида рўйхатдан ўтмагансиз.\nКомпания менежери билан боғланинг.",
       loginSuccess: " муваффақиятли тизимга кирдингиз!",
-      pendingApproval: "⏳ Сизнинг сўровингиз кўриб чиқилмоқда. Дистрибьютор тасдиқлашини кутинг.",
-      approvalSent: "✅ Рўйхатдан ўтиш сўровингиз дистрибьюторга юборилди.\n⏳ Тасдиқлаш кутиляпти.",
-      accessDenied: "⛔ Сизда бу ботдан фойдаланиш ҳуқуқи йўқ.\nДистрибьютор билан боғланинг.",
+      pendingApproval:
+        "⏳ Сизнинг сўровингиз кўриб чиқилмоқда. Дистрибьютор тасдиқлашини кутинг.",
+      approvalSent:
+        "✅ Рўйхатдан ўтиш сўровингиз дистрибьюторга юборилди.\n⏳ Тасдиқлаш кутиляпти.",
+      accessDenied:
+        "⛔ Сизда бу ботдан фойдаланиш ҳуқуқи йўқ.\nДистрибьютор билан боғланинг.",
       blocked: "🚫 Ҳисобингиз блокланган. Менежер билан боғланинг.",
       commands: "\n\n📋 Асосий менюдан фойдаланинг.",
       kbdDebt: "💰 Қарзим",
@@ -110,9 +130,11 @@ export class TelegramService implements OnModuleInit {
       recentPayments: "💸 *Охирги тўловлар:*",
       startOver: "⚠️ Аввал /start босинг ва телефон рақамингизни юборинг.",
       helpTitle: "Ёрдам",
-      helpCommands: "📋 Буйруқлар:\n\n💰 Қарзим — қарзни кўриш\n💸 Тўловларим — тўловлар тарихи\n📦 Маҳсулотлар — маҳсулотлар рўйхати\n📋 Буюртмаларим — буюртмалар тарихи\n🛒 Сават — саватни кўриш\n\n📞 Муаммо бўлса: компания менежерига мурожаат қилинг.",
+      helpCommands:
+        "📋 Буйруқлар:\n\n💰 Қарзим — қарзни кўриш\n💸 Тўловларим — тўловлар тарихи\n📦 Маҳсулотлар — маҳсулотлар рўйхати\n📋 Буюртмаларим — буюртмалар тарихи\n🛒 Сават — саватни кўриш\n\n📞 Муаммо бўлса: компания менежерига мурожаат қилинг.",
       addToCart: "🛒 Саватга",
-      cartEmpty: "🛒 Сават бўш.\nМаҳсулотларни 📦 Маҳсулотлар тугмаси орқали қўшинг.",
+      cartEmpty:
+        "🛒 Сават бўш.\nМаҳсулотларни 📦 Маҳсулотлар тугмаси орқали қўшинг.",
       cartTitle: "🛒 *Савatingиз:*",
       cartTotal: "💰 *Жами:*",
       cartCheckout: "✅ Буюртма бериш",
@@ -127,16 +149,21 @@ export class TelegramService implements OnModuleInit {
       kbdCart: "🛒 Сават",
     },
     ru: {
-      welcome: "Здравствуйте! Добро пожаловать.\nПожалуйста, отправьте ваш номер телефона:",
-      sendPhone: "📞 Отправить номер",
+      welcome:
+        "Здравствуйте!\nЧтобы начать оформление заказа, отправьте номер телефона.",
+      sendPhone: "📞 Отправить мой номер",
       suspended: "⚠️ Сервис временно приостановлен. Свяжитесь с менеджером.",
-      notRegistered: "❌ Вы не зарегистрированы как дилер. Свяжитесь с менеджером компании.",
-      loginSuccess: ", вы успешно вошли в систему!",
-      pendingApproval: "⏳ Ваша заявка рассматривается. Ожидайте подтверждения от дистрибьютора.",
-      approvalSent: "✅ Заявка на регистрацию отправлена дистрибьютору.\n⏳ Ожидайте подтверждения.",
-      accessDenied: "⛔ У вас нет доступа к этому боту.\nСвяжитесь с дистрибьютором.",
+      notRegistered:
+        "❌ Вы не зарегистрированы как дилер. Свяжитесь с менеджером компании.",
+      loginSuccess: " бот подключен.",
+      pendingApproval:
+        "⏳ Ваша заявка рассматривается. Ожидайте подтверждения от дистрибьютора.",
+      approvalSent:
+        "✅ Заявка на регистрацию отправлена дистрибьютору.\n⏳ Ожидайте подтверждения.",
+      accessDenied:
+        "⛔ У вас нет доступа к этому боту.\nСвяжитесь с дистрибьютором.",
       blocked: "🚫 Ваш аккаунт заблокирован. Свяжитесь с менеджером.",
-      commands: "\n\n📋 Используйте главное меню.",
+      commands: "\n\n📋 Используйте кнопки ниже.",
       kbdDebt: "💰 Мой долг",
       kbdPayments: "💸 Платежи",
       kbdProducts: "📦 Продукты",
@@ -154,7 +181,8 @@ export class TelegramService implements OnModuleInit {
       recentPayments: "💸 *Последние платежи:*",
       startOver: "⚠️ Сначала нажмите /start и отправьте ваш номер телефона.",
       helpTitle: "Помощь",
-      helpCommands: "📋 Команды:\n\n💰 Мой долг — узнать долг\n💸 Платежи — история платежей\n📦 Продукты — список товаров\n📋 Заказы — история заказов\n🛒 Корзина — ваша корзина\n\n📞 Проблемы? Свяжитесь с менеджером.",
+      helpCommands:
+        "📋 Команды:\n\n💰 Мой долг — узнать долг\n💸 Платежи — история платежей\n📦 Продукты — список товаров\n📋 Заказы — история заказов\n🛒 Корзина — ваша корзина\n\n📞 Проблемы? Свяжитесь с менеджером.",
       addToCart: "🛒 В корзину",
       cartEmpty: "🛒 Корзина пуста.\nДобавьте товары через 📦 Продукты.",
       cartTitle: "🛒 *Ваша корзина:*",
@@ -167,20 +195,26 @@ export class TelegramService implements OnModuleInit {
       checkoutSuccess: "✅ Заказ принят!\n\n*Заказ #",
       checkoutFail: "❌ Ошибка при оформлении. Попробуйте ещё раз.",
       checkoutEmpty: "🛒 Корзина пуста. Сначала выберите товары.",
-      limitExceeded: "⚠️ Недостаточно кредитного лимита! Сначала погасите долг.",
+      limitExceeded:
+        "⚠️ Недостаточно кредитного лимита! Сначала погасите долг.",
       kbdCart: "🛒 Корзина",
     },
     tr: {
-      welcome: "Merhaba! Hoş geldiniz.\nLütfen telefon numaranızı gönderin:",
-      sendPhone: "📞 Numara gönder",
-      suspended: "⚠️ Bu bot geçici olarak askıya alınmıştır. Yöneticiyle iletişime geçin.",
-      notRegistered: "❌ Bayi olarak kayıtlı değilsiniz.\nŞirket yöneticisiyle iletişime geçin.",
-      loginSuccess: " sisteme başarıyla giriş yaptınız!",
-      pendingApproval: "⏳ Başvurunuz inceleniyor. Distribütörün onayını bekleyin.",
-      approvalSent: "✅ Kayıt başvurunuz distribütöre gönderildi.\n⏳ Onay bekleniyor.",
-      accessDenied: "⛔ Bu botu kullanma izniniz yok.\nDistribütörünüzle iletişime geçin.",
+      welcome: "Merhaba!\nSipariş vermek için telefon numaranızı gönderin.",
+      sendPhone: "📞 Numaramı gönder",
+      suspended:
+        "⚠️ Bu bot geçici olarak askıya alınmıştır. Yöneticiyle iletişime geçin.",
+      notRegistered:
+        "❌ Bayi olarak kayıtlı değilsiniz.\nŞirket yöneticisiyle iletişime geçin.",
+      loginSuccess: " bot bağlı.",
+      pendingApproval:
+        "⏳ Başvurunuz inceleniyor. Distribütörün onayını bekleyin.",
+      approvalSent:
+        "✅ Kayıt başvurunuz distribütöre gönderildi.\n⏳ Onay bekleniyor.",
+      accessDenied:
+        "⛔ Bu botu kullanma izniniz yok.\nDistribütörünüzle iletişime geçin.",
       blocked: "🚫 Hesabınız engellendi. Yöneticiyle iletişime geçin.",
-      commands: "\n\n📋 Ana menüyü kullanın.",
+      commands: "\n\n📋 Aşağıdaki düğmeleri kullanın.",
       kbdDebt: "💰 Borcum",
       kbdPayments: "💸 Ödemelerim",
       kbdProducts: "📦 Ürünler",
@@ -198,7 +232,8 @@ export class TelegramService implements OnModuleInit {
       recentPayments: "💸 *Son ödemeler:*",
       startOver: "⚠️ Önce /start'a basın ve telefon numaranızı gönderin.",
       helpTitle: "Yardım",
-      helpCommands: "📋 Komutlar:\n\n💰 Borcum — borç görüntüle\n💸 Ödemelerim — ödeme geçmişi\n📦 Ürünler — ürün listesi\n📋 Siparişlerim — sipariş geçmişi\n🛒 Sepet — sepetiniz\n\n📞 Sorun mu var? Yöneticiyle iletişime geçin.",
+      helpCommands:
+        "📋 Komutlar:\n\n💰 Borcum — borç görüntüle\n💸 Ödemelerim — ödeme geçmişi\n📦 Ürünler — ürün listesi\n📋 Siparişlerim — sipariş geçmişi\n🛒 Sepet — sepetiniz\n\n📞 Sorun mu var? Yöneticiyle iletişime geçin.",
       addToCart: "🛒 Sepete ekle",
       cartEmpty: "🛒 Sepet boş.\n📦 Ürünler butonundan ürün ekleyin.",
       cartTitle: "🛒 *Sepetiniz:*",
@@ -215,16 +250,21 @@ export class TelegramService implements OnModuleInit {
       kbdCart: "🛒 Sepet",
     },
     en: {
-      welcome: "Hello! Welcome.\nPlease share your phone number:",
-      sendPhone: "📞 Share phone number",
-      suspended: "⚠️ This bot is temporarily suspended. Please contact the manager.",
-      notRegistered: "❌ You are not registered as a dealer.\nPlease contact the company manager.",
-      loginSuccess: " you have successfully logged in!",
-      pendingApproval: "⏳ Your request is under review. Please wait for the distributor's approval.",
-      approvalSent: "✅ Your registration request has been sent to the distributor.\n⏳ Awaiting approval.",
-      accessDenied: "⛔ You don't have permission to use this bot.\nContact your distributor.",
+      welcome: "Hello!\nTo start ordering, please share your phone number.",
+      sendPhone: "📞 Share my number",
+      suspended:
+        "⚠️ This bot is temporarily suspended. Please contact the manager.",
+      notRegistered:
+        "❌ You are not registered as a dealer.\nPlease contact the company manager.",
+      loginSuccess: " bot connected.",
+      pendingApproval:
+        "⏳ Your request is under review. Please wait for the distributor's approval.",
+      approvalSent:
+        "✅ Your registration request has been sent to the distributor.\n⏳ Awaiting approval.",
+      accessDenied:
+        "⛔ You don't have permission to use this bot.\nContact your distributor.",
       blocked: "🚫 Your account is blocked. Please contact the manager.",
-      commands: "\n\n📋 Use the main menu.",
+      commands: "\n\n📋 Use the buttons below.",
       kbdDebt: "💰 My Debt",
       kbdPayments: "💸 Payments",
       kbdProducts: "📦 Products",
@@ -242,7 +282,8 @@ export class TelegramService implements OnModuleInit {
       recentPayments: "💸 *Recent payments:*",
       startOver: "⚠️ Press /start first and send your phone number.",
       helpTitle: "Help",
-      helpCommands: "📋 Commands:\n\n💰 My Debt — view debt\n💸 Payments — payment history\n📦 Products — product list\n📋 Orders — order history\n🛒 Cart — view cart\n\n📞 Need help? Contact the company manager.",
+      helpCommands:
+        "📋 Commands:\n\n💰 My Debt — view debt\n💸 Payments — payment history\n📦 Products — product list\n📋 Orders — order history\n🛒 Cart — view cart\n\n📞 Need help? Contact the company manager.",
       addToCart: "🛒 Add to cart",
       cartEmpty: "🛒 Cart is empty.\nAdd products via 📦 Products.",
       cartTitle: "🛒 *Your cart:*",
@@ -255,50 +296,75 @@ export class TelegramService implements OnModuleInit {
       checkoutSuccess: "✅ Order placed!\n\n*Order #",
       checkoutFail: "❌ Order failed. Please try again.",
       checkoutEmpty: "🛒 Cart is empty. Please select products first.",
-      limitExceeded: "⚠️ Insufficient credit limit! Please pay your debt first.",
+      limitExceeded:
+        "⚠️ Insufficient credit limit! Please pay your debt first.",
       kbdCart: "🛒 Cart",
     },
   };
 
-  private getT(lang: string = 'uz') {
-    return this.translations[lang] ?? this.translations['uz'];
+  private getT(lang: string = "uz") {
+    return this.translations[lang] ?? this.translations["uz"];
+  }
+
+  private getPublicStoreBaseUrl() {
+    return (
+      process.env.PUBLIC_STORE_URL ||
+      process.env.APP_URL ||
+      process.env.PUBLIC_SITE_URL ||
+      process.env.FRONTEND_URL ||
+      "https://app.supplio.uz"
+    ).replace(/\/+$/, "");
   }
 
   public async sendToAdmins(companyId: string, message: string) {
     try {
-      const admins = await this.prisma.user.findMany({ where: { companyId, roleType: { in: ['OWNER', 'MANAGER'] }, deletedAt: null } });
-      if(admins.length === 0) return;
-      const adminPhones = admins.map(a => `${a.phone.slice(-9)}`);
-      
+      const admins = await this.prisma.user.findMany({
+        where: {
+          companyId,
+          roleType: { in: ["OWNER", "MANAGER"] },
+          deletedAt: null,
+        },
+      });
+      if (admins.length === 0) return;
+      const adminPhones = admins.map((a) => `${a.phone.slice(-9)}`);
+
       const adminDealers = await this.prisma.dealer.findMany({
-         where: { companyId, telegramChatId: { not: null } }
+        where: { companyId, telegramChatId: { not: null } },
       });
       // Filter manually to catch endsWith/contains match
-      const targetDealers = adminDealers.filter(d => adminPhones.some(p => d.phone.includes(p)));
+      const targetDealers = adminDealers.filter((d) =>
+        adminPhones.some((p) => d.phone.includes(p))
+      );
 
-      const botRecord = await this.prisma.customBot.findFirst({ where: { companyId, isActive: true } });
+      const botRecord = await this.prisma.customBot.findFirst({
+        where: { companyId, isActive: true },
+      });
       if (!botRecord) return;
       const bot = this.bots.get(botRecord.id);
       if (!bot) return;
 
       for (const dealer of targetDealers) {
-         if (dealer.telegramChatId) {
-            bot.telegram.sendMessage(dealer.telegramChatId, message, { parse_mode: 'Markdown' }).catch(() => {});
-         }
+        if (dealer.telegramChatId) {
+          bot.telegram
+            .sendMessage(dealer.telegramChatId, message, {
+              parse_mode: "Markdown",
+            })
+            .catch(() => {});
+        }
       }
-    } catch(e) {
+    } catch (e) {
       this.logger.error("Failed to send to Company Admins: " + e);
     }
   }
 
   /** Detect language from Telegram ctx.from.language_code and return translations */
   private getLangFromCtx(ctx: Context) {
-    const code = (ctx.from as any)?.language_code ?? 'uz';
-    let lang = 'uz';
-    if (code.startsWith('ru')) lang = 'ru';
-    else if (code.startsWith('tr')) lang = 'tr';
-    else if (code.startsWith('en')) lang = 'en';
-    return this.translations[lang] ?? this.translations['uz'];
+    const code = (ctx.from as any)?.language_code ?? "uz";
+    let lang = "uz";
+    if (code.startsWith("ru")) lang = "ru";
+    else if (code.startsWith("tr")) lang = "tr";
+    else if (code.startsWith("en")) lang = "en";
+    return this.translations[lang] ?? this.translations["uz"];
   }
 
   /** Build main menu keyboard for a given translation */
@@ -306,38 +372,84 @@ export class TelegramService implements OnModuleInit {
   private buildMainMenuKeyboard(t: ReturnType<typeof this.getLangFromCtx>) {
     return {
       inline_keyboard: [
-        [{ text: t.kbdProducts || "📦 Mahsulotlar", callback_data: "menu:products" }, { text: t.kbdCart || "🛒 Savat", callback_data: "menu:cart" }],
-        [{ text: t.kbdOrders || "📋 Buyurtmalar", callback_data: "menu:orders" }, { text: t.kbdDebt || "💰 Qarzim", callback_data: "menu:debt" }],
-        [{ text: t.kbdPayments || "💸 To'lovlar", callback_data: "menu:payments" }, { text: "⚙️ Til / Язык", callback_data: "menu:lang" }]
-      ]
-    };
-  }
-  
-  private buildAdminMenuKeyboard() {
-    return {
-      inline_keyboard: [
-        [{ text: "📊 Do'kon Holati (On/Off)", callback_data: "admin:toggle_store" }],
-        [{ text: "🌐 Web Do'kon (QR & URL)", callback_data: "admin:store_link" }],
-        [{ text: "👥 Yangi dilerlar (Tasdiqlash)", callback_data: "admin:dealers" }]
-      ]
+        [
+          {
+            text: t.kbdProducts || "📦 Mahsulotlar",
+            callback_data: "menu:products",
+          },
+          { text: t.kbdCart || "🛒 Savat", callback_data: "menu:cart" },
+        ],
+        [
+          {
+            text: t.kbdOrders || "📋 Buyurtmalar",
+            callback_data: "menu:orders",
+          },
+          { text: t.kbdDebt || "💰 Qarzim", callback_data: "menu:debt" },
+        ],
+        [
+          {
+            text: t.kbdPayments || "💸 To'lovlar",
+            callback_data: "menu:payments",
+          },
+          { text: "⚙️ Til / Язык", callback_data: "menu:lang" },
+        ],
+      ],
     };
   }
 
-  async initBot(botId: string, companyId: string, token: string, companyName: string) {
+  private buildAdminMenuKeyboard() {
+    return {
+      inline_keyboard: [
+        [
+          {
+            text: "📊 Do'kon Holati (On/Off)",
+            callback_data: "admin:toggle_store",
+          },
+        ],
+        [
+          {
+            text: "🌐 Web Do'kon (QR & URL)",
+            callback_data: "admin:store_link",
+          },
+        ],
+        [
+          {
+            text: "👥 Yangi dilerlar (Tasdiqlash)",
+            callback_data: "admin:dealers",
+          },
+        ],
+      ],
+    };
+  }
+
+  async initBot(
+    botId: string,
+    companyId: string,
+    token: string,
+    companyName: string
+  ) {
     try {
       const existing = this.bots.get(botId);
       if (existing) {
-        try { existing.stop(); } catch {}
+        try {
+          existing.stop();
+        } catch {}
         this.bots.delete(botId);
       }
 
       const bot = new Telegraf(token);
 
       bot.start(async (ctx) => {
-        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+        const company = await this.prisma.company.findUnique({
+          where: { id: companyId },
+        });
         const t = this.getLangFromCtx(ctx);
 
-        if (company?.subscriptionStatus === "LOCKED" || (company?.subscriptionStatus === "TRIAL" && new Date() > company.trialExpiresAt)) {
+        if (
+          company?.subscriptionStatus === "LOCKED" ||
+          (company?.subscriptionStatus === "TRIAL" &&
+            new Date() > company.trialExpiresAt)
+        ) {
           return ctx.reply(t.suspended);
         }
 
@@ -350,30 +462,38 @@ export class TelegramService implements OnModuleInit {
           if (existingDealer.isBlocked) return ctx.reply(t.blocked);
 
           if (!existingDealer.isApproved) {
-            const pending = await (this.prisma as any).dealerApprovalRequest.findFirst({
-              where: { dealerId: existingDealer.id, status: 'PENDING' },
+            const pending = await (
+              this.prisma as any
+            ).dealerApprovalRequest.findFirst({
+              where: { dealerId: existingDealer.id, status: "PENDING" },
             });
             return ctx.reply(pending ? t.pendingApproval : t.accessDenied);
           }
 
-          const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
-          await ctx.reply(`👋 *${existingDealer.name}*${t.loginSuccess}${t.commands}`, {
-            parse_mode: 'Markdown',
-            reply_markup: this.buildMainMenuKeyboard(t),
-          });
+          const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
+          await ctx.reply(
+            `👋 *${existingDealer.name}*${t.loginSuccess}${t.commands}`,
+            {
+              parse_mode: "Markdown",
+              reply_markup: this.buildMainMenuKeyboard(t),
+            }
+          );
           await ctx.reply(`🛍 ${companyName}`, {
             reply_markup: {
-              inline_keyboard: [[{ text: '🛍 Online do\'kon', web_app: { url: storeUrl } }]],
+              inline_keyboard: [
+                [{ text: "🛍 Online do'kon", web_app: { url: storeUrl } }],
+              ],
             },
           });
           return;
         }
 
         await ctx.reply(`🏢 *${companyName}*\n\n${t.welcome}`, {
-          parse_mode: 'Markdown',
+          parse_mode: "Markdown",
           reply_markup: {
             keyboard: [[{ text: t.sendPhone, request_contact: true }]],
-            resize_keyboard: true, one_time_keyboard: true,
+            resize_keyboard: true,
+            one_time_keyboard: true,
           },
         });
       });
@@ -387,11 +507,19 @@ export class TelegramService implements OnModuleInit {
         const chatId = String(ctx.chat.id);
 
         const dealerMatch = await this.prisma.dealer.findFirst({
-          where: { phone: { contains: phone.slice(-9) }, companyId, deletedAt: null },
+          where: {
+            phone: { contains: phone.slice(-9) },
+            companyId,
+            deletedAt: null,
+          },
         });
 
         const userMatch = await this.prisma.user.findFirst({
-          where: { phone: { contains: phone.slice(-9) }, companyId, deletedAt: null },
+          where: {
+            phone: { contains: phone.slice(-9) },
+            companyId,
+            deletedAt: null,
+          },
         });
 
         let dealer = dealerMatch;
@@ -401,124 +529,218 @@ export class TelegramService implements OnModuleInit {
           dealer = await this.prisma.dealer.create({
             data: {
               companyId,
-              branchId: userMatch.branchId || (await this.prisma.branch.findFirst({ where: { companyId } }))?.id || '',
+              branchId:
+                userMatch.branchId ||
+                (await this.prisma.branch.findFirst({ where: { companyId } }))
+                  ?.id ||
+                "",
               name: userMatch.fullName || "Admin",
               phone,
               isApproved: true,
-              telegramChatId: chatId
-            }
+              telegramChatId: chatId,
+            },
           });
         }
 
-        if (!dealer) return ctx.reply(t.notRegistered, { reply_markup: { remove_keyboard: true } });
+        if (!dealer)
+          return ctx.reply(t.notRegistered, {
+            reply_markup: { remove_keyboard: true },
+          });
 
         // Link chatId to dealer
-        await this.prisma.dealer.update({ where: { id: dealer.id }, data: { telegramChatId: chatId } });
+        await this.prisma.dealer.update({
+          where: { id: dealer.id },
+          data: { telegramChatId: chatId },
+        });
 
-        if (dealer.isBlocked) return ctx.reply(t.blocked, { reply_markup: { remove_keyboard: true } });
+        if (dealer.isBlocked)
+          return ctx.reply(t.blocked, {
+            reply_markup: { remove_keyboard: true },
+          });
 
         if (!dealer.isApproved) {
           // Avoid duplicate requests
-          const existing = await (this.prisma as any).dealerApprovalRequest.findFirst({
-            where: { dealerId: dealer.id, status: 'PENDING' },
+          const existing = await (
+            this.prisma as any
+          ).dealerApprovalRequest.findFirst({
+            where: { dealerId: dealer.id, status: "PENDING" },
           });
           if (!existing) {
             await (this.prisma as any).dealerApprovalRequest.create({
-              data: { companyId, dealerId: dealer.id, status: 'PENDING', requestedAt: new Date() },
+              data: {
+                companyId,
+                dealerId: dealer.id,
+                status: "PENDING",
+                requestedAt: new Date(),
+              },
             });
-            const compInfo = await this.prisma.company.findUnique({ where: { id: companyId } });
+            const compInfo = await this.prisma.company.findUnique({
+              where: { id: companyId },
+            });
             const companyNameLabel = (compInfo as any)?.name || "Kompaniya";
 
-            this.loggerBot.sendDealerApprovalRequest({
-              name: dealer.name, phone: dealer.phone, companyName: companyNameLabel,
-            }).catch(() => {});
-            
+            this.loggerBot
+              .sendDealerApprovalRequest({
+                name: dealer.name,
+                phone: dealer.phone,
+                companyName: companyNameLabel,
+              })
+              .catch(() => {});
+
             // Notify Distributor Admins
-            this.sendToAdmins(companyId, `🔔 *Yangi diler ro'yxatdan o'tdi!*\n\nIsmi: ${dealer.name}\nTel: ${dealer.phone}\n\nIltimos, bot menyusidan xabardor qiling yoki Admin paneldan tasdiqlang.`).catch(() => {});
+            this.sendToAdmins(
+              companyId,
+              `🔔 *Yangi diler ro'yxatdan o'tdi!*\n\nIsmi: ${dealer.name}\nTel: ${dealer.phone}\n\nIltimos, bot menyusidan xabardor qiling yoki Admin paneldan tasdiqlang.`
+            ).catch(() => {});
           }
-          return ctx.reply(`👤 *${dealer.name}*\n\n${t.approvalSent}`, { parse_mode: 'Markdown' });
+          return ctx.reply(`👤 *${dealer.name}*\n\n${t.approvalSent}`, {
+            parse_mode: "Markdown",
+          });
         }
 
-        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-        const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
+        const company = await this.prisma.company.findUnique({
+          where: { id: companyId },
+        });
+        const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
 
         // Set MenuButton WebApp
         try {
           // @ts-ignore - Telegraf library type versioning can be tricky.
           await bot.telegram.setChatMenuButton({
             chatId: ctx.chat.id,
-            menuButton: { type: "web_app", text: "🌐 Web Do'kon", web_app: { url: storeUrl } }
+            menuButton: {
+              type: "web_app",
+              text: "🌐 Web Do'kon",
+              web_app: { url: storeUrl },
+            },
           });
         } catch (e) {}
 
-        await ctx.reply(`✅ *${dealer.name}*${t.loginSuccess}\n\nQuyidagi tugmalardan foydalaning:`, {
-          parse_mode: 'Markdown',
-          reply_markup: { remove_keyboard: true },
-        });
-        
+        await ctx.reply(
+          `✅ *${dealer.name}*${t.loginSuccess}\n\nQuyidagi tugmalardan foydalaning:`,
+          {
+            parse_mode: "Markdown",
+            reply_markup: { remove_keyboard: true },
+          }
+        );
+
         // Show Dealer Menu
         await ctx.reply(`🛍 *${companyName}* - Bosh menyu`, {
-          parse_mode: 'Markdown',
+          parse_mode: "Markdown",
           reply_markup: this.buildMainMenuKeyboard(t),
         });
 
         // Show Admin Menu if User
-        if (userMatch && (userMatch.roleType === 'OWNER' || userMatch.roleType === 'MANAGER')) {
-          await ctx.reply(`👨‍💼 *Admin Panel*\nSiz tizim boshqaruvchisi sifatida tanildingiz:`, {
-            parse_mode: 'Markdown',
-            reply_markup: this.buildAdminMenuKeyboard()
-          });
+        if (
+          userMatch &&
+          (userMatch.roleType === "OWNER" || userMatch.roleType === "MANAGER")
+        ) {
+          await ctx.reply(
+            `👨‍💼 *Admin Panel*\nSiz tizim boshqaruvchisi sifatida tanildingiz:`,
+            {
+              parse_mode: "Markdown",
+              reply_markup: this.buildAdminMenuKeyboard(),
+            }
+          );
         }
       });
 
       bot.command("debt", async (ctx) => await this.handleDebt(ctx, companyId));
-      bot.command("products", async (ctx) => await this.handleProducts(ctx, companyId));
-      bot.command("payments", async (ctx) => await this.handlePayments(ctx, companyId));
-      bot.command("orders", async (ctx) => await this.handleOrders(ctx, companyId));
+      bot.command(
+        "products",
+        async (ctx) => await this.handleProducts(ctx, companyId)
+      );
+      bot.command(
+        "payments",
+        async (ctx) => await this.handlePayments(ctx, companyId)
+      );
+      bot.command(
+        "orders",
+        async (ctx) => await this.handleOrders(ctx, companyId)
+      );
       bot.command("cart", async (ctx) => await this.handleCart(ctx, companyId));
-      bot.command("checkout", async (ctx) => await this.handleCheckout(ctx, companyId));
+      bot.command(
+        "checkout",
+        async (ctx) => await this.handleCheckout(ctx, companyId)
+      );
 
       bot.command("help", async (ctx) => {
         const t = this.getLangFromCtx(ctx);
         ctx.reply(`Bosh menyuni ko'rish uchun quyidagi tugmani bosing:`, {
-          reply_markup: this.buildMainMenuKeyboard(t)
+          reply_markup: this.buildMainMenuKeyboard(t),
         });
       });
       bot.command("menu", async (ctx) => {
         const t = this.getLangFromCtx(ctx);
         const chatId = String(ctx.chat.id);
         const dealer = await this.prisma.dealer.findFirst({
-          where: { telegramChatId: chatId, companyId, deletedAt: null, isApproved: true, isBlocked: false },
+          where: {
+            telegramChatId: chatId,
+            companyId,
+            deletedAt: null,
+            isApproved: true,
+            isBlocked: false,
+          },
         });
         if (!dealer) {
           return ctx.reply(t.startOver);
         }
-        await ctx.reply(`🛍 *${companyName}* - Bosh menyu`, { parse_mode: 'Markdown', reply_markup: this.buildMainMenuKeyboard(t) });
+        await ctx.reply(`🛍 *${companyName}* - Bosh menyu`, {
+          parse_mode: "Markdown",
+          reply_markup: this.buildMainMenuKeyboard(t),
+        });
       });
 
-      bot.on("callback_query", async (ctx) => await this.handleCallback(ctx, companyId));
+      bot.on(
+        "callback_query",
+        async (ctx) => await this.handleCallback(ctx, companyId)
+      );
 
       // Set global default menu button to the web store for all users
       try {
-        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-        const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
+        const company = await this.prisma.company.findUnique({
+          where: { id: companyId },
+        });
+        const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
         await bot.telegram.setChatMenuButton({
-          menuButton: { type: "web_app", text: "🛍 Web Do'kon", web_app: { url: storeUrl } },
+          menuButton: {
+            type: "web_app",
+            text: "🛍 Web Do'kon",
+            web_app: { url: storeUrl },
+          },
         } as any);
-        this.logger.log(`✅ Global menu button set for ${companyName}: ${storeUrl}`);
+        this.logger.log(
+          `✅ Global menu button set for ${companyName}: ${storeUrl}`
+        );
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
-        this.logger.warn(`⚠️ Could not set global menu button for ${companyName}: ${msg}`);
+        this.logger.warn(
+          `⚠️ Could not set global menu button for ${companyName}: ${msg}`
+        );
       }
 
-      if (process.env.NODE_ENV === "production" && (process.env.BOT_WEBHOOK_URL || process.env.APP_URL)) {
-        const baseUrl = process.env.BOT_WEBHOOK_URL || (process.env.APP_URL + "/webhook");
+      if (
+        process.env.NODE_ENV === "production" &&
+        (process.env.BOT_WEBHOOK_URL || process.env.APP_URL)
+      ) {
+        const baseUrl =
+          process.env.BOT_WEBHOOK_URL || process.env.APP_URL + "/webhook";
         // Use botId for the webhook to support multiple bots
-        const webhookUrl = baseUrl.endsWith("/") ? `${baseUrl}${botId}` : `${baseUrl}/${botId}`;
+        const webhookUrl = baseUrl.endsWith("/")
+          ? `${baseUrl}${botId}`
+          : `${baseUrl}/${botId}`;
         await bot.telegram.setWebhook(webhookUrl);
-        this.logger.log(`✅ Webhook set for ${companyName} (Bot: ${botId}): ${webhookUrl}`);
+        this.logger.log(
+          `✅ Webhook set for ${companyName} (Bot: ${botId}): ${webhookUrl}`
+        );
       } else {
-        bot.launch().catch((e) => this.logger.warn(`Polling launch failed for ${companyName}: ${e.message}`));
+        bot
+          .launch()
+          .catch((e) =>
+            this.logger.warn(
+              `Polling launch failed for ${companyName}: ${e.message}`
+            )
+          );
         this.logger.log(`✅ Bot launched (polling) for ${companyName}`);
       }
 
@@ -540,14 +762,15 @@ export class TelegramService implements OnModuleInit {
     const bar = this.progressBar(ratio);
 
     const cashback = (dealer as any).cashbackBalance ?? 0;
-    const cashbackLine = cashback > 0 ? `\n🎁 Cashback: *${cashback.toLocaleString()} so'm*` : '';
+    const cashbackLine =
+      cashback > 0 ? `\n🎁 Cashback: *${cashback.toLocaleString()} so'm*` : "";
 
     await ctx.reply(
       `💰 *${dealer.name}*\n\n` +
         `${t.debtTitle}: *${debt.toLocaleString()} so'm*\n` +
-        `${t.limitTitle}: *${limit > 0 ? limit.toLocaleString() + " so'm" : 'Cheksiz'}*\n\n` +
-        `${limit > 0 ? bar + ' ' + ratio + '%\n\n' : ''}` +
-        `${debt > 0 && limit > 0 && debt > limit ? t.overLimit : limit > 0 ? t.withinLimit : ''}` +
+        `${t.limitTitle}: *${limit > 0 ? limit.toLocaleString() + " so'm" : "Cheksiz"}*\n\n` +
+        `${limit > 0 ? bar + " " + ratio + "%\n\n" : ""}` +
+        `${debt > 0 && limit > 0 && debt > limit ? t.overLimit : limit > 0 ? t.withinLimit : ""}` +
         cashbackLine,
       { parse_mode: "Markdown" }
     );
@@ -570,7 +793,11 @@ export class TelegramService implements OnModuleInit {
 
     await ctx.reply(t.productList, { parse_mode: "Markdown" });
 
-    const backendUrl = (process.env.APP_URL || process.env.FRONTEND_URL || 'http://localhost:5000').replace(/\/$/, '');
+    const backendUrl = (
+      process.env.APP_URL ||
+      process.env.FRONTEND_URL ||
+      "http://localhost:5000"
+    ).replace(/\/$/, "");
 
     for (const p of products) {
       const effectivePrice = (p as any).discountPrice ?? p.price;
@@ -579,22 +806,26 @@ export class TelegramService implements OnModuleInit {
         ? `~~${p.price.toLocaleString()}~~ → *${effectivePrice.toLocaleString()} so'm* 🔥`
         : `*${p.price.toLocaleString()} so'm*`;
       const caption =
-        `${isPromo ? '🏷 *AKSIYA!* ' : ''}*${p.name}*\n` +
+        `${isPromo ? "🏷 *AKSIYA!* " : ""}*${p.name}*\n` +
         `💵 ${priceStr} / ${p.unit}\n` +
         `📦 ${p.stock} ${p.unit}`;
 
-      const buttons = [[
-        { text: `${t.addToCart} (+1)`, callback_data: `add:${p.id}:1` },
-        { text: '+5', callback_data: `add:${p.id}:5` },
-        { text: '+10', callback_data: `add:${p.id}:10` },
-      ]];
+      const buttons = [
+        [
+          { text: `${t.addToCart} (+1)`, callback_data: `add:${p.id}:1` },
+          { text: "+5", callback_data: `add:${p.id}:5` },
+          { text: "+10", callback_data: `add:${p.id}:10` },
+        ],
+      ];
 
       if (p.imageUrl) {
-        const photoUrl = p.imageUrl.startsWith('http') ? p.imageUrl : `${backendUrl}${p.imageUrl}`;
+        const photoUrl = p.imageUrl.startsWith("http")
+          ? p.imageUrl
+          : `${backendUrl}${p.imageUrl}`;
         try {
           await (ctx as any).replyWithPhoto(photoUrl, {
             caption,
-            parse_mode: 'Markdown',
+            parse_mode: "Markdown",
             reply_markup: { inline_keyboard: buttons },
           });
           continue;
@@ -604,12 +835,14 @@ export class TelegramService implements OnModuleInit {
       }
 
       await ctx.reply(caption, {
-        parse_mode: 'Markdown',
+        parse_mode: "Markdown",
         reply_markup: { inline_keyboard: buttons },
       });
     }
 
-    await ctx.reply(`🛒 ${t.cartTitle.replace(/\*/g, '')}`, { parse_mode: 'Markdown' });
+    await ctx.reply(`🛒 ${t.cartTitle.replace(/\*/g, "")}`, {
+      parse_mode: "Markdown",
+    });
   }
 
   private async handleOrders(ctx: Context, companyId: string) {
@@ -630,7 +863,12 @@ export class TelegramService implements OnModuleInit {
     let msg = `${t.recentOrders}\n\n`;
     for (const order of orders) {
       const date = order.createdAt.toLocaleDateString("uz-UZ");
-      const statusIcon = order.status === "DELIVERED" ? "✅" : order.status === "PENDING" ? "⏳" : "📦";
+      const statusIcon =
+        order.status === "DELIVERED"
+          ? "✅"
+          : order.status === "PENDING"
+            ? "⏳"
+            : "📦";
 
       msg += `${statusIcon} *#${order.id.slice(-6).toUpperCase()}*\n`;
       msg += `   📅 ${date} | 💰 ${order.totalAmount.toLocaleString()} so'm\n`;
@@ -688,48 +926,68 @@ export class TelegramService implements OnModuleInit {
     const chatId = String(query.from.id);
     const t = this.getLangFromCtx(ctx);
 
-    if (data.startsWith('menu:')) {
-      const action = data.split(':')[1];
-      if (action === 'products') await this.handleProducts(ctx, companyId);
-      if (action === 'cart') await this.handleCart(ctx, companyId);
-      if (action === 'orders') await this.handleOrders(ctx, companyId);
-      if (action === 'debt') await this.handleDebt(ctx, companyId);
-      if (action === 'payments') await this.handlePayments(ctx, companyId);
-      if (action === 'lang') await (ctx as any).reply("Iltimos, tilni tanlang:"); // Further logic can be added later
-      if (action === 'help') {
-        const companyName = (await this.prisma.company.findUnique({ where: { id: companyId }, select: { name: true } }))?.name || "Company";
+    if (data.startsWith("menu:")) {
+      const action = data.split(":")[1];
+      if (action === "products") await this.handleProducts(ctx, companyId);
+      if (action === "cart") await this.handleCart(ctx, companyId);
+      if (action === "orders") await this.handleOrders(ctx, companyId);
+      if (action === "debt") await this.handleDebt(ctx, companyId);
+      if (action === "payments") await this.handlePayments(ctx, companyId);
+      if (action === "lang")
+        await (ctx as any).reply("Iltimos, tilni tanlang:"); // Further logic can be added later
+      if (action === "help") {
+        const companyName =
+          (
+            await this.prisma.company.findUnique({
+              where: { id: companyId },
+              select: { name: true },
+            })
+          )?.name || "Company";
         await this.handleHelp(ctx, companyName);
       }
       return;
     }
 
-    if (data.startsWith('admin:')) {
-      const action = data.split(':')[1];
-      if (action === 'toggle_store') {
-        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+    if (data.startsWith("admin:")) {
+      const action = data.split(":")[1];
+      if (action === "toggle_store") {
+        const company = await this.prisma.company.findUnique({
+          where: { id: companyId },
+        });
         if (company) {
-          await this.prisma.company.update({ where: { id: companyId }, data: { siteActive: !company.siteActive } });
-          await (ctx as any).reply(`📊 Do'kon hozir: ${!company.siteActive ? '✅ ONLINE (Faol)' : '❌ OFFLINE (Yopiq)'}`);
+          await this.prisma.company.update({
+            where: { id: companyId },
+            data: { siteActive: !company.siteActive },
+          });
+          await (ctx as any).reply(
+            `📊 Do'kon hozir: ${!company.siteActive ? "✅ ONLINE (Faol)" : "❌ OFFLINE (Yopiq)"}`
+          );
         }
       }
-      if (action === 'store_link') {
-        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-        const storeUrl = `${process.env.FRONTEND_URL || 'https://supplio.uz'}/store/${company?.slug || companyId}`;
+      if (action === "store_link") {
+        const company = await this.prisma.company.findUnique({
+          where: { id: companyId },
+        });
+        const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
         const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(storeUrl)}`;
         await (ctx as any).replyWithPhoto(qrUrl, {
-          caption: `🌐 Do'kon manzili: ${storeUrl}\n\nQuyidagi QR Kodni dilerlaringizga berishingiz mumkin.`
+          caption: `🌐 Do'kon manzili: ${storeUrl}\n\nQuyidagi QR Kodni dilerlaringizga berishingiz mumkin.`,
         });
       }
-      if (action === 'dealers') {
-        const pending = await (this.prisma as any).dealerApprovalRequest.findMany({
-          where: { companyId, status: 'PENDING' },
-          include: { dealer: true } // Assuming relation includes dealer
+      if (action === "dealers") {
+        const pending = await (
+          this.prisma as any
+        ).dealerApprovalRequest.findMany({
+          where: { companyId, status: "PENDING" },
+          include: { dealer: true }, // Assuming relation includes dealer
         });
         if (!pending || pending.length === 0) {
-          await (ctx as any).reply(`✅ Hozirda tasdiqlash uchun yangi dilerlar yo'q.`);
+          await (ctx as any).reply(
+            `✅ Hozirda tasdiqlash uchun yangi dilerlar yo'q.`
+          );
         } else {
           let msg = `👥 Kutilayotgan dilerlar:\n`;
-          for(const req of pending) {
+          for (const req of pending) {
             msg += `• ${req.dealer.name} (${req.dealer.phone})\n`;
           }
           msg += `\nUshbu dilerlarni Admin Paneldan tasdiqlashingiz mumkin.`;
@@ -739,8 +997,8 @@ export class TelegramService implements OnModuleInit {
       return;
     }
 
-    if (data.startsWith('add:')) {
-      const [, productId, qtyStr] = data.split(':');
+    if (data.startsWith("add:")) {
+      const [, productId, qtyStr] = data.split(":");
       const qty = parseInt(qtyStr, 10) || 1;
 
       const product = await this.prisma.product.findFirst({
@@ -759,21 +1017,21 @@ export class TelegramService implements OnModuleInit {
       return;
     }
 
-    if (data.startsWith('remove:')) {
-      const productId = data.split(':')[1];
+    if (data.startsWith("remove:")) {
+      const productId = data.split(":")[1];
       const cart = this.getCart(companyId, chatId);
       cart.delete(productId);
       await (ctx as any).reply(t.cartRemoved);
       return;
     }
 
-    if (data === 'clear_cart') {
+    if (data === "clear_cart") {
       this.clearCart(companyId, chatId);
       await (ctx as any).reply(t.cartCleared);
       return;
     }
 
-    if (data === 'checkout') {
+    if (data === "checkout") {
       await this.handleCheckoutByChat(ctx, companyId, chatId);
       return;
     }
@@ -803,12 +1061,18 @@ export class TelegramService implements OnModuleInit {
 
     for (const [productId, qty] of cart.entries()) {
       const p = productMap.get(productId);
-      if (!p) { cart.delete(productId); continue; }
+      if (!p) {
+        cart.delete(productId);
+        continue;
+      }
       const lineTotal = p.price * qty;
       total += lineTotal;
       msg += `• *${p.name}* × ${qty}\n`;
       msg += `  💵 ${lineTotal.toLocaleString()} so'm\n\n`;
-      removeButtons.push({ text: `❌ ${p.name}`, callback_data: `remove:${productId}` });
+      removeButtons.push({
+        text: `❌ ${p.name}`,
+        callback_data: `remove:${productId}`,
+      });
     }
 
     msg += `${t.cartTotal} *${total.toLocaleString()} so'm*`;
@@ -833,12 +1097,20 @@ export class TelegramService implements OnModuleInit {
     await this.handleCheckoutByChat(ctx, companyId, String(ctx.chat!.id));
   }
 
-  private async handleCheckoutByChat(ctx: Context, companyId: string, chatId: string) {
+  private async handleCheckoutByChat(
+    ctx: Context,
+    companyId: string,
+    chatId: string
+  ) {
     const t = this.getLangFromCtx(ctx);
-    
-    const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+    });
     if (!company?.siteActive) {
-      return (ctx as any).reply("⚠️ Do'kon hozirda OFFLINE yopiq holatda. Iltimos, keyinroq urinib ko'ring.");
+      return (ctx as any).reply(
+        "⚠️ Do'kon hozirda OFFLINE yopiq holatda. Iltimos, keyinroq urinib ko'ring."
+      );
     }
 
     const cart = this.getCart(companyId, chatId);
@@ -873,14 +1145,28 @@ export class TelegramService implements OnModuleInit {
     const productMap = new Map(products.map((p) => [p.id, p]));
     let totalAmount = 0;
     // Always include `name` field so orders render correctly in admin panel
-    const orderItems: { productId: string; name: string; qty: number; unit: string; price: number; total: number }[] = [];
+    const orderItems: {
+      productId: string;
+      name: string;
+      qty: number;
+      unit: string;
+      price: number;
+      total: number;
+    }[] = [];
 
     for (const [productId, qty] of cart.entries()) {
       const p = productMap.get(productId);
       if (!p) continue;
       const lineTotal = p.price * qty;
       totalAmount += lineTotal;
-      orderItems.push({ productId, name: p.name, qty, unit: p.unit || 'pcs', price: p.price, total: lineTotal });
+      orderItems.push({
+        productId,
+        name: p.name,
+        qty,
+        unit: p.unit || "pcs",
+        price: p.price,
+        total: lineTotal,
+      });
     }
 
     // Check credit limit
@@ -890,7 +1176,7 @@ export class TelegramService implements OnModuleInit {
     }
 
     try {
-      let lowStockProducts: {name: string, stock: number}[] = [];
+      let lowStockProducts: { name: string; stock: number }[] = [];
 
       const order = await this.prisma.$transaction(async (tx) => {
         // Create order - items is a JSON field, pass array directly
@@ -901,7 +1187,7 @@ export class TelegramService implements OnModuleInit {
             branchId: dealer.branchId,
             totalAmount,
             totalCost: 0,
-            status: 'PENDING',
+            status: "PENDING",
             items: orderItems as any,
           },
         });
@@ -913,7 +1199,10 @@ export class TelegramService implements OnModuleInit {
             data: { stock: { decrement: item.qty } },
           });
           if (updatedProduct.stock < 10) {
-            lowStockProducts.push({ name: updatedProduct.name, stock: updatedProduct.stock });
+            lowStockProducts.push({
+              name: updatedProduct.name,
+              stock: updatedProduct.stock,
+            });
           }
         }
 
@@ -928,7 +1217,7 @@ export class TelegramService implements OnModuleInit {
           data: {
             companyId,
             dealerId: dealer.id,
-            type: 'ORDER',
+            type: "ORDER",
             amount: totalAmount,
             note: `Telegram buyurtma #${created.id.slice(-6).toUpperCase()}`,
           },
@@ -941,54 +1230,67 @@ export class TelegramService implements OnModuleInit {
 
       if (lowStockProducts.length > 0) {
         let warnMsg = `⚠️ *Diqqat: Mahsulot kam qolmoqda!*\n\nQuyidagi mahsulotlar zaxirasi tugamoqda:\n`;
-        lowStockProducts.forEach(p => warnMsg += `• ${p.name}: ${p.stock} ta qoldi\n`);
+        lowStockProducts.forEach(
+          (p) => (warnMsg += `• ${p.name}: ${p.stock} ta qoldi\n`)
+        );
         this.sendToAdmins(companyId, warnMsg).catch(() => {});
       }
 
       // Cashback + log (fire and forget)
-      this.prisma.company.findUnique({ where: { id: companyId }, select: { name: true, cashbackPercent: true } })
+      this.prisma.company
+        .findUnique({
+          where: { id: companyId },
+          select: { name: true, cashbackPercent: true },
+        })
         .then(async (company) => {
           // Cashback
           const cashbackPct = (company as any)?.cashbackPercent ?? 0;
           if (cashbackPct > 0) {
-            const earned = Math.floor(totalAmount * cashbackPct / 100);
+            const earned = Math.floor((totalAmount * cashbackPct) / 100);
             if (earned > 0) {
-              await this.prisma.dealer.update({
-                where: { id: dealer.id },
-                data: { cashbackBalance: { increment: earned } },
-              }).catch(() => {});
+              await this.prisma.dealer
+                .update({
+                  where: { id: dealer.id },
+                  data: { cashbackBalance: { increment: earned } },
+                })
+                .catch(() => {});
             }
           }
           // Logger
-          this.loggerBot.sendOrderNotification({
-            id: order.id,
-            companyName: company?.name || companyId,
-            dealerName: dealer.name,
-            totalAmount,
-            itemCount: orderItems.length,
-          }).catch(() => {});
+          this.loggerBot
+            .sendOrderNotification({
+              id: order.id,
+              companyName: company?.name || companyId,
+              dealerName: dealer.name,
+              totalAmount,
+              itemCount: orderItems.length,
+            })
+            .catch(() => {});
         })
         .catch(() => {});
 
       // Build invoice receipt
       const orderNum = order.id.slice(-6).toUpperCase();
       const itemLines = orderItems
-        .map(item => `▪ ${item.name} — ${item.qty} ${item.unit} × ${item.price.toLocaleString()} = *${item.total.toLocaleString()} so'm*`)
-        .join('\n');
+        .map(
+          (item) =>
+            `▪ ${item.name} — ${item.qty} ${item.unit} × ${item.price.toLocaleString()} = *${item.total.toLocaleString()} so'm*`
+        )
+        .join("\n");
       const newDebtAfter = (dealer.currentDebt || 0) + totalAmount;
 
       await (ctx as any).reply(
         `✅ *BUYURTMA QABUL QILINDI*\n` +
-        `━━━━━━━━━━━━━━━\n` +
-        `📋 Buyurtma: *#${orderNum}*\n` +
-        `👤 Diler: ${dealer.name}\n` +
-        `━━━━━━━━━━━━━━━\n` +
-        `${itemLines}\n` +
-        `━━━━━━━━━━━━━━━\n` +
-        `💰 Jami: *${totalAmount.toLocaleString()} so'm*\n` +
-        `📊 Holat: ⏳ Kutilmoqda\n` +
-        `💳 Joriy qarz: *${newDebtAfter.toLocaleString()} so'm*\n` +
-        `\n/orders orqali kuzatib boring.`,
+          `━━━━━━━━━━━━━━━\n` +
+          `📋 Buyurtma: *#${orderNum}*\n` +
+          `👤 Diler: ${dealer.name}\n` +
+          `━━━━━━━━━━━━━━━\n` +
+          `${itemLines}\n` +
+          `━━━━━━━━━━━━━━━\n` +
+          `💰 Jami: *${totalAmount.toLocaleString()} so'm*\n` +
+          `📊 Holat: ⏳ Kutilmoqda\n` +
+          `💳 Joriy qarz: *${newDebtAfter.toLocaleString()} so'm*\n` +
+          `\n/orders orqali kuzatib boring.`,
         { parse_mode: "Markdown" }
       );
     } catch (err: unknown) {
@@ -1005,20 +1307,27 @@ export class TelegramService implements OnModuleInit {
     if (!bot) return;
 
     try {
-      await bot.telegram.sendMessage(chatId, message, { parse_mode: "Markdown" });
+      await bot.telegram.sendMessage(chatId, message, {
+        parse_mode: "Markdown",
+      });
     } catch (e: any) {
-      this.logger.error(`Failed to send external message for bot ${botId}: ${e.message}`);
+      this.logger.error(
+        `Failed to send external message for bot ${botId}: ${e.message}`
+      );
     }
   }
 
   /** Broadcast a message to all dealers in a company that have a Telegram chatId */
-  async broadcast(companyId: string, message: string): Promise<{ sent: number; failed: number }> {
+  async broadcast(
+    companyId: string,
+    message: string
+  ): Promise<{ sent: number; failed: number }> {
     // For broadcast, we use the first active bot found for this company
     const botRecord = await this.prisma.customBot.findFirst({
-      where: { companyId, isActive: true, deletedAt: null }
+      where: { companyId, isActive: true, deletedAt: null },
     });
     if (!botRecord) return { sent: 0, failed: 0 };
-    
+
     const bot = this.bots.get(botRecord.id);
     if (!bot) return { sent: 0, failed: 0 };
 
@@ -1032,7 +1341,9 @@ export class TelegramService implements OnModuleInit {
     for (const dealer of dealers) {
       if (!dealer.telegramChatId) continue;
       try {
-        await bot.telegram.sendMessage(dealer.telegramChatId, message, { parse_mode: "Markdown" });
+        await bot.telegram.sendMessage(dealer.telegramChatId, message, {
+          parse_mode: "Markdown",
+        });
         sent++;
       } catch {
         failed++;
@@ -1042,9 +1353,14 @@ export class TelegramService implements OnModuleInit {
   }
 
   /** Send order status update notification to the dealer */
-  async sendOrderStatusUpdate(companyId: string, orderId: string, newStatus: string, dealerId: string) {
+  async sendOrderStatusUpdate(
+    companyId: string,
+    orderId: string,
+    newStatus: string,
+    dealerId: string
+  ) {
     const botRecord = await this.prisma.customBot.findFirst({
-      where: { companyId, isActive: true, deletedAt: null }
+      where: { companyId, isActive: true, deletedAt: null },
     });
     if (!botRecord) return;
 
@@ -1058,26 +1374,30 @@ export class TelegramService implements OnModuleInit {
     if (!dealer?.telegramChatId) return;
 
     const statusEmoji: Record<string, string> = {
-      PENDING: '⏳',
-      ACCEPTED: '✅',
-      PREPARING: '🔧',
-      SHIPPED: '🚚',
-      DELIVERED: '📦',
-      COMPLETED: '✅',
-      CANCELLED: '❌',
-      RETURNED: '↩️',
+      PENDING: "⏳",
+      ACCEPTED: "✅",
+      PREPARING: "🔧",
+      SHIPPED: "🚚",
+      DELIVERED: "📦",
+      COMPLETED: "✅",
+      CANCELLED: "❌",
+      RETURNED: "↩️",
     };
 
-    const emoji = statusEmoji[newStatus] ?? '📋';
+    const emoji = statusEmoji[newStatus] ?? "📋";
     const msg =
       `${emoji} *Buyurtma holati yangilandi*\n\n` +
       `📋 Buyurtma: *#${orderId.slice(-6).toUpperCase()}*\n` +
       `📊 Yangi holat: *${newStatus}*`;
 
     try {
-      await bot.telegram.sendMessage(dealer.telegramChatId, msg, { parse_mode: "Markdown" });
+      await bot.telegram.sendMessage(dealer.telegramChatId, msg, {
+        parse_mode: "Markdown",
+      });
     } catch (e) {
-      this.logger.warn(`Could not notify dealer ${dealerId} of status update: ${e.message}`);
+      this.logger.warn(
+        `Could not notify dealer ${dealerId} of status update: ${e.message}`
+      );
     }
   }
 
@@ -1090,7 +1410,9 @@ export class TelegramService implements OnModuleInit {
     const watermark = isPremium ? "" : "\n\n⚡️ _Supplio.uz_";
 
     await ctx.reply(
-      `ℹ️ *${companyName} Bot - ${t.helpTitle}*\n\n` + t.helpCommands + watermark,
+      `ℹ️ *${companyName} Bot - ${t.helpTitle}*\n\n` +
+        t.helpCommands +
+        watermark,
       { parse_mode: "Markdown" }
     );
   }
@@ -1130,39 +1452,45 @@ export class TelegramService implements OnModuleInit {
     return this.bots.get(botId);
   }
 
-  async validateToken(token: string): Promise<{ valid: boolean; networkError?: boolean; botInfo?: { id: number; username: string; first_name: string } }> {
+  async validateToken(token: string): Promise<{
+    valid: boolean;
+    networkError?: boolean;
+    botInfo?: { id: number; username: string; first_name: string };
+  }> {
     try {
       const tempBot = new Telegram(token);
       const botInfo = await Promise.race([
         tempBot.getMe(),
         new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('TIMEOUT')), 10000)
+          setTimeout(() => reject(new Error("TIMEOUT")), 10000)
         ),
       ]);
       return {
         valid: true,
         botInfo: {
           id: botInfo.id,
-          username: botInfo.username || '',
+          username: botInfo.username || "",
           first_name: botInfo.first_name,
         },
       };
     } catch (err: any) {
-      this.logger.warn(`Token validation failed for token ${token.slice(0, 5)}...: ${err.message}`);
+      this.logger.warn(
+        `Token validation failed for token ${token.slice(0, 5)}...: ${err.message}`
+      );
       const isNetworkError =
-        err.message === 'TIMEOUT' ||
+        err.message === "TIMEOUT" ||
         !err.response ||
-        err.code === 'ECONNREFUSED' ||
-        err.code === 'ETIMEDOUT' ||
-        err.code === 'ENOTFOUND';
+        err.code === "ECONNREFUSED" ||
+        err.code === "ETIMEDOUT" ||
+        err.code === "ENOTFOUND";
       return { valid: false, networkError: isNetworkError };
     }
   }
 
-  getBotStatus(botId: string): 'connected' | 'stopped' | 'not_found' {
+  getBotStatus(botId: string): "connected" | "stopped" | "not_found" {
     const bot = this.bots.get(botId);
-    if (!bot) return 'not_found';
-    return 'connected';
+    if (!bot) return "not_found";
+    return "connected";
   }
 
   async getBotsForCompany(companyId: string) {
@@ -1172,9 +1500,12 @@ export class TelegramService implements OnModuleInit {
     });
   }
 
-  async createBot(companyId: string, data: { token: string; botName?: string; description?: string }) {
+  async createBot(
+    companyId: string,
+    data: { token: string; botName?: string; description?: string }
+  ) {
     if (!data.token?.trim()) {
-      throw new BadRequestException('Bot token is required.');
+      throw new BadRequestException("Bot token is required.");
     }
     await this.planLimits.checkBotLimit(companyId);
     // Validate token before saving
@@ -1182,79 +1513,131 @@ export class TelegramService implements OnModuleInit {
     if (!validation.valid) {
       if (validation.networkError) {
         throw new BadRequestException(
-          'Cannot reach Telegram API to verify this token. Check server internet connectivity, then try again.',
+          "Cannot reach Telegram API to verify this token. Check server internet connectivity, then try again."
         );
       }
-      throw new BadRequestException('Invalid Telegram bot token. Please get a valid token from @BotFather.');
+      throw new BadRequestException(
+        "Invalid Telegram bot token. Please get a valid token from @BotFather."
+      );
     }
     const username = validation.botInfo?.username;
-    const resolvedName = data.botName || validation.botInfo?.first_name || 'Store Bot';
+    const resolvedName =
+      data.botName || validation.botInfo?.first_name || "Store Bot";
 
     try {
       this.logger.log(`Creating bot for company: ${companyId}`);
       const bot = await this.prisma.customBot.create({
-        data: { 
-          companyId, 
-          token: data.token, 
-          botName: resolvedName, 
-          username, 
+        data: {
+          companyId,
+          token: data.token,
+          botName: resolvedName,
+          username,
           description: data.description,
-          isActive: true
+          isActive: true,
         },
       });
-      
-      this.logger.log(`Bot record created in DB: ${bot.id}. Initializing instance...`);
-      
+
+      this.logger.log(
+        `Bot record created in DB: ${bot.id}. Initializing instance...`
+      );
+
       try {
-        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+        const company = await this.prisma.company.findUnique({
+          where: { id: companyId },
+        });
         if (!company) {
-          this.logger.error(`Company not found after creating bot record! ID: ${companyId}`);
+          this.logger.error(
+            `Company not found after creating bot record! ID: ${companyId}`
+          );
         } else {
           await this.initBot(bot.id, companyId, bot.token, company.name);
         }
       } catch (initErr: any) {
-        this.logger.error(`Failed to execute initBot during creation: ${initErr.message}`);
-        // We don't throw here, the record is already created. 
+        this.logger.error(
+          `Failed to execute initBot during creation: ${initErr.message}`
+        );
+        // We don't throw here, the record is already created.
         // Admin can re-enable later if init failed.
       }
-      
+
       return { ...bot, botInfo: validation.botInfo };
     } catch (e: any) {
       this.logger.error(`Error in createBot: ${e.message}`, e.stack);
-      if (e.code === 'P2002') {
-        throw new BadRequestException('This bot token is already registered to another company.');
+      if (e.code === "P2002") {
+        throw new BadRequestException(
+          "This bot token is already registered to another company."
+        );
       }
-      if (e.code === 'P2003') {
-        throw new BadRequestException('Foreign key constraint failed. Check if companyId is valid.');
+      if (e.code === "P2003") {
+        throw new BadRequestException(
+          "Foreign key constraint failed. Check if companyId is valid."
+        );
       }
       throw e;
     }
   }
 
-  async updateBot(id: string, companyId: string, data: { token?: string; botName?: string; description?: string; isActive?: boolean }) {
-    const bot = await this.prisma.customBot.findFirst({ where: { id, companyId, deletedAt: null } });
+  async updateBot(
+    id: string,
+    companyId: string,
+    data: {
+      token?: string;
+      botName?: string;
+      description?: string;
+      isActive?: boolean;
+    }
+  ) {
+    const bot = await this.prisma.customBot.findFirst({
+      where: { id, companyId, deletedAt: null },
+    });
     if (!bot) throw new Error("Bot not found");
     const updated = await this.prisma.customBot.update({ where: { id }, data });
     if (data.isActive === true || data.token) {
-      const company = await this.prisma.company.findUnique({ where: { id: companyId } });
-      await this.initBot(updated.id, companyId, updated.token, company?.name ?? companyId);
+      const company = await this.prisma.company.findUnique({
+        where: { id: companyId },
+      });
+      await this.initBot(
+        updated.id,
+        companyId,
+        updated.token,
+        company?.name ?? companyId
+      );
     } else if (data.isActive === false) {
       const existing = this.bots.get(id);
-      if (existing) { try { existing.stop(); } catch {} this.bots.delete(id); }
+      if (existing) {
+        try {
+          existing.stop();
+        } catch {}
+        this.bots.delete(id);
+      }
     }
     return updated;
   }
 
   async removeBot(id: string, companyId: string) {
-    const bot = await this.prisma.customBot.findFirst({ where: { id, companyId, deletedAt: null } });
+    const bot = await this.prisma.customBot.findFirst({
+      where: { id, companyId, deletedAt: null },
+    });
     if (!bot) throw new Error("Bot not found");
     const existing = this.bots.get(id);
-    if (existing) { try { existing.stop(); } catch {} this.bots.delete(id); }
-    return this.prisma.customBot.update({ where: { id }, data: { deletedAt: new Date(), isActive: false } });
+    if (existing) {
+      try {
+        existing.stop();
+      } catch {}
+      this.bots.delete(id);
+    }
+    return this.prisma.customBot.update({
+      where: { id },
+      data: { deletedAt: new Date(), isActive: false },
+    });
   }
 
   /** Notify dealer via Telegram after distributor approves or rejects their request */
-  async notifyDealerApprovalResult(companyId: string, dealerId: string, approved: boolean) {
+  async notifyDealerApprovalResult(
+    companyId: string,
+    dealerId: string,
+    approved: boolean
+  ) {
     const botRecord = await this.prisma.customBot.findFirst({
       where: { companyId, isActive: true, deletedAt: null },
     });
@@ -1287,12 +1670,16 @@ export class TelegramService implements OnModuleInit {
 
     // Send in all 5 languages since we don't know which language the dealer uses
     const msgs = approved ? approvedMsgs : rejectedMsgs;
-    const text = Object.values(msgs).join('\n\n────────────\n\n');
+    const text = Object.values(msgs).join("\n\n────────────\n\n");
 
     try {
-      await bot.telegram.sendMessage(dealer.telegramChatId, text, { parse_mode: 'Markdown' });
+      await bot.telegram.sendMessage(dealer.telegramChatId, text, {
+        parse_mode: "Markdown",
+      });
     } catch (e: any) {
-      this.logger.warn(`Could not notify dealer ${dealerId} of approval result: ${e.message}`);
+      this.logger.warn(
+        `Could not notify dealer ${dealerId} of approval result: ${e.message}`
+      );
     }
   }
 

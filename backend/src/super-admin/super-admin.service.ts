@@ -1,13 +1,18 @@
 ﻿import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import * as bcrypt from "bcrypt";
+import * as ExcelJS from "exceljs";
 import { PrismaService } from "../prisma/prisma.service";
+import { AnalyticsService } from "../analytics/analytics.service";
 
 @Injectable()
 export class SuperAdminService {
   private readonly logger = new Logger(SuperAdminService.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private analyticsService: AnalyticsService
+  ) {}
 
   async getGlobalSettings() {
     return this.prisma.systemSettings.upsert({
@@ -24,7 +29,10 @@ export class SuperAdminService {
 
   async updateGlobalSettings(data: Record<string, unknown>) {
     const { id, updatedAt, ...safeData } = data as any;
-    return this.prisma.systemSettings.update({ where: { id: "GLOBAL" }, data: safeData as any });
+    return this.prisma.systemSettings.update({
+      where: { id: "GLOBAL" },
+      data: safeData as any,
+    });
   }
 
   async directUpdate(model: string, id: string, field: string, value: unknown) {
@@ -35,22 +43,31 @@ export class SuperAdminService {
     let processedValue = value;
     if (value === "true") processedValue = true;
     else if (value === "false") processedValue = false;
-    else if (typeof value === "string" && value.trim() !== "" && !isNaN(Number(value))) {
+    else if (
+      typeof value === "string" &&
+      value.trim() !== "" &&
+      !isNaN(Number(value))
+    ) {
       processedValue = Number(value);
     }
 
-    return prismaModel.update({ where: { id }, data: { [field]: processedValue } });
+    return prismaModel.update({
+      where: { id },
+      data: { [field]: processedValue },
+    });
   }
 
   // â”€â”€ Company Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  async getAllCompanies(query: {
-    search?: string;
-    plan?: string;
-    status?: string;
-    page?: number;
-    limit?: number;
-  } = {}) {
+  async getAllCompanies(
+    query: {
+      search?: string;
+      plan?: string;
+      status?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ) {
     const { search, plan, status, page = 1, limit = 20 } = query;
     const where: Record<string, unknown> = { deletedAt: null };
 
@@ -85,9 +102,18 @@ export class SuperAdminService {
       include: {
         users: {
           where: { deletedAt: null },
-          select: { id: true, phone: true, fullName: true, roleType: true, isActive: true },
+          select: {
+            id: true,
+            phone: true,
+            fullName: true,
+            roleType: true,
+            isActive: true,
+          },
         },
-        branches: { where: { deletedAt: null }, select: { id: true, name: true } },
+        branches: {
+          where: { deletedAt: null },
+          select: { id: true, name: true },
+        },
         _count: {
           select: { dealers: true, orders: true, products: true },
         },
@@ -120,6 +146,36 @@ export class SuperAdminService {
     });
   }
 
+  async extendCompanySubscription(
+    id: string,
+    expiresAt: Date,
+    plan?: string,
+    status: string = "ACTIVE"
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const company = await tx.company.update({
+        where: { id },
+        data: {
+          ...(plan ? { subscriptionPlan: plan as any } : {}),
+          subscriptionStatus: status as any,
+          trialExpiresAt: expiresAt,
+        },
+      });
+
+      await tx.subscription.create({
+        data: {
+          companyId: id,
+          plan: (plan ?? company.subscriptionPlan) as any,
+          status: status as any,
+          amount: 0,
+          expiresAt,
+        },
+      });
+
+      return company;
+    });
+  }
+
   async setCompanyStatus(id: string, status: string) {
     return this.prisma.company.update({
       where: { id },
@@ -145,11 +201,13 @@ export class SuperAdminService {
     return this.prisma.news.delete({ where: { id } });
   }
 
-
-
   // â”€â”€ Broadcast â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  async broadcast(payload: { title: string; message: string; targetPlan?: string }) {
+  async broadcast(payload: {
+    title: string;
+    message: string;
+    targetPlan?: string;
+  }) {
     const where: Record<string, unknown> = { deletedAt: null };
     if (payload.targetPlan) where.subscriptionPlan = payload.targetPlan;
 
@@ -157,7 +215,11 @@ export class SuperAdminService {
       where,
       include: {
         users: {
-          where: { deletedAt: null, isActive: true, roleType: { notIn: ["SELLER", "SALES", "DELIVERY"] as any } },
+          where: {
+            deletedAt: null,
+            isActive: true,
+            roleType: { notIn: ["SELLER", "SALES", "DELIVERY"] as any },
+          },
           select: { id: true },
         },
       },
@@ -182,7 +244,9 @@ export class SuperAdminService {
 
   // â”€â”€ Audit Logs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  async getAuditLogs(query: { page?: number; limit?: number; userId?: string } = {}) {
+  async getAuditLogs(
+    query: { page?: number; limit?: number; userId?: string } = {}
+  ) {
     const { page = 1, limit = 50, userId } = query;
     const where: Record<string, unknown> = {};
     if (userId) where.userId = userId;
@@ -203,7 +267,14 @@ export class SuperAdminService {
 
   // â”€â”€ Leads â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  async getLeads(query: { status?: string; search?: string; page?: number; limit?: number } = {}) {
+  async getLeads(
+    query: {
+      status?: string;
+      search?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ) {
     const { status, search, page = 1, limit = 20 } = query;
     const where: Record<string, unknown> = { deletedAt: null };
     if (status) where.status = status;
@@ -251,11 +322,188 @@ export class SuperAdminService {
   async updateTariff(id: string, data: Record<string, unknown>) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _id, createdAt, updatedAt, ...updateData } = data;
-    return this.prisma.tariffPlan.update({ where: { id }, data: updateData as any });
+    return this.prisma.tariffPlan.update({
+      where: { id },
+      data: updateData as any,
+    });
   }
 
   async deleteTariff(id: string) {
     return this.prisma.tariffPlan.delete({ where: { id } });
+  }
+
+  async exportOverviewToWorkbook() {
+    const [summary, distributors, tariffs] = await Promise.all([
+      this.getOverviewSummary(),
+      this.prisma.company.findMany({
+        where: { deletedAt: null },
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          subscriptionPlan: true,
+          subscriptionStatus: true,
+          trialExpiresAt: true,
+          createdAt: true,
+        },
+        take: 100,
+      }),
+      this.getAllTariffs(),
+    ]);
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "Supplio";
+    workbook.created = new Date();
+
+    const summarySheet = workbook.addWorksheet("Overview");
+    summarySheet.columns = [
+      { header: "Metric", key: "metric", width: 28 },
+      { header: "Value", key: "value", width: 18 },
+    ];
+    summarySheet.addRows([
+      { metric: "Total Companies", value: summary.totalCompanies },
+      { metric: "Total Leads", value: summary.totalLeads },
+      { metric: "Open Tickets", value: summary.openTickets },
+      { metric: "Pending Upgrades", value: summary.pendingUpgrades },
+      { metric: "Active Subscriptions", value: summary.activeSubscriptions },
+      { metric: "Collected Payments", value: summary.collectedPayments },
+      { metric: "Subscription Revenue", value: summary.subscriptionRevenue },
+    ]);
+
+    const distributorsSheet = workbook.addWorksheet("Distributors");
+    distributorsSheet.columns = [
+      { header: "Name", key: "name", width: 30 },
+      { header: "Slug", key: "slug", width: 20 },
+      { header: "Plan", key: "plan", width: 14 },
+      { header: "Status", key: "status", width: 14 },
+      { header: "Expires At", key: "expiresAt", width: 22 },
+      { header: "Created At", key: "createdAt", width: 22 },
+    ];
+    distributorsSheet.addRows(
+      distributors.map((company) => ({
+        name: company.name,
+        slug: company.slug,
+        plan: company.subscriptionPlan,
+        status: company.subscriptionStatus,
+        expiresAt: company.trialExpiresAt?.toISOString?.() ?? "",
+        createdAt: company.createdAt.toISOString(),
+      }))
+    );
+
+    const tariffsSheet = workbook.addWorksheet("Tariffs");
+    tariffsSheet.columns = [
+      { header: "Plan", key: "plan", width: 14 },
+      { header: "Name", key: "name", width: 24 },
+      { header: "Price Monthly", key: "priceMonthly", width: 16 },
+      { header: "Price Yearly", key: "priceYearly", width: 16 },
+      { header: "Trial Days", key: "trialDays", width: 14 },
+      { header: "Max Branches", key: "maxBranches", width: 14 },
+      { header: "Max Users", key: "maxUsers", width: 12 },
+      { header: "Max Dealers", key: "maxDealers", width: 14 },
+      { header: "Max Products", key: "maxProducts", width: 14 },
+      { header: "Bots", key: "maxCustomBots", width: 10 },
+    ];
+    tariffsSheet.addRows(
+      tariffs.map((tariff) => ({
+        plan: tariff.planKey,
+        name: tariff.nameUz || tariff.nameEn || tariff.planKey,
+        priceMonthly: tariff.priceMonthly,
+        priceYearly: tariff.priceYearly,
+        trialDays: tariff.trialDays,
+        maxBranches: tariff.maxBranches,
+        maxUsers: tariff.maxUsers,
+        maxDealers: tariff.maxDealers,
+        maxProducts: tariff.maxProducts,
+        maxCustomBots: tariff.maxCustomBots,
+      }))
+    );
+
+    return workbook;
+  }
+
+  async exportDistributorAnalyticsToWorkbook(
+    companyId: string,
+    period: string = "30d"
+  ) {
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      select: { id: true, name: true, slug: true },
+    });
+    if (!company) throw new NotFoundException("Company not found");
+
+    const [dashboard, topDealers, topProducts, debtReport] = await Promise.all([
+      this.analyticsService.getDashboardStats(companyId, period as any),
+      this.analyticsService.getTopDealers(companyId, 10),
+      this.analyticsService.getTopProducts(companyId, 10),
+      this.analyticsService.getDebtReport(companyId),
+    ]);
+
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = "Supplio";
+    workbook.created = new Date();
+
+    const summarySheet = workbook.addWorksheet("Summary");
+    summarySheet.columns = [
+      { header: "Metric", key: "metric", width: 28 },
+      { header: "Value", key: "value", width: 20 },
+    ];
+    summarySheet.addRows([
+      { metric: "Company", value: company.name },
+      { metric: "Slug", value: company.slug },
+      { metric: "Period", value: dashboard.period },
+      { metric: "Revenue", value: dashboard.stats.revenue },
+      { metric: "Profit", value: dashboard.stats.profit },
+      { metric: "Gross Profit", value: dashboard.stats.grossProfit },
+      { metric: "Total Expenses", value: dashboard.stats.totalExpenses },
+      { metric: "Active Dealers", value: dashboard.stats.activeDealers },
+      { metric: "Debt", value: dashboard.stats.debt },
+      { metric: "Collected", value: dashboard.stats.collected },
+      { metric: "Products", value: dashboard.stats.products },
+      { metric: "Period Revenue", value: dashboard.stats.periodRevenue },
+      { metric: "Period Profit", value: dashboard.stats.periodProfit },
+      { metric: "Period Orders", value: dashboard.stats.periodOrders },
+      { metric: "Total Orders", value: dashboard.stats.totalOrders },
+    ]);
+
+    const chartSheet = workbook.addWorksheet("Chart");
+    chartSheet.columns = [
+      { header: "Date", key: "date", width: 18 },
+      { header: "Revenue", key: "revenue", width: 16 },
+      { header: "Profit", key: "profit", width: 16 },
+      { header: "Orders", key: "orders", width: 12 },
+    ];
+    chartSheet.addRows(dashboard.chart);
+
+    const dealersSheet = workbook.addWorksheet("Top Dealers");
+    dealersSheet.columns = [
+      { header: "Name", key: "name", width: 28 },
+      { header: "Orders", key: "totalOrders", width: 12 },
+      { header: "Amount", key: "totalAmount", width: 16 },
+      { header: "Debt", key: "currentDebt", width: 16 },
+      { header: "Credit Limit", key: "creditLimit", width: 16 },
+    ];
+    dealersSheet.addRows(topDealers);
+
+    const productsSheet = workbook.addWorksheet("Top Products");
+    productsSheet.columns = [
+      { header: "Name", key: "name", width: 28 },
+      { header: "Qty", key: "qty", width: 12 },
+      { header: "Revenue", key: "revenue", width: 16 },
+    ];
+    productsSheet.addRows(topProducts);
+
+    const debtsSheet = workbook.addWorksheet("Debts");
+    debtsSheet.columns = [
+      { header: "Name", key: "name", width: 28 },
+      { header: "Phone", key: "phone", width: 18 },
+      { header: "Current Debt", key: "currentDebt", width: 16 },
+      { header: "Credit Limit", key: "creditLimit", width: 16 },
+      { header: "Utilization %", key: "utilizationPercent", width: 14 },
+    ];
+    debtsSheet.addRows(debtReport.dealers);
+
+    return workbook;
   }
 
   // â”€â”€ Landing CMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -276,17 +524,22 @@ export class SuperAdminService {
     });
   }
 
-
   // â”€â”€ Feature Flags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async getAllFeatures() {
     return this.prisma.featureFlag.findMany({ orderBy: { featureKey: "asc" } });
   }
 
-  async setFeature(data: { companyId?: string; featureKey: string; isEnabled: boolean }) {
+  async setFeature(data: {
+    companyId?: string;
+    featureKey: string;
+    isEnabled: boolean;
+  }) {
     const { companyId, featureKey, isEnabled } = data;
     return this.prisma.featureFlag.upsert({
-      where: { featureKey_companyId: { featureKey, companyId: companyId ?? null } } as any,
+      where: {
+        featureKey_companyId: { featureKey, companyId: companyId ?? null },
+      } as any,
       update: { isEnabled },
       create: { featureKey, isEnabled, companyId: companyId ?? null } as any,
     });
@@ -313,8 +566,12 @@ export class SuperAdminService {
     ] = await Promise.all([
       this.prisma.company.count({ where: { deletedAt: null } }),
       this.prisma.lead.count({ where: { deletedAt: null } }),
-      (this.prisma as any).supportTicket.count({ where: { status: { in: ["OPEN", "IN_PROGRESS"] } } }),
-      (this.prisma as any).upgradeRequest.count({ where: { status: "PENDING" } }),
+      (this.prisma as any).supportTicket.count({
+        where: { status: { in: ["OPEN", "IN_PROGRESS"] } },
+      }),
+      (this.prisma as any).upgradeRequest.count({
+        where: { status: "PENDING" },
+      }),
       this.prisma.payment.aggregate({ _sum: { amount: true } }),
       this.prisma.subscription.aggregate({ _sum: { amount: true } }),
       this.prisma.subscription.count({ where: { status: "ACTIVE" as any } }),
@@ -337,7 +594,11 @@ export class SuperAdminService {
     return this.prisma.releaseNote.findMany({ orderBy: { createdAt: "desc" } });
   }
 
-  async createReleaseNote(data: { version: string; title: string; content: string }) {
+  async createReleaseNote(data: {
+    version: string;
+    title: string;
+    content: string;
+  }) {
     return this.prisma.releaseNote.create({ data });
   }
 
@@ -351,8 +612,19 @@ export class SuperAdminService {
     const company = await this.prisma.company.findUnique({
       where: { id: companyId },
       include: {
-        _count: { select: { dealers: true, users: true, branches: true, products: true } },
-        users: { where: { deletedAt: null, roleType: "OWNER" }, select: { phone: true, fullName: true }, take: 1 },
+        _count: {
+          select: {
+            dealers: true,
+            users: true,
+            branches: true,
+            products: true,
+          },
+        },
+        users: {
+          where: { deletedAt: null, roleType: "OWNER" },
+          select: { phone: true, fullName: true },
+          take: 1,
+        },
       },
     });
     if (!company) throw new Error("Company not found");
@@ -383,11 +655,23 @@ export class SuperAdminService {
   async getUpgradeRequests() {
     return (this.prisma as any).upgradeRequest.findMany({
       orderBy: { createdAt: "desc" },
-      include: { company: { select: { name: true, slug: true, subscriptionPlan: true, subscriptionStatus: true } } },
+      include: {
+        company: {
+          select: {
+            name: true,
+            slug: true,
+            subscriptionPlan: true,
+            subscriptionStatus: true,
+          },
+        },
+      },
     });
   }
 
-  async updateUpgradeRequest(id: string, data: { status: string; note?: string }) {
+  async updateUpgradeRequest(
+    id: string,
+    data: { status: string; note?: string }
+  ) {
     return this.prisma.$transaction(async (tx) => {
       const request = await (tx as any).upgradeRequest.findUnique({
         where: { id },
@@ -416,11 +700,16 @@ export class SuperAdminService {
       if (!company) throw new Error("Company not found");
 
       const expiresAt = new Date();
-      expiresAt.setDate(expiresAt.getDate() + Math.max(tariff.trialDays || 30, 30));
+      expiresAt.setDate(
+        expiresAt.getDate() + Math.max(tariff.trialDays || 30, 30)
+      );
 
       const tenantDbUrl =
         !company.dbConnectionUrl && planKey !== "FREE"
-          ? process.env.DATABASE_URL?.replace("supplio", `supplio_tenant_${company.slug}`)
+          ? process.env.DATABASE_URL?.replace(
+              "supplio",
+              `supplio_tenant_${company.slug}`
+            )
           : company.dbConnectionUrl;
 
       await tx.company.update({
@@ -451,12 +740,14 @@ export class SuperAdminService {
 
   // ── Distributor Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  async getDistributors(query: {
-    search?: string;
-    status?: string;
-    page?: number;
-    limit?: number;
-  } = {}) {
+  async getDistributors(
+    query: {
+      search?: string;
+      status?: string;
+      page?: number;
+      limit?: number;
+    } = {}
+  ) {
     const { search, status, page = 1, limit = 20 } = query;
     const where: Record<string, unknown> = { deletedAt: null };
 
@@ -500,7 +791,9 @@ export class SuperAdminService {
   }) {
     const passwordHash = await bcrypt.hash(data.password, 10);
     const trialDays = data.trialDays ?? 14;
-    const trialExpiresAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000);
+    const trialExpiresAt = new Date(
+      Date.now() + trialDays * 24 * 60 * 60 * 1000
+    );
 
     return this.prisma.$transaction(async (tx) => {
       const company = await tx.company.create({
@@ -588,7 +881,11 @@ export class SuperAdminService {
       where,
       include: {
         users: {
-          where: { deletedAt: null, isActive: true, roleType: { notIn: ["SELLER", "SALES", "DELIVERY"] as any } },
+          where: {
+            deletedAt: null,
+            isActive: true,
+            roleType: { notIn: ["SELLER", "SALES", "DELIVERY"] as any },
+          },
           select: { id: true },
         },
       },
@@ -608,7 +905,9 @@ export class SuperAdminService {
     }
 
     if (notifications.length === 0) return { count: 0 };
-    const result = await this.prisma.notification.createMany({ data: notifications });
+    const result = await this.prisma.notification.createMany({
+      data: notifications,
+    });
     return { count: result.count, companies: companies.length };
   }
 
@@ -643,15 +942,17 @@ export class SuperAdminService {
         const plural = days > 1 ? "s" : "";
         for (const company of companies) {
           for (const user of company.users) {
-            await this.prisma.notification.create({
-              data: {
-                companyId: company.id,
-                receiverUserId: user.id,
-                title: `Obuna ${days} kun${days > 1 ? "" : "da"} tugaydi`,
-                message: `Sizning Supplio obunangiz ${days} kun${plural} ichida tugaydi. Xizmatdan foydalanishni davom ettirish uchun obunani yangilang.`,
-                type: "WARNING",
-              },
-            }).catch(() => {});
+            await this.prisma.notification
+              .create({
+                data: {
+                  companyId: company.id,
+                  receiverUserId: user.id,
+                  title: `Obuna ${days} kun${days > 1 ? "" : "da"} tugaydi`,
+                  message: `Sizning Supplio obunangiz ${days} kun${plural} ichida tugaydi. Xizmatdan foydalanishni davom ettirish uchun obunani yangilang.`,
+                  type: "WARNING",
+                },
+              })
+              .catch(() => {});
           }
         }
       }

@@ -228,7 +228,6 @@ export default function Login() {
                   onChange={(e) =>
                     setPhoneNumber(formatPhoneNumber(e.target.value))
                   }
-                  readOnly={isDemoMode}
                 />
               </div>
             </div>

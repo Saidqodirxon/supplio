@@ -29,7 +29,7 @@ export class SuperAdminController {
   constructor(
     private readonly superAdminService: SuperAdminService,
     private readonly backupService: BackupService,
-    private readonly unitsService: UnitsService,
+    private readonly unitsService: UnitsService
   ) {}
 
   // ── Root Verification ─────────────────────────────────────────────────────
@@ -78,11 +78,17 @@ export class SuperAdminController {
 
   @Get("backups/download")
   @Roles("SUPER_ADMIN")
-  async downloadBackup(@Query("name") name: string, @Res({ passthrough: true }) res: Response) {
+  async downloadBackup(
+    @Query("name") name: string,
+    @Res({ passthrough: true }) res: Response
+  ) {
     try {
       const filePath = this.backupService.resolveBackupPath(name);
       res.setHeader("Content-Type", "application/octet-stream");
-      res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(name)}"`);
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${encodeURIComponent(name)}"`
+      );
       return new StreamableFile(createReadStream(filePath));
     } catch {
       throw new NotFoundException("Backup file not found");
@@ -108,7 +114,12 @@ export class SuperAdminController {
   async directUpdate(
     @Body() body: { model: string; id: string; field: string; value: any }
   ) {
-    return this.superAdminService.directUpdate(body.model, body.id, body.field, body.value);
+    return this.superAdminService.directUpdate(
+      body.model,
+      body.id,
+      body.field,
+      body.value
+    );
   }
 
   // ── Company Management ────────────────────────────────────────────────────
@@ -158,9 +169,31 @@ export class SuperAdminController {
     return this.superAdminService.setCompanyPlan(id, body.plan, body.status);
   }
 
+  @Patch("distributors/:id/subscription")
+  @Roles("SUPER_ADMIN")
+  async extendDistributorSubscription(
+    @Param("id") id: string,
+    @Body()
+    body: {
+      expiresAt: string;
+      plan?: string;
+      status?: string;
+    }
+  ) {
+    return this.superAdminService.extendCompanySubscription(
+      id,
+      new Date(body.expiresAt),
+      body.plan,
+      body.status || "ACTIVE"
+    );
+  }
+
   @Patch("company/:id/status")
   @Roles("SUPER_ADMIN")
-  async setCompanyStatus(@Param("id") id: string, @Body() body: { status: string }) {
+  async setCompanyStatus(
+    @Param("id") id: string,
+    @Body() body: { status: string }
+  ) {
     return this.superAdminService.setCompanyStatus(id, body.status);
   }
 
@@ -208,7 +241,7 @@ export class SuperAdminController {
     @Query("search") search?: string,
     @Query("status") status?: string,
     @Query("page") page?: string,
-    @Query("limit") limit?: string,
+    @Query("limit") limit?: string
   ) {
     return this.superAdminService.getDistributors({
       search,
@@ -221,7 +254,8 @@ export class SuperAdminController {
   @Post("distributors")
   @Roles("SUPER_ADMIN")
   async createDistributor(
-    @Body() body: {
+    @Body()
+    body: {
       companyName: string;
       slug: string;
       phone: string;
@@ -234,6 +268,61 @@ export class SuperAdminController {
     return this.superAdminService.createDistributor(body);
   }
 
+  @Get("overview/export")
+  @Roles("SUPER_ADMIN")
+  async exportOverviewExcel(@Res({ passthrough: true }) res: Response) {
+    const workbook = await this.superAdminService.exportOverviewToWorkbook();
+    const buffer = await workbook.xlsx.writeBuffer();
+    const fileName = `SUPPLIO_OVERVIEW_${new Date().toISOString().split("T")[0]}.xlsx`;
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    return new StreamableFile(Buffer.from(buffer));
+  }
+
+  @Get("distributors/:id/export")
+  @Roles("SUPER_ADMIN")
+  async exportDistributorExcel(
+    @Param("id") id: string,
+    @Query("period") period: string | undefined,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const company = await this.superAdminService.getCompanyById(id);
+    const workbook =
+      await this.superAdminService.exportDistributorAnalyticsToWorkbook(
+        id,
+        period || "30d"
+      );
+    const buffer = await workbook.xlsx.writeBuffer();
+    const safeSlug = company.slug.replace(/[^a-zA-Z0-9_.-]/g, "_");
+    const fileName = `SUPPLIO_${safeSlug.toUpperCase()}_${new Date().toISOString().split("T")[0]}.xlsx`;
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    return new StreamableFile(Buffer.from(buffer));
+  }
+
+  @Get("distributors/:id/export-sql")
+  @Roles("SUPER_ADMIN")
+  async exportDistributorSql(
+    @Param("id") id: string,
+    @Res({ passthrough: true }) res: Response
+  ) {
+    const company = await this.superAdminService.getCompanyById(id);
+    const filePath = await this.backupService.dumpCompanyDatabase(
+      id,
+      company.slug
+    );
+    const fileName = filePath.split(/[/\\]/).pop() || `${company.slug}.sql`;
+    res.setHeader("Content-Type", "application/sql");
+    res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+    return new StreamableFile(createReadStream(filePath));
+  }
+
   // ── Notify Distributors ───────────────────────────────────────────────────
 
   @Patch("distributors/:id/owner-password")
@@ -242,13 +331,17 @@ export class SuperAdminController {
     @Param("id") id: string,
     @Body() body: { password: string }
   ) {
-    return this.superAdminService.resetDistributorOwnerPassword(id, body.password);
+    return this.superAdminService.resetDistributorOwnerPassword(
+      id,
+      body.password
+    );
   }
 
   @Post("notify-distributors")
   @Roles("SUPER_ADMIN")
   async notifyDistributors(
-    @Body() body: {
+    @Body()
+    body: {
       title: string;
       message: string;
       type?: string;
@@ -320,7 +413,10 @@ export class SuperAdminController {
 
   @Patch("leads/:id")
   @Roles("SUPER_ADMIN")
-  async updateLead(@Param("id") id: string, @Body() body: { status?: string; info?: string }) {
+  async updateLead(
+    @Param("id") id: string,
+    @Body() body: { status?: string; info?: string }
+  ) {
     return this.superAdminService.updateLead(id, body);
   }
 
@@ -382,7 +478,9 @@ export class SuperAdminController {
 
   @Post("release-notes")
   @Roles("SUPER_ADMIN")
-  async createReleaseNote(@Body() body: { version: string; title: string; content: string }) {
+  async createReleaseNote(
+    @Body() body: { version: string; title: string; content: string }
+  ) {
     return this.superAdminService.createReleaseNote(body);
   }
 
@@ -397,7 +495,10 @@ export class SuperAdminController {
   @Post("upgrade-requests")
   @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
   async createUpgradeRequest(@Body() body: any, @Request() req: any) {
-    return this.superAdminService.createUpgradeRequest(req.user.companyId, body);
+    return this.superAdminService.createUpgradeRequest(
+      req.user.companyId,
+      body
+    );
   }
 
   @Get("upgrade-requests")
@@ -408,7 +509,10 @@ export class SuperAdminController {
 
   @Patch("upgrade-requests/:id")
   @Roles("SUPER_ADMIN")
-  async updateUpgradeRequest(@Param("id") id: string, @Body() body: { status: string; note?: string }) {
+  async updateUpgradeRequest(
+    @Param("id") id: string,
+    @Body() body: { status: string; note?: string }
+  ) {
     return this.superAdminService.updateUpgradeRequest(id, body);
   }
 }
