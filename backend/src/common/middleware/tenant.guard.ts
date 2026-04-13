@@ -56,9 +56,8 @@ export class TenantGuard implements CanActivate {
 
     // Subscription expiry lock
     if (
-      [SubscriptionStatus.TRIAL, SubscriptionStatus.ACTIVE].includes(
-        company.subscriptionStatus
-      ) &&
+      (company.subscriptionStatus === SubscriptionStatus.TRIAL ||
+        company.subscriptionStatus === SubscriptionStatus.ACTIVE) &&
       now > company.trialExpiresAt
     ) {
       throw new ForbiddenException({
