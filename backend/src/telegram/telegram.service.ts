@@ -554,12 +554,27 @@ export class TelegramService implements OnModuleInit {
         const t = this.getLangFromCtx(ctx);
         const chatId = String(ctx.chat.id);
 
-        const dealerMatch = await this.prisma.dealer.findFirst({
-          where: {
-            phone: { contains: phone.slice(-9) },
-            companyId,
-          },
+        // Search globally — phone has a global unique constraint in DB
+        const globalDealerMatch = await this.prisma.dealer.findFirst({
+          where: { phone: { contains: phone.slice(-9) } },
         });
+
+        // Phone is registered under a different company — cannot create here
+        if (globalDealerMatch && globalDealerMatch.companyId !== companyId) {
+          const chatId_ = String(ctx.chat?.id ?? "");
+          const lang_ = this.chatLangPrefs.get(chatId_) ?? "uz";
+          return ctx.reply(
+            lang_ === "ru"
+              ? "Этот номер уже зарегистрирован в другой системе. Обратитесь к вашему дистрибьютору."
+              : "Bu telefon raqami boshqa tizimda allaqachon ro'yxatdan o'tgan. Distributor bilan bog'laning.",
+            { reply_markup: { remove_keyboard: true } }
+          );
+        }
+
+        const dealerMatch =
+          globalDealerMatch?.companyId === companyId
+            ? globalDealerMatch
+            : null;
 
         const userMatch = await this.prisma.user.findFirst({
           where: {
@@ -578,25 +593,16 @@ export class TelegramService implements OnModuleInit {
             (await this.prisma.branch.findFirst({ where: { companyId } }))
               ?.id ||
             "";
-          try {
-            dealer = await this.prisma.dealer.create({
-              data: {
-                companyId,
-                branchId,
-                name: userMatch.fullName || "Admin",
-                phone: `+${phone}`,
-                isApproved: true,
-                telegramChatId: chatId,
-              },
-            });
-          } catch (e: any) {
-            if (e.code === "P2002") {
-              dealer = await this.prisma.dealer.findFirst({
-                where: { phone: { contains: phone.slice(-9) }, companyId },
-              });
-              if (!dealer) throw e;
-            } else throw e;
-          }
+          dealer = await this.prisma.dealer.create({
+            data: {
+              companyId,
+              branchId,
+              name: userMatch.fullName || "Admin",
+              phone: `+${phone}`,
+              isApproved: true,
+              telegramChatId: chatId,
+            },
+          });
         }
 
         if (!dealer) {
@@ -618,25 +624,16 @@ export class TelegramService implements OnModuleInit {
             `${contact.first_name || ""} ${contact.last_name || ""}`.trim() ||
             `Dealer ${phone.slice(-4)}`;
 
-          try {
-            dealer = await this.prisma.dealer.create({
-              data: {
-                companyId,
-                branchId: branch.id,
-                name: suggestedName,
-                phone: `+${phone}`,
-                telegramChatId: chatId,
-                isApproved: false,
-              },
-            });
-          } catch (e: any) {
-            if (e.code === "P2002") {
-              dealer = await this.prisma.dealer.findFirst({
-                where: { phone: { contains: phone.slice(-9) }, companyId },
-              });
-              if (!dealer) throw e;
-            } else throw e;
-          }
+          dealer = await this.prisma.dealer.create({
+            data: {
+              companyId,
+              branchId: branch.id,
+              name: suggestedName,
+              phone: `+${phone}`,
+              telegramChatId: chatId,
+              isApproved: false,
+            },
+          });
         }
 
         // Link chatId to dealer
