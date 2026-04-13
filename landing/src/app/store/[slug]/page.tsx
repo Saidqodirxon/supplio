@@ -67,10 +67,11 @@ function normalizeApiBaseUrl(rawUrl?: string) {
     host.endsWith(".supplio.uz") ||
     host === "www.supplio.uz";
   const isLocalEnvValue =
-    !envValue ||
-    /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(envValue);
+    !envValue || /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(envValue);
 
-  const fallback = isProdHost ? "https://api.supplio.uz" : "http://localhost:5000";
+  const fallback = isProdHost
+    ? "https://api.supplio.uz"
+    : "http://localhost:5000";
   const value = (isLocalEnvValue ? fallback : envValue).replace(/\/+$/, "");
   return value.endsWith("/api") ? value.slice(0, -4) : value;
 }

@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Req, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Req,
+  UseGuards,
+} from "@nestjs/common";
 import { TelegramService } from "./telegram.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { TenantGuard } from "../common/middleware/tenant.guard";
@@ -14,7 +24,10 @@ export class BotsController {
   @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
   async getBots(@Req() req: any) {
     const bots = await this.telegramService.getBotsForCompany(req.companyId);
-    return bots.map(b => ({ ...b, status: this.telegramService.getBotStatus(b.id) }));
+    return bots.map((b) => ({
+      ...b,
+      status: this.telegramService.getBotStatus(b.id),
+    }));
   }
 
   @Post("bots/validate")
@@ -27,8 +40,8 @@ export class BotsController {
   @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
   async getBotStatus(@Req() req: any) {
     const bots = await this.telegramService.getBotsForCompany(req.companyId);
-    const firstBot = bots.find(b => b.isActive);
-    if (!firstBot) return { status: 'not_found' };
+    const firstBot = bots.find((b) => b.isActive);
+    if (!firstBot) return { status: "not_found" };
     return { status: this.telegramService.getBotStatus(firstBot.id) };
   }
 
@@ -46,7 +59,13 @@ export class BotsController {
   async updateBot(
     @Req() req: any,
     @Param("id") id: string,
-    @Body() body: { token?: string; botName?: string; description?: string; isActive?: boolean }
+    @Body()
+    body: {
+      token?: string;
+      botName?: string;
+      description?: string;
+      isActive?: boolean;
+    }
   ) {
     return this.telegramService.updateBot(id, req.companyId, body);
   }
