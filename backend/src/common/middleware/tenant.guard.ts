@@ -54,14 +54,16 @@ export class TenantGuard implements CanActivate {
     // 2. Continuous Subscription Lockdown (Enterprise Requirement 8)
     const now = new Date();
 
-    // Trial Lock
+    // Subscription expiry lock
     if (
-      company.subscriptionStatus === SubscriptionStatus.TRIAL &&
+      [SubscriptionStatus.TRIAL, SubscriptionStatus.ACTIVE].includes(
+        company.subscriptionStatus
+      ) &&
       now > company.trialExpiresAt
     ) {
       throw new ForbiddenException({
         statusCode: 403,
-        message: "TRIAL_EXPIRED: Your 14-day evaluation has ended.",
+        message: "SUBSCRIPTION_EXPIRED: Your subscription period has ended.",
         trialEnd: company.trialExpiresAt,
         action: "UPGRADE_PLAN",
       });

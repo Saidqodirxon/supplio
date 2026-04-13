@@ -3,7 +3,7 @@ import * as bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 const DEMO_PHONE = "+998901000000";
-const DEMO_PASSWORD = "demo1234";
+const DEMO_PASSWORD = "demoUser";
 
 function isMissingTableError(error: unknown): boolean {
   if (!(error instanceof Prisma.PrismaClientKnownRequestError)) return false;
@@ -96,7 +96,7 @@ async function main() {
     data: {
       phone: DEMO_PHONE,
       passwordHash,
-      fullName: "Demo Distributor",
+      fullName: "demoUser",
       roleType: RoleType.OWNER,
       companyId: company.id,
       branchId: branches[0].id,
@@ -266,6 +266,7 @@ async function main() {
   console.log("Company:  Supplio Demo");
   console.log("Phone:   ", DEMO_PHONE);
   console.log("Password:", DEMO_PASSWORD);
+  console.log("User:     demoUser");
   console.log("URL:      demo.supplio.uz");
   console.log("========================\n");
 }

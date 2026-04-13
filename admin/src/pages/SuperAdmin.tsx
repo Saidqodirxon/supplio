@@ -2825,12 +2825,18 @@ export default function SuperAdmin() {
                                     );
                                   }
                                 }}
-                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${dist.subscriptionStatus === "LOCKED" ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white" : "bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white"}`}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all inline-flex items-center gap-1.5 ${dist.subscriptionStatus === "LOCKED" ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white" : "bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white"}`}
                               >
                                 {dist.subscriptionStatus === "LOCKED" ? (
-                                  <Check className="w-3.5 h-3.5" />
+                                  <>
+                                    <Check className="w-3.5 h-3.5" />
+                                    <span>Faollashtirish</span>
+                                  </>
                                 ) : (
-                                  <X className="w-3.5 h-3.5" />
+                                  <>
+                                    <X className="w-3.5 h-3.5" />
+                                    <span>Faolsizlantirish</span>
+                                  </>
                                 )}
                               </button>
                             </div>

@@ -25,9 +25,10 @@ import { getApiErrorMessage } from "../utils/apiError";
 function getPublicStoreBaseUrl() {
   return (
     import.meta.env.VITE_STORE_URL ||
+    import.meta.env.VITE_LANDING_URL ||
     import.meta.env.VITE_APP_URL ||
     import.meta.env.VITE_PUBLIC_SITE_URL ||
-    "https://app.supplio.uz"
+    "https://supplio.uz"
   ).replace(/\/+$/, "");
 }
 

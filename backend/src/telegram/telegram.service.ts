@@ -309,11 +309,28 @@ export class TelegramService implements OnModuleInit {
   private getPublicStoreBaseUrl() {
     return (
       process.env.PUBLIC_STORE_URL ||
+      process.env.LANDING_URL ||
       process.env.APP_URL ||
       process.env.PUBLIC_SITE_URL ||
       process.env.FRONTEND_URL ||
-      "https://app.supplio.uz"
+      "https://supplio.uz"
     ).replace(/\/+$/, "");
+  }
+
+  private isCompanyAccessBlocked(company: {
+    subscriptionStatus?: string | null;
+    trialExpiresAt?: Date | null;
+  } | null) {
+    if (!company) return true;
+    if (company.subscriptionStatus === "LOCKED") return true;
+    if (
+      company.trialExpiresAt &&
+      ["TRIAL", "ACTIVE"].includes(String(company.subscriptionStatus || "")) &&
+      new Date() > new Date(company.trialExpiresAt)
+    ) {
+      return true;
+    }
+    return false;
   }
 
   public async sendToAdmins(companyId: string, message: string) {
@@ -445,11 +462,7 @@ export class TelegramService implements OnModuleInit {
         });
         const t = this.getLangFromCtx(ctx);
 
-        if (
-          company?.subscriptionStatus === "LOCKED" ||
-          (company?.subscriptionStatus === "TRIAL" &&
-            new Date() > company.trialExpiresAt)
-        ) {
+        if (this.isCompanyAccessBlocked(company)) {
           return ctx.reply(t.suspended);
         }
 
@@ -470,6 +483,7 @@ export class TelegramService implements OnModuleInit {
             return ctx.reply(pending ? t.pendingApproval : t.accessDenied);
           }
 
+          const limits = await this.planLimits.getLimitsForCompany(companyId);
           const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
           await ctx.reply(
             `👋 *${existingDealer.name}*${t.loginSuccess}${t.commands}`,
@@ -478,13 +492,15 @@ export class TelegramService implements OnModuleInit {
               reply_markup: this.buildMainMenuKeyboard(t),
             }
           );
-          await ctx.reply(`🛍 ${companyName}`, {
-            reply_markup: {
-              inline_keyboard: [
-                [{ text: "🛍 Online do'kon", web_app: { url: storeUrl } }],
-              ],
-            },
-          });
+          if (limits.allowWebStore) {
+            await ctx.reply(`🛍 ${companyName}`, {
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "🛍 Online do'kon", web_app: { url: storeUrl } }],
+                ],
+              },
+            });
+          }
           return;
         }
 
@@ -601,20 +617,28 @@ export class TelegramService implements OnModuleInit {
         const company = await this.prisma.company.findUnique({
           where: { id: companyId },
         });
+        if (this.isCompanyAccessBlocked(company)) {
+          return ctx.reply(t.suspended, {
+            reply_markup: { remove_keyboard: true },
+          });
+        }
+        const limits = await this.planLimits.getLimitsForCompany(companyId);
         const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
 
         // Set MenuButton WebApp
-        try {
-          // @ts-ignore - Telegraf library type versioning can be tricky.
-          await bot.telegram.setChatMenuButton({
-            chatId: ctx.chat.id,
-            menuButton: {
-              type: "web_app",
-              text: "🌐 Web Do'kon",
-              web_app: { url: storeUrl },
-            },
-          });
-        } catch (e) {}
+        if (limits.allowWebStore) {
+          try {
+            // @ts-ignore - Telegraf library type versioning can be tricky.
+            await bot.telegram.setChatMenuButton({
+              chatId: ctx.chat.id,
+              menuButton: {
+                type: "web_app",
+                text: "🌐 Web Do'kon",
+                web_app: { url: storeUrl },
+              },
+            });
+          } catch (e) {}
+        }
 
         await ctx.reply(
           `✅ *${dealer.name}*${t.loginSuccess}\n\nQuyidagi tugmalardan foydalaning:`,
@@ -698,20 +722,23 @@ export class TelegramService implements OnModuleInit {
 
       // Set global default menu button to the web store for all users
       try {
-        const company = await this.prisma.company.findUnique({
-          where: { id: companyId },
-        });
-        const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
-        await bot.telegram.setChatMenuButton({
-          menuButton: {
-            type: "web_app",
-            text: "🛍 Web Do'kon",
-            web_app: { url: storeUrl },
-          },
-        } as any);
-        this.logger.log(
-          `✅ Global menu button set for ${companyName}: ${storeUrl}`
-        );
+        const [company, limits] = await Promise.all([
+          this.prisma.company.findUnique({ where: { id: companyId } }),
+          this.planLimits.getLimitsForCompany(companyId),
+        ]);
+        if (limits.allowWebStore) {
+          const storeUrl = `${this.getPublicStoreBaseUrl()}/store/${company?.slug || companyId}`;
+          await bot.telegram.setChatMenuButton({
+            menuButton: {
+              type: "web_app",
+              text: "🛍 Web Do'kon",
+              web_app: { url: storeUrl },
+            },
+          } as any);
+          this.logger.log(
+            `✅ Global menu button set for ${companyName}: ${storeUrl}`
+          );
+        }
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
         this.logger.warn(
@@ -965,6 +992,13 @@ export class TelegramService implements OnModuleInit {
         }
       }
       if (action === "store_link") {
+        const limits = await this.planLimits.getLimitsForCompany(companyId);
+        if (!limits.allowWebStore) {
+          await (ctx as any).reply(
+            "⚠️ Joriy tarifda Web do'kon funksiyasi mavjud emas."
+          );
+          return;
+        }
         const company = await this.prisma.company.findUnique({
           where: { id: companyId },
         });
@@ -1420,6 +1454,14 @@ export class TelegramService implements OnModuleInit {
   private async getDealerByChatId(ctx: Context, companyId: string) {
     const chatId = String(ctx.chat?.id);
     const t = this.getLangFromCtx(ctx);
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      select: { subscriptionStatus: true, trialExpiresAt: true },
+    });
+    if (this.isCompanyAccessBlocked(company)) {
+      await ctx.reply(t.suspended);
+      return null;
+    }
     const dealer = await this.prisma.dealer.findFirst({
       where: { telegramChatId: chatId, companyId, deletedAt: null },
     });
@@ -1591,6 +1633,22 @@ export class TelegramService implements OnModuleInit {
       where: { id, companyId, deletedAt: null },
     });
     if (!bot) throw new Error("Bot not found");
+    if (data.isActive === true && !bot.isActive) {
+      const limits = await this.planLimits.getLimitsForCompany(companyId);
+      if (!limits.allowCustomBot || limits.maxCustomBots <= 0) {
+        throw new BadRequestException(
+          "Telegram bot is not available on your current plan. Please upgrade your tariff."
+        );
+      }
+      const activeCount = await this.prisma.customBot.count({
+        where: { companyId, deletedAt: null, isActive: true },
+      });
+      if (activeCount >= limits.maxCustomBots) {
+        throw new BadRequestException(
+          `Telegram bot limit reached. Your current plan allows up to ${limits.maxCustomBots}. Please upgrade your tariff.`
+        );
+      }
+    }
     const updated = await this.prisma.customBot.update({ where: { id }, data });
     if (data.isActive === true || data.token) {
       const company = await this.prisma.company.findUnique({

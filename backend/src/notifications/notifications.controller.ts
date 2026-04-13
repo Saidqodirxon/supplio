@@ -14,6 +14,7 @@ import { NotificationService } from "./notifications.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { TenantGuard } from "../common/middleware/tenant.guard";
 import { Request } from "express";
+import { PlanLimitsService } from "../common/services/plan-limits.service";
 
 interface AuthenticatedRequest extends Request {
   user: {
@@ -28,7 +29,14 @@ interface AuthenticatedRequest extends Request {
 @Controller("notifications")
 @UseGuards(JwtAuthGuard, TenantGuard)
 export class NotificationsController {
-  constructor(private readonly notifService: NotificationService) {}
+  constructor(
+    private readonly notifService: NotificationService,
+    private readonly planLimits: PlanLimitsService
+  ) {}
+
+  private async ensureNotificationsAllowed(companyId: string) {
+    await this.planLimits.checkFeatureAllowed(companyId, "allowNotifications");
+  }
 
   /** Get current user's notifications */
   @Get()
@@ -37,6 +45,7 @@ export class NotificationsController {
     @Query("page") page?: string,
     @Query("limit") limit?: string
   ) {
+    await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.getUserNotifications(
       req.user.id,
       req.companyId,
@@ -48,6 +57,7 @@ export class NotificationsController {
   /** Get unread count */
   @Get("unread-count")
   async getUnreadCount(@Req() req: AuthenticatedRequest) {
+    await this.ensureNotificationsAllowed(req.companyId);
     const count = await this.notifService.getUnreadCount(
       req.user.id,
       req.companyId
@@ -58,6 +68,7 @@ export class NotificationsController {
   /** Mark single notification as read */
   @Patch(":id/read")
   async markAsRead(@Param("id") id: string, @Req() req: AuthenticatedRequest) {
+    await this.ensureNotificationsAllowed(req.companyId);
     await this.notifService.markAsRead(id, req.user.id);
     return { success: true };
   }
@@ -65,6 +76,7 @@ export class NotificationsController {
   /** Mark all as read */
   @Patch("read-all")
   async markAllAsRead(@Req() req: AuthenticatedRequest) {
+    await this.ensureNotificationsAllowed(req.companyId);
     await this.notifService.markAllAsRead(req.user.id, req.companyId);
     return { success: true };
   }
@@ -75,6 +87,7 @@ export class NotificationsController {
     @Req() req: AuthenticatedRequest,
     @Body() body: { title: string; message: string; type?: string; receiverDealerId?: string }
   ) {
+    await this.ensureNotificationsAllowed(req.companyId);
     if (body.receiverDealerId) {
       return this.notifService.createForDealer({
         companyId: req.companyId,
@@ -106,6 +119,7 @@ export class NotificationsController {
       type?: string;
     }
   ) {
+    await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.createForUser({
       companyId: req.companyId,
       senderId: req.user.id,
@@ -122,6 +136,7 @@ export class NotificationsController {
     @Req() req: AuthenticatedRequest,
     @Body() body: { title: string; message: string; type?: string }
   ) {
+    await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.broadcastToCompany({
       companyId: req.companyId,
       senderId: req.user.id,
@@ -135,6 +150,7 @@ export class NotificationsController {
 
   @Get("templates")
   async getTemplates(@Req() req: AuthenticatedRequest) {
+    await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.getTemplates(req.companyId);
   }
 
@@ -143,6 +159,7 @@ export class NotificationsController {
     @Req() req: AuthenticatedRequest,
     @Body() body: { name: string; type: string; message: Record<string, string>; isActive?: boolean }
   ) {
+    await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.createTemplate(req.companyId, body);
   }
 
@@ -152,11 +169,13 @@ export class NotificationsController {
     @Param("id") id: string,
     @Body() body: { name?: string; type?: string; message?: Record<string, string>; isActive?: boolean }
   ) {
+    await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.updateTemplate(req.companyId, id, body);
   }
 
   @Delete("templates/:id")
   async deleteTemplate(@Req() req: AuthenticatedRequest, @Param("id") id: string) {
+    await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.deleteTemplate(req.companyId, id);
   }
 
@@ -165,6 +184,7 @@ export class NotificationsController {
     @Req() req: AuthenticatedRequest,
     @Query("templateId") templateId?: string
   ) {
+    await this.ensureNotificationsAllowed(req.companyId);
     return this.notifService.getTemplateLogs(req.companyId, templateId);
   }
 }

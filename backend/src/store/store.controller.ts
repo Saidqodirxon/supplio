@@ -7,16 +7,37 @@ import {
   ForbiddenException,
   Post,
   Body,
+  Headers,
   BadRequestException,
   Logger,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { PlanLimitsService } from "../common/services/plan-limits.service";
 
 @Controller("store")
 export class StoreController {
   private readonly logger = new Logger(StoreController.name);
 
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private planLimits: PlanLimitsService
+  ) {}
+
+  private isCompanyAccessBlocked(company: {
+    subscriptionStatus?: string | null;
+    trialExpiresAt?: Date | null;
+  } | null) {
+    if (!company) return true;
+    if (company.subscriptionStatus === "LOCKED") return true;
+    if (
+      company.trialExpiresAt &&
+      ["TRIAL", "ACTIVE"].includes(String(company.subscriptionStatus || "")) &&
+      new Date() > new Date(company.trialExpiresAt)
+    ) {
+      return true;
+    }
+    return false;
+  }
 
   /** Get public company info by slug */
   @Get(":slug/info")
@@ -24,6 +45,7 @@ export class StoreController {
     const company = await this.prisma.company.findFirst({
       where: { slug, deletedAt: null, siteActive: true },
       select: {
+        id: true,
         name: true,
         slug: true,
         logo: true,
@@ -39,17 +61,12 @@ export class StoreController {
       throw new NotFoundException("Company not found or store is disabled");
     }
 
-    // Check lockdown
-    if (company.subscriptionStatus === "LOCKED") {
+    // Check lockdown/expiry
+    if (this.isCompanyAccessBlocked(company)) {
       throw new ForbiddenException("Store temporarily suspended");
     }
 
-    if (
-      company.subscriptionStatus === "TRIAL" &&
-      new Date() > company.trialExpiresAt
-    ) {
-      throw new ForbiddenException("Maintenance in progress");
-    }
+    await this.planLimits.checkFeatureAllowed(company.id as string, "allowWebStore");
 
     return company;
   }
@@ -62,6 +79,8 @@ export class StoreController {
       select: { id: true },
     });
     if (!company) throw new NotFoundException("Company not found");
+
+    await this.planLimits.checkFeatureAllowed(company.id, "allowWebStore");
 
     return this.prisma.category.findMany({
       where: { companyId: company.id, deletedAt: null },
@@ -91,13 +110,11 @@ export class StoreController {
       select: { subscriptionStatus: true, trialExpiresAt: true },
     });
 
-    if (
-      compInfo?.subscriptionStatus === "LOCKED" ||
-      (compInfo?.subscriptionStatus === "TRIAL" &&
-        new Date() > (compInfo?.trialExpiresAt || 0))
-    ) {
+    if (this.isCompanyAccessBlocked(compInfo)) {
       throw new ForbiddenException("Catalog unavailable");
     }
+
+    await this.planLimits.checkFeatureAllowed(company.id, "allowWebStore");
 
     const where: Record<string, unknown> = {
       companyId: company.id,
@@ -131,14 +148,30 @@ export class StoreController {
   @Post(":slug/identify")
   async identifyDealer(
     @Param("slug") slug: string,
-    @Body("phone") phone: string
+    @Body("phone") phone: string,
+    @Headers("x-supplio-channel") channel?: string
   ) {
+    if (channel !== "telegram-webapp") {
+      throw new ForbiddenException(
+        "Buyurtma berish faqat Telegram bot ichida mavjud"
+      );
+    }
+
     const company = await this.prisma.company.findFirst({
       where: { slug, deletedAt: null },
       select: { id: true },
     });
 
     if (!company) throw new NotFoundException("Company not found");
+
+    const companyAccess = await this.prisma.company.findUnique({
+      where: { id: company.id },
+      select: { subscriptionStatus: true, trialExpiresAt: true },
+    });
+    if (this.isCompanyAccessBlocked(companyAccess)) {
+      throw new ForbiddenException("Store temporarily suspended");
+    }
+    await this.planLimits.checkFeatureAllowed(company.id, "allowWebStore");
 
     let cleanPhone = phone.replace("+", "");
     const dealer = await this.prisma.dealer.findFirst({
@@ -169,14 +202,30 @@ export class StoreController {
   @Post(":slug/order")
   async placeOrder(
     @Param("slug") slug: string,
+    @Headers("x-supplio-channel") channel: string | undefined,
     @Body()
     body: { dealerId: string; items: { productId: string; quantity: number }[] }
   ) {
+    if (channel !== "telegram-webapp") {
+      throw new ForbiddenException(
+        "Buyurtma berish faqat Telegram bot ichida mavjud"
+      );
+    }
+
     const company = await this.prisma.company.findFirst({
       where: { slug, deletedAt: null },
       select: { id: true },
     });
     if (!company) throw new NotFoundException("Company not found");
+
+    const companyAccess = await this.prisma.company.findUnique({
+      where: { id: company.id },
+      select: { subscriptionStatus: true, trialExpiresAt: true },
+    });
+    if (this.isCompanyAccessBlocked(companyAccess)) {
+      throw new ForbiddenException("Store temporarily suspended");
+    }
+    await this.planLimits.checkFeatureAllowed(company.id, "allowWebStore");
 
     const dealer = await this.prisma.dealer.findUnique({
       where: { id: body.dealerId },

@@ -73,10 +73,24 @@ export default function StorePage() {
   const [orderState, setOrderState] = useState<OrderState>("idle");
   const [orderError, setOrderError] = useState("");
   const [orderId, setOrderId] = useState("");
+  const [isTelegramWebApp, setIsTelegramWebApp] = useState(false);
 
   const API = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
   const imgUrl = (url?: string | null) =>
     !url ? '' : url.startsWith('http') ? url : `${API}${url}`;
+  const botUrl = company?.telegram
+    ? `https://t.me/${company.telegram.replace("@", "")}`
+    : "https://t.me";
+
+  useEffect(() => {
+    const isTg =
+      typeof window !== "undefined" &&
+      Boolean((window as any)?.Telegram?.WebApp);
+    setIsTelegramWebApp(isTg);
+    if (!isTg) {
+      setIsIdentified(true);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -118,6 +132,7 @@ export default function StorePage() {
   });
 
   const updateCart = (productId: string, delta: number) => {
+    if (!isTelegramWebApp) return;
     setCart((prev) => {
       const next = new Map(prev);
       const current = next.get(productId) || 0;
@@ -139,11 +154,18 @@ export default function StorePage() {
 
   const handleIdentify = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isTelegramWebApp) {
+      setPhoneError("Buyurtma berish uchun Telegram botga kiring.");
+      return;
+    }
     setPhoneError("");
     try {
       const res = await fetch(`${API}/api/store/${companySlug}/identify`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-supplio-channel": "telegram-webapp",
+        },
         body: JSON.stringify({ phone }),
       });
       if (res.ok) {
@@ -160,6 +182,11 @@ export default function StorePage() {
   };
 
   const handlePlaceOrder = async () => {
+    if (!isTelegramWebApp) {
+      setOrderState("error");
+      setOrderError("Buyurtma berish uchun Telegram botdan foydalaning.");
+      return;
+    }
     if (!dealer) return;
     setOrderState("loading");
     setOrderError("");
@@ -170,7 +197,10 @@ export default function StorePage() {
       }));
       const res = await fetch(`${API}/api/store/${companySlug}/order`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-supplio-channel": "telegram-webapp",
+        },
         body: JSON.stringify({ dealerId: dealer.id, items }),
       });
       if (res.ok) {
@@ -270,6 +300,23 @@ export default function StorePage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-5 py-8">
+        {!isTelegramWebApp && (
+          <div className="mb-6 p-4 rounded-2xl border border-amber-200 bg-amber-50 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-amber-900">Bu sahifa faqat katalog rejimida ishlayapti</p>
+              <p className="text-xs text-amber-700">Narxlar va mahsulotlarni ko'rasiz. Buyurtma berish uchun Telegram botga kiring.</p>
+            </div>
+            <a
+              href={botUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-colors"
+            >
+              Botni ochish
+            </a>
+          </div>
+        )}
+
         {/* Dealer info banner */}
         {dealer && (
           <motion.div
@@ -356,7 +403,7 @@ export default function StorePage() {
                     transition={{ delay: i * 0.04 }}
                     className="group bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-xl hover:border-blue-100 transition-all duration-300"
                   >
-                    <div className="h-44 bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center relative overflow-hidden">
+                    <div className="h-44 bg-linear-to-br from-slate-50 to-slate-100 flex items-center justify-center relative overflow-hidden">
                       {product.imageUrl ? (
                         <img src={imgUrl(product.imageUrl)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       ) : (
@@ -396,7 +443,7 @@ export default function StorePage() {
                         </div>
                       </div>
 
-                      {qty > 0 ? (
+                      {isTelegramWebApp && qty > 0 ? (
                         <div className="flex items-center justify-between bg-blue-50 rounded-xl p-1">
                           <button
                             onClick={() => updateCart(product.id, -1)}
@@ -413,7 +460,7 @@ export default function StorePage() {
                             <Plus className="w-4 h-4" />
                           </button>
                         </div>
-                      ) : (
+                      ) : isTelegramWebApp ? (
                         <button
                           onClick={() => updateCart(product.id, 1)}
                           disabled={product.stock <= 0}
@@ -422,6 +469,16 @@ export default function StorePage() {
                           <ShoppingBag className="w-4 h-4" />
                           Add to cart
                         </button>
+                      ) : (
+                        <a
+                          href={botUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full py-2.5 bg-slate-100 text-slate-700 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-slate-200 transition-all"
+                        >
+                          <Phone className="w-4 h-4" />
+                          Buyurtma uchun botga o'ting
+                        </a>
                       )}
                     </div>
                   </motion.div>
@@ -433,7 +490,7 @@ export default function StorePage() {
       </div>
 
       {/* Floating Cart CTA */}
-      {totalItems > 0 && !isCheckoutOpen && (
+      {isTelegramWebApp && totalItems > 0 && !isCheckoutOpen && (
         <motion.div
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -457,12 +514,12 @@ export default function StorePage() {
 
       {/* Identification Screen */}
       <AnimatePresence>
-        {!isIdentified && (
+        {isTelegramWebApp && !isIdentified && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-white p-6"
+            className="fixed inset-0 z-60 flex items-center justify-center bg-white p-6"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -470,7 +527,7 @@ export default function StorePage() {
               className="max-w-md w-full text-center space-y-8"
             >
               <div className="space-y-4">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-3xl flex items-center justify-center text-white mx-auto shadow-2xl shadow-blue-600/30">
+                <div className="w-20 h-20 bg-linear-to-br from-blue-600 to-blue-700 rounded-3xl flex items-center justify-center text-white mx-auto shadow-2xl shadow-blue-600/30">
                   <Package className="w-10 h-10" />
                 </div>
                 <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Welcome!</h2>
@@ -517,8 +574,8 @@ export default function StorePage() {
 
       {/* Checkout Drawer */}
       <AnimatePresence>
-        {isCheckoutOpen && (
-          <div className="fixed inset-0 z-[70] flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+        {isTelegramWebApp && isCheckoutOpen && (
+          <div className="fixed inset-0 z-70 flex items-end sm:items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
             <motion.div
               initial={{ y: 200, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
