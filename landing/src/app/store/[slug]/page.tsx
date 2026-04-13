@@ -96,6 +96,8 @@ export default function StorePage() {
   const [orderError, setOrderError] = useState("");
   const [orderId, setOrderId] = useState("");
   const [isTelegramWebApp, setIsTelegramWebApp] = useState(false);
+  const [telegramUserId, setTelegramUserId] = useState<string>("");
+  const [telegramUserName, setTelegramUserName] = useState<string>("");
 
   const API = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
   const imgUrl = (url?: string | null) =>
@@ -125,6 +127,15 @@ export default function StorePage() {
     const syncMode = () => {
       const isTg = detectTelegramWebApp();
       if (isTg) {
+        const tgUser = (window as any)?.Telegram?.WebApp?.initDataUnsafe?.user;
+        if (tgUser?.id) {
+          setTelegramUserId(String(tgUser.id));
+          setTelegramUserName(
+            [tgUser.first_name, tgUser.last_name].filter(Boolean).join(" ") ||
+              tgUser.username ||
+              ""
+          );
+        }
         setIsTelegramWebApp(true);
         setIsIdentified(false);
         return true;
@@ -147,6 +158,42 @@ export default function StorePage() {
 
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    const autoIdentifyByTelegram = async () => {
+      if (!isTelegramWebApp || !telegramUserId || isIdentified || dealer) return;
+      try {
+        const res = await fetch(`${API}/api/store/${companySlug}/identify`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-supplio-channel": "telegram-webapp",
+          },
+          body: JSON.stringify({
+            telegramUserId,
+            name: telegramUserName,
+            phone,
+          }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setDealer(data);
+          setIsIdentified(true);
+        }
+      } catch {}
+    };
+
+    autoIdentifyByTelegram();
+  }, [
+    API,
+    companySlug,
+    dealer,
+    isIdentified,
+    isTelegramWebApp,
+    phone,
+    telegramUserId,
+    telegramUserName,
+  ]);
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -226,7 +273,11 @@ export default function StorePage() {
           "Content-Type": "application/json",
           "x-supplio-channel": "telegram-webapp",
         },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({
+          phone,
+          telegramUserId,
+          name: telegramUserName,
+        }),
       });
       if (res.ok) {
         const data = await res.json();

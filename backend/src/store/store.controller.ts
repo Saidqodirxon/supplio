@@ -154,6 +154,8 @@ export class StoreController {
   async identifyDealer(
     @Param("slug") slug: string,
     @Body("phone") phone: string,
+    @Body("telegramUserId") telegramUserId?: string,
+    @Body("name") name?: string,
     @Headers("x-supplio-channel") channel?: string
   ) {
     if (channel !== "telegram-webapp") {
@@ -178,7 +180,47 @@ export class StoreController {
     }
     await this.planLimits.checkFeatureAllowed(company.id, "allowWebStore");
 
-    let cleanPhone = phone.replace("+", "");
+    const chatId = telegramUserId ? String(telegramUserId) : "";
+
+    if (chatId) {
+      const dealerByChat = await this.prisma.dealer.findFirst({
+        where: {
+          companyId: company.id,
+          telegramChatId: chatId,
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          creditLimit: true,
+          currentDebt: true,
+          branchId: true,
+          isApproved: true,
+          isBlocked: true,
+        },
+      });
+
+      if (dealerByChat) {
+        if (dealerByChat.isBlocked) {
+          throw new ForbiddenException("Hisob bloklangan. Distributor bilan bog'laning.");
+        }
+        if (!dealerByChat.isApproved) {
+          throw new ForbiddenException(
+            "So'rovingiz yuborilgan. Distributor tasdiqlashini kuting."
+          );
+        }
+
+        const { isApproved, isBlocked, ...dealerPayload } = dealerByChat as any;
+        return dealerPayload;
+      }
+    }
+
+    const cleanPhone = (phone || "").replace("+", "");
+    if (!cleanPhone) {
+      throw new BadRequestException("Telefon raqami talab qilinadi");
+    }
+
     const dealer = await this.prisma.dealer.findFirst({
       where: {
         companyId: company.id,
@@ -192,15 +234,80 @@ export class StoreController {
         creditLimit: true,
         currentDebt: true,
         branchId: true,
+        isApproved: true,
+        isBlocked: true,
       },
     });
 
-    if (!dealer)
-      throw new NotFoundException(
-        "Diler topilmadi. Iltimos, raqamni tekshiring yoki menejer bilan bog'laning."
-      );
+    if (dealer) {
+      if (dealer.isBlocked) {
+        throw new ForbiddenException("Hisob bloklangan. Distributor bilan bog'laning.");
+      }
 
-    return dealer;
+      // Link telegram chat if user came from Telegram web app.
+      if (chatId && dealer.telegramChatId !== chatId) {
+        await this.prisma.dealer.update({
+          where: { id: dealer.id },
+          data: { telegramChatId: chatId },
+        });
+      }
+
+      if (!dealer.isApproved) {
+        const pending = await (this.prisma as any).dealerApprovalRequest.findFirst({
+          where: { dealerId: dealer.id, status: "PENDING" },
+        });
+        if (!pending) {
+          await (this.prisma as any).dealerApprovalRequest.create({
+            data: {
+              companyId: company.id,
+              dealerId: dealer.id,
+              status: "PENDING",
+              requestedAt: new Date(),
+            },
+          });
+        }
+        throw new ForbiddenException(
+          "So'rovingiz yuborilgan. Distributor tasdiqlashini kuting."
+        );
+      }
+
+      const { isApproved, isBlocked, ...dealerPayload } = dealer as any;
+      return dealerPayload;
+    }
+
+    // If dealer does not exist in this store, create as pending request.
+    const defaultBranch = await this.prisma.branch.findFirst({
+      where: { companyId: company.id, deletedAt: null },
+      select: { id: true },
+      orderBy: { createdAt: "asc" },
+    });
+    if (!defaultBranch?.id) {
+      throw new BadRequestException("Filial topilmadi. Distributor bilan bog'laning.");
+    }
+
+    const pendingDealer = await this.prisma.dealer.create({
+      data: {
+        companyId: company.id,
+        branchId: defaultBranch.id,
+        name: (name || "Yangi diler").trim(),
+        phone: cleanPhone.startsWith("+") ? cleanPhone : `+${cleanPhone}`,
+        telegramChatId: chatId || null,
+        isApproved: false,
+      },
+    });
+
+    await (this.prisma as any).dealerApprovalRequest.create({
+      data: {
+        companyId: company.id,
+        dealerId: pendingDealer.id,
+        status: "PENDING",
+        requestedAt: new Date(),
+      },
+    });
+
+    throw new ForbiddenException(
+      "Ro'yxatdan o'tish so'rovi yuborildi. Distributor tasdiqlashini kuting."
+    );
   }
 
   /** Place order from public store */
@@ -237,6 +344,12 @@ export class StoreController {
     });
     if (!dealer || dealer.companyId !== company.id)
       throw new BadRequestException("Invalid dealer");
+    if (!dealer.isApproved) {
+      throw new ForbiddenException("Dealer hali tasdiqlanmagan");
+    }
+    if (dealer.isBlocked) {
+      throw new ForbiddenException("Dealer bloklangan");
+    }
 
     // 1. Calculate total and check stock
     let total = 0;

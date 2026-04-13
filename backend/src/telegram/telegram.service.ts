@@ -15,6 +15,7 @@ export class TelegramService implements OnModuleInit {
   private bots: Map<string, Telegraf> = new Map(); // Key is botId (UUID)
   // carts[companyId][chatId][productId] = qty
   private carts: Map<string, Map<string, Map<string, number>>> = new Map();
+  private chatLangPrefs: Map<string, string> = new Map();
 
   constructor(
     private prisma: PrismaService,
@@ -378,12 +379,33 @@ export class TelegramService implements OnModuleInit {
 
   /** Detect language from Telegram ctx.from.language_code and return translations */
   private getLangFromCtx(ctx: Context) {
+    const chatId = String(ctx.chat?.id ?? (ctx.from as any)?.id ?? "");
+    const preferred = chatId ? this.chatLangPrefs.get(chatId) : undefined;
+    if (preferred && this.translations[preferred]) {
+      return this.translations[preferred];
+    }
+
     const code = (ctx.from as any)?.language_code ?? "uz";
     let lang = "uz";
     if (code.startsWith("ru")) lang = "ru";
     else if (code.startsWith("tr")) lang = "tr";
     else if (code.startsWith("en")) lang = "en";
     return this.translations[lang] ?? this.translations["uz"];
+  }
+
+  private buildLanguageKeyboard() {
+    return {
+      inline_keyboard: [
+        [
+          { text: "🇺🇿 O'zbek", callback_data: "lang:set:uz" },
+          { text: "🇷🇺 Русский", callback_data: "lang:set:ru" },
+        ],
+        [
+          { text: "🇹🇷 Türkçe", callback_data: "lang:set:tr" },
+          { text: "🇬🇧 English", callback_data: "lang:set:en" },
+        ],
+      ],
+    };
   }
 
   /** Build main menu keyboard for a given translation */
@@ -462,13 +484,21 @@ export class TelegramService implements OnModuleInit {
         const company = await this.prisma.company.findUnique({
           where: { id: companyId },
         });
+        const chatId = String(ctx.chat.id);
+
+        if (!this.chatLangPrefs.has(chatId)) {
+          await ctx.reply("Tilni tanlang / Выберите язык / Choose language", {
+            reply_markup: this.buildLanguageKeyboard(),
+          });
+          return;
+        }
+
         const t = this.getLangFromCtx(ctx);
 
         if (this.isCompanyAccessBlocked(company)) {
           return ctx.reply(t.suspended);
         }
 
-        const chatId = String(ctx.chat.id);
         const existingDealer = await this.prisma.dealer.findFirst({
           where: { telegramChatId: chatId, companyId, deletedAt: null },
         });
@@ -560,10 +590,33 @@ export class TelegramService implements OnModuleInit {
           });
         }
 
-        if (!dealer)
-          return ctx.reply(t.notRegistered, {
-            reply_markup: { remove_keyboard: true },
+        if (!dealer) {
+          const branch = await this.prisma.branch.findFirst({
+            where: { companyId, deletedAt: null },
+            orderBy: { createdAt: "asc" },
           });
+
+          if (!branch?.id) {
+            return ctx.reply("Filial topilmadi. Distributor bilan bog'laning.", {
+              reply_markup: { remove_keyboard: true },
+            });
+          }
+
+          const suggestedName =
+            `${contact.first_name || ""} ${contact.last_name || ""}`.trim() ||
+            `Dealer ${phone.slice(-4)}`;
+
+          dealer = await this.prisma.dealer.create({
+            data: {
+              companyId,
+              branchId: branch.id,
+              name: suggestedName,
+              phone: `+${phone}`,
+              telegramChatId: chatId,
+              isApproved: false,
+            },
+          });
+        }
 
         // Link chatId to dealer
         await this.prisma.dealer.update({
@@ -955,6 +1008,16 @@ export class TelegramService implements OnModuleInit {
     const chatId = String(query.from.id);
     const t = this.getLangFromCtx(ctx);
 
+    if (data.startsWith("lang:set:")) {
+      const lang = data.split(":")[2] || "uz";
+      const allowed = ["uz", "ru", "tr", "en"];
+      const safeLang = allowed.includes(lang) ? lang : "uz";
+      this.chatLangPrefs.set(chatId, safeLang);
+
+      await (ctx as any).reply("✅ Til saqlandi. Davom etish uchun /start bosing.");
+      return;
+    }
+
     if (data.startsWith("menu:")) {
       const action = data.split(":")[1];
       if (action === "products") await this.handleProducts(ctx, companyId);
@@ -962,8 +1025,11 @@ export class TelegramService implements OnModuleInit {
       if (action === "orders") await this.handleOrders(ctx, companyId);
       if (action === "debt") await this.handleDebt(ctx, companyId);
       if (action === "payments") await this.handlePayments(ctx, companyId);
-      if (action === "lang")
-        await (ctx as any).reply("Iltimos, tilni tanlang:"); // Further logic can be added later
+      if (action === "lang") {
+        await (ctx as any).reply("Tilni tanlang / Выберите язык / Choose language", {
+          reply_markup: this.buildLanguageKeyboard(),
+        });
+      }
       if (action === "help") {
         const companyName =
           (

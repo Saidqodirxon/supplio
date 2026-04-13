@@ -36,9 +36,11 @@ export class DealersService {
       throw new ForbiddenException("Branch access denied or not found");
     }
 
-    // Phone uniqueness per company logic usually required (here globally unique by Schema)
-    const existing = await this.prisma.dealer.findUnique({
-      where: { phone: data.phone },
+    const normalizedPhone = data.phone.replace(/\s+/g, "").replace(/^\+?/, "+");
+
+    // Phone uniqueness should be scoped by company.
+    const existing = await this.prisma.dealer.findFirst({
+      where: { companyId, phone: normalizedPhone, deletedAt: null },
     });
 
     if (existing) {
@@ -50,7 +52,7 @@ export class DealersService {
         companyId,
         branchId: data.branchId,
         name: data.name,
-        phone: data.phone,
+        phone: normalizedPhone,
         creditLimit: data.creditLimit || 0,
         address: data.address,
       },

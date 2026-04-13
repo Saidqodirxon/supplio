@@ -200,7 +200,7 @@ model Dealer {
   companyId        String
   branchId         String
   name             String
-  phone            String                  @unique
+  phone            String
   address          String?
   creditLimit      Float                   @default(0)
   currentDebt      Float                   @default(0)
@@ -222,6 +222,8 @@ model Dealer {
   notificationLogs NotificationLog[]
   orders           Order[]
   payments         Payment[]
+
+  @@unique([companyId, phone])
 }
 
 model DealerApprovalRequest {
