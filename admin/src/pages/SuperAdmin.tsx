@@ -3507,13 +3507,22 @@ export default function SuperAdmin() {
               {activeTab === "bots" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-sm text-slate-500 dark:text-slate-400 font-bold">
-                      {language === "ru"
-                        ? `Всего ботов: ${adminBots.length}`
-                        : language === "en"
-                          ? `Total bots: ${adminBots.length}`
-                          : `Jami botlar: ${adminBots.length}`}
-                    </p>
+                    <div className="space-y-1">
+                      <p className="text-sm text-slate-500 dark:text-slate-400 font-bold">
+                        {language === "ru"
+                          ? `Всего ботов: ${adminBots.length}`
+                          : language === "en"
+                            ? `Total bots: ${adminBots.length}`
+                            : `Jami botlar: ${adminBots.length}`}
+                      </p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 font-bold">
+                        {language === "ru"
+                          ? `Активные: ${adminBots.filter((b) => b.isActive).length} · Неактивные: ${adminBots.length - adminBots.filter((b) => b.isActive).length}`
+                          : language === "en"
+                            ? `Active: ${adminBots.filter((b) => b.isActive).length} · Inactive: ${adminBots.length - adminBots.filter((b) => b.isActive).length}`
+                            : `Faol: ${adminBots.filter((b) => b.isActive).length} · Faol emas: ${adminBots.length - adminBots.filter((b) => b.isActive).length}`}
+                      </p>
+                    </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => {

@@ -3,6 +3,7 @@ import * as fs from "fs";
 import { Cron } from "@nestjs/schedule";
 import { Telegraf } from "telegraf";
 import { PrismaService } from "../prisma/prisma.service";
+import { TelegramLoggerService } from "./telegram-logger.service";
 
 @Injectable()
 export class CompanyNotifierService implements OnModuleInit {
@@ -10,7 +11,10 @@ export class CompanyNotifierService implements OnModuleInit {
   // Cache Telegraf instances by token to avoid recreating on every call
   private readonly botCache = new Map<string, Telegraf>();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly telegramLogger: TelegramLoggerService
+  ) {}
 
   onModuleInit() {
     this.logger.log("CompanyNotifierService ready");
@@ -27,6 +31,7 @@ export class CompanyNotifierService implements OnModuleInit {
 
   private async getInfo(companyId: string): Promise<{
     token: string;
+    companyName: string;
     logChatId: string | null;
     orderChatId: string | null;
     slug: string;
@@ -40,6 +45,7 @@ export class CompanyNotifierService implements OnModuleInit {
     if (!botRecord?.token) return null;
     return {
       token: botRecord.token,
+      companyName: (company as any)?.name ?? companyId,
       logChatId: (company as any)?.logGroupChatId ?? null,
       orderChatId: (company as any)?.orderGroupChatId ?? null,
       slug: (company as any)?.slug ?? companyId.slice(-6),
@@ -122,17 +128,17 @@ export class CompanyNotifierService implements OnModuleInit {
 
     if (info.orderChatId)
       await this.send(info.token, info.orderChatId, orderText);
-    if (info.logChatId) {
-      await this.send(
-        info.token,
-        info.logChatId,
-        `📋 *Log CREATE\_ORDER* ${this.tag(info.slug, "LOG")}\n` +
-          `ID: \`${order.id.slice(-8).toUpperCase()}\` | ${order.dealerName} | ${order.totalAmount.toLocaleString()} so'm`
-      );
-    }
+
+    await this.telegramLogger.sendOrderNotification({
+      id: order.id,
+      companyName: info.companyName,
+      dealerName: order.dealerName,
+      totalAmount: order.totalAmount,
+      itemCount: order.items.length,
+    });
   }
 
-  /** Generic activity log — sent only to log group */
+  /** Generic activity log — distributor log group + super-admin mirror */
   async notifyLog(
     companyId: string,
     action: string,
@@ -140,7 +146,7 @@ export class CompanyNotifierService implements OnModuleInit {
     details: Record<string, string | number | boolean | null | undefined> = {}
   ) {
     const info = await this.getInfo(companyId);
-    if (!info?.logChatId) return;
+    if (!info) return;
 
     const lines = Object.entries(details)
       .filter(([, v]) => v !== undefined && v !== null)
@@ -153,10 +159,20 @@ export class CompanyNotifierService implements OnModuleInit {
       (lines ? lines + "\n" : "") +
       `⏱ ${new Date().toLocaleString("uz-UZ")}`;
 
-    await this.send(info.token, info.logChatId, text);
+    if (info.logChatId) {
+      await this.send(info.token, info.logChatId, text);
+    }
+
+    await this.telegramLogger.sendLog("INFO", `[${info.companyName}] ${action}\n${actor}`, {
+      companyId,
+      slug: info.slug,
+      actor,
+      action,
+      details,
+    });
   }
 
-  /** Distributor paneli uchun: faqat buyurtma holati kim va qachon o'zgartirgani logi */
+  /** Buyurtmalar guruhi uchun: holat, kim va qachon o'zgargani */
   async notifyOrderStatusChanged(
     companyId: string,
     payload: {
@@ -170,7 +186,7 @@ export class CompanyNotifierService implements OnModuleInit {
     }
   ) {
     const info = await this.getInfo(companyId);
-    if (!info?.logChatId) return;
+    if (!info) return;
 
     const editor = payload.editorId
       ? await this.prisma.user
@@ -197,7 +213,24 @@ export class CompanyNotifierService implements OnModuleInit {
       `🛡 Rol: *${editorRole}*\n` +
       `⏱ Vaqt: ${changedAt.toLocaleString("uz-UZ")}`;
 
-    await this.send(info.token, info.logChatId, text);
+    if (info.orderChatId) {
+      await this.send(info.token, info.orderChatId, text);
+    }
+    await this.telegramLogger.sendLog(
+      "INFO",
+      `[${info.companyName}] Buyurtma holati o'zgardi\n${payload.oldStatus} → ${payload.newStatus}`,
+      {
+        companyId,
+        slug: info.slug,
+        orderId: payload.orderId,
+        oldStatus: payload.oldStatus,
+        newStatus: payload.newStatus,
+        editorId: payload.editorId,
+        editorPhone: payload.editorPhone,
+        editorRole,
+        changedAt: changedAt.toISOString(),
+      }
+    );
   }
 
   /** Send backup file to the company's log group */
@@ -253,7 +286,7 @@ export class CompanyNotifierService implements OnModuleInit {
 
   async sendDailyReport(companyId: string) {
     const info = await this.getInfo(companyId);
-    if (!info?.logChatId) return;
+    if (!info) return;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -309,6 +342,17 @@ export class CompanyNotifierService implements OnModuleInit {
         ? `\n🔴 *Kam qolgan mahsulotlar:*\n${lowStockLines}`
         : "\n✅ Omborda yetarli");
 
-    await this.send(info.token, info.logChatId, text);
+    if (info.logChatId) {
+      await this.send(info.token, info.logChatId, text);
+    }
+    await this.telegramLogger.sendLog("INFO", `[${info.companyName}] Kunlik hisobot`, {
+      companyId,
+      slug: info.slug,
+      totalOrders,
+      todayOrders,
+      totalDealers,
+      pendingOrders,
+      todayRevenue: todayRevenue._sum.totalAmount ?? 0,
+    });
   }
 }

@@ -52,14 +52,14 @@ export class TelegramService implements OnModuleInit {
       suspended:
         "⚠️ Ushbu bot xizmati vaqtinchalik to'xtatilgan. Iltimos, menejer bilan bog'laning.",
       notRegistered:
-        "❌ Siz diler sifatida ro'yxatdan o'tmagansiz.\nIltimos, kompaniya menejeri bilan bog'laning.",
+        "❌ Siz bu kompaniyada diler sifatida ro'yxatdan o'tmagansiz.\nIltimos, kompaniya distribyutoriga murojaat qiling.",
       loginSuccess: " botga ulandi.",
       pendingApproval:
         "⏳ Sizning so'rovingiz ko'rib chiqilmoqda. Distributor tasdiqlashini kuting.",
       approvalSent:
-        "✅ Ro'yxatdan o'tish so'rovingiz distributorga yuborildi.\n⏳ Tasdiqlash kutilyapti. Xabar beriladi.",
+        "✅ Ro'yxatdan o'tish so'rovingiz shu kompaniya distribyutoriga yuborildi.\n⏳ Tasdiqlash kutilyapti. Xabar beriladi.",
       accessDenied:
-        "⛔ Sizda bu botdan foydalanish huquqi yo'q.\nDistributor bilan bog'laning.",
+        "⛔ Bu botdan foydalanish uchun ushbu kompaniyada diler sifatida tasdiqlangan bo'lishingiz kerak.\nDistributor bilan bog'laning.",
       blocked: "🚫 Hisobingiz bloklangan. Menejer bilan bog'laning.",
       commands: "\n\n📋 Quyidagi tugmalar orqali ishlang.",
       kbdDebt: "💰 Qarzim",
@@ -105,14 +105,14 @@ export class TelegramService implements OnModuleInit {
       suspended:
         "⚠️ Ушбу бот хизмати вақтинча тўхтатилган. Менежер билан боғланинг.",
       notRegistered:
-        "❌ Сиз дилер сифатида рўйхатдан ўтмагансиз.\nКомпания менежери билан боғланинг.",
+        "❌ Сиз ушбу компанияда дилер сифатида рўйхатдан ўтмагансиз.\nИлтимос, компания дистрибьютори билан боғланинг.",
       loginSuccess: " муваффақиятли тизимга кирдингиз!",
       pendingApproval:
         "⏳ Сизнинг сўровингиз кўриб чиқилмоқда. Дистрибьютор тасдиқлашини кутинг.",
       approvalSent:
-        "✅ Рўйхатдан ўтиш сўровингиз дистрибьюторга юборилди.\n⏳ Тасдиқлаш кутиляпти.",
+        "✅ Рўйхатдан ўтиш сўровингиз шу компания дистрибьюторига юборилди.\n⏳ Тасдиқлаш кутиляпти. Хабар берилади.",
       accessDenied:
-        "⛔ Сизда бу ботдан фойдаланиш ҳуқуқи йўқ.\nДистрибьютор билан боғланинг.",
+        "⛔ Бу ботдан фойдаланиш учун ушбу компанияда дилер сифатида тасдиқланган бўлишингиз керак.\nДистрибьютор билан боғланинг.",
       blocked: "🚫 Ҳисобингиз блокланган. Менежер билан боғланинг.",
       commands: "\n\n📋 Асосий менюдан фойдаланинг.",
       kbdDebt: "💰 Қарзим",
@@ -156,14 +156,14 @@ export class TelegramService implements OnModuleInit {
       sendPhone: "📞 Отправить мой номер",
       suspended: "⚠️ Сервис временно приостановлен. Свяжитесь с менеджером.",
       notRegistered:
-        "❌ Вы не зарегистрированы как дилер. Свяжитесь с менеджером компании.",
+        "❌ Вы не зарегистрированы как дилер в этой компании.\nПожалуйста, свяжитесь с дистрибьютором компании.",
       loginSuccess: " бот подключен.",
       pendingApproval:
         "⏳ Ваша заявка рассматривается. Ожидайте подтверждения от дистрибьютора.",
       approvalSent:
-        "✅ Заявка на регистрацию отправлена дистрибьютору.\n⏳ Ожидайте подтверждения.",
+        "✅ Ваша заявка на регистрацию отправлена дистрибьютору этой компании.\n⏳ Ожидайте подтверждения. Мы уведомим вас.",
       accessDenied:
-        "⛔ У вас нет доступа к этому боту.\nСвяжитесь с дистрибьютором.",
+        "⛔ Для использования этого бота вы должны быть подтверждены как дилер этой компании.\nСвяжитесь с дистрибьютором.",
       blocked: "🚫 Ваш аккаунт заблокирован. Свяжитесь с менеджером.",
       commands: "\n\n📋 Используйте кнопки ниже.",
       kbdDebt: "💰 Мой долг",
@@ -207,14 +207,14 @@ export class TelegramService implements OnModuleInit {
       suspended:
         "⚠️ Bu bot geçici olarak askıya alınmıştır. Yöneticiyle iletişime geçin.",
       notRegistered:
-        "❌ Bayi olarak kayıtlı değilsiniz.\nŞirket yöneticisiyle iletişime geçin.",
+        "❌ Bu şirkette bayi olarak kayıtlı değilsiniz.\nLütfen şirket distribütörüyle iletişime geçin.",
       loginSuccess: " bot bağlı.",
       pendingApproval:
         "⏳ Başvurunuz inceleniyor. Distribütörün onayını bekleyin.",
       approvalSent:
-        "✅ Kayıt başvurunuz distribütöre gönderildi.\n⏳ Onay bekleniyor.",
+        "✅ Kayıt başvurunuz bu şirketin distribütörüne gönderildi.\n⏳ Onay bekleniyor. Size haber verilecek.",
       accessDenied:
-        "⛔ Bu botu kullanma izniniz yok.\nDistribütörünüzle iletişime geçin.",
+        "⛔ Bu botu kullanabilmek için bu şirkette bayi olarak onaylı olmanız gerekir.\nDistribütörünüzle iletişime geçin.",
       blocked: "🚫 Hesabınız engellendi. Yöneticiyle iletişime geçin.",
       commands: "\n\n📋 Aşağıdaki düğmeleri kullanın.",
       kbdDebt: "💰 Borcum",
@@ -257,14 +257,14 @@ export class TelegramService implements OnModuleInit {
       suspended:
         "⚠️ This bot is temporarily suspended. Please contact the manager.",
       notRegistered:
-        "❌ You are not registered as a dealer.\nPlease contact the company manager.",
+        "❌ You are not registered as a dealer in this company.\nPlease contact the company distributor.",
       loginSuccess: " bot connected.",
       pendingApproval:
         "⏳ Your request is under review. Please wait for the distributor's approval.",
       approvalSent:
-        "✅ Your registration request has been sent to the distributor.\n⏳ Awaiting approval.",
+        "✅ Your registration request has been sent to this company's distributor.\n⏳ Awaiting approval. We will notify you.",
       accessDenied:
-        "⛔ You don't have permission to use this bot.\nContact your distributor.",
+        "⛔ To use this bot, you must be approved as a dealer in this company.\nContact your distributor.",
       blocked: "🚫 Your account is blocked. Please contact the manager.",
       commands: "\n\n📋 Use the buttons below.",
       kbdDebt: "💰 My Debt",
@@ -779,7 +779,7 @@ export class TelegramService implements OnModuleInit {
 
           if (!branch?.id) {
             return ctx.reply(
-              "Filial topilmadi. Distributor bilan bog'laning.",
+              "Bu kompaniya uchun filial topilmadi. Distributor bilan bog'laning.",
               {
                 reply_markup: { remove_keyboard: true },
               }
