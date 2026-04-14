@@ -8,7 +8,7 @@ export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private telegramService: TelegramService,
-    private companyNotifier: CompanyNotifierService,
+    private companyNotifier: CompanyNotifierService
   ) {}
 
   async create(
@@ -16,16 +16,26 @@ export class OrdersService {
     data: {
       dealerId: string;
       branchId: string;
-      products: { productId?: string; price: number; cost?: number; quantity: number }[];
+      products: {
+        productId?: string;
+        price: number;
+        cost?: number;
+        quantity: number;
+      }[];
     }
   ) {
     const { dealerId, branchId, products } = data;
 
     const createdOrder = await this.prisma.$transaction(async (tx) => {
-      const totalAmount = products.reduce((acc, p) => acc + p.price * p.quantity, 0);
+      const totalAmount = products.reduce(
+        (acc, p) => acc + p.price * p.quantity,
+        0
+      );
 
       // Resolve cost + name per product
-      const productIds = products.filter(p => p.productId).map(p => p.productId as string);
+      const productIds = products
+        .filter((p) => p.productId)
+        .map((p) => p.productId as string);
       const productCosts: Record<string, number> = {};
       const productNames: Record<string, string> = {};
       const productUnits: Record<string, string> = {};
@@ -35,19 +45,22 @@ export class OrdersService {
           where: { id: { in: productIds }, companyId },
           select: { id: true, costPrice: true, name: true, unit: true },
         });
-        dbProducts.forEach(p => {
+        dbProducts.forEach((p) => {
           productCosts[p.id] = p.costPrice;
           productNames[p.id] = p.name;
-          productUnits[p.id] = p.unit ?? 'pcs';
+          productUnits[p.id] = p.unit ?? "pcs";
         });
       }
 
       const totalCost = products.reduce((acc, p) => {
-        const cost = p.cost ?? (p.productId ? (productCosts[p.productId] ?? 0) : 0);
+        const cost =
+          p.cost ?? (p.productId ? (productCosts[p.productId] ?? 0) : 0);
         return acc + cost * p.quantity;
       }, 0);
 
-      const dealer = await tx.dealer.findFirst({ where: { id: dealerId, companyId } });
+      const dealer = await tx.dealer.findFirst({
+        where: { id: dealerId, companyId },
+      });
       if (!dealer) throw new BadRequestException("Dealer not found");
 
       const ordersTotal = await tx.ledgerTransaction.aggregate({
@@ -58,19 +71,25 @@ export class OrdersService {
         where: { dealerId, companyId, type: { in: ["PAYMENT", "ADJUSTMENT"] } },
         _sum: { amount: true },
       });
-      const currentDebt = (ordersTotal._sum.amount || 0) - (paymentsTotal._sum.amount || 0);
+      const currentDebt =
+        (ordersTotal._sum.amount || 0) - (paymentsTotal._sum.amount || 0);
 
       // Only enforce credit limit when it is explicitly set (> 0)
-      if (dealer.creditLimit > 0 && currentDebt + totalAmount > dealer.creditLimit) {
+      if (
+        dealer.creditLimit > 0 &&
+        currentDebt + totalAmount > dealer.creditLimit
+      ) {
         throw new BadRequestException("Credit limit exceeded");
       }
 
       // Normalise items: always store as { productId, name, qty, unit, price, total }
-      const orderItems = products.map(p => ({
+      const orderItems = products.map((p) => ({
         productId: p.productId ?? null,
-        name: p.productId ? (productNames[p.productId] ?? 'Unknown') : 'Unknown',
+        name: p.productId
+          ? (productNames[p.productId] ?? "Unknown")
+          : "Unknown",
         qty: p.quantity,
-        unit: p.productId ? (productUnits[p.productId] ?? 'pcs') : 'pcs',
+        unit: p.productId ? (productUnits[p.productId] ?? "pcs") : "pcs",
         price: p.price,
         total: p.price * p.quantity,
       }));
@@ -92,15 +111,21 @@ export class OrdersService {
       });
 
       // Cashback
-      const company = await tx.company.findUnique({ where: { id: companyId }, select: { cashbackPercent: true } });
+      const company = await tx.company.findUnique({
+        where: { id: companyId },
+        select: { cashbackPercent: true },
+      });
       const cashbackPct = (company as any)?.cashbackPercent ?? 0;
-      const cashbackEarned = cashbackPct > 0 ? Math.floor(totalAmount * cashbackPct / 100) : 0;
+      const cashbackEarned =
+        cashbackPct > 0 ? Math.floor((totalAmount * cashbackPct) / 100) : 0;
 
       await tx.dealer.update({
         where: { id: dealerId },
         data: {
           currentDebt: { increment: totalAmount },
-          ...(cashbackEarned > 0 ? { cashbackBalance: { increment: cashbackEarned } } : {}),
+          ...(cashbackEarned > 0
+            ? { cashbackBalance: { increment: cashbackEarned } }
+            : {}),
         },
       });
 
@@ -108,15 +133,35 @@ export class OrdersService {
     });
 
     // Fire-and-forget group notifications (outside transaction)
-    const branch = await this.prisma.branch.findUnique({ where: { id: data.branchId }, select: { name: true } }).catch(() => null);
-    this.companyNotifier.notifyNewOrder(companyId, {
-      id: (createdOrder as any).id,
-      totalAmount: (createdOrder as any).totalAmount,
-      dealerName: (await this.prisma.dealer.findUnique({ where: { id: data.dealerId }, select: { name: true } }).catch(() => null))?.name ?? 'Unknown',
-      dealerPhone: (await this.prisma.dealer.findUnique({ where: { id: data.dealerId }, select: { phone: true } }).catch(() => null))?.phone ?? '',
-      branchName: branch?.name ?? '',
-      items: (createdOrder as any).items ?? [],
-    }).catch(() => {});
+    const branch = await this.prisma.branch
+      .findUnique({ where: { id: data.branchId }, select: { name: true } })
+      .catch(() => null);
+    this.companyNotifier
+      .notifyNewOrder(companyId, {
+        id: (createdOrder as any).id,
+        totalAmount: (createdOrder as any).totalAmount,
+        dealerName:
+          (
+            await this.prisma.dealer
+              .findUnique({
+                where: { id: data.dealerId },
+                select: { name: true },
+              })
+              .catch(() => null)
+          )?.name ?? "Unknown",
+        dealerPhone:
+          (
+            await this.prisma.dealer
+              .findUnique({
+                where: { id: data.dealerId },
+                select: { phone: true },
+              })
+              .catch(() => null)
+          )?.phone ?? "",
+        branchName: branch?.name ?? "",
+        items: (createdOrder as any).items ?? [],
+      })
+      .catch(() => {});
 
     return createdOrder;
   }
@@ -124,7 +169,7 @@ export class OrdersService {
   async findAll(companyId: string) {
     const orders = await this.prisma.order.findMany({
       where: { companyId, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         dealer: { select: { name: true, phone: true } },
         branch: { select: { name: true } },
@@ -136,7 +181,9 @@ export class OrdersService {
     for (const order of orders) {
       const items = order.items as any[];
       if (Array.isArray(items)) {
-        items.forEach(item => { if (item.productId) productIdSet.add(item.productId); });
+        items.forEach((item) => {
+          if (item.productId) productIdSet.add(item.productId);
+        });
       }
     }
 
@@ -146,20 +193,26 @@ export class OrdersService {
         where: { id: { in: Array.from(productIdSet) }, companyId },
         select: { id: true, name: true, unit: true },
       });
-      products.forEach(p => productMap.set(p.id, p.name));
+      products.forEach((p) => productMap.set(p.id, p.name));
     }
 
     // Normalise items structure: qty vs quantity, add name if missing
-    return orders.map(order => {
+    return orders.map((order) => {
       const rawItems = order.items as any[];
       const items = Array.isArray(rawItems)
-        ? rawItems.map(item => ({
+        ? rawItems.map((item) => ({
             productId: item.productId ?? null,
-            name: item.name || (item.productId ? (productMap.get(item.productId) ?? 'Unknown') : 'Unknown'),
+            name:
+              item.name ||
+              (item.productId
+                ? (productMap.get(item.productId) ?? "Unknown")
+                : "Unknown"),
             qty: item.qty ?? item.quantity ?? 1,
-            unit: item.unit ?? 'pcs',
+            unit: item.unit ?? "pcs",
             price: item.price ?? 0,
-            total: item.total ?? ((item.qty ?? item.quantity ?? 1) * (item.price ?? 0)),
+            total:
+              item.total ??
+              (item.qty ?? item.quantity ?? 1) * (item.price ?? 0),
           }))
         : [];
       return { ...order, items };
@@ -169,7 +222,7 @@ export class OrdersService {
   async findByDealer(companyId: string, dealerId: string) {
     const orders = await this.prisma.order.findMany({
       where: { companyId, dealerId, deletedAt: null },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       include: {
         branch: { select: { name: true } },
       },
@@ -179,7 +232,9 @@ export class OrdersService {
     for (const order of orders) {
       const items = order.items as any[];
       if (Array.isArray(items)) {
-        items.forEach(item => { if (item.productId) productIdSet.add(item.productId); });
+        items.forEach((item) => {
+          if (item.productId) productIdSet.add(item.productId);
+        });
       }
     }
 
@@ -189,19 +244,25 @@ export class OrdersService {
         where: { id: { in: Array.from(productIdSet) }, companyId },
         select: { id: true, name: true, unit: true },
       });
-      products.forEach(p => productMap.set(p.id, p.name));
+      products.forEach((p) => productMap.set(p.id, p.name));
     }
 
-    return orders.map(order => {
+    return orders.map((order) => {
       const rawItems = order.items as any[];
       const items = Array.isArray(rawItems)
-        ? rawItems.map(item => ({
+        ? rawItems.map((item) => ({
             productId: item.productId ?? null,
-            name: item.name || (item.productId ? (productMap.get(item.productId) ?? 'Unknown') : 'Unknown'),
+            name:
+              item.name ||
+              (item.productId
+                ? (productMap.get(item.productId) ?? "Unknown")
+                : "Unknown"),
             qty: item.qty ?? item.quantity ?? 1,
-            unit: item.unit ?? 'pcs',
+            unit: item.unit ?? "pcs",
             price: item.price ?? 0,
-            total: item.total ?? ((item.qty ?? item.quantity ?? 1) * (item.price ?? 0)),
+            total:
+              item.total ??
+              (item.qty ?? item.quantity ?? 1) * (item.price ?? 0),
           }))
         : [];
       return { ...order, items };
@@ -259,7 +320,9 @@ export class OrdersService {
     const rawItems = order.items as any[];
     const productIdSet = new Set<string>();
     if (Array.isArray(rawItems)) {
-      rawItems.forEach(item => { if (item.productId) productIdSet.add(item.productId); });
+      rawItems.forEach((item) => {
+        if (item.productId) productIdSet.add(item.productId);
+      });
     }
 
     const productMap = new Map<string, string>();
@@ -268,17 +331,22 @@ export class OrdersService {
         where: { id: { in: Array.from(productIdSet) }, companyId },
         select: { id: true, name: true, unit: true },
       });
-      products.forEach(p => productMap.set(p.id, p.name));
+      products.forEach((p) => productMap.set(p.id, p.name));
     }
 
     const items = Array.isArray(rawItems)
-      ? rawItems.map(item => ({
+      ? rawItems.map((item) => ({
           productId: item.productId ?? null,
-          name: item.name || (item.productId ? (productMap.get(item.productId) ?? 'Unknown') : 'Unknown'),
+          name:
+            item.name ||
+            (item.productId
+              ? (productMap.get(item.productId) ?? "Unknown")
+              : "Unknown"),
           qty: item.qty ?? item.quantity ?? 1,
-          unit: item.unit ?? 'pcs',
+          unit: item.unit ?? "pcs",
           price: item.price ?? 0,
-          total: item.total ?? ((item.qty ?? item.quantity ?? 1) * (item.price ?? 0)),
+          total:
+            item.total ?? (item.qty ?? item.quantity ?? 1) * (item.price ?? 0),
         }))
       : [];
 

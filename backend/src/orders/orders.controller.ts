@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Patch, Body, Req, Param, UseGuards } from "@nestjs/common";
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Req,
+  Param,
+  UseGuards,
+} from "@nestjs/common";
 import { OrdersService } from "./orders.service";
 import { TenantGuard } from "../common/middleware/tenant.guard";
 import { RolesGuard } from "../common/middleware/roles.guard";
@@ -37,7 +46,10 @@ export class OrdersController {
 
   @Get("dealer/:dealerId")
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER", "SALES", "DELIVERY", "SELLER")
-  async findByDealer(@Req() req: AuthenticatedRequest, @Param("dealerId") dealerId: string) {
+  async findByDealer(
+    @Req() req: AuthenticatedRequest,
+    @Param("dealerId") dealerId: string
+  ) {
     return this.ordersService.findByDealer(req.companyId, dealerId);
   }
 
@@ -52,7 +64,7 @@ export class OrdersController {
   async updateStatus(
     @Req() req: AuthenticatedRequest,
     @Param("id") id: string,
-    @Body() body: { status: string },
+    @Body() body: { status: string }
   ) {
     return this.ordersService.updateStatus(req.companyId, id, body.status, {
       id: req.user.id,
