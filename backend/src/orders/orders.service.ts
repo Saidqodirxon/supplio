@@ -208,7 +208,18 @@ export class OrdersService {
     });
   }
 
-  async updateStatus(companyId: string, id: string, status: string) {
+  async updateStatus(
+    companyId: string,
+    id: string,
+    status: string,
+    actor?: { id?: string; phone?: string; roleType?: string }
+  ) {
+    const prev = await this.prisma.order.findFirst({
+      where: { id, companyId },
+      select: { id: true, dealerId: true, status: true, updatedAt: true },
+    });
+    if (!prev) throw new BadRequestException("Order not found");
+
     const order = await this.prisma.order.update({
       where: { id, companyId },
       data: { status: status as any },
@@ -217,6 +228,19 @@ export class OrdersService {
     // Notify dealer via Telegram (fire-and-forget)
     this.telegramService
       .sendOrderStatusUpdate(companyId, id, status, order.dealerId)
+      .catch(() => {});
+
+    // Distributor log group: only order status changes + who/when edited
+    this.companyNotifier
+      .notifyOrderStatusChanged(companyId, {
+        orderId: id,
+        oldStatus: String(prev.status),
+        newStatus: String(status),
+        editorId: actor?.id,
+        editorPhone: actor?.phone,
+        editorRole: actor?.roleType,
+        changedAt: order.updatedAt,
+      })
       .catch(() => {});
 
     return order;

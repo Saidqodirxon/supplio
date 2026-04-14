@@ -711,25 +711,14 @@ export class TelegramService implements OnModuleInit {
         const t = this.getLangFromCtx(ctx);
         const chatId = String(ctx.chat.id);
 
-        // Search globally — phone has a global unique constraint in DB
-        const globalDealerMatch = await this.prisma.dealer.findFirst({
-          where: { phone: { contains: phone.slice(-9) }, deletedAt: null },
+        // Company-scoped lookup: one phone can exist in different companies.
+        const dealerMatch = await this.prisma.dealer.findFirst({
+          where: {
+            companyId,
+            phone: { endsWith: phone.slice(-9) },
+            deletedAt: null,
+          },
         });
-
-        // Phone is registered under a different company — cannot create here
-        if (globalDealerMatch && globalDealerMatch.companyId !== companyId) {
-          const chatId_ = String(ctx.chat?.id ?? "");
-          const lang_ = this.chatLangPrefs.get(chatId_) ?? "uz";
-          return ctx.reply(
-            lang_ === "ru"
-              ? "Этот номер уже зарегистрирован в другой системе. Обратитесь к вашему дистрибьютору."
-              : "Bu telefon raqami boshqa tizimda allaqachon ro'yxatdan o'tgan. Distributor bilan bog'laning.",
-            { reply_markup: { remove_keyboard: true } }
-          );
-        }
-
-        const dealerMatch =
-          globalDealerMatch?.companyId === companyId ? globalDealerMatch : null;
 
         const userMatch = await this.prisma.user.findFirst({
           where: {

@@ -60,6 +60,20 @@ export class CompanyNotifierService implements OnModuleInit {
     }
   }
 
+  private statusLabel(status: string) {
+    const map: Record<string, string> = {
+      PENDING: 'Kutilmoqda',
+      ACCEPTED: 'Qabul qilindi',
+      PREPARING: 'Tayyorlanmoqda',
+      SHIPPED: 'Yuborildi',
+      DELIVERED: 'Yetkazildi',
+      COMPLETED: 'Yakunlandi',
+      CANCELLED: 'Bekor qilindi',
+      RETURNED: 'Qaytarildi',
+    };
+    return map[String(status || '').toUpperCase()] ?? status;
+  }
+
   // ─── Public API ───────────────────────────────────────────────────────────
 
   /** Called when a new order is created (from orders service or bot checkout) */
@@ -124,6 +138,50 @@ export class CompanyNotifierService implements OnModuleInit {
       `👤 ${actor}\n` +
       (lines ? lines + '\n' : '') +
       `⏱ ${new Date().toLocaleString('uz-UZ')}`;
+
+    await this.send(info.token, info.logChatId, text);
+  }
+
+  /** Distributor paneli uchun: faqat buyurtma holati kim va qachon o'zgartirgani logi */
+  async notifyOrderStatusChanged(
+    companyId: string,
+    payload: {
+      orderId: string;
+      oldStatus: string;
+      newStatus: string;
+      editorId?: string;
+      editorPhone?: string;
+      editorRole?: string;
+      changedAt?: Date;
+    },
+  ) {
+    const info = await this.getInfo(companyId);
+    if (!info?.logChatId) return;
+
+    const editor = payload.editorId
+      ? await this.prisma.user
+          .findUnique({
+            where: { id: payload.editorId },
+            select: { fullName: true, phone: true, roleType: true },
+          })
+          .catch(() => null)
+      : null;
+
+    const editorName =
+      editor?.fullName ||
+      payload.editorPhone ||
+      editor?.phone ||
+      "Noma'lum foydalanuvchi";
+    const editorRole = payload.editorRole || editor?.roleType || 'UNKNOWN';
+    const changedAt = payload.changedAt ?? new Date();
+
+    const text =
+      `📌 *Buyurtma holati o'zgartirildi* ${this.tag(info.slug, 'ORDER_STATUS')}\n` +
+      `🆔 Buyurtma: \`${payload.orderId.slice(-8).toUpperCase()}\`\n` +
+      `🔄 Holat: *${this.statusLabel(payload.oldStatus)}* → *${this.statusLabel(payload.newStatus)}*\n` +
+      `👤 O'zgartirgan: *${editorName}*\n` +
+      `🛡 Rol: *${editorRole}*\n` +
+      `⏱ Vaqt: ${changedAt.toLocaleString('uz-UZ')}`;
 
     await this.send(info.token, info.logChatId, text);
   }

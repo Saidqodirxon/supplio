@@ -54,6 +54,10 @@ export class OrdersController {
     @Param("id") id: string,
     @Body() body: { status: string },
   ) {
-    return this.ordersService.updateStatus(req.companyId, id, body.status);
+    return this.ordersService.updateStatus(req.companyId, id, body.status, {
+      id: req.user.id,
+      phone: req.user.phone,
+      roleType: req.user.roleType,
+    });
   }
 }
