@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { TelegramService } from "./telegram.service";
+import { CompanyNotifierService } from "./company-notifier.service";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { TenantGuard } from "../common/middleware/tenant.guard";
 import { RolesGuard } from "../common/middleware/roles.guard";
@@ -18,7 +19,10 @@ import { Roles } from "../common/decorators/roles.decorator";
 @Controller("telegram")
 @UseGuards(JwtAuthGuard, TenantGuard, RolesGuard)
 export class BotsController {
-  constructor(private readonly telegramService: TelegramService) {}
+  constructor(
+    private readonly telegramService: TelegramService,
+    private readonly companyNotifier: CompanyNotifierService
+  ) {}
 
   @Get("bots")
   @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
@@ -46,7 +50,7 @@ export class BotsController {
   }
 
   @Post("bots")
-  @Roles("OWNER", "SUPER_ADMIN")
+  @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
   async createBot(
     @Req() req: any,
     @Body() body: { token: string; botName?: string; description?: string }
@@ -55,7 +59,7 @@ export class BotsController {
   }
 
   @Patch("bots/:id")
-  @Roles("OWNER", "SUPER_ADMIN")
+  @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
   async updateBot(
     @Req() req: any,
     @Param("id") id: string,
@@ -71,7 +75,7 @@ export class BotsController {
   }
 
   @Delete("bots/:id")
-  @Roles("OWNER", "SUPER_ADMIN")
+  @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
   async removeBot(@Req() req: any, @Param("id") id: string) {
     return this.telegramService.removeBot(id, req.companyId);
   }
@@ -84,14 +88,66 @@ export class BotsController {
   }
 
   @Post("bots/reload")
-  @Roles("OWNER", "SUPER_ADMIN")
+  @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
   async reloadBots(@Req() req: any) {
     return this.telegramService.reloadCompanyBots(req.companyId);
+  }
+
+  @Post("admin/bots")
+  @Roles("SUPER_ADMIN")
+  async adminCreateBot(
+    @Body()
+    body: {
+      companyId: string;
+      token: string;
+      botName?: string;
+      description?: string;
+    }
+  ) {
+    return this.telegramService.createBot(body.companyId, {
+      token: body.token,
+      botName: body.botName,
+      description: body.description,
+    });
+  }
+
+  @Post("groups/test/:type")
+  @Roles("OWNER", "SUPER_ADMIN")
+  async testGroup(@Req() req: any, @Param("type") type: "log" | "order") {
+    return this.companyNotifier.testGroup(req.companyId, type);
+  }
+
+  @Post("groups/report")
+  @Roles("OWNER", "SUPER_ADMIN")
+  async sendManualReport(@Req() req: any) {
+    await this.companyNotifier.sendDailyReport(req.companyId);
+    return { ok: true };
   }
 
   @Get("admin/bots")
   @Roles("SUPER_ADMIN")
   async getAllBotsAdmin() {
     return this.telegramService.getAllBotsAdmin();
+  }
+
+  @Post("admin/bots/:id/reload")
+  @Roles("SUPER_ADMIN")
+  async adminReloadBot(@Param("id") id: string) {
+    return this.telegramService.adminReloadBot(id);
+  }
+
+  @Patch("admin/bots/:id")
+  @Roles("SUPER_ADMIN")
+  async adminUpdateBot(
+    @Param("id") id: string,
+    @Body() body: { token?: string; isActive?: boolean }
+  ) {
+    return this.telegramService.adminUpdateBot(id, body);
+  }
+
+  @Delete("admin/bots/:id")
+  @Roles("SUPER_ADMIN")
+  async adminHardDeleteBot(@Param("id") id: string) {
+    return this.telegramService.adminHardDeleteBot(id);
   }
 }

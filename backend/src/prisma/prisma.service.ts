@@ -114,6 +114,14 @@ export class PrismaService
       `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "contactPhone" TEXT`,
       // 2026-04-13: support message image attachment
       `ALTER TABLE "SupportMessage" ADD COLUMN IF NOT EXISTS "imageUrl" TEXT`,
+      // 2026-04-14: company bot working hours & contact info
+      `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "contactPhone" TEXT`,
+      `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "contactAddress" TEXT`,
+      `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "botPaused" BOOLEAN DEFAULT FALSE`,
+      `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "botAutoSchedule" BOOLEAN DEFAULT TRUE`,
+      // 2026-04-14: per-company telegram group notifications
+      `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "logGroupChatId" TEXT`,
+      `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "orderGroupChatId" TEXT`,
     ];
 
     for (const sql of patches) {

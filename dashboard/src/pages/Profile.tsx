@@ -10,6 +10,8 @@ import {
   Instagram,
   Send,
   Globe,
+  Phone,
+  MapPin,
   Check,
   X,
   Loader2,
@@ -17,6 +19,7 @@ import {
 import api from "../services/api";
 import { toast } from "../utils/toast";
 import clsx from "clsx";
+import { pageTranslations } from "../i18n/translations";
 
 interface CompanyInfo {
   name: string;
@@ -24,12 +27,19 @@ interface CompanyInfo {
   website: string | null;
   instagram: string | null;
   telegram: string | null;
+  contactPhone: string | null;
+  contactAddress: string | null;
   siteActive: boolean;
   cashbackPercent: number;
 }
 
 export default function Profile() {
   const { user, language, updateUser } = useAuthStore();
+  const lang =
+    language in pageTranslations.profile
+      ? (language as keyof typeof pageTranslations.profile)
+      : "en";
+  const t = pageTranslations.profile[lang];
   const isOwner = user?.roleType === "OWNER";
   const isDemoMode = localStorage.getItem("supplio_demo_mode") === "1";
 
@@ -52,83 +62,6 @@ export default function Profile() {
   const [company, setCompany] = useState<CompanyInfo | null>(null);
   const [loadingCompany, setLoadingCompany] = useState(isOwner);
   const [savingCompany, setSavingCompany] = useState(false);
-
-  const isUz = ["uz", "oz"].includes(language);
-  const isRu = language === "ru";
-
-  const t = {
-    personalTitle: isUz
-      ? "Shaxsiy ma'lumotlar"
-      : isRu
-        ? "Личные данные"
-        : "Personal Info",
-    companyTitle: isUz
-      ? "Kompaniya ma'lumotlari"
-      : isRu
-        ? "Данные компании"
-        : "Company Info",
-    passwordTitle: isUz
-      ? "Parolni o'zgartirish"
-      : isRu
-        ? "Смена пароля"
-        : "Change Password",
-    name: isUz ? "Ism Familiya" : isRu ? "Имя Фамилия" : "Full Name",
-    phone: isUz
-      ? "Telefon (o'zgartirib bo'lmaydi)"
-      : isRu
-        ? "Телефон (нельзя менять)"
-        : "Phone (read-only)",
-    companyName: isUz
-      ? "Kompaniya nomi"
-      : isRu
-        ? "Название компании"
-        : "Company Name",
-    website: isUz ? "Veb-sayt" : isRu ? "Веб-сайт" : "Website",
-    websiteReadonly: isUz
-      ? "Bu manzil avtomatik yaratiladi va foydalanuvchi tomonidan o'zgartirilmaydi"
-      : isRu
-        ? "Этот адрес создаётся автоматически и не редактируется пользователем"
-        : "This address is generated automatically and cannot be edited by the user",
-    currentPw: isUz
-      ? "Joriy parol"
-      : isRu
-        ? "Текущий пароль"
-        : "Current password",
-    newPw: isUz ? "Yangi parol" : isRu ? "Новый пароль" : "New password",
-    confirmPw: isUz
-      ? "Yangi parolni takrorla"
-      : isRu
-        ? "Повтори новый пароль"
-        : "Confirm new password",
-    save: isUz ? "Saqlash" : isRu ? "Сохранить" : "Save",
-    saving: isUz ? "Saqlanmoqda..." : isRu ? "Сохранение..." : "Saving...",
-    saved: isUz ? "Saqlandi!" : isRu ? "Сохранено!" : "Saved!",
-    photoUpdated: isUz
-      ? "Rasm yangilandi"
-      : isRu
-        ? "Фото обновлено"
-        : "Photo updated",
-    pwUpdated: isUz
-      ? "Parol yangilandi"
-      : isRu
-        ? "Пароль обновлён"
-        : "Password updated",
-    pwMismatch: isUz
-      ? "Parollar mos emas"
-      : isRu
-        ? "Пароли не совпадают"
-        : "Passwords don't match",
-    pwShort: isUz
-      ? "Kamida 6 ta belgi"
-      : isRu
-        ? "Минимум 6 символов"
-        : "Min 6 characters",
-    error: isUz
-      ? "Xatolik yuz berdi"
-      : isRu
-        ? "Произошла ошибка"
-        : "An error occurred",
-  };
 
   useEffect(() => {
     setFullName(user?.fullName || "");
@@ -170,7 +103,7 @@ export default function Profile() {
     e.preventDefault();
     const name = fullName.trim();
     if (name.length < 2) {
-      toast.error("Ism kamida 2 ta belgi");
+      toast.error(t.minName);
       return;
     }
     try {
@@ -195,6 +128,8 @@ export default function Profile() {
         website: company.website,
         instagram: company.instagram,
         telegram: company.telegram,
+        contactPhone: company.contactPhone,
+        contactAddress: company.contactAddress,
       });
       toast.success(t.saved);
     } catch {
@@ -224,11 +159,7 @@ export default function Profile() {
       toast.success(t.pwUpdated);
     } catch {
       toast.error(
-        isUz
-          ? "Joriy parol noto'g'ri"
-          : isRu
-            ? "Неверный текущий пароль"
-            : "Wrong current password"
+        t.wrongCurrentPw
       );
     } finally {
       setSavingPw(false);
@@ -292,11 +223,7 @@ export default function Profile() {
               {user?.roleType?.replace(/_/g, " ") || "STAFF"}
             </span>
             <p className="text-xs text-slate-400 pt-1">
-              {isUz
-                ? "Rasmni o'zgartirish uchun ustiga bosing"
-                : isRu
-                  ? "Нажмите на фото для замены"
-                  : "Click photo to change"}
+              {t.avatarHint}
             </p>
           </div>
         </div>
@@ -317,7 +244,7 @@ export default function Profile() {
             </div>
             <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {t.phone}
+                {t.phoneReadonly}
               </label>
               <div className="input-field w-full opacity-60 cursor-not-allowed select-none">
                 {user?.phone}
@@ -356,7 +283,7 @@ export default function Profile() {
             <div className="flex items-center gap-3 py-4 text-slate-400">
               <Loader2 className="w-5 h-5 animate-spin" />
               <span className="text-sm font-bold">
-                {isUz ? "Yuklanmoqda..." : isRu ? "Загрузка..." : "Loading..."}
+                {t.loading}
               </span>
             </div>
           ) : company ? (
@@ -373,7 +300,7 @@ export default function Profile() {
                     onChange={(e) =>
                       setCompany({ ...company, name: e.target.value })
                     }
-                    placeholder="Kompaniya nomi"
+                    placeholder={t.companyNamePlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
@@ -406,7 +333,7 @@ export default function Profile() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Send className="w-3 h-3" /> Telegram
+                    <Send className="w-3 h-3" /> {t.telegramLabel}
                   </label>
                   <input
                     type="text"
@@ -415,12 +342,42 @@ export default function Profile() {
                     onChange={(e) =>
                       setCompany({ ...company, telegram: e.target.value })
                     }
-                    placeholder="@channel"
+                    placeholder={t.telegramPlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <Instagram className="w-3 h-3" /> Instagram
+                    <Phone className="w-3 h-3" />
+                    {t.contactPhone}
+                  </label>
+                  <input
+                    type="text"
+                    className="input-field w-full"
+                    value={company.contactPhone || ""}
+                    onChange={(e) =>
+                      setCompany({ ...company, contactPhone: e.target.value })
+                    }
+                    placeholder={t.phonePlaceholder}
+                  />
+                </div>
+                <div className="space-y-2 sm:col-span-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <MapPin className="w-3 h-3" />
+                    {t.officeAddress}
+                  </label>
+                  <input
+                    type="text"
+                    className="input-field w-full"
+                    value={company.contactAddress || ""}
+                    onChange={(e) =>
+                      setCompany({ ...company, contactAddress: e.target.value })
+                    }
+                    placeholder={t.officeAddressPlaceholder}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <Instagram className="w-3 h-3" /> {t.instagramLabel}
                   </label>
                   <input
                     type="text"
@@ -429,7 +386,7 @@ export default function Profile() {
                     onChange={(e) =>
                       setCompany({ ...company, instagram: e.target.value })
                     }
-                    placeholder="@username"
+                    placeholder={t.instagramPlaceholder}
                   />
                 </div>
               </div>
@@ -453,16 +410,8 @@ export default function Profile() {
                 />
                 <span>
                   {company.siteActive
-                    ? isUz
-                      ? "B2B katalog sahifangiz faol — dilerlar ko'ra oladi"
-                      : isRu
-                        ? "B2B каталог активен — дилеры могут видеть"
-                        : "B2B catalog is active — dealers can view"
-                    : isUz
-                      ? "B2B katalog sahifasi o'chirilgan. Yoqish uchun Sozlamalar → Sayt ko'rinishi"
-                      : isRu
-                        ? "B2B каталог отключён. Включите в Настройки → Видимость сайта"
-                        : "B2B catalog is off. Enable in Settings → Site Visibility"}
+                    ? t.b2bOn
+                    : t.b2bOff}
                 </span>
               </div>
 
@@ -478,13 +427,7 @@ export default function Profile() {
               </div>
             </form>
           ) : (
-            <p className="text-sm text-slate-400">
-              {isUz
-                ? "Ma'lumot topilmadi"
-                : isRu
-                  ? "Данные не найдены"
-                  : "No data found"}
-            </p>
+            <p className="text-sm text-slate-400">{t.notFound}</p>
           )}
         </div>
       )}
@@ -502,7 +445,7 @@ export default function Profile() {
 
         {!canEditPassword && (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 text-sm font-bold">
-            Demo rejimda parol o'zgartirish o'chirilgan.
+            {t.demoPwDisabled}
           </div>
         )}
 
@@ -527,7 +470,7 @@ export default function Profile() {
                         ? "border-emerald-400"
                         : "border-rose-400")
                   )}
-                  placeholder="••••••••"
+                  placeholder={t.passwordPlaceholder}
                   value={pwForm[key]}
                   onChange={(e) =>
                     setPwForm((p) => ({ ...p, [key]: e.target.value }))

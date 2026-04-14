@@ -1,18 +1,15 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { Telegraf } from "telegraf";
+import { TelegramLoggerService } from "../telegram/telegram-logger.service";
 
 @Injectable()
 export class LeadsService {
   private readonly logger = new Logger(LeadsService.name);
-  private adminBot: Telegraf | null = null;
 
-  constructor(private prisma: PrismaService) {
-    const token = process.env.TELEGRAM_BOT_TOKEN;
-    if (token) {
-      this.adminBot = new Telegraf(token);
-    }
-  }
+  constructor(
+    private prisma: PrismaService,
+    private telegramLogger: TelegramLoggerService,
+  ) {}
 
   async createLead(data: { fullName: string; phone: string; info?: string }) {
     const lead = await this.prisma.lead.create({
@@ -23,7 +20,7 @@ export class LeadsService {
       },
     });
 
-    await this.notifyAdmin(lead);
+    this.telegramLogger.sendLeadNotification(lead).catch(() => {});
     return lead;
   }
 
@@ -38,18 +35,5 @@ export class LeadsService {
       where: { id },
       data: { status },
     });
-  }
-
-  private async notifyAdmin(lead: any) {
-    const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
-    if (!this.adminBot || !chatId) return;
-
-    const message = `🚀 New Lead!\nName: ${lead.fullName}\nPhone: ${lead.phone}\nInfo: ${lead.info || "None"}`;
-
-    try {
-      await this.adminBot.telegram.sendMessage(chatId, message);
-    } catch (e) {
-      this.logger.error("Failed to send TG notification");
-    }
   }
 }

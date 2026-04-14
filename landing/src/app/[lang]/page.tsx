@@ -281,7 +281,7 @@ export default function LandingPage() {
     <div className="min-h-screen selection:bg-blue-600 selection:text-white overflow-x-hidden font-sans bg-white text-left">
       {/* ===== Global Notification ===== */}
       {notification && (
-        <div className="bg-blue-600 text-white py-2.5 px-5 text-center text-xs sm:text-sm font-bold tracking-wide relative z-[60]">
+        <div className="bg-blue-600 text-white py-2.5 px-5 text-center text-xs sm:text-sm font-bold tracking-wide relative z-60">
           <div className="max-w-7xl mx-auto flex items-center justify-center gap-2">
             <Zap className="w-4 h-4 fill-white animate-pulse" />
             {notification}
@@ -583,7 +583,7 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
             {/* Connector line */}
-            <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-gradient-to-r from-blue-200 via-blue-400 to-blue-200" />
+            <div className="hidden md:block absolute top-16 left-[20%] right-[20%] h-px bg-linear-to-r from-blue-200 via-blue-400 to-blue-200" />
 
             {(
               howItWorksTranslations[lang]?.steps ??
@@ -651,7 +651,7 @@ export default function LandingPage() {
                         "{content}"
                       </p>
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                        <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
                           {tm.name.charAt(0)}
                         </div>
                         <div>
@@ -721,7 +721,7 @@ export default function LandingPage() {
                                   "{content}"
                                 </p>
                                 <div className="flex items-center gap-4">
-                                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                                  <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
                                     {tm.name.charAt(0)}
                                   </div>
                                   <div>
@@ -967,7 +967,7 @@ export default function LandingPage() {
                         <div
                           className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isPopular ? "bg-blue-600 text-white" : "bg-white/10 text-white"}`}
                         >
-                          <Check className="w-3 h-3 stroke-[3]" />
+                          <Check className="w-3 h-3 stroke-3" />
                         </div>
                         <span
                           className={`text-sm font-medium ${isPopular ? "text-slate-600" : "text-slate-300"}`}
@@ -1093,7 +1093,7 @@ export default function LandingPage() {
                       className="group flex flex-col h-full bg-white rounded-3xl border border-slate-100 overflow-hidden hover:shadow-2xl hover:border-blue-100 hover:-translate-y-1 transition-all duration-300 text-left"
                     >
                       {/* Cover */}
-                      <div className="relative w-full aspect-[16/9] bg-slate-100 overflow-hidden shrink-0">
+                      <div className="relative w-full aspect-video bg-slate-100 overflow-hidden shrink-0">
                         {news.image ? (
                           <img
                             src={
@@ -1105,11 +1105,11 @@ export default function LandingPage() {
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
-                          <div className="w-full h-full bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                          <div className="w-full h-full bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
                             <Newspaper className="w-12 h-12 text-blue-200" />
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute inset-0 bg-linear-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
 
                       {/* Body */}
@@ -1137,18 +1137,45 @@ export default function LandingPage() {
       )}
 
       {/* ===== Contact / Quick Contact ===== */}
-      {(contactPhone || contactEmail || socialTelegram || socialInstagram || socialLinkedin || socialTwitter) && (
-        <section className="py-16 sm:py-20 px-5 sm:px-6 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
+      {(contactPhone ||
+        contactEmail ||
+        socialTelegram ||
+        socialInstagram ||
+        socialLinkedin ||
+        socialTwitter) && (
+        <section className="py-16 sm:py-20 px-5 sm:px-6 bg-linear-to-br from-blue-600 to-indigo-700 text-white">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="space-y-3">
               <span className="text-xs font-black uppercase tracking-widest text-blue-200">
-                {lang === "uz" ? "Bog'lanish" : lang === "ru" ? "Связаться" : lang === "tr" ? "İletişim" : lang === "oz" ? "Боғланиш" : "Contact"}
+                {lang === "uz"
+                  ? "Bog'lanish"
+                  : lang === "ru"
+                    ? "Связаться"
+                    : lang === "tr"
+                      ? "İletişim"
+                      : lang === "oz"
+                        ? "Боғланиш"
+                        : "Contact"}
               </span>
               <h2 className="text-3xl sm:text-4xl font-black tracking-tight">
-                {lang === "uz" ? "Tez bog'lanish" : lang === "ru" ? "Быстрая связь" : lang === "tr" ? "Hızlı İletişim" : lang === "oz" ? "Тез боғланиш" : "Get in Touch"}
+                {lang === "uz"
+                  ? "Tez bog'lanish"
+                  : lang === "ru"
+                    ? "Быстрая связь"
+                    : lang === "tr"
+                      ? "Hızlı İletişim"
+                      : lang === "oz"
+                        ? "Тез боғланиш"
+                        : "Get in Touch"}
               </h2>
               <p className="text-blue-200 max-w-lg mx-auto">
-                {lang === "uz" ? "Savollaringiz bo'lsa, biz bilan bog'laning. Yordam berishga tayyormiz!" : lang === "ru" ? "Есть вопросы? Свяжитесь с нами — мы готовы помочь!" : lang === "tr" ? "Sorularınız mı var? Bize ulaşın, yardıma hazırız!" : "Have questions? Contact us — we're ready to help!"}
+                {lang === "uz"
+                  ? "Savollaringiz bo'lsa, biz bilan bog'laning. Yordam berishga tayyormiz!"
+                  : lang === "ru"
+                    ? "Есть вопросы? Свяжитесь с нами — мы готовы помочь!"
+                    : lang === "tr"
+                      ? "Sorularınız mı var? Bize ulaşın, yardıma hazırız!"
+                      : "Have questions? Contact us — we're ready to help!"}
               </p>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4">
@@ -1353,7 +1380,7 @@ export default function LandingPage() {
 
       <AnimatePresence>
         {isHelpModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

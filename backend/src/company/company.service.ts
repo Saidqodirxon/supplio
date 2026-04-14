@@ -27,8 +27,18 @@ export class CompanyService {
       "website",
       "instagram",
       "telegram",
+      "facebook",
+      "tiktok",
+      "youtube",
       "siteActive",
       "cashbackPercent",
+      "workingHours",
+      "contactPhone",
+      "contactAddress",
+      "botPaused",
+      "botAutoSchedule",
+      "logGroupChatId",
+      "orderGroupChatId",
     ];
     const filteredData: any = {};
     for (const field of allowedFields) {

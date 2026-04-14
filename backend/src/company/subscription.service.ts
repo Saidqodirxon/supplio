@@ -2,6 +2,7 @@ import { Injectable, Logger, ConflictException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 import { TelegramBotManager } from "../telegram/telegram-bot.manager";
+import { TelegramLoggerService } from "../telegram/telegram-logger.service";
 import { RoleType } from "@prisma/client";
 
 /**
@@ -15,7 +16,8 @@ export class SubscriptionService {
 
   constructor(
     private prisma: PrismaService,
-    private botManager: TelegramBotManager
+    private botManager: TelegramBotManager,
+    private telegramLogger: TelegramLoggerService,
   ) {}
 
   /**
@@ -27,6 +29,7 @@ export class SubscriptionService {
     );
 
     // 1. Update Core Subscription (Main DB)
+    const oldCompany = await this.prisma.company.findUnique({ where: { id: companyId }, select: { subscriptionPlan: true, name: true } });
     const company = await this.prisma.company.update({
       where: { id: companyId },
       data: {
@@ -35,6 +38,12 @@ export class SubscriptionService {
         trialExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // +30 Days
       },
     });
+
+    this.telegramLogger.sendTariffUpgradeNotification({
+      companyName: oldCompany?.name ?? companyId,
+      oldPlan: oldCompany?.subscriptionPlan ?? 'UNKNOWN',
+      newPlan: plan,
+    }).catch(() => {});
 
     // 2. Provision Enterprise Connection URL if not present
     if (!company.dbConnectionUrl && plan !== SubscriptionPlan.FREE) {

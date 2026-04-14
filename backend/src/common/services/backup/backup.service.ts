@@ -6,6 +6,8 @@ import * as path from "path";
 import * as https from "https";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { PrismaService } from "../../../prisma/prisma.service";
+import { TelegramLoggerService } from "../../../telegram/telegram-logger.service";
+import { CompanyNotifierService } from "../../../telegram/company-notifier.service";
 
 const execPromise = promisify(exec);
 
@@ -63,7 +65,11 @@ export class BackupService {
   private readonly logger = new Logger(BackupService.name);
   private readonly backupDir = path.join(process.cwd(), "backups");
 
-  constructor(private prisma: PrismaService) {
+  constructor(
+    private prisma: PrismaService,
+    private loggerService: TelegramLoggerService,
+    private companyNotifier: CompanyNotifierService,
+  ) {
     if (!fs.existsSync(this.backupDir)) fs.mkdirSync(this.backupDir, { recursive: true });
   }
 
@@ -80,10 +86,25 @@ export class BackupService {
     this.logger.log("Daily Backup Triggered: 01:00 AM");
     try {
       const result = await this.createFullBackup();
-      await this.sendToTelegram(result.zipPath, path.basename(result.zipPath),
-        process.env.LOG_BOT_TOKEN,
-        process.env.BACKUP_CHAT_ID || process.env.LOG_CHAT_ID
-      );
+      const fileName = path.basename(result.zipPath);
+
+      // Super-admin backup bot (separate BACKUP_BOT_TOKEN channel)
+      await this.loggerService.sendBackupFile(result.zipPath, fileName, 'Daily Full Backup');
+
+      // Per-company backup: send each company's SQL to their own log group
+      const companies = await this.prisma.company.findMany({
+        where: { deletedAt: null },
+        select: { id: true, name: true, slug: true },
+      });
+      for (const company of companies) {
+        try {
+          const sqlResult = await this.createCompanyBackup(company.id);
+          await this.companyNotifier.notifyBackup(company.id, sqlResult.path, sqlResult.name);
+        } catch (e: any) {
+          this.logger.warn(`Per-company backup notify failed for ${company.name}: ${e?.message}`);
+        }
+      }
+
       this.logger.log("Daily backup complete");
       await this.cleanupOldBackups(2);
     } catch (err: any) {

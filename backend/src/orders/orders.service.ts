@@ -1,12 +1,14 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { TelegramService } from "../telegram/telegram.service";
+import { CompanyNotifierService } from "../telegram/company-notifier.service";
 
 @Injectable()
 export class OrdersService {
   constructor(
     private prisma: PrismaService,
     private telegramService: TelegramService,
+    private companyNotifier: CompanyNotifierService,
   ) {}
 
   async create(
@@ -19,7 +21,7 @@ export class OrdersService {
   ) {
     const { dealerId, branchId, products } = data;
 
-    return this.prisma.$transaction(async (tx) => {
+    const createdOrder = await this.prisma.$transaction(async (tx) => {
       const totalAmount = products.reduce((acc, p) => acc + p.price * p.quantity, 0);
 
       // Resolve cost + name per product
@@ -104,6 +106,19 @@ export class OrdersService {
 
       return order;
     });
+
+    // Fire-and-forget group notifications (outside transaction)
+    const branch = await this.prisma.branch.findUnique({ where: { id: data.branchId }, select: { name: true } }).catch(() => null);
+    this.companyNotifier.notifyNewOrder(companyId, {
+      id: (createdOrder as any).id,
+      totalAmount: (createdOrder as any).totalAmount,
+      dealerName: (await this.prisma.dealer.findUnique({ where: { id: data.dealerId }, select: { name: true } }).catch(() => null))?.name ?? 'Unknown',
+      dealerPhone: (await this.prisma.dealer.findUnique({ where: { id: data.dealerId }, select: { phone: true } }).catch(() => null))?.phone ?? '',
+      branchName: branch?.name ?? '',
+      items: (createdOrder as any).items ?? [],
+    }).catch(() => {});
+
+    return createdOrder;
   }
 
   async findAll(companyId: string) {

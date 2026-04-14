@@ -1,6 +1,6 @@
 -- Supplio Company Export
 -- Company: Demo Solutions Ltd
--- Exported: 2026-04-12T20:00:00.538Z
+-- Exported: 2026-04-13T20:00:00.966Z
 -- ID: 677fe634-603d-4723-8c85-afff22b41391
 
 -- Branch (1 rows)

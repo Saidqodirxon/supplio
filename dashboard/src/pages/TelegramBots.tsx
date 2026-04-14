@@ -14,223 +14,65 @@ import {
   CheckCircle,
   Circle,
   ChevronRight,
+  Clock,
+  Phone,
+  Power,
+  CalendarClock,
+  Info,
 } from "lucide-react";
 import api from "../services/api";
 import { toast } from "../utils/toast";
 import clsx from "clsx";
 import { useAuthStore } from "../store/authStore";
-import { dashboardTranslations } from "../i18n/translations";
+import { dashboardTranslations, pageTranslations } from "../i18n/translations";
 import { getApiErrorMessage } from "../utils/apiError";
-
+            {t.reloadBots}
 function getPublicStoreBaseUrl() {
   return (
-    import.meta.env.VITE_STORE_URL ||
-    import.meta.env.VITE_LANDING_URL ||
-    import.meta.env.VITE_APP_URL ||
-    import.meta.env.VITE_PUBLIC_SITE_URL ||
-    "https://supplio.uz"
+                {t.noBotYetTitle}
   ).replace(/\/+$/, "");
 }
-
-const T = {
-  en: {
-    title: "Telegram Bots",
-    subtitle:
-      "Connect your Telegram bot to power your web store and dealer channel.",
-    addBot: "Add Bot",
-    noBots: "No bots connected yet",
-    noBotsDesc: "Add a Telegram bot to enable your store inside Telegram.",
-    botName: "Bot Name",
-    description: "Description",
-    token: "Bot Token",
-    tokenPlaceholder: "e.g. 7123456789:AAF...",
-    validate: "Validate Token",
-    validating: "Validating...",
-    valid: "Token is valid",
-    invalid: "Invalid token",
-    create: "Add Bot",
-    creating: "Adding...",
-    edit: "Edit",
-    delete: "Delete",
-    deleteConfirm: "Delete this bot?",
-    cancel: "Cancel",
-    save: "Save",
-    saving: "Saving...",
-    connected: "Connected",
-    stopped: "Stopped",
-    not_found: "Not Set Up",
-    storeUrl: "Store URL",
-    howToTitle: "How to get a bot token",
-    howToStep1: "Open Telegram and search for @BotFather",
-    howToStep2: "Send /newbot and follow the instructions",
-    howToStep3: "Copy the token and paste it above",
-    howToStep4: "Your bot will become the Telegram store for your dealers",
-  },
-  uz: {
-    title: "Telegram Botlar",
-    subtitle: "Telegram botingizni veb-do'kon va dilerlar kanaliga ulang.",
-    addBot: "Bot qo'shish",
-    noBots: "Hali bot ulangan emas",
-    noBotsDesc:
-      "Telegram ichida do'koningizni faollashtirish uchun bot qo'shing.",
-    botName: "Bot nomi",
-    description: "Tavsif",
-    token: "Bot tokeni",
-    tokenPlaceholder: "Masalan: 7123456789:AAF...",
-    validate: "Tokenni tekshirish",
-    validating: "Tekshirilmoqda...",
-    valid: "Token to'g'ri",
-    invalid: "Noto'g'ri token",
-    create: "Bot qo'shish",
-    creating: "Qo'shilmoqda...",
-    edit: "Tahrirlash",
-    delete: "O'chirish",
-    deleteConfirm: "Bu botni o'chirasizmi?",
-    cancel: "Bekor qilish",
-    save: "Saqlash",
-    saving: "Saqlanmoqda...",
-    connected: "Ulangan",
-    stopped: "To'xtatilgan",
-    not_found: "Sozlanmagan",
-    storeUrl: "Do'kon manzili",
-    howToTitle: "Bot tokenini qanday olish",
-    howToStep1: "Telegramni oching va @BotFather ni qidiring",
-    howToStep2: "/newbot yuboring va ko'rsatmalarga amal qiling",
-    howToStep3: "Tokenni nusxalab yuqoriga joylashtiring",
-    howToStep4: "Botingiz dilerlar uchun Telegram do'konga aylanadi",
-  },
-  oz: {
-    title: "Telegram Ботлар",
-    subtitle: "Telegram ботингизни веб-дўкон ва диллерлар каналига улаш.",
-    addBot: "Бот қўшиш",
-    noBots: "Ҳали бот улган эмас",
-    noBotsDesc: "Telegram ичида дўкон фаоллаштириш учун бот қўшинг.",
-    botName: "Бот номи",
-    description: "Тавсиф",
-    token: "Бот токени",
-    tokenPlaceholder: "Мас: 7123456789:AAF...",
-    validate: "Токенни текшириш",
-    validating: "Текширилмоқда...",
-    valid: "Токен тўғри",
-    invalid: "Нотўғри токен",
-    create: "Бот қўшиш",
-    creating: "Қўшилмоқда...",
-    edit: "Таҳрирлаш",
-    delete: "Ўчириш",
-    deleteConfirm: "Бу ботни ўчирасизми?",
-    cancel: "Бекор қилиш",
-    save: "Сақлаш",
-    saving: "Сақланмоқда...",
-    connected: "Уланган",
-    stopped: "Тўхтатилган",
-    not_found: "Созланмаган",
-    storeUrl: "Дўкон манзили",
-    howToTitle: "Бот токенини қандай олиш",
-    howToStep1: "Telegramни очинг ва @BotFather ни қидиринг",
-    howToStep2: "/newbot юборинг ва кўрсатмаларга амал қилинг",
-    howToStep3: "Токенни нусхалаб юқорига жойлаштиринг",
-    howToStep4: "Ботингиз диллерлар учун Telegram дўконга айланади",
-  },
-  tr: {
-    title: "Telegram Botlar",
-    subtitle: "Telegram botunuzu web mağazanıza ve bayi kanalınıza bağlayın.",
-    addBot: "Bot Ekle",
-    noBots: "Henüz bot bağlı değil",
-    noBotsDesc: "Telegram içinde mağazanızı etkinleştirmek için bot ekleyin.",
-    botName: "Bot Adı",
-    description: "Açıklama",
-    token: "Bot Token",
-    tokenPlaceholder: "Örn: 7123456789:AAF...",
-    validate: "Token Doğrula",
-    validating: "Doğrulanıyor...",
-    valid: "Token geçerli",
-    invalid: "Geçersiz token",
-    create: "Bot Ekle",
-    creating: "Ekleniyor...",
-    edit: "Düzenle",
-    delete: "Sil",
-    deleteConfirm: "Bu botu silmek istiyor musunuz?",
-    cancel: "İptal",
-    save: "Kaydet",
-    saving: "Kaydediliyor...",
-    connected: "Bağlı",
-    stopped: "Durduruldu",
-    not_found: "Kurulmadı",
-    storeUrl: "Mağaza URL",
-    howToTitle: "Bot token nasıl alınır",
-    howToStep1: "Telegram'ı açın ve @BotFather'ı arayın",
-    howToStep2: "/newbot gönderin ve talimatları izleyin",
-    howToStep3: "Token'ı kopyalayıp yukarıya yapıştırın",
-    howToStep4: "Botunuz bayiler için Telegram mağazasına dönüşür",
-  },
-  ru: {
-    title: "Telegram Боты",
-    subtitle:
-      "Подключите Telegram-бота к вашему веб-магазину и каналу для дилеров.",
-    addBot: "Добавить бота",
-    noBots: "Боты не подключены",
-    noBotsDesc:
-      "Добавьте Telegram-бота, чтобы запустить магазин внутри Telegram.",
-    botName: "Имя бота",
-    description: "Описание",
-    token: "Токен бота",
-    tokenPlaceholder: "Напр: 7123456789:AAF...",
-    validate: "Проверить токен",
-    validating: "Проверка...",
-    valid: "Токен действителен",
-    invalid: "Неверный токен",
-    create: "Добавить бота",
-    creating: "Добавление...",
-    edit: "Редактировать",
-    delete: "Удалить",
-    deleteConfirm: "Удалить этого бота?",
-    cancel: "Отмена",
-    save: "Сохранить",
-    saving: "Сохранение...",
-    connected: "Подключён",
-    stopped: "Остановлен",
-    not_found: "Не настроен",
-    storeUrl: "URL магазина",
-    howToTitle: "Как получить токен бота",
-    howToStep1: "Откройте Telegram и найдите @BotFather",
-    howToStep2: "Отправьте /newbot и следуйте инструкциям",
-    howToStep3: "Скопируйте токен и вставьте выше",
-    howToStep4: "Ваш бот станет Telegram-магазином для дилеров",
-  },
-} as const;
-
-type Lang = keyof typeof T;
-
+                {t.noBotYetDesc}
 interface Bot {
   id: string;
   botName: string | null;
   description: string | null;
   token: string;
   username: string | null;
-  isActive: boolean;
-  status: "connected" | "stopped" | "not_found";
-  createdAt: string;
-}
-
+              {t.openBotFather}
 interface BotFormData {
   token: string;
   botName: string;
   description: string;
 }
+                placeholder={t.botNamePlaceholder}
+type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+interface DaySchedule {
+  open: string;
+  close: string;
+  active: boolean;
+                placeholder={t.descriptionPlaceholder}
+type WorkingHoursSchedule = Record<DayKey, DaySchedule>;
 
-const STATUS_COLOR = {
-  connected: "text-emerald-600 bg-emerald-500/10",
-  stopped: "text-amber-600 bg-amber-500/10",
+const DAY_LABELS: Record<DayKey, Record<string, string>> = {
+            {t.storeUrlInfo}
+  wed: { uz: "Chorshanba", ru: "Среда", en: "Wednesday", oz: "Чоршанба" },
+  thu: { uz: "Payshanba", ru: "Четверг", en: "Thursday", oz: "Пайшанба" },
+  fri: { uz: "Juma", ru: "Пятница", en: "Friday", oz: "Жума" },
+  sat: { uz: "Shanba", ru: "Суббота", en: "Saturday", oz: "Шанба" },
+  sun: { uz: "Yakshanba", ru: "Воскресенье", en: "Sunday", oz: "Якшанба" },
+};
+const DAY_KEYS: DayKey[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
+
+      toast.success(t.saved);
+  wed: { open: "09:00", close: "18:00", active: true },
+  thu: { open: "09:00", close: "18:00", active: true },
+  fri: { open: "09:00", close: "18:00", active: true },
+      toast.success(t.testSent);
   not_found: "text-slate-400 bg-slate-500/10",
-};
+      toast.success(t.reportSent);
 
-const STATUS_ICON = {
-  connected: <CheckCircle className="w-3.5 h-3.5" />,
-  stopped: <AlertCircle className="w-3.5 h-3.5" />,
-  not_found: <Circle className="w-3.5 h-3.5" />,
-};
-
-export default function TelegramBots() {
+      t.broadcastConfirm.replace("{count}", String(bots.length))
   const { language } = useAuthStore();
   const lang = (language in T ? language : "en") as Lang;
   const t = T[lang];
@@ -264,6 +106,21 @@ export default function TelegramBots() {
     failed: number;
   } | null>(null);
 
+  // Bot schedule settings
+  const [schedule, setSchedule] =
+    useState<WorkingHoursSchedule>(DEFAULT_SCHEDULE);
+  const [botPaused, setBotPaused] = useState(false);
+  const [botAutoSchedule, setBotAutoSchedule] = useState(true);
+  const [savingSettings, setSavingSettings] = useState(false);
+
+  // Group notifications
+  const [logGroupChatId, setLogGroupChatId] = useState("");
+  const [orderGroupChatId, setOrderGroupChatId] = useState("");
+  const [testingGroup, setTestingGroup] = useState<"log" | "order" | null>(
+    null
+  );
+  const [sendingReport, setSendingReport] = useState(false);
+
   const errorText = (error: unknown, fallback: string) =>
     getApiErrorMessage(error, fallback, language);
 
@@ -275,8 +132,18 @@ export default function TelegramBots() {
         api.get("/company/me"),
       ]);
       setBots(botsRes.data);
-      const slug = companyRes.data?.slug;
-      if (slug) setStoreUrl(`${getPublicStoreBaseUrl()}/store/${slug}`);
+      const c = companyRes.data;
+      if (c?.slug) setStoreUrl(`${getPublicStoreBaseUrl()}/store/${c.slug}`);
+      // Hydrate bot settings
+      setBotPaused(c?.botPaused ?? false);
+      setBotAutoSchedule(c?.botAutoSchedule ?? true);
+      setLogGroupChatId(c?.logGroupChatId ?? "");
+      setOrderGroupChatId(c?.orderGroupChatId ?? "");
+      if (c?.workingHours) {
+        try {
+          setSchedule({ ...DEFAULT_SCHEDULE, ...JSON.parse(c.workingHours) });
+        } catch {}
+      }
     } catch {
       toast.error(errorText(undefined, dt.common?.error ?? "Error"));
     } finally {
@@ -312,13 +179,13 @@ export default function TelegramBots() {
         botName: form.botName.trim() || undefined,
         description: form.description.trim() || undefined,
       });
-      toast.success("Bot qo'shildi! Menyu tugmasi avtomatik sozlandi.");
+      toast.success(t.create);
       setShowForm(false);
       setForm({ token: "", botName: "", description: "" });
       setTokenStatus("idle");
       fetchBots();
     } catch (e: any) {
-      toast.error(errorText(e, "Failed to add bot"));
+      toast.error(errorText(e, dt.common?.error ?? "Error"));
     } finally {
       setCreating(false);
     }
@@ -328,11 +195,11 @@ export default function TelegramBots() {
     setSaving(true);
     try {
       await api.patch(`/telegram/bots/${id}`, editForm);
-      toast.success("Saved");
+      toast.success(dt.common?.save ?? "Saved");
       setEditId(null);
       fetchBots();
     } catch (e) {
-      toast.error(errorText(e, "Failed to save"));
+      toast.error(errorText(e, dt.common?.error ?? "Error"));
     } finally {
       setSaving(false);
     }
@@ -342,20 +209,20 @@ export default function TelegramBots() {
     setDeletingId(id);
     try {
       await api.delete(`/telegram/bots/${id}`);
-      toast.success("Bot removed");
+      toast.success(dt.common?.delete ?? "Deleted");
       setBots((prev) => prev.filter((b) => b.id !== id));
     } catch (e) {
-      toast.error(errorText(e, "Failed to remove bot"));
+      toast.error(errorText(e, dt.common?.error ?? "Error"));
     } finally {
       setDeletingId(null);
     }
   };
 
   const handleBroadcast = async () => {
-    if (!broadcastMsg.trim()) return toast.error("Xabar matnini kiriting");
+    if (!broadcastMsg.trim()) return toast.error(dt.common?.error ?? "Error");
     if (
       !window.confirm(
-        `${bots.length > 0 ? "Barcha" : "0"} dilerlarga xabar yuborilsinmi?`
+        t.broadcastConfirm.replace("{count}", String(bots.length))
       )
     )
       return;
@@ -366,10 +233,10 @@ export default function TelegramBots() {
         message: broadcastMsg,
       });
       setBroadcastResult(res.data);
-      toast.success(`Yuborildi: ${res.data.sent} ta`);
+      toast.success(`${res.data.sent} ${t.saved}`);
       setBroadcastMsg("");
     } catch (e) {
-      toast.error(errorText(e, "Xabar yuborishda xatolik"));
+      toast.error(errorText(e, dt.common?.error ?? "Error"));
     } finally {
       setBroadcasting(false);
     }
@@ -380,12 +247,54 @@ export default function TelegramBots() {
     try {
       const res = await api.post("/telegram/bots/reload");
       const count = Number(res?.data?.reloaded ?? 0);
-      toast.success(`Botlar qayta yuklandi: ${count} ta`);
+      toast.success(`${count} ${t.reloadBots}`);
       await fetchBots();
     } catch (e) {
-      toast.error(errorText(e, "Botlarni reload qilishda xatolik"));
+      toast.error(errorText(e, dt.common?.error ?? "Error"));
     } finally {
       setReloadingBots(false);
+    }
+  };
+
+  const saveSettings = async () => {
+    setSavingSettings(true);
+    try {
+      await api.patch("/company/me", {
+        botPaused,
+        botAutoSchedule,
+        workingHours: JSON.stringify(schedule),
+        logGroupChatId: logGroupChatId.trim() || null,
+        orderGroupChatId: orderGroupChatId.trim() || null,
+      });
+      toast.success(t.saved);
+    } catch (e) {
+      toast.error(errorText(e, dt.common?.error ?? "Error"));
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const testGroup = async (type: "log" | "order") => {
+    setTestingGroup(type);
+    try {
+      await api.post(`/telegram/groups/test/${type}`);
+      toast.success(t.testSent);
+    } catch (e) {
+      toast.error(errorText(e, dt.common?.error ?? "Error"));
+    } finally {
+      setTestingGroup(null);
+    }
+  };
+
+  const sendManualReport = async () => {
+    setSendingReport(true);
+    try {
+      await api.post("/telegram/groups/report");
+      toast.success(t.reportSent);
+    } catch (e) {
+      toast.error(errorText(e, dt.common?.error ?? "Error"));
+    } finally {
+      setSendingReport(false);
     }
   };
 
@@ -418,7 +327,7 @@ export default function TelegramBots() {
             ) : (
               <RefreshCw className="w-4 h-4" />
             )}
-            Botlarni reload
+            {t.reloadBots}
           </button>
           <button
             onClick={fetchBots}
@@ -467,18 +376,10 @@ export default function TelegramBots() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-black text-slate-700 dark:text-white">
-                {language === "ru"
-                  ? "Ещё нет бота?"
-                  : language === "en"
-                    ? "No bot yet?"
-                    : "Hali bot yo'q?"}
+                {t.noBotYetTitle}
               </p>
               <p className="text-[10px] text-slate-400 mt-0.5">
-                {language === "ru"
-                  ? "Создайте бесплатно через BotFather — официального бота Telegram"
-                  : language === "en"
-                    ? "Create one free via BotFather — Telegram's official bot creator"
-                    : "BotFather orqali bepul yarating — rasmiy Telegram bot yaratuvchi"}
+                {t.noBotYetDesc}
               </p>
             </div>
             <a
@@ -487,11 +388,7 @@ export default function TelegramBots() {
               rel="noopener noreferrer"
               className="shrink-0 px-4 py-2.5 bg-[#29aee6] text-white rounded-xl text-xs font-black hover:bg-[#1a9fd6] transition-all active:scale-95 whitespace-nowrap"
             >
-              {language === "ru"
-                ? "Открыть BotFather"
-                : language === "en"
-                  ? "Open BotFather"
-                  : "BotFather ochish"}
+              {t.openBotFather}
             </a>
           </div>
 
@@ -505,7 +402,7 @@ export default function TelegramBots() {
                 onChange={(e) =>
                   setForm((p) => ({ ...p, botName: e.target.value }))
                 }
-                placeholder="My Store Bot"
+                placeholder={t.botNamePlaceholder}
                 className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
               />
             </div>
@@ -518,7 +415,7 @@ export default function TelegramBots() {
                 onChange={(e) =>
                   setForm((p) => ({ ...p, description: e.target.value }))
                 }
-                placeholder="Optional description"
+                placeholder={t.descriptionPlaceholder}
                 className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 text-sm font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
               />
             </div>
@@ -587,8 +484,7 @@ export default function TelegramBots() {
           </div>
 
           <div className="p-3 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 text-xs font-semibold text-blue-700 dark:text-blue-300">
-            Bot qo'shilganda Web Do'kon havola tugmasi Telegram menyusiga
-            avtomatik o'rnatiladi.
+            {t.storeUrlInfo}
           </div>
 
           <div className="flex gap-3 pt-2">
@@ -817,6 +713,701 @@ export default function TelegramBots() {
         </div>
       )}
 
+      {/* Bot Schedule & Contact Settings */}
+      <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/10 p-8 space-y-7">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+            <CalendarClock className="w-5 h-5 text-indigo-600" />
+          </div>
+          <div>
+            <h3 className="font-black text-slate-900 dark:text-white">
+              {lang === "ru"
+                ? "Настройки бота"
+                : lang === "en"
+                  ? "Bot Settings"
+                  : "Bot sozlamalari"}
+            </h3>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+              {lang === "ru"
+                ? "Ish vaqti va ishlash rejimi"
+                : lang === "en"
+                  ? "Working hours and behavior"
+                  : "Ish vaqti va ishlash rejimi"}
+            </p>
+          </div>
+        </div>
+
+        {/* Toggles row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Bot pause toggle */}
+          <button
+            onClick={() => setBotPaused((p) => !p)}
+            className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
+              botPaused
+                ? "border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10"
+                : "border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5"
+            }`}
+          >
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${botPaused ? "bg-rose-100 dark:bg-rose-500/20 text-rose-600" : "bg-slate-100 dark:bg-white/10 text-slate-400"}`}
+            >
+              <Power className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-black text-sm text-slate-800 dark:text-white">
+                {lang === "ru"
+                  ? "Ручная пауза"
+                  : lang === "en"
+                    ? "Manual pause"
+                    : "Qo'lda to'xtatish"}
+              </p>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">
+                {botPaused
+                  ? lang === "ru"
+                    ? "Бот сейчас остановлен"
+                    : lang === "en"
+                      ? "Bot is currently paused"
+                      : "Bot hozir to'xtatilgan"
+                  : lang === "ru"
+                    ? "Бот работает"
+                    : lang === "en"
+                      ? "Bot is running"
+                      : "Bot ishlayapti"}
+              </p>
+            </div>
+            <div
+              className={`w-11 h-6 rounded-full transition-colors shrink-0 relative ${botPaused ? "bg-rose-500" : "bg-slate-200 dark:bg-white/20"}`}
+            >
+              <div
+                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${botPaused ? "translate-x-5" : "translate-x-0.5"}`}
+              />
+            </div>
+          </button>
+
+          {/* Auto schedule toggle */}
+          <button
+            onClick={() => setBotAutoSchedule((p) => !p)}
+            className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left ${
+              botAutoSchedule
+                ? "border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10"
+                : "border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5"
+            }`}
+          >
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${botAutoSchedule ? "bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600" : "bg-slate-100 dark:bg-white/10 text-slate-400"}`}
+            >
+              <Clock className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-black text-sm text-slate-800 dark:text-white">
+                {lang === "ru"
+                  ? "Авто по расписанию"
+                  : lang === "en"
+                    ? "Auto schedule"
+                    : "Avto jadval"}
+              </p>
+              <p className="text-xs text-slate-400 font-medium mt-0.5">
+                {botAutoSchedule
+                  ? lang === "ru"
+                    ? "Бот следует расписанию"
+                    : lang === "en"
+                      ? "Bot follows schedule"
+                      : "Bot jadvalga mos ishlaydi"
+                  : lang === "ru"
+                    ? "Расписание не применяется"
+                    : lang === "en"
+                      ? "Schedule disabled"
+                      : "Jadval qo'llanilmaydi"}
+              </p>
+            </div>
+            <div
+              className={`w-11 h-6 rounded-full transition-colors shrink-0 relative ${botAutoSchedule ? "bg-indigo-500" : "bg-slate-200 dark:bg-white/20"}`}
+            >
+              <div
+                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${botAutoSchedule ? "translate-x-5" : "translate-x-0.5"}`}
+              />
+            </div>
+          </button>
+        </div>
+
+        {/* Working hours table */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Clock className="w-4 h-4 text-slate-400" />
+            <span className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+              {lang === "ru"
+                ? "Расписание работы"
+                : lang === "en"
+                  ? "Working schedule"
+                  : "Ish jadvali"}
+            </span>
+          </div>
+          <div className="rounded-2xl border border-slate-100 dark:border-white/10 overflow-hidden">
+            {DAY_KEYS.map((key, i) => {
+              const day = schedule[key];
+              const label = DAY_LABELS[key][lang] ?? DAY_LABELS[key].en;
+              return (
+                <div
+                  key={key}
+                  className={`flex items-center gap-3 px-4 py-3 ${i < DAY_KEYS.length - 1 ? "border-b border-slate-100 dark:border-white/5" : ""} ${!day.active ? "opacity-50" : ""}`}
+                >
+                  {/* Day name + toggle */}
+                  <button
+                    onClick={() =>
+                      setSchedule((s) => ({
+                        ...s,
+                        [key]: { ...s[key], active: !s[key].active },
+                      }))
+                    }
+                    className="flex items-center gap-2 w-36 shrink-0"
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors ${day.active ? "bg-indigo-600 border-indigo-600" : "border-slate-300 dark:border-slate-600"}`}
+                    >
+                      {day.active && (
+                        <Check className="w-2.5 h-2.5 text-white" />
+                      )}
+                    </div>
+                    <span className="text-sm font-bold text-slate-700 dark:text-slate-200 select-none">
+                      {label}
+                    </span>
+                  </button>
+
+                  {/* Open time */}
+                  <input
+                    type="time"
+                    value={day.open}
+                    disabled={!day.active}
+                    onChange={(e) =>
+                      setSchedule((s) => ({
+                        ...s,
+                        [key]: { ...s[key], open: e.target.value },
+                      }))
+                    }
+                    className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-40 w-28"
+                  />
+                  <span className="text-slate-300 text-sm font-bold">–</span>
+                  {/* Close time */}
+                  <input
+                    type="time"
+                    value={day.close}
+                    disabled={!day.active}
+                    onChange={(e) =>
+                      setSchedule((s) => ({
+                        ...s,
+                        [key]: { ...s[key], close: e.target.value },
+                      }))
+                    }
+                    className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-40 w-28"
+                  />
+                  {!day.active && (
+                    <span className="text-xs font-bold text-slate-400 ml-1">
+                      {lang === "ru"
+                        ? "Выходной"
+                        : lang === "en"
+                          ? "Day off"
+                          : "Dam olish"}
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Info hint */}
+        <div className="flex items-start gap-3 p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20">
+          <Info className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+          <p className="text-xs text-indigo-700 dark:text-indigo-300 font-medium">
+            {lang === "ru"
+              ? "Дилеры могут написать /info в боте, чтобы увидеть часы работы, телефон и адрес в любое время."
+              : lang === "en"
+                ? "Dealers can type /info in the bot at any time to see working hours, phone and address."
+                : "Dilerlar istalgan vaqtda botda /info yozib ish vaqti, telefon va manzilni ko'rishlari mumkin."}
+          </p>
+        </div>
+
+        {/* Save button */}
+        <button
+          onClick={saveSettings}
+          disabled={savingSettings}
+          className="flex items-center gap-2 px-6 py-3.5 bg-indigo-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-indigo-600/20 active:scale-95 transition-all disabled:opacity-50"
+        >
+          {savingSettings ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Check className="w-4 h-4" />
+          )}
+          {lang === "ru"
+            ? "Сохранить настройки"
+            : lang === "en"
+              ? "Save settings"
+              : "Sozlamalarni saqlash"}
+        </button>
+      </div>
+
+      {/* Group Notifications */}
+      <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/10 p-8 space-y-7">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+              <Bot className="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <h3 className="font-black text-slate-900 dark:text-white">
+                {lang === "ru"
+                  ? "Telegram гурухлари"
+                  : lang === "en"
+                    ? "Telegram Groups"
+                    : "Telegram guruhlari"}
+              </h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                {lang === "ru"
+                  ? "2 guruh: log + buyurtmalar"
+                  : lang === "en"
+                    ? "2 groups: logs + orders"
+                    : "2 guruh: loglar + buyurtmalar"}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={sendManualReport}
+            disabled={sendingReport || !logGroupChatId.trim()}
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all disabled:opacity-40"
+          >
+            {sendingReport ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <CalendarClock className="w-3.5 h-3.5" />
+            )}
+            {lang === "ru"
+              ? "Hisobot yuborish"
+              : lang === "en"
+                ? "Send report"
+                : "Hisobot yuborish"}
+          </button>
+        </div>
+
+        {/* How-to */}
+        <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+          <Info className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium space-y-1">
+            <p className="font-black text-slate-700 dark:text-slate-200">
+              {lang === "ru"
+                ? "Qanday ulash:"
+                : lang === "en"
+                  ? "How to connect:"
+                  : "Qanday ulash:"}
+            </p>
+            <p>
+              1.{" "}
+              {lang === "ru"
+                ? "Botingizni guruhga qo'shing (admin qilib)"
+                : lang === "en"
+                  ? "Add your bot to the group (as admin)"
+                  : "Botingizni guruhga qo'shing (admin sifatida)"}
+            </p>
+            <p>
+              2.{" "}
+              {lang === "ru"
+                ? "Guruhda /chatid yozing"
+                : lang === "en"
+                  ? "Type /chatid in the group"
+                  : "Guruhda /chatid yozing"}
+            </p>
+            <p>
+              3.{" "}
+              {lang === "ru"
+                ? "Chat ID ni quyidagi maydonga kiriting"
+                : lang === "en"
+                  ? "Paste the Chat ID below"
+                  : "Chat ID ni quyidagi maydonga kiriting"}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Log group */}
+          <div className="space-y-3 p-5 rounded-2xl border-2 border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-white/3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-violet-600" />
+              </div>
+              <div>
+                <p className="font-black text-sm text-slate-800 dark:text-white">
+                  {t.logGroupTitle}
+                </p>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  {t.logGroupDesc}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={logGroupChatId}
+                onChange={(e) => setLogGroupChatId(e.target.value)}
+                placeholder="-100123456789"
+                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
+              />
+              <button
+                onClick={() => testGroup("log")}
+                disabled={!logGroupChatId.trim() || testingGroup === "log"}
+                className="px-3 py-2 text-xs font-bold bg-violet-50 dark:bg-violet-900/20 text-violet-600 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-all disabled:opacity-40 shrink-0"
+              >
+                {testingGroup === "log" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  "Test"
+                )}
+              </button>
+            </div>
+            <ul className="text-[11px] text-slate-400 space-y-0.5 pl-1">
+              <li>
+                •{" "}
+                {lang === "ru"
+                  ? "Yangi buyurtma log"
+                  : lang === "en"
+                    ? "New order log"
+                    : "Yangi buyurtma logi"}
+              </li>
+              <li>
+                •{" "}
+                {lang === "ru"
+                  ? "Mahsulot/diler o'zgarishlari"
+                  : lang === "en"
+                    ? "Product/dealer changes"
+                    : "Mahsulot/diler o'zgarishlari"}
+              </li>
+              <li>
+                •{" "}
+                {lang === "ru"
+                  ? "Kunlik omborxona holati"
+                  : lang === "en"
+                    ? "Daily inventory snapshot"
+                    : "Kunlik omborxona holati"}
+              </li>
+              <li>
+                •{" "}
+                {lang === "ru"
+                  ? "Avtomatik kunlik hisobot (01:30)"
+                  : lang === "en"
+                    ? "Auto daily report (01:30)"
+                    : "Avto kunlik hisobot (01:30)"}
+              </li>
+            </ul>
+          </div>
+
+          {/* Orders group */}
+          <div className="space-y-3 p-5 rounded-2xl border-2 border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-white/3">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <p className="font-black text-sm text-slate-800 dark:text-white">
+                  {lang === "ru"
+                    ? "Buyurtmalar guruh"
+                    : lang === "en"
+                      ? "Orders group"
+                      : "Buyurtmalar guruh"}
+                </p>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  {lang === "ru"
+                    ? "Faqat yangi buyurtmalar"
+                    : lang === "en"
+                      ? "New orders only"
+                      : "Faqat yangi buyurtmalar"}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={orderGroupChatId}
+                onChange={(e) => setOrderGroupChatId(e.target.value)}
+                placeholder="-100987654321"
+                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              />
+              <button
+                onClick={() => testGroup("order")}
+                disabled={!orderGroupChatId.trim() || testingGroup === "order"}
+                className="px-3 py-2 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all disabled:opacity-40 shrink-0"
+              >
+                {testingGroup === "order" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : lang === "en" ? (
+                  "Test"
+                ) : (
+                  "Test"
+                )}
+              </button>
+            </div>
+            <ul className="text-[11px] text-slate-400 space-y-0.5 pl-1">
+              <li>
+                •{" "}
+                {lang === "ru"
+                  ? "Har bir yangi buyurtma to'liq ma'lumoti"
+                  : lang === "en"
+                    ? "Full details of each new order"
+                    : "Har bir yangi buyurtma to'liq ma'lumoti"}
+              </li>
+              <li>
+                •{" "}
+                {lang === "ru"
+                  ? "Diler nomi, telefon, filial"
+                  : lang === "en"
+                    ? "Dealer name, phone, branch"
+                    : "Diler ismi, telefon, filial"}
+              </li>
+              <li>
+                •{" "}
+                {lang === "ru"
+                  ? "Mahsulotlar ro'yxati va summa"
+                  : lang === "en"
+                    ? "Product list and total"
+                    : "Mahsulotlar ro'yxati va summa"}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Save */}
+        <button
+          onClick={saveSettings}
+          disabled={savingSettings}
+          className="flex items-center gap-2 px-6 py-3.5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-emerald-600/20 active:scale-95 transition-all disabled:opacity-50"
+        >
+          {savingSettings ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Check className="w-4 h-4" />
+          )}
+          {lang === "ru" ? "Saqlash" : lang === "en" ? "Save" : "Saqlash"}
+        </button>
+      </div>
+
+      {/* Group Notifications */}
+      <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/10 p-8 space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+            <Bot className="w-5 h-5 text-emerald-600" />
+          </div>
+          <div>
+            <h3 className="font-black text-slate-900 dark:text-white">
+              {lang === "ru"
+                ? "Уведомления в группы"
+                : lang === "en"
+                  ? "Group Notifications"
+                  : "Guruh bildirishnomalari"}
+            </h3>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+              {lang === "ru"
+                ? "Подключите 2 Telegram-группы"
+                : lang === "en"
+                  ? "Connect 2 Telegram groups"
+                  : "2 ta Telegram guruh ulang"}
+            </p>
+          </div>
+        </div>
+
+        {/* How-to hint */}
+        <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10">
+          <Info className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            {lang === "ru"
+              ? "Добавьте бота в группу → напишите /start → скопируйте Chat ID из ответа и вставьте ниже."
+              : lang === "en"
+                ? "Add your bot to the group → send /start → copy the Chat ID from the reply and paste below."
+                : "Botni guruhga qo'shing → /start yozing → javobdagi Chat ID ni nusxalab quyida joylashtiring."}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Log group */}
+          <div className="rounded-2xl border-2 border-slate-100 dark:border-white/10 p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                <Clock className="w-4 h-4 text-indigo-600" />
+              </div>
+              <div>
+                <p className="font-black text-sm text-slate-800 dark:text-white">
+                  {lang === "ru"
+                    ? "Группа логов и бэкапов"
+                    : lang === "en"
+                      ? "Logs & Backup Group"
+                      : "Log va backup guruhi"}
+                </p>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  {lang === "ru"
+                    ? "Активность, отчёты, резервные копии"
+                    : lang === "en"
+                      ? "Activity, reports, backups"
+                      : "Faoliyat, hisobotlar, backuplar"}
+                </p>
+              </div>
+            </div>
+            <input
+              type="text"
+              value={logGroupChatId}
+              onChange={(e) => setLogGroupChatId(e.target.value)}
+              placeholder="-100123456789"
+              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  await saveSettings();
+                }}
+                className="flex-1 px-3 py-2 text-xs font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
+              >
+                {lang === "ru"
+                  ? "Сохранить"
+                  : lang === "en"
+                    ? "Save"
+                    : "Saqlash"}
+              </button>
+              <button
+                disabled={testingGroup === "log" || !logGroupChatId.trim()}
+                onClick={async () => {
+                  setTestingGroup("log");
+                  try {
+                    await saveSettings();
+                    await api.post("/telegram/groups/test/log");
+                    toast.success(
+                      lang === "ru"
+                        ? "Тест отправлен!"
+                        : lang === "en"
+                          ? "Test sent!"
+                          : "Test yuborildi!"
+                    );
+                  } catch (e) {
+                    toast.error(errorText(e, "Error"));
+                  } finally {
+                    setTestingGroup(null);
+                  }
+                }}
+                className="flex-1 px-3 py-2 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all disabled:opacity-50"
+              >
+                {testingGroup === "log" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" />
+                ) : lang === "ru" ? (
+                  "Тест"
+                ) : lang === "en" ? (
+                  "Test"
+                ) : (
+                  "Test"
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Order group */}
+          <div className="rounded-2xl border-2 border-slate-100 dark:border-white/10 p-5 space-y-4">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <Phone className="w-4 h-4 text-emerald-600" />
+              </div>
+              <div>
+                <p className="font-black text-sm text-slate-800 dark:text-white">
+                  {lang === "ru"
+                    ? "Группа заказов"
+                    : lang === "en"
+                      ? "Orders Group"
+                      : "Buyurtmalar guruhi"}
+                </p>
+                <p className="text-[10px] text-slate-400 font-medium">
+                  {lang === "ru"
+                    ? "Только новые заказы"
+                    : lang === "en"
+                      ? "New orders only"
+                      : "Faqat yangi buyurtmalar"}
+                </p>
+              </div>
+            </div>
+            <input
+              type="text"
+              value={orderGroupChatId}
+              onChange={(e) => setOrderGroupChatId(e.target.value)}
+              placeholder="-100987654321"
+              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={async () => {
+                  await saveSettings();
+                }}
+                className="flex-1 px-3 py-2 text-xs font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
+              >
+                {lang === "ru"
+                  ? "Сохранить"
+                  : lang === "en"
+                    ? "Save"
+                    : "Saqlash"}
+              </button>
+              <button
+                disabled={testingGroup === "order" || !orderGroupChatId.trim()}
+                onClick={async () => {
+                  setTestingGroup("order");
+                  try {
+                    await saveSettings();
+                    await api.post("/telegram/groups/test/order");
+                    toast.success(
+                      lang === "ru"
+                        ? "Тест отправлен!"
+                        : lang === "en"
+                          ? "Test sent!"
+                          : "Test yuborildi!"
+                    );
+                  } catch (e) {
+                    toast.error(errorText(e, "Error"));
+                  } finally {
+                    setTestingGroup(null);
+                  }
+                }}
+                className="flex-1 px-3 py-2 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all disabled:opacity-50"
+              >
+                {testingGroup === "order" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" />
+                ) : lang === "ru" ? (
+                  "Тест"
+                ) : lang === "en" ? (
+                  "Test"
+                ) : (
+                  "Test"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Manual daily report button */}
+        <button
+          disabled={sendingReport}
+          onClick={async () => {
+            setSendingReport(true);
+            try {
+              await api.post("/telegram/groups/report");
+              toast.success(t.reportSent);
+            } catch (e) {
+              toast.error(errorText(e, "Error"));
+            } finally {
+              setSendingReport(false);
+            }
+          }}
+          className="flex items-center gap-2 px-5 py-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 rounded-2xl text-xs font-black hover:bg-slate-200 dark:hover:bg-white/20 transition-all disabled:opacity-50"
+        >
+          {sendingReport ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <RefreshCw className="w-4 h-4" />
+          )}
+              {t.dailyReportNow}
+        </button>
+      </div>
+
       {/* Broadcast Section */}
       <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/10 p-8 space-y-6">
         <div className="flex items-center gap-3">
@@ -825,10 +1416,10 @@ export default function TelegramBots() {
           </div>
           <div>
             <h3 className="font-black text-slate-900 dark:text-white">
-              Barcha dilerlarga xabar yuborish
+              {t.broadcastTitle}
             </h3>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-              Telegram orqali broadcast
+              {t.broadcastSubtitle}
             </p>
           </div>
         </div>
@@ -836,7 +1427,7 @@ export default function TelegramBots() {
         <textarea
           value={broadcastMsg}
           onChange={(e) => setBroadcastMsg(e.target.value)}
-          placeholder="Xabar matnini kiriting... (Markdown qo'llab-quvvatlanadi: *qalin*, _kursiv_)"
+          placeholder={t.broadcastPlaceholder}
           rows={4}
           className="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent focus:border-blue-500 outline-none font-medium text-sm transition-all resize-none"
         />
@@ -845,8 +1436,9 @@ export default function TelegramBots() {
           <div className="flex items-center gap-4 px-5 py-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
             <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
             <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">
-              Yuborildi: <strong>{broadcastResult.sent}</strong> ta ·
-              Muvaffaqiyatsiz: <strong>{broadcastResult.failed}</strong> ta
+              {t.broadcastSummary
+                .replace("{sent}", String(broadcastResult.sent))
+                .replace("{failed}", String(broadcastResult.failed))}
             </p>
           </div>
         )}

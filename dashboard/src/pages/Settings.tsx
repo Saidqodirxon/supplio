@@ -20,9 +20,11 @@ import {
   Check,
   X,
   Download,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import { useAuthStore } from "../store/authStore";
-import { dashboardTranslations } from "../i18n/translations";
+import { dashboardTranslations, pageTranslations } from "../i18n/translations";
 import api from "../services/api";
 import { motion } from "framer-motion";
 import clsx from "clsx";
@@ -36,6 +38,8 @@ interface CompanySettings {
   website: string | null;
   instagram: string | null;
   telegram: string | null;
+  contactPhone: string | null;
+  contactAddress: string | null;
   siteActive: boolean;
   subscriptionPlan: string;
   subscriptionStatus: string;
@@ -56,6 +60,16 @@ const CASHBACK_HELP: Record<string, string> = {
 function UserSecurityForm() {
   const { user, language, updateUser } = useAuthStore();
   const t = dashboardTranslations[language];
+  const lt =
+    language in pageTranslations.settingsPage
+      ? pageTranslations.settingsPage[
+          language as keyof typeof pageTranslations.settingsPage
+        ]
+      : pageTranslations.settingsPage.en;
+  const pt =
+    language in pageTranslations.profile
+      ? pageTranslations.profile[language as keyof typeof pageTranslations.profile]
+      : pageTranslations.profile.en;
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [fullName, setFullName] = useState(user?.fullName || "");
@@ -92,7 +106,7 @@ function UserSecurityForm() {
       setPhotoUrl(newUrl);
       await api.patch("/auth/profile", { photoUrl: newUrl });
       updateUser({ photoUrl: newUrl });
-      toast.success(language === 'ru' ? "Фото обновлено" : language === 'en' ? "Photo updated" : "Rasm yangilandi");
+      toast.success(pt.photoUpdated);
     } catch {
       toast.error(t.common.error);
     } finally {
@@ -105,7 +119,7 @@ function UserSecurityForm() {
     const normalizedName = fullName.trim();
 
     if (normalizedName.length < 2) {
-      toast.error("Ism kamida 2 ta belgidan iborat bo'lishi kerak");
+      toast.error(lt.minName);
       return;
     }
 
@@ -113,7 +127,7 @@ function UserSecurityForm() {
       setSavingProfile(true);
       await api.patch("/auth/profile", { fullName: normalizedName });
       updateUser({ fullName: normalizedName });
-      toast.success("Ism yangilandi");
+      toast.success(lt.nameUpdated);
     } catch {
       toast.error(t.common.error);
     } finally {
@@ -126,9 +140,9 @@ function UserSecurityForm() {
     if (!passwordForm.currentPassword || !passwordForm.newPassword)
       return toast.error(t.common.error);
     if (passwordForm.newPassword.length < 6)
-      return toast.error("Yangi parol kamida 6 ta belgi bo‘lishi kerak");
+      return toast.error(lt.pwShort);
     if (passwordForm.newPassword !== passwordForm.confirmPassword)
-      return toast.error("Yangi parollar mos emas");
+      return toast.error(lt.pwMismatch);
 
     try {
       setSavingPassword(true);
@@ -141,9 +155,9 @@ function UserSecurityForm() {
         newPassword: "",
         confirmPassword: "",
       });
-      toast.success("Parol yangilandi");
+      toast.success(lt.pwUpdated);
     } catch {
-      toast.error("Joriy parol noto‘g‘ri yoki amal bajarilmadi");
+      toast.error(lt.wrongCurrentPw);
     } finally {
       setSavingPassword(false);
     }
@@ -153,7 +167,7 @@ function UserSecurityForm() {
     try {
       setRequestingReset(true);
       await api.post("/auth/request-password-reset");
-      toast.success("SuperAdmin ga parol reset so‘rovi yuborildi");
+      toast.success(lt.resetRequested);
     } catch {
       toast.error(t.common.error);
     } finally {
@@ -183,43 +197,56 @@ function UserSecurityForm() {
               </div>
             ) : photoUrl ? (
               <img
-                src={photoUrl.startsWith("http") || photoUrl.startsWith("/") ? photoUrl : `/api${photoUrl}`}
+                src={
+                  photoUrl.startsWith("http") || photoUrl.startsWith("/")
+                    ? photoUrl
+                    : `/api${photoUrl}`
+                }
                 alt="Profile"
                 className="w-full h-full object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).src = "/favicon.png"; }}
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = "/favicon.png";
+                }}
               />
             ) : (
               <User className="w-8 h-8 text-slate-300 dark:text-slate-600" />
             )}
             <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer backdrop-blur-sm rounded-full">
               <Camera className="w-5 h-5 text-white" />
-              <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+              <input
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={handleImageUpload}
+              />
             </label>
           </div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avatar</p>
+          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+            {lt.avatarLabel}
+          </p>
         </div>
 
         <div className="flex-1 w-full grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-            {t.superadmin.fullNameLabel}
-          </label>
-          <input
-            type="text"
-            className="input-field w-full"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-            placeholder={t.superadmin.fullNameLabel}
-          />
-        </div>
-        <div className="space-y-2">
-          <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-            {t.settings.phone}
-          </label>
-          <div className="input-field w-full opacity-80 cursor-not-allowed">
-            {user?.phone || "-"}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              {t.superadmin.fullNameLabel}
+            </label>
+            <input
+              type="text"
+              className="input-field w-full"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder={t.superadmin.fullNameLabel}
+            />
           </div>
-        </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              {t.settings.phone}
+            </label>
+            <div className="input-field w-full opacity-80 cursor-not-allowed">
+              {user?.phone || "-"}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -232,14 +259,13 @@ function UserSecurityForm() {
           className="px-8 py-3.5 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-blue-500/20 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
         >
           <Save className="w-4 h-4" />
-          {savingProfile ? t.common.loading : "Ismni saqlash"}
+          {savingProfile ? t.common.loading : lt.saveName}
         </button>
       </form>
 
       <div className="rounded-2xl border border-amber-100 dark:border-amber-900/30 bg-amber-50/70 dark:bg-amber-900/10 px-5 py-4">
         <p className="text-[11px] font-semibold text-amber-700 dark:text-amber-300 leading-relaxed">
-          Telefon raqami faqat SuperAdmin tomonidan boshqariladi. Ismni bu yerda
-          yangilashingiz mumkin.
+          {lt.phoneAdminOnly}
         </p>
       </div>
 
@@ -250,13 +276,13 @@ function UserSecurityForm() {
         {/* Current password */}
         <div className="space-y-1.5">
           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Joriy parol
+            {pt.currentPw}
           </label>
           <div className="relative">
             <input
               type={showPasswords.current ? "text" : "password"}
               className="input-field w-full pr-14"
-              placeholder="••••••••"
+              placeholder={pt.passwordPlaceholder}
               value={passwordForm.currentPassword}
               onChange={(e) =>
                 setPasswordForm((prev) => ({
@@ -284,13 +310,13 @@ function UserSecurityForm() {
         {/* New password */}
         <div className="space-y-1.5">
           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Yangi parol
+            {pt.newPw}
           </label>
           <div className="relative">
             <input
               type={showPasswords.new ? "text" : "password"}
               className="input-field w-full pr-14"
-              placeholder="Kamida 6 ta belgi"
+              placeholder={pt.pwShort}
               value={passwordForm.newPassword}
               onChange={(e) =>
                 setPasswordForm((prev) => ({
@@ -314,7 +340,7 @@ function UserSecurityForm() {
           {passwordForm.newPassword.length > 0 &&
             passwordForm.newPassword.length < 6 && (
               <p className="text-[10px] text-rose-500 font-bold flex items-center gap-1">
-                <X className="w-3 h-3" /> Kamida 6 ta belgi
+                <X className="w-3 h-3" /> {pt.pwShort}
               </p>
             )}
         </div>
@@ -322,13 +348,13 @@ function UserSecurityForm() {
         {/* Confirm password */}
         <div className="space-y-1.5">
           <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-            Yangi parolni takrorlang
+            {pt.confirmPw}
           </label>
           <div className="relative">
             <input
               type={showPasswords.confirm ? "text" : "password"}
               className={`input-field w-full pr-14 transition-all ${passwordForm.confirmPassword.length > 0 ? (passwordForm.confirmPassword === passwordForm.newPassword ? "border-emerald-400 focus:border-emerald-500" : "border-rose-400 focus:border-rose-500") : ""}`}
-              placeholder="Parolni qayta kiriting"
+              placeholder={pt.confirmPwPlaceholder}
               value={passwordForm.confirmPassword}
               onChange={(e) =>
                 setPasswordForm((prev) => ({
@@ -363,13 +389,13 @@ function UserSecurityForm() {
           {passwordForm.confirmPassword.length > 0 &&
             passwordForm.confirmPassword !== passwordForm.newPassword && (
               <p className="text-[10px] text-rose-500 font-bold flex items-center gap-1">
-                <X className="w-3 h-3" /> Parollar mos emas
+                <X className="w-3 h-3" /> {lt.pwMismatch}
               </p>
             )}
           {passwordForm.confirmPassword.length > 0 &&
             passwordForm.confirmPassword === passwordForm.newPassword && (
               <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-                <Check className="w-3 h-3" /> Parollar mos
+                  <Check className="w-3 h-3" /> {pt.passwordsMatch}
               </p>
             )}
         </div>
@@ -381,16 +407,14 @@ function UserSecurityForm() {
             disabled={requestingReset}
             className="px-6 py-3 rounded-2xl border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-50"
           >
-            {requestingReset
-              ? t.common.loading
-              : "SuperAdmin dan reset so'rash"}
+            {requestingReset ? t.common.loading : lt.requestReset}
           </button>
           <button
             type="submit"
             disabled={savingPassword}
             className="px-8 py-3.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all disabled:opacity-50"
           >
-            {savingPassword ? t.common.loading : "Parolni saqlash"}
+            {savingPassword ? t.common.loading : lt.savePassword}
           </button>
         </div>
       </form>
@@ -401,6 +425,12 @@ function UserSecurityForm() {
 export default function Settings() {
   const { user, language } = useAuthStore();
   const t = dashboardTranslations[language];
+  const lt =
+    language in pageTranslations.settingsPage
+      ? pageTranslations.settingsPage[
+          language as keyof typeof pageTranslations.settingsPage
+        ]
+      : pageTranslations.settingsPage.en;
   const navigate = useNavigate();
   const { showUpgrade, setShowUpgrade, upgradeReason, triggerUpgrade } =
     usePlanLimits();
@@ -442,9 +472,9 @@ export default function Settings() {
       a.click();
       URL.revokeObjectURL(url);
       toast.success(
-        language === "ru"
-          ? `Backup tayyor: ${res.data.summary.orders} buyurtma, ${res.data.summary.dealers} diler`
-          : `Backup tayyor: ${res.data.summary.orders} ta buyurtma, ${res.data.summary.dealers} ta diler`
+        lt.backupReady
+          .replace("{orders}", String(res.data.summary.orders))
+          .replace("{dealers}", String(res.data.summary.dealers))
       );
     } catch {
       toast.error(t.common.error);
@@ -563,14 +593,14 @@ export default function Settings() {
                     onChange={(e) =>
                       setCompany({ ...company, website: e.target.value })
                     }
-                    placeholder="https://example.com"
+                    placeholder={lt.websitePlaceholder}
                   />
                 </div>
 
                 {/* Instagram */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                    <Instagram className="w-3 h-3" /> Instagram
+                    <Instagram className="w-3 h-3" /> {t.settings.instagramHandle}
                   </label>
                   <input
                     type="text"
@@ -579,14 +609,14 @@ export default function Settings() {
                     onChange={(e) =>
                       setCompany({ ...company, instagram: e.target.value })
                     }
-                    placeholder="@username"
+                    placeholder={lt.instagramPlaceholder}
                   />
                 </div>
 
                 {/* Telegram */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                    <Send className="w-3 h-3" /> Telegram
+                    <Send className="w-3 h-3" /> {t.settings.telegramChannel}
                   </label>
                   <input
                     type="text"
@@ -595,7 +625,42 @@ export default function Settings() {
                     onChange={(e) =>
                       setCompany({ ...company, telegram: e.target.value })
                     }
-                    placeholder="@channel_name"
+                    placeholder={lt.telegramPlaceholder}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <Phone className="w-3 h-3" />
+                    {lt.contactPhone}
+                  </label>
+                  <input
+                    type="text"
+                    className="input-field w-full"
+                    value={company.contactPhone || ""}
+                    onChange={(e) =>
+                      setCompany({ ...company, contactPhone: e.target.value })
+                    }
+                    placeholder={lt.phonePlaceholder}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
+                    <MapPin className="w-3 h-3" />
+                    {lt.officeAddress}
+                  </label>
+                  <input
+                    type="text"
+                    className="input-field w-full"
+                    value={company.contactAddress || ""}
+                    onChange={(e) =>
+                      setCompany({
+                        ...company,
+                        contactAddress: e.target.value,
+                      })
+                    }
+                    placeholder={lt.officeAddressPlaceholder}
                   />
                 </div>
 
@@ -604,7 +669,7 @@ export default function Settings() {
                   <label className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
                     <Zap className="w-3 h-3" />{" "}
                     {(t.settings as Record<string, string>).cashback ||
-                      "Cashback (%)"}
+                        lt.cashback
                   </label>
                   <div className="flex items-center gap-3">
                     <input
@@ -702,11 +767,7 @@ export default function Settings() {
                   {t.settings.profile}
                 </p>
                 <p className="text-[11px] text-slate-400 font-semibold mt-0.5">
-                  {language === "uz"
-                    ? "Kompaniya sozlamalarini faqat rahbar o'zgartira oladi."
-                    : language === "ru"
-                      ? "Настройки компании может изменить только руководитель."
-                      : "Only the company owner can change company settings."}
+                  {lt.managerOnlyCompany}
                 </p>
               </div>
             </div>
@@ -756,15 +817,7 @@ export default function Settings() {
                   className="w-full py-3.5 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all hover:opacity-90 active:scale-95 flex items-center justify-center gap-2"
                 >
                   <TrendingUp className="w-3.5 h-3.5" />
-                  {language === "uz"
-                    ? "Tarifni oshirish"
-                    : language === "ru"
-                      ? "Повысить тариф"
-                      : language === "tr"
-                        ? "Planı Yükselt"
-                        : language === "oz"
-                          ? "Тарифни ошириш"
-                          : "Upgrade Plan"}
+                  {lt.upgradePlan}
                 </button>
               </div>
             </div>
@@ -793,15 +846,11 @@ export default function Settings() {
               <div className="flex items-center gap-3 mb-3">
                 <Download className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                 <h4 className="font-black uppercase tracking-widest text-xs text-slate-700 dark:text-slate-300">
-                  {language === "ru" ? "Резервная копия" : language === "en" ? "Backup" : "Backup"}
+                  {lt.backupTitle}
                 </h4>
               </div>
               <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-4 leading-relaxed">
-                {language === "ru"
-                  ? "Скачайте все данные вашей компании (дилеры, заказы, товары, платежи) в формате JSON."
-                  : language === "en"
-                    ? "Download all your company data (dealers, orders, products, payments) as JSON."
-                    : "Kompaniya ma'lumotlarini (dilerlar, buyurtmalar, mahsulotlar, to'lovlar) JSON formatida yuklab oling."}
+                {lt.backupDesc}
               </p>
               <button
                 onClick={handleBackup}
@@ -809,9 +858,7 @@ export default function Settings() {
                 className="w-full py-3 px-4 flex items-center justify-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:opacity-90 active:scale-95 disabled:opacity-50"
               >
                 <Download className="w-3.5 h-3.5" />
-                {backingUp
-                  ? (language === "ru" ? "Загрузка..." : "Yuklanmoqda...")
-                  : (language === "ru" ? "Скачать backup" : language === "en" ? "Download backup" : "Backup yuklab olish")}
+                {backingUp ? lt.downloading : lt.downloadBackup}
               </button>
             </div>
           </div>

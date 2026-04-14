@@ -3,6 +3,7 @@ import {
   OnModuleInit,
   Logger,
   BadRequestException,
+  NotFoundException,
 } from "@nestjs/common";
 import { Telegraf, Context, Telegram } from "telegraf";
 import { PrismaService } from "../prisma/prisma.service";
@@ -463,6 +464,105 @@ export class TelegramService implements OnModuleInit {
     };
   }
 
+  private isWithinWorkingHours(
+    workingHoursJson: string | null | undefined,
+    botPaused: boolean | null | undefined,
+    botAutoSchedule: boolean | null | undefined
+  ): boolean {
+    if (botPaused) return false;
+    if (!botAutoSchedule || !workingHoursJson) return true;
+    try {
+      const schedule = JSON.parse(workingHoursJson);
+      // Use Tashkent UTC+5 offset
+      const tzDate = new Date(Date.now() + 5 * 60 * 60 * 1000);
+      const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+      const dayKey = days[tzDate.getUTCDay()];
+      const day = schedule[dayKey];
+      if (!day || !day.active) return false;
+      const h = tzDate.getUTCHours().toString().padStart(2, "0");
+      const m = tzDate.getUTCMinutes().toString().padStart(2, "0");
+      const now = `${h}:${m}`;
+      return now >= day.open && now < day.close;
+    } catch {
+      return true;
+    }
+  }
+
+  private buildWorkingHoursText(
+    workingHoursJson: string | null | undefined,
+    lang: string
+  ): string {
+    if (!workingHoursJson) return "";
+    try {
+      const schedule = JSON.parse(workingHoursJson);
+      const days = [
+        { key: "mon", uz: "Dushanba", ru: "Понедельник", en: "Monday" },
+        { key: "tue", uz: "Seshanba", ru: "Вторник", en: "Tuesday" },
+        { key: "wed", uz: "Chorshanba", ru: "Среда", en: "Wednesday" },
+        { key: "thu", uz: "Payshanba", ru: "Четверг", en: "Thursday" },
+        { key: "fri", uz: "Juma", ru: "Пятница", en: "Friday" },
+        { key: "sat", uz: "Shanba", ru: "Суббота", en: "Saturday" },
+        { key: "sun", uz: "Yakshanba", ru: "Воскресенье", en: "Sunday" },
+      ];
+      const off =
+        lang === "ru" ? "Выходной" : lang === "en" ? "Closed" : "Dam olish";
+      return days
+        .map((d) => {
+          const day = schedule[d.key];
+          if (!day) return null;
+          const label = lang === "ru" ? d.ru : lang === "en" ? d.en : d.uz;
+          return day.active
+            ? `${label}: ${day.open} – ${day.close}`
+            : `${label}: ${off}`;
+        })
+        .filter(Boolean)
+        .join("\n");
+    } catch {
+      return workingHoursJson;
+    }
+  }
+
+  private buildClosedMessage(company: any, lang: string): string {
+    const title =
+      lang === "ru"
+        ? "🔒 *Магазин временно закрыт*"
+        : lang === "en"
+          ? "🔒 *Store is temporarily closed*"
+          : "🔒 *Do'kon vaqtincha yopiq*";
+    let msg = title;
+    const hoursText = this.buildWorkingHoursText(company?.workingHours, lang);
+    if (hoursText) {
+      const label =
+        lang === "ru"
+          ? "🕐 *Ish vaqti:*"
+          : lang === "en"
+            ? "🕐 *Working hours:*"
+            : "🕐 *Ish vaqti:*";
+      msg += "\n\n" + label + "\n" + hoursText;
+    }
+    if (company?.contactPhone) {
+      msg +=
+        "\n\n" +
+        (lang === "ru"
+          ? "📞 Telefon: "
+          : lang === "en"
+            ? "📞 Phone: "
+            : "📞 Telefon: ") +
+        company.contactPhone;
+    }
+    if (company?.contactAddress) {
+      msg +=
+        "\n" +
+        (lang === "ru"
+          ? "📍 Адрес: "
+          : lang === "en"
+            ? "📍 Address: "
+            : "📍 Manzil: ") +
+        company.contactAddress;
+    }
+    return msg;
+  }
+
   async initBot(
     botId: string,
     companyId: string,
@@ -479,6 +579,63 @@ export class TelegramService implements OnModuleInit {
       }
 
       const bot = new Telegraf(token);
+
+      // Working-hours / bot-pause middleware
+      // Admins (system users) always pass through.
+      // Skip for /start, /info and language selection so dealers can always see info.
+      bot.use(async (ctx, next) => {
+        const text: string = (ctx as any).message?.text ?? "";
+        const callbackData: string = (ctx as any).callbackQuery?.data ?? "";
+        if (
+          text.startsWith("/start") ||
+          text.startsWith("/info") ||
+          callbackData.startsWith("lang:") ||
+          callbackData.startsWith("admin:")
+        ) {
+          return next();
+        }
+
+        const company = await this.prisma.company.findUnique({
+          where: { id: companyId },
+        });
+        if (
+          this.isWithinWorkingHours(
+            company?.workingHours,
+            (company as any)?.botPaused,
+            (company as any)?.botAutoSchedule
+          )
+        ) {
+          return next();
+        }
+
+        // Check if this chat belongs to an admin user — let them through
+        const chatId = String(ctx.chat?.id ?? "");
+        const adminDealer = await this.prisma.dealer.findFirst({
+          where: {
+            telegramChatId: chatId,
+            companyId,
+            isApproved: true,
+            deletedAt: null,
+          },
+        });
+        if (adminDealer) {
+          const isAdmin = await this.prisma.user.findFirst({
+            where: {
+              phone: {
+                contains: adminDealer.phone.replace(/^\+/, "").slice(-9),
+              },
+              companyId,
+              deletedAt: null,
+            },
+          });
+          if (isAdmin) return next();
+        }
+
+        const lang = this.chatLangPrefs.get(chatId) ?? "uz";
+        return (ctx as any).reply?.(this.buildClosedMessage(company, lang), {
+          parse_mode: "Markdown",
+        });
+      });
 
       bot.start(async (ctx) => {
         const company = await this.prisma.company.findUnique({
@@ -556,7 +713,7 @@ export class TelegramService implements OnModuleInit {
 
         // Search globally — phone has a global unique constraint in DB
         const globalDealerMatch = await this.prisma.dealer.findFirst({
-          where: { phone: { contains: phone.slice(-9) } },
+          where: { phone: { contains: phone.slice(-9) }, deletedAt: null },
         });
 
         // Phone is registered under a different company — cannot create here
@@ -572,9 +729,7 @@ export class TelegramService implements OnModuleInit {
         }
 
         const dealerMatch =
-          globalDealerMatch?.companyId === companyId
-            ? globalDealerMatch
-            : null;
+          globalDealerMatch?.companyId === companyId ? globalDealerMatch : null;
 
         const userMatch = await this.prisma.user.findFirst({
           where: {
@@ -593,16 +748,38 @@ export class TelegramService implements OnModuleInit {
             (await this.prisma.branch.findFirst({ where: { companyId } }))
               ?.id ||
             "";
-          dealer = await this.prisma.dealer.create({
-            data: {
-              companyId,
-              branchId,
-              name: userMatch.fullName || "Admin",
-              phone: `+${phone}`,
-              isApproved: true,
-              telegramChatId: chatId,
-            },
-          });
+          try {
+            dealer = await this.prisma.dealer.create({
+              data: {
+                companyId,
+                branchId,
+                name: userMatch.fullName || "Admin",
+                phone: `+${phone}`,
+                isApproved: true,
+                telegramChatId: chatId,
+              },
+            });
+          } catch (err: any) {
+            if (err?.code === "P2002") {
+              const existing = await this.prisma.dealer.findFirst({
+                where: { phone: { contains: phone.slice(-9) }, companyId },
+              });
+              if (existing?.deletedAt) {
+                dealer = await this.prisma.dealer.update({
+                  where: { id: existing.id },
+                  data: {
+                    deletedAt: null,
+                    isApproved: true,
+                    telegramChatId: chatId,
+                  },
+                });
+              } else {
+                dealer = existing;
+              }
+            } else {
+              throw err;
+            }
+          }
         }
 
         if (!dealer) {
@@ -624,16 +801,38 @@ export class TelegramService implements OnModuleInit {
             `${contact.first_name || ""} ${contact.last_name || ""}`.trim() ||
             `Dealer ${phone.slice(-4)}`;
 
-          dealer = await this.prisma.dealer.create({
-            data: {
-              companyId,
-              branchId: branch.id,
-              name: suggestedName,
-              phone: `+${phone}`,
-              telegramChatId: chatId,
-              isApproved: false,
-            },
-          });
+          try {
+            dealer = await this.prisma.dealer.create({
+              data: {
+                companyId,
+                branchId: branch.id,
+                name: suggestedName,
+                phone: `+${phone}`,
+                telegramChatId: chatId,
+                isApproved: false,
+              },
+            });
+          } catch (err: any) {
+            if (err?.code === "P2002") {
+              const existing = await this.prisma.dealer.findFirst({
+                where: { phone: { contains: phone.slice(-9) }, companyId },
+              });
+              if (existing?.deletedAt) {
+                dealer = await this.prisma.dealer.update({
+                  where: { id: existing.id },
+                  data: {
+                    deletedAt: null,
+                    isApproved: false,
+                    telegramChatId: chatId,
+                  },
+                });
+              } else {
+                dealer = existing;
+              }
+            } else {
+              throw err;
+            }
+          }
         }
 
         // Link chatId to dealer
@@ -760,6 +959,75 @@ export class TelegramService implements OnModuleInit {
         "checkout",
         async (ctx) => await this.handleCheckout(ctx, companyId)
       );
+
+      bot.command("info", async (ctx) => {
+        const lang = this.chatLangPrefs.get(String(ctx.chat.id)) ?? "uz";
+        const company = await this.prisma.company.findUnique({
+          where: { id: companyId },
+        });
+        const open = this.isWithinWorkingHours(
+          company?.workingHours,
+          (company as any)?.botPaused,
+          (company as any)?.botAutoSchedule
+        );
+        const statusLine = open
+          ? lang === "ru"
+            ? "🟢 Сейчас открыто"
+            : lang === "en"
+              ? "🟢 Now open"
+              : "🟢 Hozir ochiq"
+          : lang === "ru"
+            ? "🔴 Сейчас закрыто"
+            : lang === "en"
+              ? "🔴 Currently closed"
+              : "🔴 Hozir yopiq";
+
+        let msg = `🏢 *${companyName}*\n${statusLine}`;
+        const hoursText = this.buildWorkingHoursText(
+          company?.workingHours,
+          lang
+        );
+        if (hoursText) {
+          const label =
+            lang === "ru"
+              ? "🕐 *Часы работы:*"
+              : lang === "en"
+                ? "🕐 *Working hours:*"
+                : "🕐 *Ish vaqti:*";
+          msg += "\n\n" + label + "\n" + hoursText;
+        }
+        if ((company as any)?.contactPhone) {
+          msg +=
+            "\n\n" +
+            (lang === "ru"
+              ? "📞 Telefon: "
+              : lang === "en"
+                ? "📞 Phone: "
+                : "📞 Telefon: ") +
+            (company as any).contactPhone;
+        }
+        if ((company as any)?.contactAddress) {
+          msg +=
+            "\n" +
+            (lang === "ru"
+              ? "📍 Адрес: "
+              : lang === "en"
+                ? "📍 Address: "
+                : "📍 Manzil: ") +
+            (company as any).contactAddress;
+        }
+        return ctx.reply(msg, { parse_mode: "Markdown" });
+      });
+
+      // /chatid — works in groups so admins can find the group chat ID
+      bot.command("chatid", async (ctx) => {
+        const id = String(ctx.chat.id);
+        const type = ctx.chat.type;
+        await ctx.reply(
+          `🆔 *Chat ID:* \`${id}\`\n📌 Tur: ${type}\n\nBu ID ni bot sozlamalarida "Guruh Chat ID" maydoniga kiriting.`,
+          { parse_mode: "Markdown" }
+        );
+      });
 
       bot.command("help", async (ctx) => {
         const t = this.getLangFromCtx(ctx);
@@ -1520,8 +1788,9 @@ export class TelegramService implements OnModuleInit {
         parse_mode: "Markdown",
       });
     } catch (e) {
+      const message = e instanceof Error ? e.message : String(e);
       this.logger.warn(
-        `Could not notify dealer ${dealerId} of status update: ${e.message}`
+        `Could not notify dealer ${dealerId} of status update: ${message}`
       );
     }
   }
@@ -1532,7 +1801,7 @@ export class TelegramService implements OnModuleInit {
     });
     const t = this.getLangFromCtx(ctx);
     const isPremium = company?.subscriptionPlan === "PREMIUM";
-    const watermark = isPremium ? "" : "\n\n⚡️ _Supplio.uz_";
+    const watermark = isPremium ? "" : "\n\n⚡️ supplio.uz yordamida yaratildi.";
 
     await ctx.reply(
       `ℹ️ *${companyName} Bot - ${t.helpTitle}*\n\n` +
@@ -1840,6 +2109,96 @@ export class TelegramService implements OnModuleInit {
       ...b,
       status: this.getBotStatus(b.id),
     }));
+  }
+
+  async adminReloadBot(botId: string) {
+    const bot = await this.prisma.customBot.findFirst({
+      where: { id: botId, deletedAt: null },
+      include: { company: true },
+    });
+    if (!bot) throw new NotFoundException("Bot not found");
+
+    const existing = this.bots.get(botId);
+    if (existing) {
+      try {
+        existing.stop();
+      } catch {}
+      this.bots.delete(botId);
+    }
+
+    if (bot.isActive) {
+      await this.initBot(
+        bot.id,
+        bot.companyId,
+        bot.token,
+        bot.company?.name ?? bot.companyId
+      );
+    }
+
+    return { success: true, status: this.getBotStatus(botId) };
+  }
+
+  async adminHardDeleteBot(botId: string) {
+    const bot = await this.prisma.customBot.findFirst({
+      where: { id: botId },
+    });
+    if (!bot) throw new NotFoundException("Bot not found");
+
+    const existing = this.bots.get(botId);
+    if (existing) {
+      try {
+        await existing.telegram.deleteWebhook({ drop_pending_updates: true });
+      } catch {}
+      try {
+        existing.stop();
+      } catch {}
+      this.bots.delete(botId);
+    }
+
+    await this.prisma.customBot.delete({ where: { id: botId } });
+    return { success: true };
+  }
+
+  async adminUpdateBot(
+    botId: string,
+    data: { token?: string; isActive?: boolean }
+  ) {
+    const bot = await this.prisma.customBot.findFirst({
+      where: { id: botId, deletedAt: null },
+      include: { company: true },
+    });
+    if (!bot) throw new NotFoundException("Bot not found");
+
+    const updated = await this.prisma.customBot.update({
+      where: { id: botId },
+      data,
+    });
+
+    if (data.token || data.isActive === true) {
+      const existing = this.bots.get(botId);
+      if (existing) {
+        try {
+          existing.stop();
+        } catch {}
+        this.bots.delete(botId);
+      }
+      await this.initBot(
+        updated.id,
+        updated.companyId,
+        updated.token,
+        bot.company?.name ?? updated.companyId
+      );
+    } else if (data.isActive === false) {
+      const existing = this.bots.get(botId);
+      if (existing) {
+        try {
+          existing.stop();
+        } catch {}
+        this.bots.delete(botId);
+      }
+    }
+
+    return { ...updated, status: this.getBotStatus(botId) };
   }
 
   /** Notify dealer via Telegram after distributor approves or rejects their request */

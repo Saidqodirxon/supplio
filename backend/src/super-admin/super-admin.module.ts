@@ -6,6 +6,8 @@ import { PrismaService } from "../prisma/prisma.service";
 import { AnalyticsService } from "../analytics/analytics.service";
 import { BackupService } from "../common/services/backup/backup.service";
 import { UnitsService } from "../units/units.service";
+import { TelegramLoggerService } from "../telegram/telegram-logger.service";
+import { CompanyNotifierService } from "../telegram/company-notifier.service";
 
 @Module({
   imports: [ScheduleModule],
@@ -16,6 +18,8 @@ import { UnitsService } from "../units/units.service";
     AnalyticsService,
     BackupService,
     UnitsService,
+    TelegramLoggerService,
+    CompanyNotifierService,
   ],
   exports: [SuperAdminService],
 })

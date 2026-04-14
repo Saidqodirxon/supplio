@@ -1,6 +1,6 @@
 -- Supplio Company Export
 -- Company: Supplio System
--- Exported: 2026-04-12T20:00:00.557Z
+-- Exported: 2026-04-13T20:00:00.971Z
 -- ID: 372dcf39-46c6-4fef-a349-808c82dc8d8a
 
 -- Branch (1 rows)
