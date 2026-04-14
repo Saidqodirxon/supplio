@@ -68,7 +68,9 @@ function UserSecurityForm() {
       : pageTranslations.settingsPage.en;
   const pt =
     language in pageTranslations.profile
-      ? pageTranslations.profile[language as keyof typeof pageTranslations.profile]
+      ? pageTranslations.profile[
+          language as keyof typeof pageTranslations.profile
+        ]
       : pageTranslations.profile.en;
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
@@ -139,8 +141,7 @@ function UserSecurityForm() {
     e.preventDefault();
     if (!passwordForm.currentPassword || !passwordForm.newPassword)
       return toast.error(t.common.error);
-    if (passwordForm.newPassword.length < 6)
-      return toast.error(lt.pwShort);
+    if (passwordForm.newPassword.length < 6) return toast.error(lt.pwShort);
     if (passwordForm.newPassword !== passwordForm.confirmPassword)
       return toast.error(lt.pwMismatch);
 
@@ -395,7 +396,7 @@ function UserSecurityForm() {
           {passwordForm.confirmPassword.length > 0 &&
             passwordForm.confirmPassword === passwordForm.newPassword && (
               <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-                  <Check className="w-3 h-3" /> {pt.passwordsMatch}
+                <Check className="w-3 h-3" /> {pt.passwordsMatch}
               </p>
             )}
         </div>
@@ -600,7 +601,8 @@ export default function Settings() {
                 {/* Instagram */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5">
-                    <Instagram className="w-3 h-3" /> {t.settings.instagramHandle}
+                    <Instagram className="w-3 h-3" />{" "}
+                    {t.settings.instagramHandle}
                   </label>
                   <input
                     type="text"
@@ -669,7 +671,7 @@ export default function Settings() {
                   <label className="text-[10px] font-black text-amber-700 dark:text-amber-400 uppercase tracking-widest flex items-center gap-1.5">
                     <Zap className="w-3 h-3" />{" "}
                     {(t.settings as Record<string, string>).cashback ||
-                        lt.cashback
+                      lt.cashback}
                   </label>
                   <div className="flex items-center gap-3">
                     <input

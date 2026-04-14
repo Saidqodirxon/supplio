@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type ReactNode } from "react";
 import {
   Bot,
   Plus,
@@ -26,53 +26,76 @@ import clsx from "clsx";
 import { useAuthStore } from "../store/authStore";
 import { dashboardTranslations, pageTranslations } from "../i18n/translations";
 import { getApiErrorMessage } from "../utils/apiError";
-            {t.reloadBots}
+
+const T = pageTranslations.telegramBots;
+type Lang = keyof typeof T;
+
 function getPublicStoreBaseUrl() {
   return (
-                {t.noBotYetTitle}
+    import.meta.env.VITE_PUBLIC_STORE_BASE_URL || window.location.origin
   ).replace(/\/+$/, "");
 }
-                {t.noBotYetDesc}
+
 interface Bot {
   id: string;
   botName: string | null;
   description: string | null;
   token: string;
   username: string | null;
-              {t.openBotFather}
+  status?: string;
+}
+
 interface BotFormData {
   token: string;
   botName: string;
   description: string;
 }
-                placeholder={t.botNamePlaceholder}
+
 type DayKey = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+
 interface DaySchedule {
   open: string;
   close: string;
   active: boolean;
-                placeholder={t.descriptionPlaceholder}
+}
+
 type WorkingHoursSchedule = Record<DayKey, DaySchedule>;
 
 const DAY_LABELS: Record<DayKey, Record<string, string>> = {
-            {t.storeUrlInfo}
+  mon: { uz: "Dushanba", ru: "Понедельник", en: "Monday", oz: "Душанба" },
+  tue: { uz: "Seshanba", ru: "Вторник", en: "Tuesday", oz: "Сешанба" },
   wed: { uz: "Chorshanba", ru: "Среда", en: "Wednesday", oz: "Чоршанба" },
   thu: { uz: "Payshanba", ru: "Четверг", en: "Thursday", oz: "Пайшанба" },
   fri: { uz: "Juma", ru: "Пятница", en: "Friday", oz: "Жума" },
   sat: { uz: "Shanba", ru: "Суббота", en: "Saturday", oz: "Шанба" },
   sun: { uz: "Yakshanba", ru: "Воскресенье", en: "Sunday", oz: "Якшанба" },
 };
+
 const DAY_KEYS: DayKey[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
-      toast.success(t.saved);
+const DEFAULT_SCHEDULE: WorkingHoursSchedule = {
+  mon: { open: "09:00", close: "18:00", active: true },
+  tue: { open: "09:00", close: "18:00", active: true },
   wed: { open: "09:00", close: "18:00", active: true },
   thu: { open: "09:00", close: "18:00", active: true },
   fri: { open: "09:00", close: "18:00", active: true },
-      toast.success(t.testSent);
-  not_found: "text-slate-400 bg-slate-500/10",
-      toast.success(t.reportSent);
+  sat: { open: "09:00", close: "14:00", active: false },
+  sun: { open: "09:00", close: "14:00", active: false },
+};
 
-      t.broadcastConfirm.replace("{count}", String(bots.length))
+const STATUS_COLOR: Record<string, string> = {
+  connected: "text-emerald-600 bg-emerald-500/10",
+  stopped: "text-amber-600 bg-amber-500/10",
+  not_found: "text-slate-400 bg-slate-500/10",
+};
+
+const STATUS_ICON: Record<string, ReactNode> = {
+  connected: <CheckCircle className="w-3.5 h-3.5" />,
+  stopped: <AlertCircle className="w-3.5 h-3.5" />,
+  not_found: <Circle className="w-3.5 h-3.5" />,
+};
+
+export default function TelegramBots() {
   const { language } = useAuthStore();
   const lang = (language in T ? language : "en") as Lang;
   const t = T[lang];
@@ -615,7 +638,8 @@ const DAY_KEYS: DayKey[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
                           )}
                         >
                           {STATUS_ICON[bot.status ?? "not_found"]}
-                          {t[bot.status ?? "not_found"]}
+                          {t[(bot.status ?? "not_found") as keyof typeof t] ??
+                            t.not_found}
                         </span>
                       </div>
                       {bot.description && (
@@ -1404,7 +1428,7 @@ const DAY_KEYS: DayKey[] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
           ) : (
             <RefreshCw className="w-4 h-4" />
           )}
-              {t.dailyReportNow}
+          {t.dailyReportNow}
         </button>
       </div>
 
