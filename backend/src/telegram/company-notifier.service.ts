@@ -163,13 +163,17 @@ export class CompanyNotifierService implements OnModuleInit {
       await this.send(info.token, info.logChatId, text);
     }
 
-    await this.telegramLogger.sendLog("INFO", `[${info.companyName}] ${action}\n${actor}`, {
-      companyId,
-      slug: info.slug,
-      actor,
-      action,
-      details,
-    });
+    await this.telegramLogger.sendLog(
+      "INFO",
+      `[${info.companyName}] ${action}\n${actor}`,
+      {
+        companyId,
+        slug: info.slug,
+        actor,
+        action,
+        details,
+      }
+    );
   }
 
   /** Buyurtmalar guruhi uchun: holat, kim va qachon o'zgargani */
@@ -345,14 +349,18 @@ export class CompanyNotifierService implements OnModuleInit {
     if (info.logChatId) {
       await this.send(info.token, info.logChatId, text);
     }
-    await this.telegramLogger.sendLog("INFO", `[${info.companyName}] Kunlik hisobot`, {
-      companyId,
-      slug: info.slug,
-      totalOrders,
-      todayOrders,
-      totalDealers,
-      pendingOrders,
-      todayRevenue: todayRevenue._sum.totalAmount ?? 0,
-    });
+    await this.telegramLogger.sendLog(
+      "INFO",
+      `[${info.companyName}] Kunlik hisobot`,
+      {
+        companyId,
+        slug: info.slug,
+        totalOrders,
+        todayOrders,
+        totalDealers,
+        pendingOrders,
+        todayRevenue: todayRevenue._sum.totalAmount ?? 0,
+      }
+    );
   }
 }
