@@ -362,7 +362,8 @@ export const dashboardTranslations = {
       phone: "Phone Number",
       password: "Password",
       role: "Role",
-      deactivateConfirm: "Are you sure you want to deactivate this staff member?",
+      deactivateConfirm:
+        "Are you sure you want to deactivate this staff member?",
     },
     products: {
       title: "Products",
@@ -695,7 +696,8 @@ export const dashboardTranslations = {
       limits: "Chegaralar",
       featuresHint: "har biri alohida qatorda",
       securityConfirm: "Xavfsizlikni tasdiqlash",
-      adminPasswordDesc: "Ushbu amalni bajarish uchun administrator parolini kiriting",
+      adminPasswordDesc:
+        "Ushbu amalni bajarish uchun administrator parolini kiriting",
       uploadCoverImage: "Muqova rasmini yuklash",
     },
     common: {
@@ -1182,7 +1184,8 @@ export const dashboardTranslations = {
       limits: "Чегаралар",
       featuresHint: "ҳар бири алоҳида қаторда",
       securityConfirm: "Хавфсизликни тасдиқлаш",
-      adminPasswordDesc: "Ушбу амални бажариш учун администратор паролини киритинг",
+      adminPasswordDesc:
+        "Ушбу амални бажариш учун администратор паролини киритинг",
       uploadCoverImage: "Муқова расмини юклаш",
     },
     common: {
@@ -1665,7 +1668,8 @@ export const dashboardTranslations = {
       limits: "Limitler",
       featuresHint: "her satıra bir tane",
       securityConfirm: "Güvenlik Onayı",
-      adminPasswordDesc: "Bu işlemi gerçekleştirmek için yönetici şifresini girin",
+      adminPasswordDesc:
+        "Bu işlemi gerçekleştirmek için yönetici şifresini girin",
       uploadCoverImage: "Kapak Görseli Yükle",
     },
     common: {
@@ -1817,11 +1821,13 @@ export const dashboardTranslations = {
       phone: "Telefon Numarası",
       password: "Şifre",
       role: "Rol",
-      deactivateConfirm: "Bu personeli devre dışı bırakmak istediğinizden emin misiniz?",
+      deactivateConfirm:
+        "Bu personeli devre dışı bırakmak istediğinizden emin misiniz?",
     },
     products: {
       title: "Ürünler",
-      subtitle: "Ürün kataloğunuzu, fiyatlandırmanızı ve envanterinizi yönetin.",
+      subtitle:
+        "Ürün kataloğunuzu, fiyatlandırmanızı ve envanterinizi yönetin.",
       addProduct: "Ürün Ekle",
       editProduct: "Ürünü Düzenle",
       name: "Ürün Adı",
@@ -1889,7 +1895,8 @@ export const dashboardTranslations = {
     },
     subscription: {
       title: "Abonelik",
-      subtitle: "Planınızı, faturalandırmanızı ve kullanım limitlerini yönetin.",
+      subtitle:
+        "Planınızı, faturalandırmanızı ve kullanım limitlerini yönetin.",
       currentPlan: "Mevcut Plan",
       status: "Durum",
       trialExpires: "Deneme Süresi Bitiyor",
@@ -2149,7 +2156,8 @@ export const dashboardTranslations = {
       limits: "Лимиты",
       featuresHint: "по одному на строке",
       securityConfirm: "Подтверждение безопасности",
-      adminPasswordDesc: "Введите пароль администратора для подтверждения действия",
+      adminPasswordDesc:
+        "Введите пароль администратора для подтверждения действия",
       uploadCoverImage: "Загрузить обложку",
     },
     common: {
@@ -2288,7 +2296,8 @@ export const dashboardTranslations = {
       phone: "Номер телефона",
       password: "Пароль",
       role: "Роль",
-      deactivateConfirm: "Вы уверены, что хотите деактивировать этого сотрудника?",
+      deactivateConfirm:
+        "Вы уверены, что хотите деактивировать этого сотрудника?",
     },
     login: {
       welcomeBack: "С возвращением",
@@ -2661,8 +2670,7 @@ export const pageTranslations = {
       telegramPlaceholder: "@channel_name",
       phonePlaceholder: "+998 90 123 45 67",
       cashback: "Cashback (%)",
-      managerOnlyCompany:
-        "Only the company owner can change company settings.",
+      managerOnlyCompany: "Only the company owner can change company settings.",
       upgradePlan: "Upgrade Plan",
       backupTitle: "Backup",
       backupDesc:
@@ -2683,8 +2691,7 @@ export const pageTranslations = {
       resetRequested: "SuperAdmin ga parol reset so'rovi yuborildi",
       savePassword: "Parolni saqlash",
       avatarLabel: "Avatar",
-      phoneAdminOnly:
-        "Telefon raqami faqat SuperAdmin tomonidan boshqariladi.",
+      phoneAdminOnly: "Telefon raqami faqat SuperAdmin tomonidan boshqariladi.",
       contactPhone: "Aloqa telefoni",
       officeAddress: "Ofis manzili",
       officeAddressPlaceholder: "Toshkent, Navoiy ko'ch. 12",
@@ -2746,7 +2753,8 @@ export const pageTranslations = {
       resetRequested: "Sifre sifirlama istegi SuperAdmin'e gonderildi",
       savePassword: "Sifreyi kaydet",
       avatarLabel: "Avatar",
-      phoneAdminOnly: "Telefon numarasi sadece SuperAdmin tarafindan yonetilir.",
+      phoneAdminOnly:
+        "Telefon numarasi sadece SuperAdmin tarafindan yonetilir.",
       contactPhone: "Iletisim telefonu",
       officeAddress: "Ofis adresi",
       officeAddressPlaceholder: "Taskent, Navoi cd. 12",

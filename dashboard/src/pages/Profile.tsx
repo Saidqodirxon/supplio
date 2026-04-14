@@ -158,9 +158,7 @@ export default function Profile() {
       setPwForm({ current: "", next: "", confirm: "" });
       toast.success(t.pwUpdated);
     } catch {
-      toast.error(
-        t.wrongCurrentPw
-      );
+      toast.error(t.wrongCurrentPw);
     } finally {
       setSavingPw(false);
     }
@@ -222,9 +220,7 @@ export default function Profile() {
             <span className="text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-md">
               {user?.roleType?.replace(/_/g, " ") || "STAFF"}
             </span>
-            <p className="text-xs text-slate-400 pt-1">
-              {t.avatarHint}
-            </p>
+            <p className="text-xs text-slate-400 pt-1">{t.avatarHint}</p>
           </div>
         </div>
 
@@ -282,9 +278,7 @@ export default function Profile() {
           {loadingCompany ? (
             <div className="flex items-center gap-3 py-4 text-slate-400">
               <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm font-bold">
-                {t.loading}
-              </span>
+              <span className="text-sm font-bold">{t.loading}</span>
             </div>
           ) : company ? (
             <form onSubmit={handleSaveCompany} className="space-y-4">
@@ -408,11 +402,7 @@ export default function Profile() {
                       : "bg-amber-500"
                   )}
                 />
-                <span>
-                  {company.siteActive
-                    ? t.b2bOn
-                    : t.b2bOff}
-                </span>
+                <span>{company.siteActive ? t.b2bOn : t.b2bOff}</span>
               </div>
 
               <div className="flex justify-end">
