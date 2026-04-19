@@ -24,6 +24,7 @@ import {
   Package,
   Globe,
   CreditCard,
+  Send,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -191,6 +192,7 @@ interface DynamicLanding {
   contactAddress?: string;
   contactAddressUrl?: string;
   socialTelegram?: string;
+  supportTelegramUsername?: string;
   socialInstagram?: string;
   socialLinkedin?: string;
   socialTwitter?: string;
@@ -290,6 +292,9 @@ export default function LandingPage() {
   const contactEmailHref = contactEmail ? `mailto:${contactEmail}` : null;
   const contactAddress = landing?.contactAddress?.trim() || null;
   const contactAddressUrl = sanitizeExternalUrl(landing?.contactAddressUrl);
+  const supportTelegram = normalizeTelegramUrl(
+    landing?.supportTelegramUsername
+  );
   const socialInstagram = sanitizeExternalUrl(landing?.socialInstagram);
   const socialLinkedin = sanitizeExternalUrl(landing?.socialLinkedin);
   const socialTwitter = sanitizeExternalUrl(landing?.socialTwitter);
@@ -1265,7 +1270,7 @@ export default function LandingPage() {
       )}
 
       {/* ===== Contact / Quick Contact ===== */}
-      {(contactPhone || contactEmail || contactAddress) && (
+      {(contactPhone || contactEmail || contactAddress || supportTelegram) && (
         <section className="py-16 sm:py-20 px-5 sm:px-6 bg-linear-to-br from-blue-600 to-indigo-700 text-white">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="space-y-3">
@@ -1329,6 +1334,23 @@ export default function LandingPage() {
                 >
                   <MapPin className="w-4 h-4" />
                   {contactAddress}
+                </a>
+              )}
+              {supportTelegram && (
+                <a
+                  href={supportTelegram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl font-bold text-sm transition-all"
+                >
+                  <Send className="w-4 h-4" />
+                  {lang === "uz"
+                    ? "Tezkor Telegram"
+                    : lang === "ru"
+                      ? "Быстрый Telegram"
+                      : lang === "tr"
+                        ? "Hızlı Telegram"
+                        : "Fast Telegram"}
                 </a>
               )}
             </div>

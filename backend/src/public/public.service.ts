@@ -93,7 +93,27 @@ export class PublicService {
         .catch(() => null),
     ]);
 
-    return { news, tariffs, settings, landing };
+    let supportTelegramUsername: string | null = null;
+    try {
+      const rows = await this.prisma.$queryRawUnsafe<
+        Array<{ supportTelegramUsername: string | null }>
+      >(
+        'SELECT "supportTelegramUsername" FROM "LandingContent" WHERE id = $1 LIMIT 1',
+        "LANDING"
+      );
+      supportTelegramUsername = rows[0]?.supportTelegramUsername ?? null;
+    } catch {
+      supportTelegramUsername = null;
+    }
+
+    const landingWithSupport = landing
+      ? {
+          ...landing,
+          supportTelegramUsername,
+        }
+      : landing;
+
+    return { news, tariffs, settings, landing: landingWithSupport };
   }
 
   async getNewsList(_lang: string, limit: number = 20) {

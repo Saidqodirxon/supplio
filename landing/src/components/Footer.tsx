@@ -2,7 +2,17 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Phone, Mail, MapPin, LifeBuoy, X, Send, Instagram, Linkedin, ExternalLink } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  LifeBuoy,
+  X,
+  Send,
+  Instagram,
+  Linkedin,
+  ExternalLink,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { translations } from "@/i18n/translations";
 import type { Language } from "@/i18n/translations";
@@ -36,8 +46,36 @@ export function Footer({ lang }: { lang: Language }) {
     { label: "Twitter", href: landing?.socialTwitter },
   ].filter((s) => s.href);
 
+  const supportTelegram = (() => {
+    const raw = (landing?.supportTelegramUsername || "").trim();
+    if (!raw) return null;
+    if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+    const handle = raw.replace(/^@/, "").trim();
+    return handle ? `https://t.me/${handle}` : null;
+  })();
+  const supportTelegramLabel = (() => {
+    const raw = (landing?.supportTelegramUsername || "").trim();
+    if (!raw) return "@supplio_support";
+    if (raw.startsWith("http://") || raw.startsWith("https://")) {
+      try {
+        const parsed = new URL(raw);
+        const path = parsed.pathname
+          .replace(/\/+$/, "")
+          .split("/")
+          .filter(Boolean)
+          .pop();
+        return path ? `@${path}` : raw;
+      } catch {
+        return raw;
+      }
+    }
+    return raw.startsWith("@") ? raw : `@${raw}`;
+  })();
+
   const contactPhone = landing?.contactPhone?.trim();
-  const contactPhoneHref = contactPhone ? `tel:${contactPhone.replace(/[^\d+]/g, "")}` : null;
+  const contactPhoneHref = contactPhone
+    ? `tel:${contactPhone.replace(/[^\d+]/g, "")}`
+    : null;
   const contactEmail = landing?.contactEmail?.trim();
   const contactEmailHref = contactEmail ? `mailto:${contactEmail}` : null;
   const contactAddress = landing?.contactAddress?.trim();
@@ -222,7 +260,7 @@ export function Footer({ lang }: { lang: Language }) {
 
       <AnimatePresence>
         {isHelpModalOpen && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -291,6 +329,22 @@ export function Footer({ lang }: { lang: Language }) {
                     </span>
                   </a>
                 )}
+                {supportTelegram && (
+                  <a
+                    href={supportTelegram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
+                  >
+                    <span className="inline-flex items-center gap-2 font-bold text-slate-700">
+                      <Send className="w-4 h-4 text-blue-600" />
+                      Telegram support
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      {supportTelegramLabel}
+                    </span>
+                  </a>
+                )}
                 {contactAddress && (
                   <a
                     href={contactAddressUrl || "#"}
@@ -313,9 +367,14 @@ export function Footer({ lang }: { lang: Language }) {
                     </span>
                   </a>
                 )}
-                {!contactPhone && !contactEmail && !contactAddress && (
-                  <p className="text-sm text-slate-500">Ma'lumot topilmadi.</p>
-                )}
+                {!contactPhone &&
+                  !contactEmail &&
+                  !contactAddress &&
+                  !supportTelegram && (
+                    <p className="text-sm text-slate-500">
+                      Ma'lumot topilmadi.
+                    </p>
+                  )}
               </div>
             </motion.div>
           </div>

@@ -586,6 +586,7 @@ model LandingContent {
   socialInstagram String?
   socialLinkedin String?
   socialTwitter  String?
+  supportTelegramUsername String?
   footerDescUz   String   @default("")
   footerDescRu   String   @default("")
   footerDescEn   String   @default("")

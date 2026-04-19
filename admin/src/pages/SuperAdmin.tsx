@@ -3,6 +3,7 @@ import {
   ShieldCheck,
   Database,
   Bell,
+  Calendar,
   Monitor,
   Server,
   AlertTriangle,
@@ -10,7 +11,6 @@ import {
   Lock,
   Table,
   Activity,
-  Calendar,
   Loader2,
   Trash2,
   ChevronRight,
@@ -26,26 +26,26 @@ import {
   X,
   Edit,
   BarChart3,
-  UserPlus,
   Newspaper,
   Plus,
   TrendingUp,
-  Clock,
   BadgeCheck,
   Download,
   Eye,
-  Image as ImageIcon,
   Bot,
   CheckCircle2,
-  XCircle,
   Circle,
+  XCircle,
   Power,
   KeyRound,
+  ImageIcon,
   MessageSquare,
+  UserPlus,
   Users,
   Star,
   Pencil,
   LifeBuoy,
+  Clock,
 } from "lucide-react";
 import clsx from "clsx";
 import { useScrollLock } from "../utils/useScrollLock";
@@ -157,8 +157,8 @@ interface NewsItem {
   slugTr?: string;
   slugUzCyr?: string;
   image?: string;
-  isPublished: boolean;
   viewCount?: number;
+  isPublished: boolean;
   createdAt: string;
 }
 
@@ -251,6 +251,7 @@ interface LandingContent {
   socialInstagram: string;
   socialLinkedin: string;
   socialTwitter: string;
+  supportTelegramUsername: string;
   footerDescUz: string;
   footerDescRu: string;
   footerDescEn: string;
@@ -465,6 +466,7 @@ export default function SuperAdmin() {
     socialInstagram: "https://www.instagram.com/supplio__app/",
     socialLinkedin: "https://www.linkedin.com/company/supplioapp",
     socialTwitter: "https://x.com/supplioapp",
+    supportTelegramUsername: "@supplio_support",
     footerDescUz: "",
     footerDescRu: "",
     footerDescEn: "",
@@ -786,6 +788,28 @@ export default function SuperAdmin() {
     setReplyImageFile(file);
     setReplyImagePreview(URL.createObjectURL(file));
   };
+
+  const appendQuickReply = (text: string) => {
+    setReplyMessage((current) => {
+      const next = current.trim();
+      return next ? `${next}\n${text}` : text;
+    });
+  };
+
+  const supportQuickReplies = [
+    {
+      label: "TG support",
+      text: `Telegram: ${landingContent.supportTelegramUsername || "@supplio_support"}`,
+    },
+    {
+      label: "Instagram",
+      text: `Instagram: ${landingContent.socialInstagram || "@supplio__app"}`,
+    },
+    {
+      label: "LinkedIn",
+      text: `LinkedIn: ${landingContent.socialLinkedin || "supplioapp"}`,
+    },
+  ];
 
   const paginatedTickets = supportTickets.slice(
     (ticketsPage - 1) * 10,
@@ -1916,6 +1940,18 @@ export default function SuperAdmin() {
 
                         {selectedTicket.status !== "CLOSED" && (
                           <div className="p-4 bg-white dark:bg-white/5 border-t border-slate-100 dark:border-white/10 space-y-3">
+                            <div className="flex flex-wrap gap-2">
+                              {supportQuickReplies.map((item) => (
+                                <button
+                                  key={item.label}
+                                  type="button"
+                                  onClick={() => appendQuickReply(item.text)}
+                                  className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-300 hover:border-indigo-500 hover:text-indigo-600 transition-all"
+                                >
+                                  {item.label}
+                                </button>
+                              ))}
+                            </div>
                             {replyImagePreview && (
                               <div className="relative inline-block">
                                 <img
@@ -2645,6 +2681,24 @@ export default function SuperAdmin() {
                         </label>
                         <input
                           type="text"
+                          value={landingContent.supportTelegramUsername || ""}
+                          onChange={(e) =>
+                            setLandingContent((p) => ({
+                              ...p,
+                              supportTelegramUsername: e.target.value,
+                            }))
+                          }
+                          placeholder="@supplio_support"
+                          className="w-full px-5 py-3.5 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-bold focus:border-blue-600 transition-all text-sm"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase px-2">
+                          Telegram kanal URL (Footer)
+                        </label>
+                        <input
+                          type="text"
                           value={landingContent.socialTelegram || ""}
                           onChange={(e) =>
                             setLandingContent((p) => ({
@@ -2652,9 +2706,85 @@ export default function SuperAdmin() {
                               socialTelegram: e.target.value,
                             }))
                           }
-                          placeholder="@supplioapp yoki https://t.me/supplioapp"
+                          placeholder="https://t.me/your_channel"
                           className="w-full px-5 py-3.5 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-bold focus:border-blue-600 transition-all text-sm"
                         />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-slate-500 uppercase px-2">
+                            Instagram URL (Footer)
+                          </label>
+                          <input
+                            type="text"
+                            value={landingContent.socialInstagram || ""}
+                            onChange={(e) =>
+                              setLandingContent((p) => ({
+                                ...p,
+                                socialInstagram: e.target.value,
+                              }))
+                            }
+                            placeholder="https://instagram.com/your_page"
+                            className="w-full px-5 py-3.5 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-bold focus:border-blue-600 transition-all text-sm"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-slate-500 uppercase px-2">
+                            LinkedIn URL (Footer)
+                          </label>
+                          <input
+                            type="text"
+                            value={landingContent.socialLinkedin || ""}
+                            onChange={(e) =>
+                              setLandingContent((p) => ({
+                                ...p,
+                                socialLinkedin: e.target.value,
+                              }))
+                            }
+                            placeholder="https://linkedin.com/company/your_page"
+                            className="w-full px-5 py-3.5 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-bold focus:border-blue-600 transition-all text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-slate-500 uppercase px-2">
+                            Lokatsiya (matn)
+                          </label>
+                          <input
+                            type="text"
+                            value={landingContent.contactAddress || ""}
+                            onChange={(e) =>
+                              setLandingContent((p) => ({
+                                ...p,
+                                contactAddress: e.target.value,
+                              }))
+                            }
+                            placeholder="Toshkent sh., Yunusobod..."
+                            className="w-full px-5 py-3.5 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-bold focus:border-blue-600 transition-all text-sm"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-slate-500 uppercase px-2">
+                            Lokatsiya URL (xarita)
+                          </label>
+                          <input
+                            type="text"
+                            value={landingContent.contactAddressUrl || ""}
+                            onChange={(e) =>
+                              setLandingContent((p) => ({
+                                ...p,
+                                contactAddressUrl: e.target.value,
+                              }))
+                            }
+                            placeholder="https://maps.google.com/..."
+                            className="w-full px-5 py-3.5 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-bold focus:border-blue-600 transition-all text-sm"
+                          />
+                        </div>
                       </div>
                     </div>
 
@@ -2722,7 +2852,13 @@ export default function SuperAdmin() {
                         await api.patch("/super/landing", {
                           contactPhone: landingContent.contactPhone,
                           contactEmail: landingContent.contactEmail,
+                          contactAddress: landingContent.contactAddress,
+                          contactAddressUrl: landingContent.contactAddressUrl,
                           socialTelegram: landingContent.socialTelegram,
+                          socialInstagram: landingContent.socialInstagram,
+                          socialLinkedin: landingContent.socialLinkedin,
+                          supportTelegramUsername:
+                            landingContent.supportTelegramUsername,
                         });
                         toast.success(t.superadmin.saveSettingsSuccess);
                       } catch {
@@ -3524,6 +3660,10 @@ export default function SuperAdmin() {
                         { key: "socialInstagram", label: "Instagram URL" },
                         { key: "socialLinkedin", label: "LinkedIn URL" },
                         { key: "socialTwitter", label: "Twitter URL" },
+                        {
+                          key: "supportTelegramUsername",
+                          label: "Support Telegram username",
+                        },
                       ].map(({ key, label }) => (
                         <div key={key} className="space-y-2">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">

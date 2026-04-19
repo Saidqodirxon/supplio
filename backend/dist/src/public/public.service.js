@@ -81,7 +81,21 @@ let PublicService = class PublicService {
                 .findUnique({ where: { id: "LANDING" } })
                 .catch(() => null),
         ]);
-        return { news, tariffs, settings, landing };
+        let supportTelegramUsername = null;
+        try {
+            const rows = await this.prisma.$queryRawUnsafe('SELECT "supportTelegramUsername" FROM "LandingContent" WHERE id = $1 LIMIT 1', "LANDING");
+            supportTelegramUsername = rows[0]?.supportTelegramUsername ?? null;
+        }
+        catch {
+            supportTelegramUsername = null;
+        }
+        const landingWithSupport = landing
+            ? {
+                ...landing,
+                supportTelegramUsername,
+            }
+            : landing;
+        return { news, tariffs, settings, landing: landingWithSupport };
     }
     async getNewsList(_lang, limit = 20) {
         const take = Number.isFinite(limit) && limit > 0 ? Math.min(limit, 50) : 20;

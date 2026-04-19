@@ -483,7 +483,7 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
         return workbook;
     }
     async getLandingContent() {
-        return this.prisma.landingContent.upsert({
+        const landing = await this.prisma.landingContent.upsert({
             where: { id: "LANDING" },
             update: {},
             create: {
@@ -498,13 +498,43 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
                 footerDescEn: "Supplio — the leading B2B sales management platform in Uzbekistan. Manage orders, dealers and payments in one place.",
             },
         });
+        try {
+            await this.prisma.$executeRawUnsafe('ALTER TABLE "LandingContent" ADD COLUMN IF NOT EXISTS "supportTelegramUsername" TEXT');
+            const rows = await this.prisma.$queryRawUnsafe('SELECT "supportTelegramUsername" FROM "LandingContent" WHERE id = $1 LIMIT 1', "LANDING");
+            return {
+                ...landing,
+                supportTelegramUsername: rows[0]?.supportTelegramUsername ?? "@supplio_support",
+            };
+        }
+        catch {
+            return {
+                ...landing,
+                supportTelegramUsername: "@supplio_support",
+            };
+        }
     }
     async updateLandingContent(data) {
-        return this.prisma.landingContent.upsert({
+        const { supportTelegramUsername, ...safeData } = data;
+        const landing = await this.prisma.landingContent.upsert({
             where: { id: "LANDING" },
-            update: data,
-            create: { id: "LANDING", ...data },
+            update: safeData,
+            create: { id: "LANDING", ...safeData },
         });
+        try {
+            await this.prisma.$executeRawUnsafe('ALTER TABLE "LandingContent" ADD COLUMN IF NOT EXISTS "supportTelegramUsername" TEXT');
+            if (supportTelegramUsername !== undefined) {
+                const value = String(supportTelegramUsername ?? "").trim() || null;
+                await this.prisma.$executeRawUnsafe('UPDATE "LandingContent" SET "supportTelegramUsername" = $1 WHERE id = $2', value, "LANDING");
+            }
+            const rows = await this.prisma.$queryRawUnsafe('SELECT "supportTelegramUsername" FROM "LandingContent" WHERE id = $1 LIMIT 1', "LANDING");
+            return {
+                ...landing,
+                supportTelegramUsername: rows[0]?.supportTelegramUsername ?? null,
+            };
+        }
+        catch {
+            return landing;
+        }
     }
     async getAllFeatures() {
         return this.prisma.featureFlag.findMany({ orderBy: { featureKey: "asc" } });

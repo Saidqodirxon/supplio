@@ -108,6 +108,7 @@ let PrismaService = class PrismaService extends client_1.PrismaClient {
             `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "contractRu" TEXT`,
             `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "contractEn" TEXT`,
             `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "contractUzCyr" TEXT`,
+            `ALTER TABLE "LandingContent" ADD COLUMN IF NOT EXISTS "supportTelegramUsername" TEXT`,
             `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "region" TEXT`,
             `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "district" TEXT`,
             `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "contactPhone" TEXT`,

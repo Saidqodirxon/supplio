@@ -83,14 +83,16 @@ export default function DocumentsPage() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         setSupportTelegram(
-          normalizeTelegramUrl(data?.landing?.socialTelegram) ||
-            sanitizeExternalUrl(data?.landing?.socialTelegram)
+          normalizeTelegramUrl(data?.landing?.supportTelegramUsername)
         );
-        setSupportInstagram(sanitizeExternalUrl(data?.landing?.socialInstagram));
+        setSupportInstagram(
+          sanitizeExternalUrl(data?.landing?.socialInstagram)
+        );
         setSupportLinkedin(sanitizeExternalUrl(data?.landing?.socialLinkedin));
         setSupportPhone(
-          String(data?.settings?.superAdminPhone || data?.landing?.contactPhone || "").trim() ||
-            null
+          String(
+            data?.settings?.superAdminPhone || data?.landing?.contactPhone || ""
+          ).trim() || null
         );
       })
       .catch(() => {
@@ -137,8 +139,10 @@ export default function DocumentsPage() {
       : null,
     supportTelegram
       ? {
-          label: labels.telegram,
-          value: supportTelegram.replace(/^https?:\/\/t\.me\//, "@").replace(/\/$/, ""),
+          label: `${labels.telegram} (${lang === "uz" ? "tezkor" : lang === "ru" ? "быстрый" : lang === "tr" ? "hızlı" : "quick"})`,
+          value: supportTelegram
+            .replace(/^https?:\/\/t\.me\//, "@")
+            .replace(/\/$/, ""),
           href: supportTelegram,
           icon: Send,
         }
@@ -223,7 +227,11 @@ export default function DocumentsPage() {
         <div className="max-w-7xl mx-auto px-5 sm:px-6 flex items-center justify-between">
           <Link href={`/${params.lang}`} className="flex items-center shrink-0">
             <div className="h-12 overflow-hidden flex items-center">
-              <img src="/logo.png" alt="Supplio" className="h-full object-contain" />
+              <img
+                src="/logo.png"
+                alt="Supplio"
+                className="h-full object-contain"
+              />
             </div>
           </Link>
 
@@ -268,7 +276,11 @@ export default function DocumentsPage() {
             className="md:hidden p-2.5 rounded-xl border border-slate-200 bg-white/80"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {isMenuOpen ? (
+              <X className="w-5 h-5" />
+            ) : (
+              <Menu className="w-5 h-5" />
+            )}
           </button>
         </div>
       </nav>
@@ -276,16 +288,28 @@ export default function DocumentsPage() {
       {isMenuOpen && (
         <div className="fixed inset-0 z-40 md:hidden pt-24 px-5 bg-white">
           <div className="flex flex-col gap-6 text-lg font-medium">
-            <Link href={`/${params.lang}#features`} onClick={() => setIsMenuOpen(false)}>
+            <Link
+              href={`/${params.lang}#features`}
+              onClick={() => setIsMenuOpen(false)}
+            >
               {t.nav.features}
             </Link>
-            <Link href={`/${params.lang}#pricing`} onClick={() => setIsMenuOpen(false)}>
+            <Link
+              href={`/${params.lang}#pricing`}
+              onClick={() => setIsMenuOpen(false)}
+            >
               {t.nav.pricing}
             </Link>
-            <Link href={`/${params.lang}/news`} onClick={() => setIsMenuOpen(false)}>
+            <Link
+              href={`/${params.lang}/news`}
+              onClick={() => setIsMenuOpen(false)}
+            >
               {t.nav.news}
             </Link>
-            <Link href={`/${params.lang}/about`} onClick={() => setIsMenuOpen(false)}>
+            <Link
+              href={`/${params.lang}/about`}
+              onClick={() => setIsMenuOpen(false)}
+            >
               {t.nav.about}
             </Link>
             <div className="pt-4">
@@ -297,11 +321,15 @@ export default function DocumentsPage() {
 
       <section className="pt-36 pb-20 px-5 sm:px-6 text-white relative overflow-hidden bg-slate-950">
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/3 w-[500px] h-[500px] bg-blue-500/15 rounded-full blur-[140px]" />
+          <div className="absolute top-0 left-1/3 w-125 h-125 bg-blue-500/15 rounded-full blur-[140px]" />
           <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-indigo-400/10 rounded-full blur-[100px]" />
         </div>
         <div className="max-w-6xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
             <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_0.8fr] gap-8 items-end">
               <div className="text-left space-y-6">
                 <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 text-blue-200 text-xs font-bold uppercase tracking-[0.25em] border border-white/10 backdrop-blur-sm">
@@ -330,27 +358,42 @@ export default function DocumentsPage() {
                   </span>
                   <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 text-sm text-slate-100">
                     <LifeBuoy className="w-4 h-4 text-blue-300" />
-                    {docCount} {lang === "uz" ? "ta hujjat" : lang === "ru" ? "документа" : lang === "tr" ? "belge" : lang === "oz" ? "та ҳужжат" : "documents"}
+                    {docCount}{" "}
+                    {lang === "uz"
+                      ? "ta hujjat"
+                      : lang === "ru"
+                        ? "документа"
+                        : lang === "tr"
+                          ? "belge"
+                          : lang === "oz"
+                            ? "та ҳужжат"
+                            : "documents"}
                   </span>
                 </div>
               </div>
 
-              <div className="rounded-[2rem] bg-white/10 border border-white/10 backdrop-blur-xl p-6 sm:p-7 shadow-2xl shadow-slate-900/30">
+              <div className="rounded-4xl bg-white/10 border border-white/10 backdrop-blur-xl p-6 sm:p-7 shadow-2xl shadow-slate-900/30">
                 <p className="text-xs font-black uppercase tracking-[0.28em] text-blue-200 mb-3">
                   {contactLabel}
                 </p>
                 <p className="text-slate-300 text-sm leading-relaxed">
                   {contactSubtitle}
                 </p>
-              <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="mt-5 grid grid-cols-2 gap-3">
                   {contactCards.slice(0, 2).map((card) => {
                     const Icon = card.icon;
                     return (
                       <a
                         key={card.href}
                         href={card.href}
-                        target={card.href.startsWith("http") ? "_blank" : undefined}
-                        rel={card.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                        target={
+                          card.href.startsWith("http") ? "_blank" : undefined
+                        }
+                        rel={
+                          card.href.startsWith("http")
+                            ? "noopener noreferrer"
+                            : undefined
+                        }
                         className="rounded-2xl bg-white/10 hover:bg-white/15 border border-white/10 p-4 transition-colors"
                       >
                         <Icon className="w-5 h-5 text-blue-200 mb-3" />
@@ -386,7 +429,7 @@ export default function DocumentsPage() {
       <section className="py-20 px-5 sm:px-6 bg-slate-50">
         <div className="max-w-7xl mx-auto grid grid-cols-1 xl:grid-cols-[1.2fr_0.8fr] gap-8">
           <div className="space-y-5">
-            <div className="rounded-[2rem] border border-white/70 bg-white p-6 sm:p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+            <div className="rounded-4xl border border-white/70 bg-white p-6 sm:p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
               <div className="flex items-end justify-between gap-4 mb-6">
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.28em] text-blue-600 mb-2">
@@ -450,7 +493,9 @@ export default function DocumentsPage() {
                     href={`/${params.lang}/${item.href}`}
                     className="group rounded-[1.75rem] border border-slate-100 bg-white p-5 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all"
                   >
-                    <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${gradient} text-white flex items-center justify-center mb-4 shadow-lg`}>
+                    <div
+                      className={`w-11 h-11 rounded-2xl bg-linear-to-br ${gradient} text-white flex items-center justify-center mb-4 shadow-lg`}
+                    >
                       <Bell className="w-5 h-5" />
                     </div>
                     <p className="text-sm font-black text-slate-900 leading-tight">
@@ -478,7 +523,7 @@ export default function DocumentsPage() {
           </div>
 
           <div className="space-y-5">
-            <div className="rounded-[2rem] border border-slate-100 bg-white p-6 sm:p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+            <div className="rounded-4xl border border-slate-100 bg-white p-6 sm:p-8 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
                   <LifeBuoy className="w-6 h-6" />
@@ -525,7 +570,7 @@ export default function DocumentsPage() {
               </div>
             </div>
 
-            <div className="rounded-[2rem] bg-slate-900 text-white p-6 sm:p-8 overflow-hidden relative">
+            <div className="rounded-4xl bg-slate-900 text-white p-6 sm:p-8 overflow-hidden relative">
               <div className="absolute top-0 right-0 w-44 h-44 bg-blue-500/15 blur-3xl rounded-full" />
               <p className="relative text-xs font-black uppercase tracking-[0.28em] text-blue-200 mb-3">
                 {lang === "uz"
@@ -542,19 +587,16 @@ export default function DocumentsPage() {
                 {pageNote}
               </p>
               <div className="relative mt-6 flex flex-wrap gap-2">
-                {[
-                  t.nav.features,
-                  t.nav.pricing,
-                  t.nav.news,
-                  t.nav.about,
-                ].map((label) => (
-                  <span
-                    key={label}
-                    className="px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-bold text-slate-100"
-                  >
-                    {label}
-                  </span>
-                ))}
+                {[t.nav.features, t.nav.pricing, t.nav.news, t.nav.about].map(
+                  (label) => (
+                    <span
+                      key={label}
+                      className="px-3 py-1.5 rounded-full bg-white/10 border border-white/10 text-xs font-bold text-slate-100"
+                    >
+                      {label}
+                    </span>
+                  )
+                )}
               </div>
             </div>
           </div>

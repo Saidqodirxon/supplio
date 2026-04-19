@@ -575,7 +575,7 @@ export class SuperAdminService {
   // â”€â”€ Landing CMS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   async getLandingContent() {
-    return (this.prisma as any).landingContent.upsert({
+    const landing = await (this.prisma as any).landingContent.upsert({
       where: { id: "LANDING" },
       update: {},
       create: {
@@ -593,14 +593,64 @@ export class SuperAdminService {
           "Supplio — the leading B2B sales management platform in Uzbekistan. Manage orders, dealers and payments in one place.",
       },
     });
+
+    try {
+      await this.prisma.$executeRawUnsafe(
+        'ALTER TABLE "LandingContent" ADD COLUMN IF NOT EXISTS "supportTelegramUsername" TEXT'
+      );
+      const rows = await this.prisma.$queryRawUnsafe<
+        Array<{ supportTelegramUsername: string | null }>
+      >(
+        'SELECT "supportTelegramUsername" FROM "LandingContent" WHERE id = $1 LIMIT 1',
+        "LANDING"
+      );
+      return {
+        ...landing,
+        supportTelegramUsername:
+          rows[0]?.supportTelegramUsername ?? "@supplio_support",
+      };
+    } catch {
+      return {
+        ...landing,
+        supportTelegramUsername: "@supplio_support",
+      };
+    }
   }
 
   async updateLandingContent(data: Record<string, unknown>) {
-    return (this.prisma as any).landingContent.upsert({
+    const { supportTelegramUsername, ...safeData } = data as any;
+
+    const landing = await (this.prisma as any).landingContent.upsert({
       where: { id: "LANDING" },
-      update: data,
-      create: { id: "LANDING", ...data },
+      update: safeData,
+      create: { id: "LANDING", ...safeData },
     });
+
+    try {
+      await this.prisma.$executeRawUnsafe(
+        'ALTER TABLE "LandingContent" ADD COLUMN IF NOT EXISTS "supportTelegramUsername" TEXT'
+      );
+      if (supportTelegramUsername !== undefined) {
+        const value = String(supportTelegramUsername ?? "").trim() || null;
+        await this.prisma.$executeRawUnsafe(
+          'UPDATE "LandingContent" SET "supportTelegramUsername" = $1 WHERE id = $2',
+          value,
+          "LANDING"
+        );
+      }
+      const rows = await this.prisma.$queryRawUnsafe<
+        Array<{ supportTelegramUsername: string | null }>
+      >(
+        'SELECT "supportTelegramUsername" FROM "LandingContent" WHERE id = $1 LIMIT 1',
+        "LANDING"
+      );
+      return {
+        ...landing,
+        supportTelegramUsername: rows[0]?.supportTelegramUsername ?? null,
+      };
+    } catch {
+      return landing;
+    }
   }
 
   // â”€â”€ Feature Flags â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
