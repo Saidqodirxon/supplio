@@ -6,42 +6,42 @@ BEGIN
     END IF;
 
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'termsUz') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "termsUz" = '<p><b>1. Umumiy qoidalar</b></p><p>Ushbu Foydalanish shartlari (qisqacha "Shartlar") Supplio platformasi va uning xizmatlaridan foydalanishni tartibga soladi. Platformaga kirish yoki undan foydalanish orqali siz ushbu shartlarga rozilik bildirasiz.</p><br/><p><b>2. Ro''yxatdan o''tish va xavfsizlik</b></p><p>Foydalanuvchilar o''z akkauntlarining maxfiyligini saqlash majburiyatiga ega. Hisobingizdan qilingan har qanday harakatlar uchun to''liq javobgar bo''lasiz.</p><br/><p><b>3. Tizimdan foydalanish cheklovlari</b></p><p>Supplio tizimidan noqonuniy harakatlar, firibgarlik yoki boshqa foydalanuvchilarga zarar yetkazish maqsadida foydalanish qat''iyan man etiladi.</p><br/><p><b>4. To''lovlar va tariflar</b></p><p>Platforma pullik xizmatlarni taqdim etadi. Barcha to''lovlar oldindan amalga oshiriladi va qaytarilmaydi (qonunchilikda ko''rsatilgan holatlar bundan mustasno).</p>' WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "termsUz" = %s WHERE id = ''GLOBAL''', '<p><b>1. Umumiy qoidalar</b></p><p>Ushbu Foydalanish shartlari (qisqacha "Shartlar") Supplio platformasi va uning xizmatlaridan foydalanishni tartibga soladi. Platformaga kirish yoki undan foydalanish orqali siz ushbu shartlarga rozilik bildirasiz.</p><br/><p><b>2. Ro''yxatdan o''tish va xavfsizlik</b></p><p>Foydalanuvchilar o''z akkauntlarining maxfiyligini saqlash majburiyatiga ega. Hisobingizdan qilingan har qanday harakatlar uchun to''liq javobgar bo''lasiz.</p><br/><p><b>3. Tizimdan foydalanish cheklovlari</b></p><p>Supplio tizimidan noqonuniy harakatlar, firibgarlik yoki boshqa foydalanuvchilarga zarar yetkazish maqsadida foydalanish qat''iyan man etiladi.</p><br/><p><b>4. To''lovlar va tariflar</b></p><p>Platforma pullik xizmatlarni taqdim etadi. Barcha to''lovlar oldindan amalga oshiriladi va qaytarilmaydi (qonunchilikda ko''rsatilgan holatlar bundan mustasno).</p>');
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'termsRu') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "termsRu" = NULL WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "termsRu" = %s WHERE id = ''GLOBAL''', NULL);
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'termsEn') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "termsEn" = NULL WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "termsEn" = %s WHERE id = ''GLOBAL''', NULL);
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'termsUzCyr') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "termsUzCyr" = NULL WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "termsUzCyr" = %s WHERE id = ''GLOBAL''', NULL);
     END IF;
 
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'privacyUz') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "privacyUz" = '<p><b>1. Maxfiylik kafolati</b></p><p>Supplio sizning shaxsiy ma''lumotlaringizni himoya qilishga katta e''tibor qaratadi. Biz ma''lumotlaringizni uchinchi shaxslarga sotmaymiz.</p><br/><p><b>2. Qanday ma''lumotlar yig''iladi?</b></p><p>Sizning telefon raqamingiz, ismingiz, kompaniya ma''lumotlaringiz va tizimdagi harakatlar loglari xavfsizlik va xizmat sifatini oshirish uchun yig''iladi.</p><br/><p><b>3. Ma''lumotlarni saqlash muddati</b></p><p>Sizning ma''lumotlaringiz siz tizimdan foydalanayotgan davr mobaynida xavfsiz serverlarda saqlanadi. Hisobingizni o''chirmoqchi bo''lsangiz, biz bilan bog''lanishingiz mumkin.</p>' WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "privacyUz" = %s WHERE id = ''GLOBAL''', '<p><b>1. Maxfiylik kafolati</b></p><p>Supplio sizning shaxsiy ma''lumotlaringizni himoya qilishga katta e''tibor qaratadi. Biz ma''lumotlaringizni uchinchi shaxslarga sotmaymiz.</p><br/><p><b>2. Qanday ma''lumotlar yig''iladi?</b></p><p>Sizning telefon raqamingiz, ismingiz, kompaniya ma''lumotlaringiz va tizimdagi harakatlar loglari xavfsizlik va xizmat sifatini oshirish uchun yig''iladi.</p><br/><p><b>3. Ma''lumotlarni saqlash muddati</b></p><p>Sizning ma''lumotlaringiz siz tizimdan foydalanayotgan davr mobaynida xavfsiz serverlarda saqlanadi. Hisobingizni o''chirmoqchi bo''lsangiz, biz bilan bog''lanishingiz mumkin.</p>');
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'privacyRu') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "privacyRu" = NULL WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "privacyRu" = %s WHERE id = ''GLOBAL''', NULL);
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'privacyEn') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "privacyEn" = NULL WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "privacyEn" = %s WHERE id = ''GLOBAL''', NULL);
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'privacyUzCyr') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "privacyUzCyr" = NULL WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "privacyUzCyr" = %s WHERE id = ''GLOBAL''', NULL);
     END IF;
 
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'contractUz') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "contractUz" = '<p><b>1. Xizmat ko''rsatish shartnomasi</b></p><p>Ushbu hujjat SUPPLIO va Mijoz o''rtasidagi rasmiy litsenziya va xizmat ko''rsatish kelishuvi hisoblanadi.</p><br/><p><b>2. Tomonlarning huquq va majburiyatlari</b></p><p>Biz tizimning 99.9% ishlashini (SLA) kafolatlaymiz. Mijoz esa foydalanish qoidalari va oylik obuna to''lovlarini o''z vaqtida amalga oshirishi shart.</p><br/><p><b>3. Fors-major holatlar</b></p><p>Tabiiy ofatlar, davlat miqyosidagi internet uzilishlari va bizga bog''liq bo''lmagan uzilishlar uchun SUPPLIO javobgar bo''lmaydi.</p><br/><p><b>4. Kelishuvni bekor qilish</b></p><p>Mijoz istalgan vaqtda xizmatdan foydalanishni to''xtatishi mumkin. Buning uchun 15 kun oldin yozma (yoki elektron) ogohlantirish berilishi kerak.</p>' WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "contractUz" = %s WHERE id = ''GLOBAL''', '<p><b>1. Xizmat ko''rsatish shartnomasi</b></p><p>Ushbu hujjat SUPPLIO va Mijoz o''rtasidagi rasmiy litsenziya va xizmat ko''rsatish kelishuvi hisoblanadi.</p><br/><p><b>2. Tomonlarning huquq va majburiyatlari</b></p><p>Biz tizimning 99.9% ishlashini (SLA) kafolatlaymiz. Mijoz esa foydalanish qoidalari va oylik obuna to''lovlarini o''z vaqtida amalga oshirishi shart.</p><br/><p><b>3. Fors-major holatlar</b></p><p>Tabiiy ofatlar, davlat miqyosidagi internet uzilishlari va bizga bog''liq bo''lmagan uzilishlar uchun SUPPLIO javobgar bo''lmaydi.</p><br/><p><b>4. Kelishuvni bekor qilish</b></p><p>Mijoz istalgan vaqtda xizmatdan foydalanishni to''xtatishi mumkin. Buning uchun 15 kun oldin yozma (yoki elektron) ogohlantirish berilishi kerak.</p>');
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'contractRu') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "contractRu" = NULL WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "contractRu" = %s WHERE id = ''GLOBAL''', NULL);
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'contractEn') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "contractEn" = NULL WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "contractEn" = %s WHERE id = ''GLOBAL''', NULL);
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'contractUzCyr') THEN
-        EXECUTE 'UPDATE "SystemSettings" SET "contractUzCyr" = NULL WHERE id = ''GLOBAL''';
+        EXECUTE format('UPDATE "SystemSettings" SET "contractUzCyr" = %s WHERE id = ''GLOBAL''', NULL);
     END IF;
 END
 $sync$;
