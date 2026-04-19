@@ -127,7 +127,8 @@ export default function HelpCenter() {
     if (language === "tr") {
       return {
         title: "Yardım Merkezi",
-        subtitle: "Admin ekibiyle iletişim kurmanın tüm yolları ve hata bildirimi",
+        subtitle:
+          "Admin ekibiyle iletişim kurmanın tüm yolları ve hata bildirimi",
         methods: "İletişim Kanalları",
         report: "Hata Bildir",
         category: "Kategori",
@@ -157,7 +158,8 @@ export default function HelpCenter() {
     }
     return {
       title: "Yordam markazi",
-      subtitle: "Admin bilan bog'lanish usullari va savollaringizga javob olish",
+      subtitle:
+        "Admin bilan bog'lanish usullari va savollaringizga javob olish",
       methods: "Admin bilan bog'lanish",
       report: "Xatolik arizasi yuborish",
       category: "Kategoriya",
@@ -190,10 +192,18 @@ export default function HelpCenter() {
   const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
   const email = landing?.contactEmail?.trim() || "support@supplio.uz";
   const emailHref = email ? `mailto:${email}` : "#";
-  const tg = normalizeTelegramLink(landing?.socialTelegram || "https://t.me/supplioapp");
-  const tgDisplay = telegramUsername(landing?.socialTelegram || "https://t.me/supplioapp");
-  const instagram = landing?.socialInstagram?.trim() || "https://www.instagram.com/supplio__app/";
-  const linkedin = landing?.socialLinkedin?.trim() || "https://www.linkedin.com/company/supplioapp";
+  const tg = normalizeTelegramLink(
+    landing?.socialTelegram || "https://t.me/supplioapp"
+  );
+  const tgDisplay = telegramUsername(
+    landing?.socialTelegram || "https://t.me/supplioapp"
+  );
+  const instagram =
+    landing?.socialInstagram?.trim() ||
+    "https://www.instagram.com/supplio__app/";
+  const linkedin =
+    landing?.socialLinkedin?.trim() ||
+    "https://www.linkedin.com/company/supplioapp";
   const twitter = landing?.socialTwitter?.trim() || "";
   const address = landing?.contactAddress?.trim() || "";
   const addressUrl = landing?.contactAddressUrl?.trim() || "";

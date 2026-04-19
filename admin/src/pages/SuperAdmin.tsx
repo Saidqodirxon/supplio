@@ -395,20 +395,53 @@ export default function SuperAdmin() {
   const [tariffs, setTariffs] = useState<TariffPlan[]>([]);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [testimonialForm, setTestimonialForm] = useState<Partial<Testimonial>>({
-    name: "", company: "", roleTitle: "",
-    contentUz: "", contentRu: "", contentEn: "", contentTr: "",
-    rating: 5, isActive: true, order: 0,
+    name: "",
+    company: "",
+    roleTitle: "",
+    contentUz: "",
+    contentRu: "",
+    contentEn: "",
+    contentTr: "",
+    rating: 5,
+    isActive: true,
+    order: 0,
   });
-  const [editingTestimonialId, setEditingTestimonialId] = useState<string | null>(null);
+  const [editingTestimonialId, setEditingTestimonialId] = useState<
+    string | null
+  >(null);
   const [showTestimonialForm, setShowTestimonialForm] = useState(false);
 
   // Team members
-  const [teamMembers, setTeamMembers] = useState<{
-    id: string; name: string; roleUz: string; roleRu: string; roleEn: string; roleTr: string;
-    bioUz: string; bioRu: string; bioEn: string; bioTr: string;
-    avatar?: string; order: number; isActive: boolean;
-  }[]>([]);
-  const [teamForm, setTeamForm] = useState({ name: "", roleUz: "", roleRu: "", roleEn: "", roleTr: "", bioUz: "", bioRu: "", bioEn: "", bioTr: "", order: 0, isActive: true });
+  const [teamMembers, setTeamMembers] = useState<
+    {
+      id: string;
+      name: string;
+      roleUz: string;
+      roleRu: string;
+      roleEn: string;
+      roleTr: string;
+      bioUz: string;
+      bioRu: string;
+      bioEn: string;
+      bioTr: string;
+      avatar?: string;
+      order: number;
+      isActive: boolean;
+    }[]
+  >([]);
+  const [teamForm, setTeamForm] = useState({
+    name: "",
+    roleUz: "",
+    roleRu: "",
+    roleEn: "",
+    roleTr: "",
+    bioUz: "",
+    bioRu: "",
+    bioEn: "",
+    bioTr: "",
+    order: 0,
+    isActive: true,
+  });
   const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
   const [showTeamForm, setShowTeamForm] = useState(false);
   const [landingContent, setLandingContent] = useState<LandingContent>({
@@ -1104,7 +1137,12 @@ export default function SuperAdmin() {
         },
         {
           id: "testimonials",
-          label: language === "ru" ? "Отзывы клиентов" : language === "en" ? "Testimonials" : "Mijozlar sharhlari",
+          label:
+            language === "ru"
+              ? "Отзывы клиентов"
+              : language === "en"
+                ? "Testimonials"
+                : "Mijozlar sharhlari",
           icon: MessageSquare,
           color: "text-amber-600",
           bg: "bg-amber-50 dark:bg-amber-900/20",
@@ -1112,7 +1150,12 @@ export default function SuperAdmin() {
         },
         {
           id: "team",
-          label: language === "ru" ? "Команда" : language === "en" ? "Team" : "Jamoa a'zolari",
+          label:
+            language === "ru"
+              ? "Команда"
+              : language === "en"
+                ? "Team"
+                : "Jamoa a'zolari",
           icon: Users,
           color: "text-indigo-600",
           bg: "bg-indigo-50 dark:bg-indigo-900/20",
@@ -2638,7 +2681,8 @@ export default function SuperAdmin() {
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             {(["Uz", "Ru", "En", "UzCyr"] as const).map(
                               (langKey) => {
-                                const field = `${page.key}${langKey}` as keyof GlobalSettings;
+                                const field =
+                                  `${page.key}${langKey}` as keyof GlobalSettings;
                                 return (
                                   <div key={langKey} className="space-y-2">
                                     <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-2">
@@ -3690,24 +3734,50 @@ export default function SuperAdmin() {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                      {language === "ru" ? "Отзывы клиентов" : language === "en" ? "Client Testimonials" : "Mijozlar sharhlari"}
+                      {language === "ru"
+                        ? "Отзывы клиентов"
+                        : language === "en"
+                          ? "Client Testimonials"
+                          : "Mijozlar sharhlari"}
                     </h3>
                     <button
                       onClick={() => {
-                        setTestimonialForm({ name: "", company: "", roleTitle: "", contentUz: "", contentRu: "", contentEn: "", contentTr: "", rating: 5, isActive: true, order: testimonials.length });
+                        setTestimonialForm({
+                          name: "",
+                          company: "",
+                          roleTitle: "",
+                          contentUz: "",
+                          contentRu: "",
+                          contentEn: "",
+                          contentTr: "",
+                          rating: 5,
+                          isActive: true,
+                          order: testimonials.length,
+                        });
                         setEditingTestimonialId(null);
                         setShowTestimonialForm(true);
                       }}
                       className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all"
                     >
-                      + {language === "ru" ? "Добавить" : language === "en" ? "Add" : "Qo'shish"}
+                      +{" "}
+                      {language === "ru"
+                        ? "Добавить"
+                        : language === "en"
+                          ? "Add"
+                          : "Qo'shish"}
                     </button>
                   </div>
 
                   {showTestimonialForm && (
                     <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 space-y-4 border border-slate-200 dark:border-slate-700">
                       <h4 className="font-black text-sm text-slate-700 dark:text-slate-300 uppercase tracking-widest">
-                        {editingTestimonialId ? (language === "ru" ? "Редактировать" : "Tahrirlash") : (language === "ru" ? "Новый отзыв" : "Yangi sharh")}
+                        {editingTestimonialId
+                          ? language === "ru"
+                            ? "Редактировать"
+                            : "Tahrirlash"
+                          : language === "ru"
+                            ? "Новый отзыв"
+                            : "Yangi sharh"}
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
@@ -3716,7 +3786,12 @@ export default function SuperAdmin() {
                           </label>
                           <input
                             value={testimonialForm.name || ""}
-                            onChange={(e) => setTestimonialForm((f) => ({ ...f, name: e.target.value }))}
+                            onChange={(e) =>
+                              setTestimonialForm((f) => ({
+                                ...f,
+                                name: e.target.value,
+                              }))
+                            }
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                           />
                         </div>
@@ -3726,7 +3801,12 @@ export default function SuperAdmin() {
                           </label>
                           <input
                             value={testimonialForm.company || ""}
-                            onChange={(e) => setTestimonialForm((f) => ({ ...f, company: e.target.value }))}
+                            onChange={(e) =>
+                              setTestimonialForm((f) => ({
+                                ...f,
+                                company: e.target.value,
+                              }))
+                            }
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                           />
                         </div>
@@ -3736,20 +3816,36 @@ export default function SuperAdmin() {
                           </label>
                           <input
                             value={testimonialForm.roleTitle || ""}
-                            onChange={(e) => setTestimonialForm((f) => ({ ...f, roleTitle: e.target.value }))}
+                            onChange={(e) =>
+                              setTestimonialForm((f) => ({
+                                ...f,
+                                roleTitle: e.target.value,
+                              }))
+                            }
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                           />
                         </div>
                         <div>
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
-                            {language === "ru" ? "Рейтинг (1-5)" : "Reyting (1-5)"}
+                            {language === "ru"
+                              ? "Рейтинг (1-5)"
+                              : "Reyting (1-5)"}
                           </label>
                           <select
                             value={testimonialForm.rating || 5}
-                            onChange={(e) => setTestimonialForm((f) => ({ ...f, rating: Number(e.target.value) }))}
+                            onChange={(e) =>
+                              setTestimonialForm((f) => ({
+                                ...f,
+                                rating: Number(e.target.value),
+                              }))
+                            }
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none"
                           >
-                            {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} ⭐</option>)}
+                            {[5, 4, 3, 2, 1].map((n) => (
+                              <option key={n} value={n}>
+                                {n} ⭐
+                              </option>
+                            ))}
                           </select>
                         </div>
                       </div>
@@ -3760,10 +3856,17 @@ export default function SuperAdmin() {
                         { key: "contentTr", label: "Metin (TR)" },
                       ].map(({ key, label }) => (
                         <div key={key}>
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">{label}</label>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+                            {label}
+                          </label>
                           <textarea
                             value={(testimonialForm as any)[key] || ""}
-                            onChange={(e) => setTestimonialForm((f) => ({ ...f, [key]: e.target.value }))}
+                            onChange={(e) =>
+                              setTestimonialForm((f) => ({
+                                ...f,
+                                [key]: e.target.value,
+                              }))
+                            }
                             rows={3}
                             className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 resize-none"
                           />
@@ -3774,7 +3877,12 @@ export default function SuperAdmin() {
                           <input
                             type="checkbox"
                             checked={testimonialForm.isActive !== false}
-                            onChange={(e) => setTestimonialForm((f) => ({ ...f, isActive: e.target.checked }))}
+                            onChange={(e) =>
+                              setTestimonialForm((f) => ({
+                                ...f,
+                                isActive: e.target.checked,
+                              }))
+                            }
                             className="w-4 h-4 rounded"
                           />
                           {language === "ru" ? "Активный" : "Faol"}
@@ -3782,7 +3890,12 @@ export default function SuperAdmin() {
                         <input
                           type="number"
                           value={testimonialForm.order || 0}
-                          onChange={(e) => setTestimonialForm((f) => ({ ...f, order: Number(e.target.value) }))}
+                          onChange={(e) =>
+                            setTestimonialForm((f) => ({
+                              ...f,
+                              order: Number(e.target.value),
+                            }))
+                          }
                           placeholder={language === "ru" ? "Порядок" : "Tartib"}
                           className="w-24 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none"
                         />
@@ -3790,21 +3903,35 @@ export default function SuperAdmin() {
                       <div className="flex gap-3">
                         <button
                           onClick={async () => {
-                            if (!testimonialForm.name?.trim()) return toast.error("Ism kiritilmadi");
+                            if (!testimonialForm.name?.trim())
+                              return toast.error("Ism kiritilmadi");
                             try {
                               setLoading(true);
                               if (editingTestimonialId) {
-                                await api.patch(`/super/testimonials/${editingTestimonialId}`, testimonialForm);
+                                await api.patch(
+                                  `/super/testimonials/${editingTestimonialId}`,
+                                  testimonialForm
+                                );
                               } else {
-                                await api.post("/super/testimonials", testimonialForm);
+                                await api.post(
+                                  "/super/testimonials",
+                                  testimonialForm
+                                );
                               }
                               const res = await api.get("/super/testimonials");
-                              setTestimonials(Array.isArray(res.data) ? res.data : []);
+                              setTestimonials(
+                                Array.isArray(res.data) ? res.data : []
+                              );
                               setShowTestimonialForm(false);
                               setEditingTestimonialId(null);
-                              toast.success(language === "ru" ? "Сохранено" : "Saqlandi");
-                            } catch { toast.error(t.common.error); }
-                            finally { setLoading(false); }
+                              toast.success(
+                                language === "ru" ? "Сохранено" : "Saqlandi"
+                              );
+                            } catch {
+                              toast.error(t.common.error);
+                            } finally {
+                              setLoading(false);
+                            }
                           }}
                           disabled={loading}
                           className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all disabled:opacity-50"
@@ -3812,7 +3939,10 @@ export default function SuperAdmin() {
                           {t.common.save}
                         </button>
                         <button
-                          onClick={() => { setShowTestimonialForm(false); setEditingTestimonialId(null); }}
+                          onClick={() => {
+                            setShowTestimonialForm(false);
+                            setEditingTestimonialId(null);
+                          }}
                           className="px-5 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-300 transition-all"
                         >
                           {t.common.cancel}
@@ -3824,47 +3954,89 @@ export default function SuperAdmin() {
                   <div className="space-y-3">
                     {testimonials.length === 0 ? (
                       <p className="text-center text-slate-400 py-12 font-bold text-sm">
-                        {language === "ru" ? "Отзывов пока нет" : language === "en" ? "No testimonials yet" : "Hozircha sharhlar yo'q"}
+                        {language === "ru"
+                          ? "Отзывов пока нет"
+                          : language === "en"
+                            ? "No testimonials yet"
+                            : "Hozircha sharhlar yo'q"}
                       </p>
-                    ) : testimonials.map((tm) => (
-                      <div key={tm.id} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 flex items-start justify-between gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="font-black text-slate-900 dark:text-white text-sm">{tm.name}</span>
-                            {tm.company && <span className="text-slate-400 text-xs">· {tm.company}</span>}
-                            {tm.roleTitle && <span className="text-slate-400 text-xs">· {tm.roleTitle}</span>}
-                            <span className="text-amber-500 text-xs">{"⭐".repeat(tm.rating)}</span>
-                            {!tm.isActive && <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full">{language === "ru" ? "Неакт." : "Nofaol"}</span>}
+                    ) : (
+                      testimonials.map((tm) => (
+                        <div
+                          key={tm.id}
+                          className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 flex items-start justify-between gap-4"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-1">
+                              <span className="font-black text-slate-900 dark:text-white text-sm">
+                                {tm.name}
+                              </span>
+                              {tm.company && (
+                                <span className="text-slate-400 text-xs">
+                                  · {tm.company}
+                                </span>
+                              )}
+                              {tm.roleTitle && (
+                                <span className="text-slate-400 text-xs">
+                                  · {tm.roleTitle}
+                                </span>
+                              )}
+                              <span className="text-amber-500 text-xs">
+                                {"⭐".repeat(tm.rating)}
+                              </span>
+                              {!tm.isActive && (
+                                <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full">
+                                  {language === "ru" ? "Неакт." : "Nofaol"}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-slate-600 dark:text-slate-400 text-xs line-clamp-2">
+                              {tm.contentUz || tm.contentRu || tm.contentEn}
+                            </p>
                           </div>
-                          <p className="text-slate-600 dark:text-slate-400 text-xs line-clamp-2">{tm.contentUz || tm.contentRu || tm.contentEn}</p>
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              onClick={() => {
+                                setTestimonialForm({ ...tm });
+                                setEditingTestimonialId(tm.id);
+                                setShowTestimonialForm(true);
+                              }}
+                              className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 transition-all"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (
+                                  !confirm(
+                                    language === "ru"
+                                      ? "Удалить?"
+                                      : "O'chirasizmi?"
+                                  )
+                                )
+                                  return;
+                                try {
+                                  await api.delete(
+                                    `/super/testimonials/${tm.id}`
+                                  );
+                                  setTestimonials((prev) =>
+                                    prev.filter((t) => t.id !== tm.id)
+                                  );
+                                  toast.success(
+                                    language === "ru" ? "Удалено" : "O'chirildi"
+                                  );
+                                } catch {
+                                  toast.error(t.common.error);
+                                }
+                              }}
+                              className="p-2 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 hover:bg-rose-100 transition-all"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex gap-2 shrink-0">
-                          <button
-                            onClick={() => {
-                              setTestimonialForm({ ...tm });
-                              setEditingTestimonialId(tm.id);
-                              setShowTestimonialForm(true);
-                            }}
-                            className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 transition-all"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (!confirm(language === "ru" ? "Удалить?" : "O'chirasizmi?")) return;
-                              try {
-                                await api.delete(`/super/testimonials/${tm.id}`);
-                                setTestimonials((prev) => prev.filter((t) => t.id !== tm.id));
-                                toast.success(language === "ru" ? "Удалено" : "O'chirildi");
-                              } catch { toast.error(t.common.error); }
-                            }}
-                            className="p-2 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 hover:bg-rose-100 transition-all"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
               )}
@@ -3874,40 +4046,92 @@ export default function SuperAdmin() {
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-lg font-black text-slate-900 dark:text-white">
-                        {language === "ru" ? "Члены команды" : language === "en" ? "Team Members" : "Jamoa a'zolari"}
+                        {language === "ru"
+                          ? "Члены команды"
+                          : language === "en"
+                            ? "Team Members"
+                            : "Jamoa a'zolari"}
                       </h3>
                       <p className="text-xs text-slate-400 font-bold mt-0.5">
-                        {language === "ru" ? "Отображаются на странице 'О нас'" : language === "en" ? "Shown on the About page" : "'Biz haqimizda' sahifasida ko'rinadi"}
+                        {language === "ru"
+                          ? "Отображаются на странице 'О нас'"
+                          : language === "en"
+                            ? "Shown on the About page"
+                            : "'Biz haqimizda' sahifasida ko'rinadi"}
                       </p>
                     </div>
                     <button
                       onClick={() => {
-                        setTeamForm({ name: "", roleUz: "", roleRu: "", roleEn: "", roleTr: "", bioUz: "", bioRu: "", bioEn: "", bioTr: "", order: teamMembers.length, isActive: true });
+                        setTeamForm({
+                          name: "",
+                          roleUz: "",
+                          roleRu: "",
+                          roleEn: "",
+                          roleTr: "",
+                          bioUz: "",
+                          bioRu: "",
+                          bioEn: "",
+                          bioTr: "",
+                          order: teamMembers.length,
+                          isActive: true,
+                        });
                         setEditingTeamId(null);
                         setShowTeamForm(true);
                       }}
                       className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      {language === "ru" ? "Добавить" : language === "en" ? "Add" : "Qo'shish"}
+                      {language === "ru"
+                        ? "Добавить"
+                        : language === "en"
+                          ? "Add"
+                          : "Qo'shish"}
                     </button>
                   </div>
 
                   {showTeamForm && (
                     <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 space-y-4 border border-slate-200 dark:border-slate-700">
                       <h4 className="font-black text-sm text-slate-700 dark:text-slate-300 uppercase tracking-widest">
-                        {editingTeamId ? (language === "ru" ? "Редактировать" : "Tahrirlash") : (language === "ru" ? "Новый участник" : "Yangi a'zo")}
+                        {editingTeamId
+                          ? language === "ru"
+                            ? "Редактировать"
+                            : "Tahrirlash"
+                          : language === "ru"
+                            ? "Новый участник"
+                            : "Yangi a'zo"}
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Ism / Name *</label>
-                          <input value={teamForm.name} onChange={e => setTeamForm(f => ({ ...f, name: e.target.value }))}
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold" placeholder="Ali Karimov" />
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
+                            Ism / Name *
+                          </label>
+                          <input
+                            value={teamForm.name}
+                            onChange={(e) =>
+                              setTeamForm((f) => ({
+                                ...f,
+                                name: e.target.value,
+                              }))
+                            }
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold"
+                            placeholder="Ali Karimov"
+                          />
                         </div>
                         <div>
-                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Tartib / Order</label>
-                          <input type="number" value={teamForm.order} onChange={e => setTeamForm(f => ({ ...f, order: Number(e.target.value) }))}
-                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold" />
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
+                            Tartib / Order
+                          </label>
+                          <input
+                            type="number"
+                            value={teamForm.order}
+                            onChange={(e) =>
+                              setTeamForm((f) => ({
+                                ...f,
+                                order: Number(e.target.value),
+                              }))
+                            }
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold"
+                          />
                         </div>
                       </div>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -3916,11 +4140,22 @@ export default function SuperAdmin() {
                           { key: "roleRu", label: "Должность (RU)" },
                           { key: "roleEn", label: "Role (EN)" },
                           { key: "roleTr", label: "Görev (TR)" },
-                        ].map(f => (
+                        ].map((f) => (
                           <div key={f.key}>
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">{f.label}</label>
-                            <input value={(teamForm as any)[f.key]} onChange={e => setTeamForm(p => ({ ...p, [f.key]: e.target.value }))}
-                              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold" placeholder="CEO, Founder" />
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
+                              {f.label}
+                            </label>
+                            <input
+                              value={(teamForm as any)[f.key]}
+                              onChange={(e) =>
+                                setTeamForm((p) => ({
+                                  ...p,
+                                  [f.key]: e.target.value,
+                                }))
+                              }
+                              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold"
+                              placeholder="CEO, Founder"
+                            />
                           </div>
                         ))}
                       </div>
@@ -3930,40 +4165,80 @@ export default function SuperAdmin() {
                           { key: "bioRu", label: "Bio (RU)" },
                           { key: "bioEn", label: "Bio (EN)" },
                           { key: "bioTr", label: "Bio (TR)" },
-                        ].map(f => (
+                        ].map((f) => (
                           <div key={f.key}>
-                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">{f.label}</label>
-                            <textarea rows={2} value={(teamForm as any)[f.key]} onChange={e => setTeamForm(p => ({ ...p, [f.key]: e.target.value }))}
-                              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold resize-none" />
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">
+                              {f.label}
+                            </label>
+                            <textarea
+                              rows={2}
+                              value={(teamForm as any)[f.key]}
+                              onChange={(e) =>
+                                setTeamForm((p) => ({
+                                  ...p,
+                                  [f.key]: e.target.value,
+                                }))
+                              }
+                              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold resize-none"
+                            />
                           </div>
                         ))}
                       </div>
                       <label className="flex items-center gap-3 cursor-pointer">
-                        <input type="checkbox" checked={teamForm.isActive} onChange={e => setTeamForm(f => ({ ...f, isActive: e.target.checked }))} className="w-4 h-4 rounded" />
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{language === "ru" ? "Активен" : "Faol"}</span>
+                        <input
+                          type="checkbox"
+                          checked={teamForm.isActive}
+                          onChange={(e) =>
+                            setTeamForm((f) => ({
+                              ...f,
+                              isActive: e.target.checked,
+                            }))
+                          }
+                          className="w-4 h-4 rounded"
+                        />
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                          {language === "ru" ? "Активен" : "Faol"}
+                        </span>
                       </label>
                       <div className="flex gap-3">
                         <button
                           onClick={async () => {
                             try {
                               if (editingTeamId) {
-                                const res = await api.patch(`/super/team/${editingTeamId}`, teamForm);
-                                setTeamMembers(prev => prev.map(m => m.id === editingTeamId ? res.data : m));
+                                const res = await api.patch(
+                                  `/super/team/${editingTeamId}`,
+                                  teamForm
+                                );
+                                setTeamMembers((prev) =>
+                                  prev.map((m) =>
+                                    m.id === editingTeamId ? res.data : m
+                                  )
+                                );
                               } else {
-                                const res = await api.post("/super/team", teamForm);
-                                setTeamMembers(prev => [...prev, res.data]);
+                                const res = await api.post(
+                                  "/super/team",
+                                  teamForm
+                                );
+                                setTeamMembers((prev) => [...prev, res.data]);
                               }
                               setShowTeamForm(false);
                               setEditingTeamId(null);
-                              toast.success(language === "ru" ? "Сохранено" : "Saqlandi");
-                            } catch { toast.error(t.common.error); }
+                              toast.success(
+                                language === "ru" ? "Сохранено" : "Saqlandi"
+                              );
+                            } catch {
+                              toast.error(t.common.error);
+                            }
                           }}
                           className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all"
                         >
                           {t.common.save}
                         </button>
                         <button
-                          onClick={() => { setShowTeamForm(false); setEditingTeamId(null); }}
+                          onClick={() => {
+                            setShowTeamForm(false);
+                            setEditingTeamId(null);
+                          }}
                           className="px-5 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-300 transition-all"
                         >
                           {t.common.cancel}
@@ -3975,47 +4250,89 @@ export default function SuperAdmin() {
                   <div className="space-y-3">
                     {teamMembers.length === 0 ? (
                       <p className="text-center text-slate-400 py-12 font-bold text-sm">
-                        {language === "ru" ? "Команда пуста" : language === "en" ? "No team members yet" : "Jamoa bo'sh"}
+                        {language === "ru"
+                          ? "Команда пуста"
+                          : language === "en"
+                            ? "No team members yet"
+                            : "Jamoa bo'sh"}
                       </p>
-                    ) : teamMembers.map(m => (
-                      <div key={m.id} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shrink-0">
-                            {m.name.charAt(0)}
+                    ) : (
+                      teamMembers.map((m) => (
+                        <div
+                          key={m.id}
+                          className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 flex items-center justify-between gap-4"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shrink-0">
+                              {m.name.charAt(0)}
+                            </div>
+                            <div>
+                              <p className="font-black text-slate-900 dark:text-white text-sm">
+                                {m.name}
+                              </p>
+                              <p className="text-slate-400 text-xs font-semibold">
+                                {m.roleUz || m.roleEn}
+                              </p>
+                              {!m.isActive && (
+                                <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full">
+                                  {language === "ru" ? "Неакт." : "Nofaol"}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-black text-slate-900 dark:text-white text-sm">{m.name}</p>
-                            <p className="text-slate-400 text-xs font-semibold">{m.roleUz || m.roleEn}</p>
-                            {!m.isActive && <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full">{language === "ru" ? "Неакт." : "Nofaol"}</span>}
+                          <div className="flex gap-2 shrink-0">
+                            <button
+                              onClick={() => {
+                                setTeamForm({
+                                  name: m.name,
+                                  roleUz: m.roleUz,
+                                  roleRu: m.roleRu,
+                                  roleEn: m.roleEn,
+                                  roleTr: m.roleTr,
+                                  bioUz: m.bioUz,
+                                  bioRu: m.bioRu,
+                                  bioEn: m.bioEn,
+                                  bioTr: m.bioTr,
+                                  order: m.order,
+                                  isActive: m.isActive,
+                                });
+                                setEditingTeamId(m.id);
+                                setShowTeamForm(true);
+                              }}
+                              className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 transition-all"
+                            >
+                              <Edit className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (
+                                  !confirm(
+                                    language === "ru"
+                                      ? "Удалить?"
+                                      : "O'chirasizmi?"
+                                  )
+                                )
+                                  return;
+                                try {
+                                  await api.delete(`/super/team/${m.id}`);
+                                  setTeamMembers((prev) =>
+                                    prev.filter((x) => x.id !== m.id)
+                                  );
+                                  toast.success(
+                                    language === "ru" ? "Удалено" : "O'chirildi"
+                                  );
+                                } catch {
+                                  toast.error(t.common.error);
+                                }
+                              }}
+                              className="p-2 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 hover:bg-rose-100 transition-all"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </div>
-                        <div className="flex gap-2 shrink-0">
-                          <button
-                            onClick={() => {
-                              setTeamForm({ name: m.name, roleUz: m.roleUz, roleRu: m.roleRu, roleEn: m.roleEn, roleTr: m.roleTr, bioUz: m.bioUz, bioRu: m.bioRu, bioEn: m.bioEn, bioTr: m.bioTr, order: m.order, isActive: m.isActive });
-                              setEditingTeamId(m.id);
-                              setShowTeamForm(true);
-                            }}
-                            className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 transition-all"
-                          >
-                            <Edit className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={async () => {
-                              if (!confirm(language === "ru" ? "Удалить?" : "O'chirasizmi?")) return;
-                              try {
-                                await api.delete(`/super/team/${m.id}`);
-                                setTeamMembers(prev => prev.filter(x => x.id !== m.id));
-                                toast.success(language === "ru" ? "Удалено" : "O'chirildi");
-                              } catch { toast.error(t.common.error); }
-                            }}
-                            className="p-2 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 hover:bg-rose-100 transition-all"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      ))
+                    )}
                   </div>
                 </div>
               )}

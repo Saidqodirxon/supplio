@@ -1,5 +1,15 @@
 import { useState, useEffect, useRef } from "react";
-import { MessageSquare, Plus, Clock, CheckCircle2, AlertCircle, ChevronRight, Send, ImageIcon, X as XIcon } from "lucide-react";
+import {
+  MessageSquare,
+  Plus,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  ChevronRight,
+  Send,
+  ImageIcon,
+  X as XIcon,
+} from "lucide-react";
 import api from "../services/api";
 import { toast } from "sonner";
 import clsx from "clsx";
@@ -24,7 +34,9 @@ interface Ticket {
 }
 
 export default function SupportTickets() {
-  const BACKEND = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api$/, "");
+  const BACKEND = (
+    import.meta.env.VITE_API_URL || "http://localhost:5000/api"
+  ).replace(/\/api$/, "");
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
@@ -46,7 +58,10 @@ export default function SupportTickets() {
       const res = await api.get("/support/company/tickets");
       setTickets(res.data);
       setSelectedTicket((current) =>
-        current ? res.data.find((ticket: Ticket) => ticket.id === current.id) || current : current
+        current
+          ? res.data.find((ticket: Ticket) => ticket.id === current.id) ||
+            current
+          : current
       );
     } catch (error) {
       toast.error("Murojaatlarni yuklashda xatolik yuz berdi");
@@ -107,7 +122,10 @@ export default function SupportTickets() {
       };
       if (imageUrl) payload.imageUrl = imageUrl;
 
-      const res = await api.post(`/support/message/${selectedTicket.id}`, payload);
+      const res = await api.post(
+        `/support/message/${selectedTicket.id}`,
+        payload
+      );
       const nextMessage: Message = {
         ...res.data,
         imageUrl: res.data?.imageUrl || imageUrl,
@@ -139,11 +157,23 @@ export default function SupportTickets() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "OPEN":
-        return <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center gap-1"><Clock size={12} /> Yangi</span>;
+        return (
+          <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full flex items-center gap-1">
+            <Clock size={12} /> Yangi
+          </span>
+        );
       case "IN_PROGRESS":
-        return <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full flex items-center gap-1"><AlertCircle size={12} /> Jarayonda</span>;
+        return (
+          <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs font-medium rounded-full flex items-center gap-1">
+            <AlertCircle size={12} /> Jarayonda
+          </span>
+        );
       case "CLOSED":
-        return <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full flex items-center gap-1"><CheckCircle2 size={12} /> Yopilgan</span>;
+        return (
+          <span className="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs font-medium rounded-full flex items-center gap-1">
+            <CheckCircle2 size={12} /> Yopilgan
+          </span>
+        );
       default:
         return null;
     }
@@ -175,13 +205,19 @@ export default function SupportTickets() {
         {/* Ticket List */}
         <div className="lg:col-span-1 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
           <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Barcha murojaatlar</span>
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Barcha murojaatlar
+            </span>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-1">
             {loading ? (
-              <div className="p-8 text-center text-slate-400">Yuklanmoqda...</div>
+              <div className="p-8 text-center text-slate-400">
+                Yuklanmoqda...
+              </div>
             ) : tickets.length === 0 ? (
-              <div className="p-8 text-center text-slate-400">Sizda hali murojaatlar yo'q</div>
+              <div className="p-8 text-center text-slate-400">
+                Sizda hali murojaatlar yo'q
+              </div>
             ) : (
               tickets.map((ticket) => (
                 <button
@@ -196,17 +232,26 @@ export default function SupportTickets() {
                 >
                   <div className="flex justify-between items-start mb-2">
                     {getStatusBadge(ticket.status)}
-                    <span className="text-[10px] text-slate-400 font-mono">#{ticket.id.slice(0,8)}</span>
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      #{ticket.id.slice(0, 8)}
+                    </span>
                   </div>
-                  <h3 className="font-semibold text-slate-900 dark:text-white truncate pr-4">{ticket.subject}</h3>
+                  <h3 className="font-semibold text-slate-900 dark:text-white truncate pr-4">
+                    {ticket.subject}
+                  </h3>
                   <div className="flex items-center gap-2 mt-2 text-[11px] text-slate-500">
                     <Clock size={10} />
                     {format(new Date(ticket.lastReplyAt), "dd.MM.yyyy HH:mm")}
                   </div>
-                  <ChevronRight size={16} className={clsx(
-                    "absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 transition-transform",
-                    selectedTicket?.id === ticket.id ? "translate-x-0 opacity-100" : "-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
-                  )} />
+                  <ChevronRight
+                    size={16}
+                    className={clsx(
+                      "absolute right-2 top-1/2 -translate-y-1/2 text-slate-300 transition-transform",
+                      selectedTicket?.id === ticket.id
+                        ? "translate-x-0 opacity-100"
+                        : "-translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100"
+                    )}
+                  />
                 </button>
               ))
             )}
@@ -219,27 +264,43 @@ export default function SupportTickets() {
             <>
               <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                 <div>
-                  <h2 className="font-bold text-slate-900 dark:text-white">{selectedTicket.subject}</h2>
-                  <p className="text-xs text-slate-500">ID: {selectedTicket.id}</p>
+                  <h2 className="font-bold text-slate-900 dark:text-white">
+                    {selectedTicket.subject}
+                  </h2>
+                  <p className="text-xs text-slate-500">
+                    ID: {selectedTicket.id}
+                  </p>
                 </div>
                 {getStatusBadge(selectedTicket.status)}
               </div>
-              
+
               <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50 dark:bg-slate-900/10">
                 {selectedTicket.messages.map((msg) => {
                   const isMe = msg.senderType === "DISTRIBUTOR";
                   const hasImage = Boolean(msg.imageUrl);
                   const attachmentSrc = getAttachmentSrc(msg.imageUrl);
                   return (
-                    <div key={msg.id} className={clsx("flex flex-col", isMe ? "items-end" : "items-start")}>
-                      <div className={clsx(
-                        "max-w-[80%] rounded-2xl text-sm shadow-sm overflow-hidden",
-                        isMe
-                          ? "bg-indigo-600 text-white rounded-tr-none"
-                          : "bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-tl-none border border-slate-100 dark:border-slate-600"
-                      )}>
+                    <div
+                      key={msg.id}
+                      className={clsx(
+                        "flex flex-col",
+                        isMe ? "items-end" : "items-start"
+                      )}
+                    >
+                      <div
+                        className={clsx(
+                          "max-w-[80%] rounded-2xl text-sm shadow-sm overflow-hidden",
+                          isMe
+                            ? "bg-indigo-600 text-white rounded-tr-none"
+                            : "bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-tl-none border border-slate-100 dark:border-slate-600"
+                        )}
+                      >
                         {hasImage && (
-                          <a href={attachmentSrc} target="_blank" rel="noopener noreferrer">
+                          <a
+                            href={attachmentSrc}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             <img
                               src={attachmentSrc}
                               alt="attachment"
@@ -249,13 +310,21 @@ export default function SupportTickets() {
                         )}
                         {msg.message.trim() && msg.message.trim() !== " " && (
                           <div className="p-4">
-                            {!isMe && <span className="text-[10px] block opacity-60 mb-1 font-bold">SUPER ADMIN</span>}
+                            {!isMe && (
+                              <span className="text-[10px] block opacity-60 mb-1 font-bold">
+                                SUPER ADMIN
+                              </span>
+                            )}
                             {msg.message}
                           </div>
                         )}
                         {!hasImage && msg.message.trim() === " " && (
                           <div className="p-4">
-                            {!isMe && <span className="text-[10px] block opacity-60 mb-1 font-bold">SUPER ADMIN</span>}
+                            {!isMe && (
+                              <span className="text-[10px] block opacity-60 mb-1 font-bold">
+                                SUPER ADMIN
+                              </span>
+                            )}
                           </div>
                         )}
                       </div>
@@ -268,13 +337,25 @@ export default function SupportTickets() {
               </div>
 
               {selectedTicket.status !== "CLOSED" ? (
-                <form onSubmit={handleSendMessage} className="p-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                <form
+                  onSubmit={handleSendMessage}
+                  className="p-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 space-y-2"
+                >
                   {imagePreview && (
                     <div className="relative inline-block">
-                      <img src={imagePreview} alt="preview" className="h-24 rounded-xl object-cover border border-slate-200 dark:border-slate-700" />
+                      <img
+                        src={imagePreview}
+                        alt="preview"
+                        className="h-24 rounded-xl object-cover border border-slate-200 dark:border-slate-700"
+                      />
                       <button
                         type="button"
-                        onClick={() => { setImagePreview(null); setImageFile(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                        onClick={() => {
+                          setImagePreview(null);
+                          setImageFile(null);
+                          if (fileInputRef.current)
+                            fileInputRef.current.value = "";
+                        }}
                         className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full flex items-center justify-center hover:bg-rose-600 transition-all"
                       >
                         <XIcon size={12} />
@@ -321,7 +402,8 @@ export default function SupportTickets() {
                 </form>
               ) : (
                 <div className="p-4 text-center text-slate-400 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-700 italic">
-                  Bu murojaat yopilgan. Savollaringiz bo'lsa yangi murojaat yarating.
+                  Bu murojaat yopilgan. Savollaringiz bo'lsa yangi murojaat
+                  yarating.
                 </div>
               )}
             </>
@@ -341,28 +423,43 @@ export default function SupportTickets() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
           <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/50">
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">Yangi murojaat</h2>
-              <button onClick={() => setShowCreateModal(false)} className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-xl transition-all"><XIcon size={20} /></button>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+                Yangi murojaat
+              </h2>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-xl transition-all"
+              >
+                <XIcon size={20} />
+              </button>
             </div>
             <form onSubmit={handleCreateTicket} className="p-6 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mavzu</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Mavzu
+                </label>
                 <input
                   type="text"
                   required
                   value={newTicket.subject}
-                  onChange={(e) => setNewTicket({...newTicket, subject: e.target.value})}
+                  onChange={(e) =>
+                    setNewTicket({ ...newTicket, subject: e.target.value })
+                  }
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white"
                   placeholder="Masalan: To'lov haqida savol"
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Xabar matni</label>
+                <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                  Xabar matni
+                </label>
                 <textarea
                   required
                   rows={4}
                   value={newTicket.message}
-                  onChange={(e) => setNewTicket({...newTicket, message: e.target.value})}
+                  onChange={(e) =>
+                    setNewTicket({ ...newTicket, message: e.target.value })
+                  }
                   className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all dark:text-white resize-none"
                   placeholder="Murojaatingizni batafsil yozing..."
                 />
