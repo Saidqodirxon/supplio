@@ -585,9 +585,12 @@ export class SuperAdminService {
         socialTelegram: "https://t.me/supplioapp",
         socialInstagram: "https://www.instagram.com/supplio__app/",
         socialLinkedin: "https://www.linkedin.com/company/supplioapp",
-        footerDescUz: "Supplio — O'zbekistondagi yetakchi B2B savdo boshqaruv platformasi. Buyurtmalar, dilerlar va to'lovlarni bir joyda boshqaring.",
-        footerDescRu: "Supplio — ведущая платформа управления B2B продажами в Узбекистане. Управляйте заказами, дилерами и платежами в одном месте.",
-        footerDescEn: "Supplio — the leading B2B sales management platform in Uzbekistan. Manage orders, dealers and payments in one place.",
+        footerDescUz:
+          "Supplio — O'zbekistondagi yetakchi B2B savdo boshqaruv platformasi. Buyurtmalar, dilerlar va to'lovlarni bir joyda boshqaring.",
+        footerDescRu:
+          "Supplio — ведущая платформа управления B2B продажами в Узбекистане. Управляйте заказами, дилерами и платежами в одном месте.",
+        footerDescEn:
+          "Supplio — the leading B2B sales management platform in Uzbekistan. Manage orders, dealers and payments in one place.",
       },
     });
   }
