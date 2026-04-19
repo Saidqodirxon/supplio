@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
-#  SUPPLIO — Selective Database Sync (Terms, Categories, etc.)
-#  Tarifflar MUTLAQO SAQLANADI, faqat qolgan datalar yuboriladi
+#  SUPPLIO — Selective Database Sync (SystemSettings only)
+#  Terms/Privacy/Contract matnlari serverga ko'chiriladi
 # ============================================================
 
 BOLD="\033[1m"
@@ -40,23 +40,23 @@ if [ -z "$DB_SCHEMA" ]; then
 fi
 BACKUP_FILE="db_backup_selective.sql"
 
-log "Selektiv ma'lumotlar bazasi barkarorlanmoqda (tarifflar ISTISNO)..."
+log "SystemSettings ma'lumotlari backup qilinmoqda..."
 log "Schema: $DB_SCHEMA"
 
 # SystemSettings mavjudligi va terms qiymati tekshiruvi.
-SETTINGS_INFO=$(psql "$DB_URL_CLEAN" -At -c "SELECT COUNT(*), COALESCE(MAX(length(\"termsUz\")),0) FROM \"$DB_SCHEMA\".\"SystemSettings\";" 2>/dev/null)
+SETTINGS_INFO=$(psql "$DB_URL_CLEAN" -At -c "SELECT COUNT(*), COALESCE(MAX(GREATEST(length(COALESCE(\"termsUz\",'')), length(COALESCE(\"termsRu\",'')), length(COALESCE(\"termsEn\",'')), length(COALESCE(\"privacyUz\",'')), length(COALESCE(\"privacyRu\",'')), length(COALESCE(\"privacyEn\",'')))),0) FROM \"$DB_SCHEMA\".\"SystemSettings\";" 2>/dev/null)
 if [ -z "$SETTINGS_INFO" ]; then
     fail "SystemSettings jadvali o'qilmadi. DB/schema noto'g'ri bo'lishi mumkin."
 fi
 
 SETTINGS_ROWS=$(echo "$SETTINGS_INFO" | cut -d'|' -f1)
-TERMS_UZ_LEN=$(echo "$SETTINGS_INFO" | cut -d'|' -f2)
+MAX_TEXT_LEN=$(echo "$SETTINGS_INFO" | cut -d'|' -f2)
 
-if [ "$SETTINGS_ROWS" = "0" ] || [ "$TERMS_UZ_LEN" = "0" ]; then
-    fail "Lokal DBda termsUz bo'sh yoki SystemSettings qatori yo'q. Avval local datani to'ldiring."
+if [ "$SETTINGS_ROWS" = "0" ] || [ "$MAX_TEXT_LEN" = "0" ]; then
+    fail "Lokal DBda SystemSettings matnlari bo'sh yoki qator yo'q. Avval local datani to'ldiring."
 fi
 
-log "SystemSettings qatori: $SETTINGS_ROWS, termsUz uzunligi: $TERMS_UZ_LEN"
+log "SystemSettings qatori: $SETTINGS_ROWS, max matn uzunligi: $MAX_TEXT_LEN"
 
 pg_dump \
     --data-only \
@@ -64,11 +64,6 @@ pg_dump \
     --no-privileges \
     --schema="$DB_SCHEMA" \
     --table="$DB_SCHEMA.\"SystemSettings\"" \
-    --table="$DB_SCHEMA.\"Category\"" \
-    --table="$DB_SCHEMA.\"Subcategory\"" \
-    --table="$DB_SCHEMA.\"Unit\"" \
-    --table="$DB_SCHEMA.\"SupportTicket\"" \
-    --table="$DB_SCHEMA.\"SupportMessage\"" \
     -d "$DB_URL_CLEAN" > "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
@@ -85,7 +80,7 @@ log "Fayl hajmi: $SIZE"
 # 2. GitHub'ga yuborish
 log "GitHub'ga yuklanmoqda..."
 git add "$BACKUP_FILE"
-git commit -m "chore: selective database backup (terms, categories, etc.) $(date +'%Y-%m-%d %H:%M:%S')"
+git commit -m "chore: selective database backup (SystemSettings terms/privacy) $(date +'%Y-%m-%d %H:%M:%S')"
 
 if git push origin main; then
     ok "GitHub'ga yuborildi."

@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================
 #  SUPPLIO — Selective Database Restore (Server)
-#  Terms, categories va boshqa datalarni qabul qiladi (tarifflar saqlanadi)
+#  Faqat SystemSettings (terms/privacy/contract) ni yangilaydi
 # ============================================================
 
 BOLD="\033[1m"
@@ -70,7 +70,7 @@ log "  Schema: $DB_SCHEMA"
 # 4. Confirmation
 echo ""
 echo -e "${RED}${BOLD}DIQQAT!${RESET} Bu amal quyidagini qiladi:"
-echo "  ✓ Terms, categories, units, settings kabi datalarni YANGILAYDI"
+echo "  ✓ SystemSettings (terms/privacy/contract) ni YANGILAYDI"
 echo "  ✓ Tarifflar va buyurtmalar SAQLANIB QOLADI (o'chirilmaydi)"
 echo ""
 read -p "Davom etaylikmi? (y/n): " confirm
@@ -99,7 +99,7 @@ TRUNCATE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_nam
 FROM information_schema.tables
 WHERE table_schema = '$DB_SCHEMA'
     AND table_name IN (
-        'SystemSettings','Category','Subcategory','Unit','SupportTicket','SupportMessage'
+        'SystemSettings'
     )
 ORDER BY 1;"
 
@@ -131,6 +131,8 @@ TABLE_COUNT=$(psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
 
 SETTINGS_COUNT=$(psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
     --no-password -At -c "SELECT count(*) FROM \"SystemSettings\";" 2>/dev/null)
+SETTINGS_TEXT_LEN=$(psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
+    --no-password -At -c "SELECT COALESCE(MAX(GREATEST(length(COALESCE(\"termsUz\",'')), length(COALESCE(\"termsRu\",'')), length(COALESCE(\"termsEn\",'')), length(COALESCE(\"privacyUz\",'')), length(COALESCE(\"privacyRu\",'')), length(COALESCE(\"privacyEn\",'')))),0) FROM \"SystemSettings\";" 2>/dev/null)
 
 if [ -z "$TABLE_COUNT" ]; then
     TABLE_COUNT="0"
@@ -140,8 +142,13 @@ if [ -z "$SETTINGS_COUNT" ]; then
     SETTINGS_COUNT="0"
 fi
 
+if [ -z "$SETTINGS_TEXT_LEN" ]; then
+    SETTINGS_TEXT_LEN="0"
+fi
+
 ok "Jami tablolar: $TABLE_COUNT"
 ok "SystemSettings qatorlari: $SETTINGS_COUNT"
+ok "SystemSettings max matn uzunligi: $SETTINGS_TEXT_LEN"
 
 echo ""
 echo "=========================================================="
