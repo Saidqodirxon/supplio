@@ -20,8 +20,8 @@ REPO_DIR="/root/supplio"
 cd "$REPO_DIR" || fail "Papka topilmadi: $REPO_DIR"
 
 # 1. Fayl tekshirish
-if [ ! -f "db_backup_selective.sql" ]; then
-    fail "db_backup_selective.sql fayli topilmadi! Oldin lokal 'bash db_sync_selective.sh' qiding."
+if [ ! -f "system_settings_payload.sql" ]; then
+    fail "system_settings_payload.sql topilmadi! Oldin lokal 'bash db_sync_selective.sh' qiling va git pull qiling."
 fi
 
 log "Faylni tekshiryapman..."
@@ -85,33 +85,12 @@ export PGPASSWORD="$DB_PASS"
 
 log "Ma'lumotlar bazasi tiklanmoqda..."
 
-# Turli Postgres versiyalari orasida moslik uchun backup SQL ni tayyorlaymiz.
-# Masalan, eski serverlarda `SET transaction_timeout` parametri bo'lmasligi mumkin.
-TMP_SQL=$(mktemp /tmp/restore_selective.XXXXXX.sql)
+TMP_SQL=$(mktemp /tmp/restore_selective_payload.XXXXXX.sql)
 trap 'rm -f "$TMP_SQL"' EXIT
-sed -e '/^SET transaction_timeout =/d' \
-    -e '/^ALTER TABLE .* DISABLE TRIGGER ALL;/d' \
-    -e '/^ALTER TABLE .* ENABLE TRIGGER ALL;/d' \
-    db_backup_selective.sql > "$TMP_SQL"
-
-# Faqat selektiv import qilinadigan tablalarni oldindan tozalaymiz.
-TRUNCATE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_name)
-FROM information_schema.tables
-WHERE table_schema = '$DB_SCHEMA'
-    AND table_name IN (
-        'SystemSettings'
-    )
-ORDER BY 1;"
-
-TRUNCATE_TABLES=$(psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" --no-password -At -c "$TRUNCATE_QUERY" 2>/dev/null)
-
-if [ -n "$TRUNCATE_TABLES" ]; then
-    while IFS= read -r tbl; do
-        if [ -n "$tbl" ]; then
-            psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" --no-password -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE $tbl CASCADE;" >/dev/null 2>&1 || fail "TRUNCATE xatolik: $tbl"
-        fi
-    done <<< "$TRUNCATE_TABLES"
-fi
+{
+    echo "SET search_path TO \"$DB_SCHEMA\";"
+    cat system_settings_payload.sql
+} > "$TMP_SQL"
 
 if psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
     --no-password -v ON_ERROR_STOP=1 -f "$TMP_SQL" > restore_selective.log 2>&1; then
