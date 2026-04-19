@@ -20,6 +20,7 @@ import {
   Send,
   User,
   MessageSquare,
+  Bot,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAuthStore } from "../store/authStore";
@@ -78,6 +79,13 @@ export default function Layout() {
     if (tab === "upgrades") return language === "ru" ? "Запросы апгрейда" : "Tarif so'rovlari";
     if (tab === "leads") return "Lidlar";
     if (tab === "notify") return language === "ru" ? "Рассылка" : "Xabarnoma";
+    if (tab === "bots") {
+      return language === "ru"
+        ? "Telegram боты"
+        : language === "en"
+          ? "Telegram Bots"
+          : "Telegram botlar";
+    }
     if (tab === "editor") return t.superadmin.editor;
     if (tab === "testimonials") return language === "ru" ? "Отзывы клиентов" : language === "en" ? "Testimonials" : "Mijozlar sharhlari";
     if (tab === "team") return language === "ru" ? "Команда" : language === "en" ? "Team" : "Jamoa a'zolari";
@@ -93,6 +101,17 @@ export default function Layout() {
     { name: "Lidlar", href: "/?tab=leads", icon: UserCheck, badge: 0 },
     { name: language === "ru" ? "Обращения" : "Arizalar", href: "/?tab=tickets", icon: Bell, badge: badges.tickets },
     { name: language === "ru" ? "Рассылка" : "Xabarnoma", href: "/?tab=notify", icon: Send, badge: 0 },
+    {
+      name:
+        language === "ru"
+          ? "Telegram боты"
+          : language === "en"
+            ? "Telegram Bots"
+            : "Telegram botlar",
+      href: "/?tab=bots",
+      icon: Bot,
+      badge: 0,
+    },
     { name: t.superadmin.news, href: "/?tab=news", icon: Newspaper, badge: 0 },
     { name: t.superadmin.tariffs, href: "/?tab=tariffs", icon: CreditCard, badge: 0 },
     { name: language === "ru" ? "Отзывы клиентов" : language === "en" ? "Testimonials" : "Mijozlar sharhlari", href: "/?tab=testimonials", icon: MessageSquare, badge: 0 },
@@ -110,7 +129,7 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-background text-foreground font-medium flex overflow-hidden">
       <Helmet>
-        <title>{currentTitle} — Supplio Admin</title>
+        <title>{`${currentTitle} - Supplio Admin`}</title>
       </Helmet>
 
       {/* Sidebar background overlay */}

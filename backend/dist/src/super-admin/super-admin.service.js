@@ -40,7 +40,8 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
         });
     }
     async updateGlobalSettings(data) {
-        const { id, updatedAt, ...safeData } = data;
+        const input = (data ?? {});
+        const { id, updatedAt, ...safeData } = input;
         const allowedKeys = new Set([
             "maintenanceMode",
             "backupFrequency",

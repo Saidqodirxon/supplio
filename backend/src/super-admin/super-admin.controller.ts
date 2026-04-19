@@ -106,7 +106,7 @@ export class SuperAdminController {
   @Patch("settings")
   @Roles("SUPER_ADMIN")
   async updateSettings(@Body() body: any) {
-    return this.superAdminService.updateGlobalSettings(body);
+    return this.superAdminService.updateGlobalSettings(body ?? {});
   }
 
   @Post("patch-data")

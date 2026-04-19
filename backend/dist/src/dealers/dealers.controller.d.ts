@@ -17,12 +17,12 @@ export declare class DealersController {
     constructor(dealersService: DealersService, telegramService: TelegramService);
     create(req: AuthenticatedRequest, body: any): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string;
         phone: string;
         address: string | null;
@@ -45,12 +45,12 @@ export declare class DealersController {
             name: string;
         };
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string;
         phone: string;
         address: string | null;
@@ -71,12 +71,12 @@ export declare class DealersController {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string;
         phone: string;
         address: string | null;
@@ -98,12 +98,12 @@ export declare class DealersController {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string;
         phone: string;
         address: string | null;
@@ -121,12 +121,12 @@ export declare class DealersController {
     }>;
     remove(req: AuthenticatedRequest, id: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string;
         phone: string;
         address: string | null;
@@ -146,12 +146,12 @@ export declare class DealersController {
         creditLimit?: number;
     }): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string;
         phone: string;
         address: string | null;
@@ -172,12 +172,12 @@ export declare class DealersController {
     }>;
     block(req: AuthenticatedRequest, id: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string;
         phone: string;
         address: string | null;
@@ -195,12 +195,12 @@ export declare class DealersController {
     }>;
     unblock(req: AuthenticatedRequest, id: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string;
         phone: string;
         address: string | null;

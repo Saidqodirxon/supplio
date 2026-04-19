@@ -543,6 +543,7 @@ export default function SuperAdmin() {
     Array<{
       id: string;
       botName: string | null;
+      description?: string | null;
       username: string | null;
       isActive: boolean;
       status: string;
@@ -556,6 +557,9 @@ export default function SuperAdmin() {
   const [botEditModal, setBotEditModal] = useState<{
     id: string;
     token: string;
+    botName: string;
+    description: string;
+    isActive: boolean;
   } | null>(null);
   const [botDeleteConfirm, setBotDeleteConfirm] = useState<string | null>(null);
   const [botCreateModal, setBotCreateModal] = useState<{
@@ -565,6 +569,7 @@ export default function SuperAdmin() {
     description: string;
   } | null>(null);
   const [botCreateLoading, setBotCreateLoading] = useState(false);
+  const [botsReloadingAll, setBotsReloadingAll] = useState(false);
 
   const [newsLangTab, setNewsLangTab] = useState<
     "Uz" | "En" | "Ru" | "Tr" | "UzCyr"
@@ -1129,7 +1134,7 @@ export default function SuperAdmin() {
               ? "Telegram боты"
               : language === "en"
                 ? "Telegram Bots"
-                : "Telegram Botlar",
+                : "Telegram botlar",
           icon: Bot,
           color: "text-sky-600",
           bg: "bg-sky-50 dark:bg-sky-900/20",
@@ -2848,7 +2853,7 @@ export default function SuperAdmin() {
                     onClick={async () => {
                       try {
                         setLoading(true);
-                        await api.patch("/super/settings", settings);
+                        await api.patch("/super/settings", settings ?? {});
                         await api.patch("/super/landing", {
                           contactPhone: landingContent.contactPhone,
                           contactEmail: landingContent.contactEmail,
@@ -4530,31 +4535,40 @@ export default function SuperAdmin() {
                             : "Bot qo'shish"}
                       </button>
                       <button
+                        disabled={botsReloadingAll}
                         onClick={async () => {
+                          setBotsReloadingAll(true);
                           try {
+                            await api.post("/telegram/admin/bots/reload-all");
                             const res = await api.get("/telegram/admin/bots");
                             setAdminBots(
                               Array.isArray(res.data) ? res.data : []
                             );
                             toast.success(
                               language === "ru"
-                                ? "Обновлено"
+                                ? "Полный reload выполнен"
                                 : language === "en"
-                                  ? "Refreshed"
-                                  : "Yangilandi"
+                                  ? "Full reload completed"
+                                  : "To'liq obnovit bajarildi"
                             );
                           } catch {
                             toast.error("Xato");
+                          } finally {
+                            setBotsReloadingAll(false);
                           }
                         }}
-                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-sky-50 dark:bg-sky-900/20 text-sky-600 rounded-xl hover:bg-sky-100 dark:hover:bg-sky-900/40 transition-all"
+                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-sky-50 dark:bg-sky-900/20 text-sky-600 rounded-xl hover:bg-sky-100 dark:hover:bg-sky-900/40 transition-all disabled:opacity-60"
                       >
-                        <RotateCcw className="w-3.5 h-3.5" />
+                        {botsReloadingAll ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        )}
                         {language === "ru"
-                          ? "Обновить"
+                          ? "Обновить (сброс)"
                           : language === "en"
-                            ? "Refresh"
-                            : "Yangilash"}
+                            ? "Refresh (Reset)"
+                            : "Obnovit (reset)"}
                       </button>
                     </div>
                   </div>
@@ -4607,6 +4621,11 @@ export default function SuperAdmin() {
                                 {new Date(bot.createdAt).toLocaleDateString()}
                               </span>
                             </div>
+                            {bot.description && (
+                              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
+                                {bot.description}
+                              </p>
+                            )}
                           </div>
                           <div className="shrink-0">
                             {bot.status === "connected" ? (
@@ -4695,16 +4714,22 @@ export default function SuperAdmin() {
                           <button
                             disabled={!!botActionLoading[bot.id]}
                             onClick={() =>
-                              setBotEditModal({ id: bot.id, token: "" })
+                              setBotEditModal({
+                                id: bot.id,
+                                token: "",
+                                botName: bot.botName || "",
+                                description: bot.description || "",
+                                isActive: !!bot.isActive,
+                              })
                             }
                             className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-violet-50 dark:bg-violet-900/20 text-violet-600 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-all disabled:opacity-50"
                           >
                             <KeyRound className="w-3.5 h-3.5" />
                             {language === "ru"
-                              ? "Изменить токен"
+                              ? "Глубокое редактирование"
                               : language === "en"
-                                ? "Edit Token"
-                                : "Token o'zgartirish"}
+                                ? "Deep Edit"
+                                : "Chuqur edit"}
                           </button>
 
                           {/* Activate / Deactivate */}
@@ -5029,11 +5054,68 @@ export default function SuperAdmin() {
                               </div>
                               <h3 className="font-black text-slate-800 dark:text-white">
                                 {language === "ru"
-                                  ? "Изменить токен бота"
+                                  ? "Глубокое обновление бота"
                                   : language === "en"
-                                    ? "Edit Bot Token"
-                                    : "Bot tokenini o'zgartirish"}
+                                    ? "Deep Bot Update"
+                                    : "Botni chuqur yangilash"}
                               </h3>
+                            </div>
+                            <div className="space-y-3 mb-4">
+                              <input
+                                type="text"
+                                value={botEditModal.botName}
+                                onChange={(e) =>
+                                  setBotEditModal((p) =>
+                                    p ? { ...p, botName: e.target.value } : null
+                                  )
+                                }
+                                placeholder={
+                                  language === "ru"
+                                    ? "Название бота"
+                                    : language === "en"
+                                      ? "Bot name"
+                                      : "Bot nomi"
+                                }
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                              />
+                              <input
+                                type="text"
+                                value={botEditModal.description}
+                                onChange={(e) =>
+                                  setBotEditModal((p) =>
+                                    p
+                                      ? { ...p, description: e.target.value }
+                                      : null
+                                  )
+                                }
+                                placeholder={
+                                  language === "ru"
+                                    ? "Описание"
+                                    : language === "en"
+                                      ? "Description"
+                                      : "Tavsif"
+                                }
+                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
+                              />
+                              <label className="flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm font-bold text-slate-700 dark:text-slate-200">
+                                <span>
+                                  {language === "ru"
+                                    ? "Активный"
+                                    : language === "en"
+                                      ? "Active"
+                                      : "Faol"}
+                                </span>
+                                <input
+                                  type="checkbox"
+                                  checked={botEditModal.isActive}
+                                  onChange={(e) =>
+                                    setBotEditModal((p) =>
+                                      p ? { ...p, isActive: e.target.checked } : null
+                                    )
+                                  }
+                                  className="w-4 h-4"
+                                />
+                              </label>
                             </div>
                             <input
                               type="text"
@@ -5045,10 +5127,10 @@ export default function SuperAdmin() {
                               }
                               placeholder={
                                 language === "ru"
-                                  ? "Новый токен бота"
+                                  ? "Новый токен (опционально)"
                                   : language === "en"
-                                    ? "New bot token"
-                                    : "Yangi bot token"
+                                    ? "New bot token (optional)"
+                                    : "Yangi bot token (ixtiyoriy)"
                               }
                               className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4"
                             />
@@ -5065,19 +5147,32 @@ export default function SuperAdmin() {
                               </button>
                               <button
                                 disabled={
-                                  !botEditModal.token.trim() ||
                                   !!botActionLoading[botEditModal.id]
                                 }
                                 onClick={async () => {
-                                  const { id, token } = botEditModal;
+                                  const {
+                                    id,
+                                    token,
+                                    botName,
+                                    description,
+                                    isActive,
+                                  } = botEditModal;
                                   setBotActionLoading((p) => ({
                                     ...p,
                                     [id]: "token",
                                   }));
                                   try {
+                                    const payload: Record<string, unknown> = {
+                                      botName: botName.trim(),
+                                      description: description.trim(),
+                                      isActive,
+                                    };
+                                    if (token.trim()) {
+                                      payload.token = token.trim();
+                                    }
                                     await api.patch(
                                       `/telegram/admin/bots/${id}`,
-                                      { token: token.trim() }
+                                      payload
                                     );
                                     const res = await api.get(
                                       "/telegram/admin/bots"

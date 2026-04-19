@@ -2059,6 +2059,26 @@ export class TelegramService implements OnModuleInit {
     return "connected";
   }
 
+  private async stopRunningBot(botId: string) {
+    const existing = this.bots.get(botId);
+    if (!existing) return;
+    try {
+      existing.stop();
+    } catch {}
+    this.bots.delete(botId);
+  }
+
+  private clearCompanyRuntimeState(companyId: string) {
+    // Drop old cart/load cache for this company so new bot config starts clean.
+    this.carts.delete(companyId);
+  }
+
+  private clearGlobalRuntimeState() {
+    // Full reset for super-admin hard reload.
+    this.carts.clear();
+    this.chatLangPrefs.clear();
+  }
+
   async getBotsForCompany(companyId: string) {
     return this.prisma.customBot.findMany({
       where: { companyId, deletedAt: null },
@@ -2067,19 +2087,14 @@ export class TelegramService implements OnModuleInit {
   }
 
   async reloadCompanyBots(companyId: string) {
+    this.clearCompanyRuntimeState(companyId);
     const records = await this.prisma.customBot.findMany({
       where: { companyId, deletedAt: null, isActive: true },
       include: { company: true },
     });
 
     for (const record of records) {
-      const existing = this.bots.get(record.id);
-      if (existing) {
-        try {
-          existing.stop();
-        } catch {}
-        this.bots.delete(record.id);
-      }
+      await this.stopRunningBot(record.id);
 
       await this.initBot(
         record.id,
@@ -2268,13 +2283,8 @@ export class TelegramService implements OnModuleInit {
     });
     if (!bot) throw new NotFoundException("Bot not found");
 
-    const existing = this.bots.get(botId);
-    if (existing) {
-      try {
-        existing.stop();
-      } catch {}
-      this.bots.delete(botId);
-    }
+    this.clearCompanyRuntimeState(bot.companyId);
+    await this.stopRunningBot(botId);
 
     if (bot.isActive) {
       await this.initBot(
@@ -2288,6 +2298,31 @@ export class TelegramService implements OnModuleInit {
     return { success: true, status: this.getBotStatus(botId) };
   }
 
+  async adminReloadAllBots() {
+    const activeBots = await this.prisma.customBot.findMany({
+      where: { deletedAt: null, isActive: true },
+      include: { company: { select: { id: true, name: true } } },
+      orderBy: { createdAt: "desc" },
+    });
+
+    this.clearGlobalRuntimeState();
+
+    for (const [botId] of Array.from(this.bots.entries())) {
+      await this.stopRunningBot(botId);
+    }
+
+    for (const bot of activeBots) {
+      await this.initBot(
+        bot.id,
+        bot.companyId,
+        bot.token,
+        bot.company?.name ?? bot.companyId
+      );
+    }
+
+    return { success: true, reloaded: activeBots.length };
+  }
+
   async adminHardDeleteBot(botId: string) {
     const bot = await this.prisma.customBot.findFirst({
       where: { id: botId },
@@ -2299,11 +2334,9 @@ export class TelegramService implements OnModuleInit {
       try {
         await existing.telegram.deleteWebhook({ drop_pending_updates: true });
       } catch {}
-      try {
-        existing.stop();
-      } catch {}
-      this.bots.delete(botId);
     }
+    await this.stopRunningBot(botId);
+    this.clearCompanyRuntimeState(bot.companyId);
 
     await this.prisma.customBot.delete({ where: { id: botId } });
     return { success: true };
@@ -2311,7 +2344,12 @@ export class TelegramService implements OnModuleInit {
 
   async adminUpdateBot(
     botId: string,
-    data: { token?: string; isActive?: boolean }
+    data: {
+      token?: string;
+      isActive?: boolean;
+      botName?: string;
+      description?: string;
+    }
   ) {
     const bot = await this.prisma.customBot.findFirst({
       where: { id: botId, deletedAt: null },
@@ -2319,33 +2357,70 @@ export class TelegramService implements OnModuleInit {
     });
     if (!bot) throw new NotFoundException("Bot not found");
 
+    const updateData: {
+      token?: string;
+      username?: string | null;
+      botName?: string | null;
+      description?: string | null;
+      isActive?: boolean;
+    } = {};
+
+    if (data.token !== undefined) {
+      const token = String(data.token).trim();
+      if (!token) {
+        throw new BadRequestException("Bot token cannot be empty.");
+      }
+
+      const validation = await this.validateToken(token);
+      if (!validation.valid) {
+        if (validation.networkError) {
+          throw new BadRequestException(
+            "Cannot reach Telegram API to verify this token. Check internet and try again."
+          );
+        }
+        throw new BadRequestException("Invalid Telegram bot token.");
+      }
+
+      updateData.token = token;
+      updateData.username = validation.botInfo?.username || null;
+      if (data.botName === undefined && validation.botInfo?.first_name) {
+        updateData.botName = validation.botInfo.first_name;
+      }
+    }
+
+    if (data.botName !== undefined) {
+      const name = String(data.botName).trim();
+      updateData.botName = name || null;
+    }
+
+    if (data.description !== undefined) {
+      const description = String(data.description).trim();
+      updateData.description = description || null;
+    }
+
+    if (data.isActive !== undefined) {
+      updateData.isActive = !!data.isActive;
+    }
+
     const updated = await this.prisma.customBot.update({
       where: { id: botId },
-      data,
+      data: updateData,
     });
 
-    if (data.token || data.isActive === true) {
-      const existing = this.bots.get(botId);
-      if (existing) {
-        try {
-          existing.stop();
-        } catch {}
-        this.bots.delete(botId);
-      }
+    const hasUpdates = Object.keys(updateData).length > 0;
+
+    if (hasUpdates && updated.isActive) {
+      this.clearCompanyRuntimeState(updated.companyId);
+      await this.stopRunningBot(botId);
       await this.initBot(
         updated.id,
         updated.companyId,
         updated.token,
         bot.company?.name ?? updated.companyId
       );
-    } else if (data.isActive === false) {
-      const existing = this.bots.get(botId);
-      if (existing) {
-        try {
-          existing.stop();
-        } catch {}
-        this.bots.delete(botId);
-      }
+    } else if (updateData.isActive === false) {
+      this.clearCompanyRuntimeState(updated.companyId);
+      await this.stopRunningBot(botId);
     }
 
     return { ...updated, status: this.getBotStatus(botId) };

@@ -81,6 +81,9 @@ let BotsController = class BotsController {
     async getAllBotsAdmin() {
         return this.telegramService.getAllBotsAdmin();
     }
+    async adminReloadAllBots() {
+        return this.telegramService.adminReloadAllBots();
+    }
     async adminReloadBot(id) {
         return this.telegramService.adminReloadBot(id);
     }
@@ -202,6 +205,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], BotsController.prototype, "getAllBotsAdmin", null);
+__decorate([
+    (0, common_1.Post)("admin/bots/reload-all"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "adminReloadAllBots", null);
 __decorate([
     (0, common_1.Post)("admin/bots/:id/reload"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),

@@ -8,8 +8,10 @@ export declare class CompanyService {
     constructor(prisma: PrismaService, planLimits: PlanLimitsService, telegramService: TelegramService);
     getCompany(companyId: string): Promise<{
         id: string;
-        slug: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        slug: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
@@ -20,9 +22,7 @@ export declare class CompanyService {
         subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
-        createdAt: Date;
         updatedAt: Date;
-        deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
         preparingVariants: import("@prisma/client/runtime/library").JsonValue | null;
@@ -35,8 +35,10 @@ export declare class CompanyService {
     }>;
     updateCompany(companyId: string, data: any): Promise<{
         id: string;
-        slug: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        slug: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
@@ -47,9 +49,7 @@ export declare class CompanyService {
         subscriptionStatus: import(".prisma/client").$Enums.SubscriptionStatus;
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
-        createdAt: Date;
         updatedAt: Date;
-        deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
         preparingVariants: import("@prisma/client/runtime/library").JsonValue | null;
@@ -77,16 +77,16 @@ export declare class CompanyService {
     getUsers(companyId: string): Promise<{
         id: string;
         createdAt: Date;
-        customRole: {
-            id: string;
-            name: string;
-            permissions: import("@prisma/client/runtime/library").JsonValue;
-        };
         branchId: string;
         phone: string;
         fullName: string;
         roleType: import(".prisma/client").$Enums.RoleType;
         customRoleId: string;
+        customRole: {
+            id: string;
+            name: string;
+            permissions: import("@prisma/client/runtime/library").JsonValue;
+        };
     }[]>;
     createStaff(companyId: string, data: {
         phone: string;
@@ -98,16 +98,16 @@ export declare class CompanyService {
     }): Promise<{
         id: string;
         createdAt: Date;
-        customRole: {
-            id: string;
-            name: string;
-            permissions: import("@prisma/client/runtime/library").JsonValue;
-        };
         branchId: string;
         phone: string;
         fullName: string;
         roleType: import(".prisma/client").$Enums.RoleType;
         customRoleId: string;
+        customRole: {
+            id: string;
+            name: string;
+            permissions: import("@prisma/client/runtime/library").JsonValue;
+        };
     }>;
     updateStaff(companyId: string, userId: string, data: {
         phone?: string;
@@ -118,25 +118,25 @@ export declare class CompanyService {
     }): Promise<{
         id: string;
         createdAt: Date;
-        customRole: {
-            id: string;
-            name: string;
-            permissions: import("@prisma/client/runtime/library").JsonValue;
-        };
         branchId: string;
         phone: string;
         fullName: string;
         roleType: import(".prisma/client").$Enums.RoleType;
         customRoleId: string;
+        customRole: {
+            id: string;
+            name: string;
+            permissions: import("@prisma/client/runtime/library").JsonValue;
+        };
     }>;
     deactivateStaff(companyId: string, userId: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string | null;
         phone: string;
         passwordHash: string;
@@ -152,10 +152,10 @@ export declare class CompanyService {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
         companyId: string;
+        createdAt: Date;
+        name: string;
+        updatedAt: Date;
         permissions: import("@prisma/client/runtime/library").JsonValue;
     })[]>;
     createCustomRole(companyId: string, data: {
@@ -163,10 +163,10 @@ export declare class CompanyService {
         permissions: Record<string, boolean>;
     }): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
         companyId: string;
+        createdAt: Date;
+        name: string;
+        updatedAt: Date;
         permissions: import("@prisma/client/runtime/library").JsonValue;
     }>;
     updateCustomRole(companyId: string, roleId: string, data: {
@@ -174,31 +174,31 @@ export declare class CompanyService {
         permissions?: Record<string, boolean>;
     }): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
         companyId: string;
+        createdAt: Date;
+        name: string;
+        updatedAt: Date;
         permissions: import("@prisma/client/runtime/library").JsonValue;
     }>;
     deleteCustomRole(companyId: string, roleId: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
         companyId: string;
+        createdAt: Date;
+        name: string;
+        updatedAt: Date;
         permissions: import("@prisma/client/runtime/library").JsonValue;
     }>;
     getBackup(companyId: string): Promise<{
         exportedAt: string;
         company: {
             id: string;
-            slug: string;
+            createdAt: Date;
             name: string;
+            slug: string;
             website: string;
             instagram: string;
             telegram: string;
             subscriptionPlan: import(".prisma/client").$Enums.SubscriptionPlan;
-            createdAt: Date;
         };
         summary: {
             dealers: number;
@@ -211,12 +211,12 @@ export declare class CompanyService {
         };
         dealers: {
             id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            deletedAt: Date | null;
-            deletedBy: string | null;
             companyId: string;
+            createdAt: Date;
+            deletedAt: Date | null;
+            name: string;
+            updatedAt: Date;
+            deletedBy: string | null;
             branchId: string;
             phone: string;
             address: string | null;
@@ -234,21 +234,21 @@ export declare class CompanyService {
         }[];
         products: {
             id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            deletedAt: Date | null;
-            deletedBy: string | null;
             companyId: string;
-            sku: string | null;
+            isActive: boolean;
+            createdAt: Date;
+            deletedAt: Date | null;
             description: string | null;
+            name: string;
+            updatedAt: Date;
+            deletedBy: string | null;
+            sku: string | null;
             costPrice: number;
             price: number;
             stock: number;
             unit: string;
             categoryId: string | null;
             imageUrl: string | null;
-            isActive: boolean;
             subcategoryId: string | null;
             unitId: string | null;
             discountPrice: number | null;
@@ -261,52 +261,52 @@ export declare class CompanyService {
             };
         } & {
             id: string;
-            createdAt: Date;
-            updatedAt: Date;
-            deletedAt: Date | null;
-            deletedBy: string | null;
             companyId: string;
+            createdAt: Date;
+            deletedAt: Date | null;
+            updatedAt: Date;
+            deletedBy: string | null;
+            status: import(".prisma/client").$Enums.OrderStatus;
+            branchId: string;
+            dealerId: string;
             totalAmount: number;
             totalCost: number;
-            status: import(".prisma/client").$Enums.OrderStatus;
             subStatus: string | null;
             items: import("@prisma/client/runtime/library").JsonValue;
             note: string | null;
-            dealerId: string;
-            branchId: string;
         })[];
         payments: {
             id: string;
+            companyId: string;
             createdAt: Date;
             deletedAt: Date | null;
             deletedBy: string | null;
-            companyId: string;
-            note: string | null;
-            dealerId: string;
             branchId: string | null;
+            dealerId: string;
             amount: number;
+            note: string | null;
             method: string;
             reference: string | null;
         }[];
         expenses: {
             id: string;
+            companyId: string;
             createdAt: Date;
             deletedAt: Date | null;
-            deletedBy: string | null;
-            category: string;
-            companyId: string;
             description: string | null;
+            deletedBy: string | null;
             branchId: string | null;
             amount: number;
+            category: string;
         }[];
         branches: {
             id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            deletedAt: Date | null;
-            deletedBy: string | null;
             companyId: string;
+            createdAt: Date;
+            deletedAt: Date | null;
+            name: string;
+            updatedAt: Date;
+            deletedBy: string | null;
             phone: string | null;
             address: string | null;
         }[];

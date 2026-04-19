@@ -60,18 +60,21 @@ export declare class TelegramService implements OnModuleInit {
         };
     }>;
     getBotStatus(botId: string): "connected" | "stopped" | "not_found";
+    private stopRunningBot;
+    private clearCompanyRuntimeState;
+    private clearGlobalRuntimeState;
     getBotsForCompany(companyId: string): Promise<{
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
         token: string;
         username: string | null;
+        isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
         botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }[]>;
     reloadCompanyBots(companyId: string): Promise<{
@@ -88,16 +91,16 @@ export declare class TelegramService implements OnModuleInit {
             first_name: string;
         };
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
         token: string;
         username: string | null;
+        isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
         botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }>;
     updateBot(id: string, companyId: string, data: {
@@ -107,55 +110,59 @@ export declare class TelegramService implements OnModuleInit {
         isActive?: boolean;
     }): Promise<{
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
         token: string;
         username: string | null;
+        isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
         botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }>;
     removeBot(id: string, companyId: string): Promise<{
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
         token: string;
         username: string | null;
+        isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
         botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }>;
     getAllBotsAdmin(): Promise<{
         status: "connected" | "stopped" | "not_found";
         company: {
             id: string;
-            slug: string;
             name: string;
+            slug: string;
         };
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
         token: string;
         username: string | null;
+        isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
         botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }[]>;
     adminReloadBot(botId: string): Promise<{
         success: boolean;
         status: "connected" | "stopped" | "not_found";
+    }>;
+    adminReloadAllBots(): Promise<{
+        success: boolean;
+        reloaded: number;
     }>;
     adminHardDeleteBot(botId: string): Promise<{
         success: boolean;
@@ -163,19 +170,21 @@ export declare class TelegramService implements OnModuleInit {
     adminUpdateBot(botId: string, data: {
         token?: string;
         isActive?: boolean;
+        botName?: string;
+        description?: string;
     }): Promise<{
         status: "connected" | "stopped" | "not_found";
         id: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         companyId: string;
-        description: string | null;
-        isActive: boolean;
         token: string;
         username: string | null;
+        isActive: boolean;
         hasWebApp: boolean;
         watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
         botName: string | null;
+        description: string | null;
         webhookUrl: string | null;
     }>;
     notifyDealerApprovalResult(companyId: string, dealerId: string, approved: boolean): Promise<void>;

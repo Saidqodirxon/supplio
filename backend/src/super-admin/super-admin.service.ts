@@ -35,8 +35,9 @@ export class SuperAdminService {
     });
   }
 
-  async updateGlobalSettings(data: Record<string, unknown>) {
-    const { id, updatedAt, ...safeData } = data as any;
+  async updateGlobalSettings(data?: Record<string, unknown>) {
+    const input = (data ?? {}) as Record<string, unknown>;
+    const { id, updatedAt, ...safeData } = input as any;
     const allowedKeys = new Set([
       "maintenanceMode",
       "backupFrequency",

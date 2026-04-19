@@ -139,6 +139,12 @@ export class BotsController {
     return this.telegramService.getAllBotsAdmin();
   }
 
+  @Post("admin/bots/reload-all")
+  @Roles("SUPER_ADMIN")
+  async adminReloadAllBots() {
+    return this.telegramService.adminReloadAllBots();
+  }
+
   @Post("admin/bots/:id/reload")
   @Roles("SUPER_ADMIN")
   async adminReloadBot(@Param("id") id: string) {
@@ -149,7 +155,13 @@ export class BotsController {
   @Roles("SUPER_ADMIN")
   async adminUpdateBot(
     @Param("id") id: string,
-    @Body() body: { token?: string; isActive?: boolean }
+    @Body()
+    body: {
+      token?: string;
+      isActive?: boolean;
+      botName?: string;
+      description?: string;
+    }
   ) {
     return this.telegramService.adminUpdateBot(id, body);
   }

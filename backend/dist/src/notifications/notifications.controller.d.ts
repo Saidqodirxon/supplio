@@ -23,9 +23,9 @@ export declare class NotificationsController {
             };
         } & {
             id: string;
+            companyId: string;
             createdAt: Date;
             deletedAt: Date | null;
-            companyId: string;
             title: string;
             message: string;
             isRead: boolean;
@@ -55,9 +55,9 @@ export declare class NotificationsController {
         receiverDealerId?: string;
     }): Promise<{
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        companyId: string;
         title: string;
         message: string;
         isRead: boolean;
@@ -73,9 +73,9 @@ export declare class NotificationsController {
         type?: string;
     }): Promise<{
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        companyId: string;
         title: string;
         message: string;
         isRead: boolean;
@@ -91,12 +91,12 @@ export declare class NotificationsController {
     }): Promise<import(".prisma/client").Prisma.BatchPayload>;
     getTemplates(req: AuthenticatedRequest): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         companyId: string;
         isActive: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         message: import("@prisma/client/runtime/library").JsonValue;
         type: string;
     }[]>;
@@ -107,12 +107,12 @@ export declare class NotificationsController {
         isActive?: boolean;
     }): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
         companyId: string;
         isActive: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
         message: import("@prisma/client/runtime/library").JsonValue;
         type: string;
     }>;
@@ -129,12 +129,12 @@ export declare class NotificationsController {
         };
     } & {
         id: string;
-        createdAt: Date;
         companyId: string;
+        createdAt: Date;
         status: string;
-        dealerId: string | null;
         message: string;
         templateId: string | null;
+        dealerId: string | null;
     })[]>;
 }
 export {};

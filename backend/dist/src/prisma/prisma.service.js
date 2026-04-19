@@ -117,6 +117,8 @@ let PrismaService = class PrismaService extends client_1.PrismaClient {
             `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "contactAddress" TEXT`,
             `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "botPaused" BOOLEAN DEFAULT FALSE`,
             `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "botAutoSchedule" BOOLEAN DEFAULT TRUE`,
+            `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "preparingVariants" JSONB`,
+            `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "dealerStatusLabels" JSONB`,
             `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "logGroupChatId" TEXT`,
             `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "orderGroupChatId" TEXT`,
         ];

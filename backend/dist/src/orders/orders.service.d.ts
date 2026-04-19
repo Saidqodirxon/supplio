@@ -17,19 +17,19 @@ export declare class OrdersService {
         }[];
     }): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        branchId: string;
+        dealerId: string;
         totalAmount: number;
         totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
         subStatus: string | null;
         items: import("@prisma/client/runtime/library").JsonValue;
         note: string | null;
-        dealerId: string;
-        branchId: string;
     }>;
     findAll(companyId: string): Promise<{
         items: {
@@ -48,18 +48,18 @@ export declare class OrdersService {
             phone: string;
         };
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        branchId: string;
+        dealerId: string;
         totalAmount: number;
         totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
         subStatus: string | null;
         note: string | null;
-        dealerId: string;
-        branchId: string;
     }[]>;
     findByDealer(companyId: string, dealerId: string): Promise<{
         items: {
@@ -74,18 +74,18 @@ export declare class OrdersService {
             name: string;
         };
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        branchId: string;
+        dealerId: string;
         totalAmount: number;
         totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
         subStatus: string | null;
         note: string | null;
-        dealerId: string;
-        branchId: string;
     }[]>;
     updateStatus(companyId: string, id: string, status: string, subStatus?: string, actor?: {
         id?: string;
@@ -93,19 +93,19 @@ export declare class OrdersService {
         roleType?: string;
     }): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        branchId: string;
+        dealerId: string;
         totalAmount: number;
         totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
         subStatus: string | null;
         items: import("@prisma/client/runtime/library").JsonValue;
         note: string | null;
-        dealerId: string;
-        branchId: string;
     }>;
     findOne(companyId: string, id: string): Promise<{
         items: {
@@ -124,17 +124,17 @@ export declare class OrdersService {
             phone: string;
         };
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        branchId: string;
+        dealerId: string;
         totalAmount: number;
         totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
         subStatus: string | null;
         note: string | null;
-        dealerId: string;
-        branchId: string;
     }>;
 }

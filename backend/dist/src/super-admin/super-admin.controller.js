@@ -64,7 +64,7 @@ let SuperAdminController = class SuperAdminController {
         return this.superAdminService.getGlobalSettings();
     }
     async updateSettings(body) {
-        return this.superAdminService.updateGlobalSettings(body);
+        return this.superAdminService.updateGlobalSettings(body ?? {});
     }
     async directUpdate(body) {
         return this.superAdminService.directUpdate(body.model, body.id, body.field, body.value);

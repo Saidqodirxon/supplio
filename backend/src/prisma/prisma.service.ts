@@ -144,6 +144,8 @@ export class PrismaService
       `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "contactAddress" TEXT`,
       `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "botPaused" BOOLEAN DEFAULT FALSE`,
       `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "botAutoSchedule" BOOLEAN DEFAULT TRUE`,
+      `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "preparingVariants" JSONB`,
+      `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "dealerStatusLabels" JSONB`,
       // 2026-04-14: per-company telegram group notifications
       `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "logGroupChatId" TEXT`,
       `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "orderGroupChatId" TEXT`,
