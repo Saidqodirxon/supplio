@@ -76,7 +76,7 @@ cat > "$PAYLOAD_FILE" <<EOF
 DO \$sync\$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM "SystemSettings" WHERE id = 'GLOBAL') THEN
-        INSERT INTO "SystemSettings" (id) VALUES ('GLOBAL');
+        INSERT INTO "SystemSettings" (id, "updatedAt") VALUES ('GLOBAL', NOW());
     END IF;
 
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'termsUz') THEN
