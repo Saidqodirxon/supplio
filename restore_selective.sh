@@ -26,8 +26,13 @@ fi
 
 log "Faylni tekshiryapman..."
 
-# 2. Production .env faylidan oxiri o'qish
-if [ -f "backend/.env.production" ]; then
+# 2. Production URL ni olish
+# Ustuvorlik: 1) argument 2) env 3) backend env fayllari
+if [ -n "$1" ]; then
+    DATABASE_URL="$1"
+elif [ -n "$DATABASE_URL" ]; then
+    DATABASE_URL="$DATABASE_URL"
+elif [ -f "backend/.env.production" ]; then
     DATABASE_URL=$(grep "^DATABASE_URL=" backend/.env.production | cut -d'=' -f2- | sed 's/^"//; s/"$//')
 elif [ -f "backend/.env" ]; then
     DATABASE_URL=$(grep "^DATABASE_URL=" backend/.env | cut -d'=' -f2- | sed 's/^"//; s/"$//')
@@ -35,6 +40,11 @@ fi
 
 if [ -z "$DATABASE_URL" ]; then
     fail "DATABASE_URL topilmadi yoki bo'sh!"
+fi
+
+DB_SCHEMA=$(echo "$DATABASE_URL" | sed -n 's/.*[?&]schema=\([^&]*\).*/\1/p')
+if [ -z "$DB_SCHEMA" ]; then
+    DB_SCHEMA="public"
 fi
 
 log "Database URL parslanmoqda..."
@@ -55,6 +65,7 @@ log "  Host: $DB_HOST"
 log "  Port: $DB_PORT"
 log "  Database: $DB_NAME"
 log "  User: $DB_USER"
+log "  Schema: $DB_SCHEMA"
 
 # 4. Confirmation
 echo ""
@@ -77,7 +88,7 @@ log "Ma'lumotlar bazasi tiklanmoqda..."
 # Faqat selektiv import qilinadigan tablalarni oldindan tozalaymiz.
 TRUNCATE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_name)
 FROM information_schema.tables
-WHERE table_schema = 'public'
+WHERE table_schema = '$DB_SCHEMA'
     AND table_name IN (
         'system_settings','categories','units','support_contacts','company_settings',
         'SystemSettings','Category','Unit','SupportContact','CompanySettings'
@@ -87,15 +98,19 @@ ORDER BY 1;"
 TRUNCATE_TABLES=$(psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" --no-password -At -c "$TRUNCATE_QUERY" 2>/dev/null)
 
 if [ -n "$TRUNCATE_TABLES" ]; then
-        while IFS= read -r tbl; do
-                [ -n "$tbl" ] && psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" --no-password -c "TRUNCATE TABLE $tbl CASCADE;" >/dev/null 2>&1
-        done <<< "$TRUNCATE_TABLES"
+    while IFS= read -r tbl; do
+        if [ -n "$tbl" ]; then
+            psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" --no-password -v ON_ERROR_STOP=1 -c "TRUNCATE TABLE $tbl CASCADE;" >/dev/null 2>&1 || fail "TRUNCATE xatolik: $tbl"
+        fi
+    done <<< "$TRUNCATE_TABLES"
 fi
 
 if psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
-    --no-password -f db_backup_selective.sql > /dev/null 2>&1; then
+    --no-password -v ON_ERROR_STOP=1 -f db_backup_selective.sql > restore_selective.log 2>&1; then
     ok "Ma'lumotlar bazasi muvaffaqiyatli tikland!"
 else
+    warn "restore_selective.log ichida xatolik tafsilotlari bor."
+    tail -n 30 restore_selective.log
     fail "Tiklashda xatolik!"
 fi
 
@@ -104,13 +119,21 @@ unset PGPASSWORD
 # 6. Verification
 log "Tekshiryapman..."
 TABLE_COUNT=$(psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
-    --no-password -At -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" 2>/dev/null)
+    --no-password -At -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='$DB_SCHEMA';" 2>/dev/null)
+
+SETTINGS_COUNT=$(psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
+    --no-password -At -c "SELECT count(*) FROM \"SystemSettings\";" 2>/dev/null)
 
 if [ -z "$TABLE_COUNT" ]; then
-        TABLE_COUNT="0"
+    TABLE_COUNT="0"
+fi
+
+if [ -z "$SETTINGS_COUNT" ]; then
+    SETTINGS_COUNT="0"
 fi
 
 ok "Jami tablolar: $TABLE_COUNT"
+ok "SystemSettings qatorlari: $SETTINGS_COUNT"
 
 echo ""
 echo "=========================================================="

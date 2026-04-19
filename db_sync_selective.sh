@@ -17,8 +17,12 @@ warn() { echo -e "${YELLOW}[WARN]${RESET}  $1"; }
 fail() { echo -e "${RED}[ERROR]${RESET} $1"; exit 1; }
 
 # 1. Local DB ma'lumotlari
-# .env dagi DATABASE_URL bo'lsa o'shani olamiz, bo'lmasa fallback URL ishlatamiz.
-if [ -f "backend/.env" ]; then
+# Ustuvorlik: 1) argument 2) env 3) .env fayl 4) fallback
+if [ -n "$1" ]; then
+    DB_URL="$1"
+elif [ -n "$DATABASE_URL" ]; then
+    DB_URL="$DATABASE_URL"
+elif [ -f "backend/.env" ]; then
     DB_URL=$(grep "^DATABASE_URL=" backend/.env | cut -d'=' -f2- | sed 's/^"//; s/"$//')
 elif [ -f "backend/.env.production" ]; then
     DB_URL=$(grep "^DATABASE_URL=" backend/.env.production | cut -d'=' -f2- | sed 's/^"//; s/"$//')
@@ -30,14 +34,19 @@ fi
 
 # Prisma URL dagi query parametrlar (masalan ?schema=public) pg_dump uchun muammo beradi.
 DB_URL_CLEAN="${DB_URL%%\?*}"
+DB_SCHEMA=$(echo "$DB_URL" | sed -n 's/.*[?&]schema=\([^&]*\).*/\1/p')
+if [ -z "$DB_SCHEMA" ]; then
+    DB_SCHEMA="public"
+fi
 BACKUP_FILE="db_backup_selective.sql"
 
 log "Selektiv ma'lumotlar bazasi barkarorlanmoqda (tarifflar ISTISNO)..."
+log "Schema: $DB_SCHEMA"
 
 # Faqat kerakli mock/settings tablalarni ko'chiramiz (orders/tariffs umuman dump qilinmaydi).
 TABLE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_name)
 FROM information_schema.tables
-WHERE table_schema = 'public'
+WHERE table_schema = '$DB_SCHEMA'
     AND table_name IN (
         'system_settings','categories','units','support_contacts','company_settings',
         'SystemSettings','Category','Unit','SupportContact','CompanySettings'
@@ -60,6 +69,7 @@ pg_dump \
     --disable-triggers \
     --no-owner \
     --no-privileges \
+    --schema="$DB_SCHEMA" \
     "${TABLE_ARGS[@]}" \
     -d "$DB_URL_CLEAN" > "$BACKUP_FILE"
 
