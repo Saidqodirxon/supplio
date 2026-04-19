@@ -85,6 +85,12 @@ export PGPASSWORD="$DB_PASS"
 
 log "Ma'lumotlar bazasi tiklanmoqda..."
 
+# Turli Postgres versiyalari orasida moslik uchun backup SQL ni tayyorlaymiz.
+# Masalan, eski serverlarda `SET transaction_timeout` parametri bo'lmasligi mumkin.
+TMP_SQL=$(mktemp /tmp/restore_selective.XXXXXX.sql)
+trap 'rm -f "$TMP_SQL"' EXIT
+sed '/^SET transaction_timeout =/d' db_backup_selective.sql > "$TMP_SQL"
+
 # Faqat selektiv import qilinadigan tablalarni oldindan tozalaymiz.
 TRUNCATE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_name)
 FROM information_schema.tables
@@ -106,7 +112,7 @@ if [ -n "$TRUNCATE_TABLES" ]; then
 fi
 
 if psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
-    --no-password -v ON_ERROR_STOP=1 -f db_backup_selective.sql > restore_selective.log 2>&1; then
+    --no-password -v ON_ERROR_STOP=1 -f "$TMP_SQL" > restore_selective.log 2>&1; then
     ok "Ma'lumotlar bazasi muvaffaqiyatli tikland!"
 else
     warn "restore_selective.log ichida xatolik tafsilotlari bor."
