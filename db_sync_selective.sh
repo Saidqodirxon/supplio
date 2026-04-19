@@ -80,42 +80,42 @@ BEGIN
     END IF;
 
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'termsUz') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "termsUz" = %s WHERE id = ''GLOBAL''', ${TERMS_UZ});
+        UPDATE "SystemSettings" SET "termsUz" = ${TERMS_UZ} WHERE id = 'GLOBAL';
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'termsRu') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "termsRu" = %s WHERE id = ''GLOBAL''', ${TERMS_RU});
+        UPDATE "SystemSettings" SET "termsRu" = ${TERMS_RU} WHERE id = 'GLOBAL';
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'termsEn') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "termsEn" = %s WHERE id = ''GLOBAL''', ${TERMS_EN});
+        UPDATE "SystemSettings" SET "termsEn" = ${TERMS_EN} WHERE id = 'GLOBAL';
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'termsUzCyr') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "termsUzCyr" = %s WHERE id = ''GLOBAL''', ${TERMS_UZ_CYR});
+        UPDATE "SystemSettings" SET "termsUzCyr" = ${TERMS_UZ_CYR} WHERE id = 'GLOBAL';
     END IF;
 
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'privacyUz') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "privacyUz" = %s WHERE id = ''GLOBAL''', ${PRIVACY_UZ});
+        UPDATE "SystemSettings" SET "privacyUz" = ${PRIVACY_UZ} WHERE id = 'GLOBAL';
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'privacyRu') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "privacyRu" = %s WHERE id = ''GLOBAL''', ${PRIVACY_RU});
+        UPDATE "SystemSettings" SET "privacyRu" = ${PRIVACY_RU} WHERE id = 'GLOBAL';
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'privacyEn') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "privacyEn" = %s WHERE id = ''GLOBAL''', ${PRIVACY_EN});
+        UPDATE "SystemSettings" SET "privacyEn" = ${PRIVACY_EN} WHERE id = 'GLOBAL';
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'privacyUzCyr') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "privacyUzCyr" = %s WHERE id = ''GLOBAL''', ${PRIVACY_UZ_CYR});
+        UPDATE "SystemSettings" SET "privacyUzCyr" = ${PRIVACY_UZ_CYR} WHERE id = 'GLOBAL';
     END IF;
 
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'contractUz') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "contractUz" = %s WHERE id = ''GLOBAL''', ${CONTRACT_UZ});
+        UPDATE "SystemSettings" SET "contractUz" = ${CONTRACT_UZ} WHERE id = 'GLOBAL';
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'contractRu') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "contractRu" = %s WHERE id = ''GLOBAL''', ${CONTRACT_RU});
+        UPDATE "SystemSettings" SET "contractRu" = ${CONTRACT_RU} WHERE id = 'GLOBAL';
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'contractEn') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "contractEn" = %s WHERE id = ''GLOBAL''', ${CONTRACT_EN});
+        UPDATE "SystemSettings" SET "contractEn" = ${CONTRACT_EN} WHERE id = 'GLOBAL';
     END IF;
     IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'SystemSettings' AND column_name = 'contractUzCyr') THEN
-        EXECUTE format('UPDATE "SystemSettings" SET "contractUzCyr" = %s WHERE id = ''GLOBAL''', ${CONTRACT_UZ_CYR});
+        UPDATE "SystemSettings" SET "contractUzCyr" = ${CONTRACT_UZ_CYR} WHERE id = 'GLOBAL';
     END IF;
 END
 \$sync\$;
