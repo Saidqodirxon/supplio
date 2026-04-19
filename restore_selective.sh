@@ -99,8 +99,7 @@ TRUNCATE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_nam
 FROM information_schema.tables
 WHERE table_schema = '$DB_SCHEMA'
     AND table_name IN (
-        'system_settings','categories','units','support_contacts','company_settings',
-        'SystemSettings','Category','Unit','SupportContact','CompanySettings'
+        'SystemSettings','Category','Subcategory','Unit','SupportTicket','SupportMessage'
     )
 ORDER BY 1;"
 

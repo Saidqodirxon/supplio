@@ -43,33 +43,32 @@ BACKUP_FILE="db_backup_selective.sql"
 log "Selektiv ma'lumotlar bazasi barkarorlanmoqda (tarifflar ISTISNO)..."
 log "Schema: $DB_SCHEMA"
 
-# Faqat kerakli mock/settings tablalarni ko'chiramiz (orders/tariffs umuman dump qilinmaydi).
-TABLE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_name)
-FROM information_schema.tables
-WHERE table_schema = '$DB_SCHEMA'
-    AND table_name IN (
-        'system_settings','categories','units','support_contacts','company_settings',
-        'SystemSettings','Category','Unit','SupportContact','CompanySettings'
-    )
-ORDER BY 1;"
-
-TABLE_LIST=$(psql "$DB_URL_CLEAN" -At -c "$TABLE_QUERY" 2>/dev/null)
-
-if [ -z "$TABLE_LIST" ]; then
-        fail "Ko'chirish uchun mos table topilmadi. DB nomi/yoki schema ni tekshiring."
+# SystemSettings mavjudligi va terms qiymati tekshiruvi.
+SETTINGS_INFO=$(psql "$DB_URL_CLEAN" -At -c "SELECT COUNT(*), COALESCE(MAX(length(\"termsUz\")),0) FROM \"$DB_SCHEMA\".\"SystemSettings\";" 2>/dev/null)
+if [ -z "$SETTINGS_INFO" ]; then
+    fail "SystemSettings jadvali o'qilmadi. DB/schema noto'g'ri bo'lishi mumkin."
 fi
 
-TABLE_ARGS=()
-while IFS= read -r tbl; do
-        [ -n "$tbl" ] && TABLE_ARGS+=("--table=$tbl")
-done <<< "$TABLE_LIST"
+SETTINGS_ROWS=$(echo "$SETTINGS_INFO" | cut -d'|' -f1)
+TERMS_UZ_LEN=$(echo "$SETTINGS_INFO" | cut -d'|' -f2)
+
+if [ "$SETTINGS_ROWS" = "0" ] || [ "$TERMS_UZ_LEN" = "0" ]; then
+    fail "Lokal DBda termsUz bo'sh yoki SystemSettings qatori yo'q. Avval local datani to'ldiring."
+fi
+
+log "SystemSettings qatori: $SETTINGS_ROWS, termsUz uzunligi: $TERMS_UZ_LEN"
 
 pg_dump \
     --data-only \
     --no-owner \
     --no-privileges \
     --schema="$DB_SCHEMA" \
-    "${TABLE_ARGS[@]}" \
+    --table="$DB_SCHEMA.\"SystemSettings\"" \
+    --table="$DB_SCHEMA.\"Category\"" \
+    --table="$DB_SCHEMA.\"Subcategory\"" \
+    --table="$DB_SCHEMA.\"Unit\"" \
+    --table="$DB_SCHEMA.\"SupportTicket\"" \
+    --table="$DB_SCHEMA.\"SupportMessage\"" \
     -d "$DB_URL_CLEAN" > "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
