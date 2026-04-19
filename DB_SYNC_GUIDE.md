@@ -1,6 +1,7 @@
 # 📊 Selektiv Database Sync Qo'llanmasi
 
 ## 🎯 Maqsadi
+
 Lokal mock datalarni (terms, categories, settings va boshqa) serverdaga yuborishni, **tarifflar, buyurtmalar va boshqa kritik datalarni saqlab qolishni** ta'minlaydi.
 
 ---
@@ -17,6 +18,7 @@ bash db_sync_selective.sh
 ```
 
 **Bu script quyidagini bajaradi:**
+
 - ✅ **Qo'shiladi (dump-ga):** Categories, Units, Terms, Support Contacts, System Settings, Company Settings
 - ❌ **Istisno qilinadi:** Tariffs, Orders, Transactions, Invoices, Notifications, Analytics
 - 📤 GitHub'ga `db_backup_selective.sql` faylini push qiladi
@@ -38,6 +40,7 @@ bash restore_selective.sh
 ```
 
 **Confirm qilgandan so'ng:**
+
 - ✅ New terms, categories, va settings qabul qilinadi
 - ✅ Tarifflar va buyurtmalar **o'chirilmaydi** va **o'zgarmaydi**
 - ✅ Connection test va stats ko'rsatiladi
@@ -47,24 +50,26 @@ bash restore_selective.sh
 ## 📊 Qaysi Tablalar Sync Qilinadi?
 
 ### ✅ **Sync-lanadi (Include)**
-| Tabla | Maqsadi |
-|-------|---------|
-| `categories` | Tovarlar kategoriyalari |
-| `units` | O'lchov birliklari (kg, dona, litr) |
-| `company_settings` | Kompaniya sozlamalari |
-| `terms` | Payment terms, shartlar |
-| `support_contacts` | Qo'llab-quvvatlash aloqalari |
-| `system_settings` | Global sistema sozlamalari |
+
+| Tabla              | Maqsadi                             |
+| ------------------ | ----------------------------------- |
+| `categories`       | Tovarlar kategoriyalari             |
+| `units`            | O'lchov birliklari (kg, dona, litr) |
+| `company_settings` | Kompaniya sozlamalari               |
+| `terms`            | Payment terms, shartlar             |
+| `support_contacts` | Qo'llab-quvvatlash aloqalari        |
+| `system_settings`  | Global sistema sozlamalari          |
 
 ### ❌ **Saqlanadi (Exclude)**
-| Tabla | Sababi |
-|-------|--------|
-| `tariffs` | ₹ Sotib olish narxlari - serverdagi ma'lumotlarni saqlab qolish |
-| `orders` | 📦 Mavjud buyurtmalar - saqlab qolish |
-| `transactions` | 💳 To'lov tarixlari - saqlab qolish |
-| `invoices` | 🧾 Hisob-kitoblar - saqlab qolish |
-| `notifications` | 🔔 Yuborilgan bildirishnomalar - saqlab qolish |
-| `analytics` | 📈 Tahlil ma'lumotlari - saqlab qolish |
+
+| Tabla           | Sababi                                                          |
+| --------------- | --------------------------------------------------------------- |
+| `tariffs`       | ₹ Sotib olish narxlari - serverdagi ma'lumotlarni saqlab qolish |
+| `orders`        | 📦 Mavjud buyurtmalar - saqlab qolish                           |
+| `transactions`  | 💳 To'lov tarixlari - saqlab qolish                             |
+| `invoices`      | 🧾 Hisob-kitoblar - saqlab qolish                               |
+| `notifications` | 🔔 Yuborilgan bildirishnomalar - saqlab qolish                  |
+| `analytics`     | 📈 Tahlil ma'lumotlari - saqlab qolish                          |
 
 ---
 
@@ -87,19 +92,25 @@ bash restore_selective.sh
 ## 💡 Tips
 
 ### Faqat Tarifflarni Sync Qilish
+
 Agar tarifflarni ham sync qilmoqchi bo'lsangiz, oddiy `db_sync.sh` ishlating:
+
 ```bash
 bash db_sync.sh          # Lokal'da
 ```
 
 ### Specific Tabla Sync Qilish
+
 Faqat `categories` jadvalini sync qilish:
+
 ```bash
 pg_dump -t categories postgresql://user:pass@host/db > categories.sql
 ```
 
 ### Full Restore (Barcha Ma'lumotlar)
+
 Agar barcha narsani qayta yuborishni istasangiz:
+
 ```bash
 bash restore_db.sh  # Lokal dumpdan
 ```
@@ -109,13 +120,17 @@ bash restore_db.sh  # Lokal dumpdan
 ## 🆘 Muammolar
 
 ### **ERROR: "db_backup_selective.sql fayli topilmadi"**
+
 → Avval lokal'da `bash db_sync_selective.sh` qiling
 
 ### **ERROR: "DATABASE_URL topilmadi"**
+
 → `/root/supplio/backend/.env.production` fayli mavjudligini tekshiring
 
 ### **ERROR: "psql: command not found"**
+
 → Server'da PostgreSQL client o'rnatilmagan:
+
 ```bash
 apt-get update && apt-get install -y postgresql-client
 ```
@@ -124,12 +139,12 @@ apt-get update && apt-get install -y postgresql-client
 
 ## 📝 Script Fayllar
 
-| Fayl | Joyi | Maqsadi |
-|------|------|--------|
-| `db_sync_selective.sh` | Root | Lokal DB dan selektiv dump |
-| `restore_selective.sh` | Root (server) | Server da restore qilish |
-| `db_sync.sh` | Root | Barcha datalarni dump qilish |
-| `restore_db.sh` | Root (server) | Barcha datalarni restore qilish |
+| Fayl                   | Joyi          | Maqsadi                         |
+| ---------------------- | ------------- | ------------------------------- |
+| `db_sync_selective.sh` | Root          | Lokal DB dan selektiv dump      |
+| `restore_selective.sh` | Root (server) | Server da restore qilish        |
+| `db_sync.sh`           | Root          | Barcha datalarni dump qilish    |
+| `restore_db.sh`        | Root (server) | Barcha datalarni restore qilish |
 
 ---
 
