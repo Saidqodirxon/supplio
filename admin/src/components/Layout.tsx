@@ -47,10 +47,14 @@ export default function Layout() {
           api.get("/super/upgrade-requests"),
         ]);
         const openTickets = Array.isArray(ticketsRes.data)
-          ? ticketsRes.data.filter((t: { status: string }) => t.status === "OPEN").length
+          ? ticketsRes.data.filter(
+              (t: { status: string }) => t.status === "OPEN"
+            ).length
           : 0;
         const pendingUpgrades = Array.isArray(upgradesRes.data)
-          ? upgradesRes.data.filter((r: { status: string }) => r.status === "PENDING").length
+          ? upgradesRes.data.filter(
+              (r: { status: string }) => r.status === "PENDING"
+            ).length
           : 0;
         setBadges({ tickets: openTickets, upgrades: pendingUpgrades });
       } catch {
@@ -65,7 +69,11 @@ export default function Layout() {
   // Map of routes to titles for the header
   const getTitle = (pathname: string, search: string) => {
     if (pathname === "/profile") {
-      return language === "ru" ? "Профиль" : language === "en" ? "Profile" : "Profil";
+      return language === "ru"
+        ? "Профиль"
+        : language === "en"
+          ? "Profile"
+          : "Profil";
     }
     const tab = new URLSearchParams(search).get("tab");
     if (!tab || tab === "overview") return t.superadmin.overview;
@@ -76,7 +84,8 @@ export default function Layout() {
     if (tab === "backups") return t.superadmin.backups;
     if (tab === "settings") return t.superadmin.settings;
     if (tab === "tickets") return language === "ru" ? "Обращения" : "Arizalar";
-    if (tab === "upgrades") return language === "ru" ? "Запросы апгрейда" : "Tarif so'rovlari";
+    if (tab === "upgrades")
+      return language === "ru" ? "Запросы апгрейда" : "Tarif so'rovlari";
     if (tab === "leads") return "Lidlar";
     if (tab === "notify") return language === "ru" ? "Рассылка" : "Xabarnoma";
     if (tab === "bots") {
@@ -87,20 +96,55 @@ export default function Layout() {
           : "Telegram botlar";
     }
     if (tab === "editor") return t.superadmin.editor;
-    if (tab === "testimonials") return language === "ru" ? "Отзывы клиентов" : language === "en" ? "Testimonials" : "Mijozlar sharhlari";
-    if (tab === "team") return language === "ru" ? "Команда" : language === "en" ? "Team" : "Jamoa a'zolari";
+    if (tab === "testimonials")
+      return language === "ru"
+        ? "Отзывы клиентов"
+        : language === "en"
+          ? "Testimonials"
+          : "Mijozlar sharhlari";
+    if (tab === "team")
+      return language === "ru"
+        ? "Команда"
+        : language === "en"
+          ? "Team"
+          : "Jamoa a'zolari";
     return t.sidebar.overview;
   };
 
   const currentTitle = getTitle(location.pathname, location.search);
 
   const navigation = [
-    { name: t.superadmin.overview, href: "/?tab=overview", icon: ShieldCheck, badge: 0 },
-    { name: t.superadmin.distributors, href: "/?tab=distributors", icon: Users, badge: 0 },
-    { name: language === "ru" ? "Запросы апгрейда" : "Tarif so'rovlari", href: "/?tab=upgrades", icon: TrendingUp, badge: badges.upgrades },
+    {
+      name: t.superadmin.overview,
+      href: "/?tab=overview",
+      icon: ShieldCheck,
+      badge: 0,
+    },
+    {
+      name: t.superadmin.distributors,
+      href: "/?tab=distributors",
+      icon: Users,
+      badge: 0,
+    },
+    {
+      name: language === "ru" ? "Запросы апгрейда" : "Tarif so'rovlari",
+      href: "/?tab=upgrades",
+      icon: TrendingUp,
+      badge: badges.upgrades,
+    },
     { name: "Lidlar", href: "/?tab=leads", icon: UserCheck, badge: 0 },
-    { name: language === "ru" ? "Обращения" : "Arizalar", href: "/?tab=tickets", icon: Bell, badge: badges.tickets },
-    { name: language === "ru" ? "Рассылка" : "Xabarnoma", href: "/?tab=notify", icon: Send, badge: 0 },
+    {
+      name: language === "ru" ? "Обращения" : "Arizalar",
+      href: "/?tab=tickets",
+      icon: Bell,
+      badge: badges.tickets,
+    },
+    {
+      name: language === "ru" ? "Рассылка" : "Xabarnoma",
+      href: "/?tab=notify",
+      icon: Send,
+      badge: 0,
+    },
     {
       name:
         language === "ru"
@@ -113,13 +157,58 @@ export default function Layout() {
       badge: 0,
     },
     { name: t.superadmin.news, href: "/?tab=news", icon: Newspaper, badge: 0 },
-    { name: t.superadmin.tariffs, href: "/?tab=tariffs", icon: CreditCard, badge: 0 },
-    { name: language === "ru" ? "Отзывы клиентов" : language === "en" ? "Testimonials" : "Mijozlar sharhlari", href: "/?tab=testimonials", icon: MessageSquare, badge: 0 },
-    { name: language === "ru" ? "Команда" : language === "en" ? "Team" : "Jamoa a'zolari", href: "/?tab=team", icon: Users, badge: 0 },
-    { name: t.superadmin.recentLogs, href: "/?tab=activities", icon: Activity, badge: 0 },
-    { name: t.superadmin.backups, href: "/?tab=backups", icon: Database, badge: 0 },
-    { name: t.superadmin.settings, href: "/?tab=settings", icon: Globe, badge: 0 },
-    { name: t.superadmin.editor, href: "/?tab=editor", icon: FileCode, badge: 0 },
+    {
+      name: t.superadmin.tariffs,
+      href: "/?tab=tariffs",
+      icon: CreditCard,
+      badge: 0,
+    },
+    {
+      name:
+        language === "ru"
+          ? "Отзывы клиентов"
+          : language === "en"
+            ? "Testimonials"
+            : "Mijozlar sharhlari",
+      href: "/?tab=testimonials",
+      icon: MessageSquare,
+      badge: 0,
+    },
+    {
+      name:
+        language === "ru"
+          ? "Команда"
+          : language === "en"
+            ? "Team"
+            : "Jamoa a'zolari",
+      href: "/?tab=team",
+      icon: Users,
+      badge: 0,
+    },
+    {
+      name: t.superadmin.recentLogs,
+      href: "/?tab=activities",
+      icon: Activity,
+      badge: 0,
+    },
+    {
+      name: t.superadmin.backups,
+      href: "/?tab=backups",
+      icon: Database,
+      badge: 0,
+    },
+    {
+      name: t.superadmin.settings,
+      href: "/?tab=settings",
+      icon: Globe,
+      badge: 0,
+    },
+    {
+      name: t.superadmin.editor,
+      href: "/?tab=editor",
+      icon: FileCode,
+      badge: 0,
+    },
   ];
 
   useEffect(() => {
@@ -151,10 +240,12 @@ export default function Layout() {
       >
         <div className="flex flex-col h-full">
           {/* Logo Area */}
-          <div className={clsx(
-            "flex h-20 items-center shrink-0 transition-all",
-            isCollapsed ? "px-4 justify-center" : "px-8"
-          )}>
+          <div
+            className={clsx(
+              "flex h-20 items-center shrink-0 transition-all",
+              isCollapsed ? "px-4 justify-center" : "px-8"
+            )}
+          >
             <Link to="/" className="flex items-center group">
               <img
                 src="/logo.png"
@@ -175,9 +266,15 @@ export default function Layout() {
               </p>
             )}
             {navigation.map((item) => {
-              const tabParam = new URLSearchParams(item.href.split('?')[1]).get('tab');
-              const currentTab = new URLSearchParams(location.search).get('tab');
-              const isActive = tabParam === currentTab || (!currentTab && tabParam === 'overview');
+              const tabParam = new URLSearchParams(item.href.split("?")[1]).get(
+                "tab"
+              );
+              const currentTab = new URLSearchParams(location.search).get(
+                "tab"
+              );
+              const isActive =
+                tabParam === currentTab ||
+                (!currentTab && tabParam === "overview");
               const Icon = item.icon;
               return (
                 <Link
@@ -206,11 +303,15 @@ export default function Layout() {
                     <span className="truncate flex-1">{item.name}</span>
                   )}
                   {item.badge > 0 && (
-                    <span className={clsx(
-                      "flex items-center justify-center rounded-full text-[10px] font-black min-w-[18px] h-[18px] px-1",
-                      isActive ? "bg-white/30 text-white" : "bg-rose-500 text-white",
-                      isCollapsed ? "absolute top-1 right-1" : ""
-                    )}>
+                    <span
+                      className={clsx(
+                        "flex items-center justify-center rounded-full text-[10px] font-black min-w-[18px] h-[18px] px-1",
+                        isActive
+                          ? "bg-white/30 text-white"
+                          : "bg-rose-500 text-white",
+                        isCollapsed ? "absolute top-1 right-1" : ""
+                      )}
+                    >
                       {item.badge > 99 ? "99+" : item.badge}
                     </span>
                   )}
@@ -222,9 +323,16 @@ export default function Layout() {
           {/* User Info + Logout */}
           <div className="p-3 border-t border-border space-y-1">
             {!isCollapsed && user && (
-              <Link to="/profile" className="block px-4 py-2 rounded-xl bg-slate-50 dark:bg-white/5 mb-1 hover:bg-slate-100 dark:hover:bg-white/10 transition-all">
-                <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">{user.fullName || "Super Admin"}</p>
-                <p className="text-[10px] text-slate-400 truncate">{user.phone}</p>
+              <Link
+                to="/profile"
+                className="block px-4 py-2 rounded-xl bg-slate-50 dark:bg-white/5 mb-1 hover:bg-slate-100 dark:hover:bg-white/10 transition-all"
+              >
+                <p className="text-[11px] font-black text-slate-900 dark:text-white truncate">
+                  {user.fullName || "Super Admin"}
+                </p>
+                <p className="text-[10px] text-slate-400 truncate">
+                  {user.phone}
+                </p>
               </Link>
             )}
             <Link
@@ -236,7 +344,11 @@ export default function Layout() {
               )}
             >
               <User className="h-5 w-5 shrink-0" />
-              {!isCollapsed && <span className="text-sm font-extrabold uppercase tracking-widest">{language === "ru" ? "Профиль" : "Profil"}</span>}
+              {!isCollapsed && (
+                <span className="text-sm font-extrabold uppercase tracking-widest">
+                  {language === "ru" ? "Профиль" : "Profil"}
+                </span>
+              )}
             </Link>
             <button
               onClick={logout}
@@ -246,7 +358,11 @@ export default function Layout() {
               )}
             >
               <LogOut className="h-5 w-5 shrink-0" />
-              {!isCollapsed && <span className="text-sm font-extrabold uppercase tracking-widest">Logout</span>}
+              {!isCollapsed && (
+                <span className="text-sm font-extrabold uppercase tracking-widest">
+                  Logout
+                </span>
+              )}
             </button>
           </div>
         </div>
@@ -256,7 +372,7 @@ export default function Layout() {
         {/* Header */}
         <header className="h-20 bg-background/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-6 shrink-0 sticky top-0 z-30">
           <div className="flex items-center gap-4">
-             <button
+            <button
               type="button"
               className="lg:hidden p-2.5 text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl"
               onClick={() => setSidebarOpen(true)}
@@ -290,9 +406,13 @@ export default function Layout() {
                 <Moon className="w-4.5 h-4.5 text-slate-700" />
               )}
             </button>
-            
+
             <div className="w-10 h-10 rounded-full border border-border flex items-center justify-center overflow-hidden">
-               <img src="/logo.png" className="w-full h-full object-contain" alt="Admin" />
+              <img
+                src="/logo.png"
+                className="w-full h-full object-contain"
+                alt="Admin"
+              />
             </div>
           </div>
         </header>

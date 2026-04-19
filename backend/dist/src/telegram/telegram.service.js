@@ -578,11 +578,19 @@ let TelegramService = TelegramService_1 = class TelegramService {
                 });
                 if (!existingDealer) {
                     const otherDealer = await this.prisma.dealer.findFirst({
-                        where: { telegramChatId: chatId, deletedAt: null, NOT: { companyId } },
+                        where: {
+                            telegramChatId: chatId,
+                            deletedAt: null,
+                            NOT: { companyId },
+                        },
                     });
                     if (otherDealer) {
                         const sameInThisCompany = await this.prisma.dealer.findFirst({
-                            where: { phone: { endsWith: otherDealer.phone.slice(-9) }, companyId, deletedAt: null },
+                            where: {
+                                phone: { endsWith: otherDealer.phone.slice(-9) },
+                                companyId,
+                                deletedAt: null,
+                            },
                         });
                         if (sameInThisCompany) {
                             await this.prisma.dealer.update({
@@ -970,10 +978,15 @@ let TelegramService = TelegramService_1 = class TelegramService {
             `${limit > 0 ? bar + " " + ratio + "%\n\n" : ""}` +
             `${debt > 0 && limit > 0 && debt > limit ? t.overLimit : limit > 0 ? t.withinLimit : ""}` +
             cashbackLine;
-        const backOpts = { inline_keyboard: [[{ text: "🔙 Menyu", callback_data: "menu:back" }]] };
+        const backOpts = {
+            inline_keyboard: [[{ text: "🔙 Menyu", callback_data: "menu:back" }]],
+        };
         if (editMsg) {
             try {
-                await ctx.editMessageText(text, { parse_mode: "Markdown", reply_markup: backOpts });
+                await ctx.editMessageText(text, {
+                    parse_mode: "Markdown",
+                    reply_markup: backOpts,
+                });
                 return;
             }
             catch { }
@@ -1047,11 +1060,15 @@ let TelegramService = TelegramService_1 = class TelegramService {
             take: 5,
             orderBy: { createdAt: "desc" },
         });
-        const backOpts = { inline_keyboard: [[{ text: "🔙 Menyu", callback_data: "menu:back" }]] };
+        const backOpts = {
+            inline_keyboard: [[{ text: "🔙 Menyu", callback_data: "menu:back" }]],
+        };
         if (orders.length === 0) {
             if (editMsg) {
                 try {
-                    await ctx.editMessageText(t.noOrders, { reply_markup: backOpts });
+                    await ctx.editMessageText(t.noOrders, {
+                        reply_markup: backOpts,
+                    });
                     return;
                 }
                 catch { }
@@ -1061,14 +1078,21 @@ let TelegramService = TelegramService_1 = class TelegramService {
         let msg = `${t.recentOrders}\n\n`;
         for (const order of orders) {
             const date = order.createdAt.toLocaleDateString("uz-UZ");
-            const statusIcon = order.status === "DELIVERED" ? "✅" : order.status === "PENDING" ? "⏳" : "📦";
+            const statusIcon = order.status === "DELIVERED"
+                ? "✅"
+                : order.status === "PENDING"
+                    ? "⏳"
+                    : "📦";
             msg += `${statusIcon} *#${order.id.slice(-6).toUpperCase()}*\n`;
             msg += `   📅 ${date} | 💰 ${order.totalAmount.toLocaleString()} so'm\n`;
             msg += `   📊 ${order.status}\n\n`;
         }
         if (editMsg) {
             try {
-                await ctx.editMessageText(msg, { parse_mode: "Markdown", reply_markup: backOpts });
+                await ctx.editMessageText(msg, {
+                    parse_mode: "Markdown",
+                    reply_markup: backOpts,
+                });
                 return;
             }
             catch { }
@@ -1085,11 +1109,15 @@ let TelegramService = TelegramService_1 = class TelegramService {
             take: 10,
             orderBy: { createdAt: "desc" },
         });
-        const backOpts = { inline_keyboard: [[{ text: "🔙 Menyu", callback_data: "menu:back" }]] };
+        const backOpts = {
+            inline_keyboard: [[{ text: "🔙 Menyu", callback_data: "menu:back" }]],
+        };
         if (payments.length === 0) {
             if (editMsg) {
                 try {
-                    await ctx.editMessageText(t.noPayments, { reply_markup: backOpts });
+                    await ctx.editMessageText(t.noPayments, {
+                        reply_markup: backOpts,
+                    });
                     return;
                 }
                 catch { }
@@ -1104,7 +1132,10 @@ let TelegramService = TelegramService_1 = class TelegramService {
         }
         if (editMsg) {
             try {
-                await ctx.editMessageText(msg, { parse_mode: "Markdown", reply_markup: backOpts });
+                await ctx.editMessageText(msg, {
+                    parse_mode: "Markdown",
+                    reply_markup: backOpts,
+                });
                 return;
             }
             catch { }
@@ -1167,11 +1198,19 @@ let TelegramService = TelegramService_1 = class TelegramService {
                 if (action === "back") {
                     const t = this.getLangFromCtx(ctx);
                     const dealer = await this.prisma.dealer.findFirst({
-                        where: { telegramChatId: chatId, companyId, deletedAt: null, isApproved: true },
+                        where: {
+                            telegramChatId: chatId,
+                            companyId,
+                            deletedAt: null,
+                            isApproved: true,
+                        },
                     });
                     const name = dealer?.name || "";
                     try {
-                        await ctx.editMessageText(`👋 *${name}*${t.loginSuccess}${t.commands}`, { parse_mode: "Markdown", reply_markup: this.buildMainMenuKeyboard(t) });
+                        await ctx.editMessageText(`👋 *${name}*${t.loginSuccess}${t.commands}`, {
+                            parse_mode: "Markdown",
+                            reply_markup: this.buildMainMenuKeyboard(t),
+                        });
                     }
                     catch {
                         await ctx.reply(`👋 *${name}*${t.loginSuccess}`, {
@@ -1181,7 +1220,10 @@ let TelegramService = TelegramService_1 = class TelegramService {
                     }
                 }
                 if (action === "help") {
-                    const companyName = (await this.prisma.company.findUnique({ where: { id: companyId }, select: { name: true } }))?.name || "Company";
+                    const companyName = (await this.prisma.company.findUnique({
+                        where: { id: companyId },
+                        select: { name: true },
+                    }))?.name || "Company";
                     await this.handleHelp(ctx, companyName);
                 }
                 return;
@@ -1582,7 +1624,9 @@ let TelegramService = TelegramService_1 = class TelegramService {
             "");
     }
     async applyBotBranding(botToken, companyId) {
-        const company = await this.prisma.company.findUnique({ where: { id: companyId } });
+        const company = await this.prisma.company.findUnique({
+            where: { id: companyId },
+        });
         if (!company)
             return;
         const tg = new telegraf_1.Telegram(botToken);
@@ -1597,60 +1641,62 @@ let TelegramService = TelegramService_1 = class TelegramService {
             `⚡️ supplio.uz — B2B Distributsiya Platformasi`;
         const shortDescUz = `${name} rasmiy boti — dilerlar uchun buyurtma tizimi. ⚡️ supplio.uz`;
         const commands = [
-            { command: 'start', description: '🚀 Boshlash / Start' },
-            { command: 'menu', description: '📋 Bosh menyu' },
-            { command: 'products', description: '📦 Mahsulotlar' },
-            { command: 'cart', description: '🛒 Savat' },
-            { command: 'orders', description: '📋 Buyurtmalarim' },
-            { command: 'debt', description: '💰 Qarzim' },
-            { command: 'payments', description: '💸 To\'lovlarim' },
-            { command: 'info', description: 'ℹ️ Kompaniya ma\'lumotlari' },
-            { command: 'help', description: '❓ Yordam' },
+            { command: "start", description: "🚀 Boshlash / Start" },
+            { command: "menu", description: "📋 Bosh menyu" },
+            { command: "products", description: "📦 Mahsulotlar" },
+            { command: "cart", description: "🛒 Savat" },
+            { command: "orders", description: "📋 Buyurtmalarim" },
+            { command: "debt", description: "💰 Qarzim" },
+            { command: "payments", description: "💸 To'lovlarim" },
+            { command: "info", description: "ℹ️ Kompaniya ma'lumotlari" },
+            { command: "help", description: "❓ Yordam" },
         ];
         const results = {};
         try {
             await tg.setMyName(name);
-            results.name = 'ok';
+            results.name = "ok";
         }
         catch (e) {
-            results.name = e?.message ?? 'err';
+            results.name = e?.message ?? "err";
         }
         try {
             await tg.setMyDescription({ description: descriptionUz });
-            results.description = 'ok';
+            results.description = "ok";
         }
         catch (e) {
-            results.description = e?.message ?? 'err';
+            results.description = e?.message ?? "err";
         }
         try {
-            await tg.setMyShortDescription({ short_description: shortDescUz });
-            results.shortDescription = 'ok';
+            await tg.setMyShortDescription({
+                short_description: shortDescUz,
+            });
+            results.shortDescription = "ok";
         }
         catch (e) {
-            results.shortDescription = e?.message ?? 'err';
+            results.shortDescription = e?.message ?? "err";
         }
         try {
             await tg.setMyCommands(commands);
-            results.commands = 'ok';
+            results.commands = "ok";
         }
         catch (e) {
-            results.commands = e?.message ?? 'err';
+            results.commands = e?.message ?? "err";
         }
         if (company.logo) {
             try {
                 const logoPath = String(company.logo);
-                const logoUrl = logoPath.startsWith('http')
+                const logoUrl = logoPath.startsWith("http")
                     ? logoPath
-                    : `${(process.env.APP_URL || 'http://localhost:5000').replace(/\/+$/, '')}${logoPath}`;
+                    : `${(process.env.APP_URL || "http://localhost:5000").replace(/\/+$/, "")}${logoPath}`;
                 const resp = await fetch(logoUrl);
                 if (resp.ok) {
                     const buf = Buffer.from(await resp.arrayBuffer());
                     await tg.setMyPhoto({ source: buf });
-                    results.photo = 'ok';
+                    results.photo = "ok";
                 }
             }
             catch (e) {
-                results.photo = e?.message ?? 'err';
+                results.photo = e?.message ?? "err";
             }
         }
         this.logger.log(`Bot branding applied for ${name}: ${JSON.stringify(results)}`);

@@ -5110,7 +5110,9 @@ export default function SuperAdmin() {
                                   checked={botEditModal.isActive}
                                   onChange={(e) =>
                                     setBotEditModal((p) =>
-                                      p ? { ...p, isActive: e.target.checked } : null
+                                      p
+                                        ? { ...p, isActive: e.target.checked }
+                                        : null
                                     )
                                   }
                                   className="w-4 h-4"
@@ -5146,9 +5148,7 @@ export default function SuperAdmin() {
                                     : "Bekor"}
                               </button>
                               <button
-                                disabled={
-                                  !!botActionLoading[botEditModal.id]
-                                }
+                                disabled={!!botActionLoading[botEditModal.id]}
                                 onClick={async () => {
                                   const {
                                     id,
