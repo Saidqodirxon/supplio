@@ -7,16 +7,16 @@ export declare class BotsController {
     getBots(req: any): Promise<{
         status: "connected" | "stopped" | "not_found";
         id: string;
-        companyId: string;
-        token: string;
-        username: string | null;
-        isActive: boolean;
-        hasWebApp: boolean;
-        watermark: boolean;
         createdAt: Date;
         deletedAt: Date | null;
-        botName: string | null;
+        companyId: string;
         description: string | null;
+        isActive: boolean;
+        token: string;
+        username: string | null;
+        hasWebApp: boolean;
+        watermark: boolean;
+        botName: string | null;
         webhookUrl: string | null;
     }[]>;
     validateToken(body: {
@@ -44,16 +44,16 @@ export declare class BotsController {
             first_name: string;
         };
         id: string;
-        companyId: string;
-        token: string;
-        username: string | null;
-        isActive: boolean;
-        hasWebApp: boolean;
-        watermark: boolean;
         createdAt: Date;
         deletedAt: Date | null;
-        botName: string | null;
+        companyId: string;
         description: string | null;
+        isActive: boolean;
+        token: string;
+        username: string | null;
+        hasWebApp: boolean;
+        watermark: boolean;
+        botName: string | null;
         webhookUrl: string | null;
     }>;
     updateBot(req: any, id: string, body: {
@@ -63,30 +63,30 @@ export declare class BotsController {
         isActive?: boolean;
     }): Promise<{
         id: string;
-        companyId: string;
-        token: string;
-        username: string | null;
-        isActive: boolean;
-        hasWebApp: boolean;
-        watermark: boolean;
         createdAt: Date;
         deletedAt: Date | null;
-        botName: string | null;
+        companyId: string;
         description: string | null;
+        isActive: boolean;
+        token: string;
+        username: string | null;
+        hasWebApp: boolean;
+        watermark: boolean;
+        botName: string | null;
         webhookUrl: string | null;
     }>;
     removeBot(req: any, id: string): Promise<{
         id: string;
-        companyId: string;
-        token: string;
-        username: string | null;
-        isActive: boolean;
-        hasWebApp: boolean;
-        watermark: boolean;
         createdAt: Date;
         deletedAt: Date | null;
-        botName: string | null;
+        companyId: string;
         description: string | null;
+        isActive: boolean;
+        token: string;
+        username: string | null;
+        hasWebApp: boolean;
+        watermark: boolean;
+        botName: string | null;
         webhookUrl: string | null;
     }>;
     broadcast(req: any, body: {
@@ -111,16 +111,16 @@ export declare class BotsController {
             first_name: string;
         };
         id: string;
-        companyId: string;
-        token: string;
-        username: string | null;
-        isActive: boolean;
-        hasWebApp: boolean;
-        watermark: boolean;
         createdAt: Date;
         deletedAt: Date | null;
-        botName: string | null;
+        companyId: string;
         description: string | null;
+        isActive: boolean;
+        token: string;
+        username: string | null;
+        hasWebApp: boolean;
+        watermark: boolean;
+        botName: string | null;
         webhookUrl: string | null;
     }>;
     testGroup(req: any, type: "log" | "order"): Promise<{
@@ -133,20 +133,20 @@ export declare class BotsController {
         status: "connected" | "stopped" | "not_found";
         company: {
             id: string;
-            name: string;
             slug: string;
+            name: string;
         };
         id: string;
-        companyId: string;
-        token: string;
-        username: string | null;
-        isActive: boolean;
-        hasWebApp: boolean;
-        watermark: boolean;
         createdAt: Date;
         deletedAt: Date | null;
-        botName: string | null;
+        companyId: string;
         description: string | null;
+        isActive: boolean;
+        token: string;
+        username: string | null;
+        hasWebApp: boolean;
+        watermark: boolean;
+        botName: string | null;
         webhookUrl: string | null;
     }[]>;
     adminReloadBot(id: string): Promise<{
@@ -159,16 +159,16 @@ export declare class BotsController {
     }): Promise<{
         status: "connected" | "stopped" | "not_found";
         id: string;
-        companyId: string;
-        token: string;
-        username: string | null;
-        isActive: boolean;
-        hasWebApp: boolean;
-        watermark: boolean;
         createdAt: Date;
         deletedAt: Date | null;
-        botName: string | null;
+        companyId: string;
         description: string | null;
+        isActive: boolean;
+        token: string;
+        username: string | null;
+        hasWebApp: boolean;
+        watermark: boolean;
+        botName: string | null;
         webhookUrl: string | null;
     }>;
     adminHardDeleteBot(id: string): Promise<{

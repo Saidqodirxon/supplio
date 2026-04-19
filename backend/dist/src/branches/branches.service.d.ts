@@ -10,14 +10,14 @@ export declare class BranchesService {
         phone?: string;
     }): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
     findAll(companyId: string): Promise<({
         _count: {
@@ -27,25 +27,25 @@ export declare class BranchesService {
         };
     } & {
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     })[]>;
     findOne(companyId: string, id: string): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
     update(companyId: string, id: string, data: {
         name?: string;
@@ -53,35 +53,35 @@ export declare class BranchesService {
         phone?: string;
     }): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
     remove(companyId: string, id: string, deletedBy: string): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
     restore(companyId: string, id: string): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
 }

@@ -42,6 +42,7 @@ export declare class SuperAdminController {
     downloadBackup(name: string, res: Response): Promise<StreamableFile>;
     getSettings(): Promise<{
         id: string;
+        updatedAt: Date;
         maintenanceMode: boolean;
         backupFrequency: import(".prisma/client").$Enums.BackupFrequency;
         lastBackupAt: Date | null;
@@ -53,7 +54,6 @@ export declare class SuperAdminController {
         globalNotifyRu: string | null;
         globalNotifyEn: string | null;
         globalNotifyTr: string | null;
-        updatedAt: Date;
         termsUz: string | null;
         termsRu: string | null;
         termsEn: string | null;
@@ -69,6 +69,7 @@ export declare class SuperAdminController {
     }>;
     updateSettings(body: any): Promise<{
         id: string;
+        updatedAt: Date;
         maintenanceMode: boolean;
         backupFrequency: import(".prisma/client").$Enums.BackupFrequency;
         lastBackupAt: Date | null;
@@ -80,7 +81,6 @@ export declare class SuperAdminController {
         globalNotifyRu: string | null;
         globalNotifyEn: string | null;
         globalNotifyTr: string | null;
-        updatedAt: Date;
         termsUz: string | null;
         termsRu: string | null;
         termsEn: string | null;
@@ -109,9 +109,8 @@ export declare class SuperAdminController {
             };
         } & {
             id: string;
-            updatedAt: Date;
-            name: string;
             slug: string;
+            name: string;
             logo: string | null;
             website: string | null;
             instagram: string | null;
@@ -123,6 +122,7 @@ export declare class SuperAdminController {
             trialExpiresAt: Date;
             dbConnectionUrl: string | null;
             createdAt: Date;
+            updatedAt: Date;
             deletedAt: Date | null;
             deletedBy: string | null;
             cashbackPercent: number;
@@ -146,8 +146,8 @@ export declare class SuperAdminController {
         }[];
         users: {
             id: string;
-            phone: string;
             isActive: boolean;
+            phone: string;
             fullName: string;
             roleType: import(".prisma/client").$Enums.RoleType;
         }[];
@@ -158,9 +158,8 @@ export declare class SuperAdminController {
         };
     } & {
         id: string;
-        updatedAt: Date;
-        name: string;
         slug: string;
+        name: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
@@ -172,6 +171,7 @@ export declare class SuperAdminController {
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
         createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
@@ -185,9 +185,8 @@ export declare class SuperAdminController {
     }>;
     updateCompany(id: string, body: any): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
         slug: string;
+        name: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
@@ -199,6 +198,7 @@ export declare class SuperAdminController {
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
         createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
@@ -212,9 +212,8 @@ export declare class SuperAdminController {
     }>;
     deleteCompany(id: string, req: any): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
         slug: string;
+        name: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
@@ -226,6 +225,7 @@ export declare class SuperAdminController {
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
         createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
@@ -242,9 +242,8 @@ export declare class SuperAdminController {
         status: string;
     }): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
         slug: string;
+        name: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
@@ -256,6 +255,7 @@ export declare class SuperAdminController {
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
         createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
@@ -273,9 +273,8 @@ export declare class SuperAdminController {
         status?: string;
     }): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
         slug: string;
+        name: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
@@ -287,6 +286,7 @@ export declare class SuperAdminController {
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
         createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
@@ -302,9 +302,8 @@ export declare class SuperAdminController {
         status: string;
     }): Promise<{
         id: string;
-        updatedAt: Date;
-        name: string;
         slug: string;
+        name: string;
         logo: string | null;
         website: string | null;
         instagram: string | null;
@@ -316,6 +315,7 @@ export declare class SuperAdminController {
         trialExpiresAt: Date;
         dbConnectionUrl: string | null;
         createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
         cashbackPercent: number;
@@ -329,8 +329,8 @@ export declare class SuperAdminController {
     }>;
     getNews(): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         slugUz: string;
         slugRu: string;
         slugEn: string;
@@ -358,8 +358,8 @@ export declare class SuperAdminController {
     }[]>;
     createNews(req: any, body: any): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         slugUz: string;
         slugRu: string;
         slugEn: string;
@@ -387,8 +387,8 @@ export declare class SuperAdminController {
     }>;
     updateNews(id: string, body: any): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         slugUz: string;
         slugRu: string;
         slugEn: string;
@@ -416,8 +416,8 @@ export declare class SuperAdminController {
     }>;
     deleteNews(id: string): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         slugUz: string;
         slugRu: string;
         slugEn: string;
@@ -452,8 +452,8 @@ export declare class SuperAdminController {
         items: ({
             users: {
                 id: string;
-                phone: string;
                 isActive: boolean;
+                phone: string;
                 fullName: string;
             }[];
             _count: {
@@ -463,9 +463,8 @@ export declare class SuperAdminController {
             };
         } & {
             id: string;
-            updatedAt: Date;
-            name: string;
             slug: string;
+            name: string;
             logo: string | null;
             website: string | null;
             instagram: string | null;
@@ -477,6 +476,7 @@ export declare class SuperAdminController {
             trialExpiresAt: Date;
             dbConnectionUrl: string | null;
             createdAt: Date;
+            updatedAt: Date;
             deletedAt: Date | null;
             deletedBy: string | null;
             cashbackPercent: number;
@@ -504,9 +504,8 @@ export declare class SuperAdminController {
     }): Promise<{
         company: {
             id: string;
-            updatedAt: Date;
-            name: string;
             slug: string;
+            name: string;
             logo: string | null;
             website: string | null;
             instagram: string | null;
@@ -518,6 +517,7 @@ export declare class SuperAdminController {
             trialExpiresAt: Date;
             dbConnectionUrl: string | null;
             createdAt: Date;
+            updatedAt: Date;
             deletedAt: Date | null;
             deletedBy: string | null;
             cashbackPercent: number;
@@ -563,8 +563,8 @@ export declare class SuperAdminController {
     }>;
     getTariffs(): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         price: string;
         isActive: boolean;
         order: number;
@@ -597,8 +597,8 @@ export declare class SuperAdminController {
     }[]>;
     createTariff(body: any): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         price: string;
         isActive: boolean;
         order: number;
@@ -631,8 +631,8 @@ export declare class SuperAdminController {
     }>;
     updateTariff(id: string, body: any): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         price: string;
         isActive: boolean;
         order: number;
@@ -665,8 +665,8 @@ export declare class SuperAdminController {
     }>;
     deleteTariff(id: string): Promise<{
         id: string;
-        updatedAt: Date;
         createdAt: Date;
+        updatedAt: Date;
         price: string;
         isActive: boolean;
         order: number;
@@ -706,11 +706,11 @@ export declare class SuperAdminController {
         } & {
             id: string;
             createdAt: Date;
-            userId: string | null;
             action: string;
             resource: string | null;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             ip: string | null;
+            userId: string | null;
         })[];
         total: number;
         page: number;
@@ -722,8 +722,8 @@ export declare class SuperAdminController {
             id: string;
             createdAt: Date;
             deletedAt: Date | null;
-            phone: string;
             status: string;
+            phone: string;
             fullName: string;
         }[];
         total: number;
@@ -738,8 +738,8 @@ export declare class SuperAdminController {
         id: string;
         createdAt: Date;
         deletedAt: Date | null;
-        phone: string;
         status: string;
+        phone: string;
         fullName: string;
     }>;
     deleteLead(id: string): Promise<{
@@ -747,8 +747,8 @@ export declare class SuperAdminController {
         id: string;
         createdAt: Date;
         deletedAt: Date | null;
-        phone: string;
         status: string;
+        phone: string;
         fullName: string;
     }>;
     getFeatures(): Promise<{
@@ -792,8 +792,8 @@ export declare class SuperAdminController {
     getReleaseNotes(): Promise<{
         id: string;
         createdAt: Date;
-        version: string;
         title: string;
+        version: string;
         content: string;
     }[]>;
     createReleaseNote(body: {
@@ -803,15 +803,15 @@ export declare class SuperAdminController {
     }): Promise<{
         id: string;
         createdAt: Date;
-        version: string;
         title: string;
+        version: string;
         content: string;
     }>;
     deleteReleaseNote(id: string): Promise<{
         id: string;
         createdAt: Date;
-        version: string;
         title: string;
+        version: string;
         content: string;
     }>;
     createUpgradeRequest(body: any, req: any): Promise<any>;

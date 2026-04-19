@@ -11,16 +11,16 @@ export declare class PaymentsService {
         branchId?: string;
     }): Promise<{
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
-        branchId: string | null;
+        companyId: string;
         note: string | null;
         dealerId: string;
+        branchId: string | null;
         amount: number;
-        reference: string | null;
         method: string;
+        reference: string | null;
     }>;
     createAdjustment(companyId: string, data: {
         dealerId: string;
@@ -42,16 +42,16 @@ export declare class PaymentsService {
         };
     } & {
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
-        branchId: string | null;
+        companyId: string;
         note: string | null;
         dealerId: string;
+        branchId: string | null;
         amount: number;
-        reference: string | null;
         method: string;
+        reference: string | null;
     })[]>;
     getDealerDebt(companyId: string, dealerId: string): Promise<{
         dealerId: string;

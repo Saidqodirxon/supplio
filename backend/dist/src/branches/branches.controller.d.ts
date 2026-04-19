@@ -8,14 +8,14 @@ export declare class BranchesController {
         phone?: string;
     }): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
     findAll(req: any): Promise<({
         _count: {
@@ -25,25 +25,25 @@ export declare class BranchesController {
         };
     } & {
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     })[]>;
     findOne(req: any, id: string): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
     update(req: any, id: string, body: {
         name?: string;
@@ -51,35 +51,35 @@ export declare class BranchesController {
         phone?: string;
     }): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
     restore(req: any, id: string): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
     remove(req: any, id: string): Promise<{
         id: string;
-        companyId: string;
-        createdAt: Date;
-        deletedAt: Date | null;
         name: string;
+        createdAt: Date;
         updatedAt: Date;
+        deletedAt: Date | null;
         deletedBy: string | null;
-        address: string | null;
+        companyId: string;
         phone: string | null;
+        address: string | null;
     }>;
 }

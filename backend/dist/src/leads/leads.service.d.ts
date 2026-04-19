@@ -14,8 +14,8 @@ export declare class LeadsService {
         id: string;
         createdAt: Date;
         deletedAt: Date | null;
-        phone: string;
         status: string;
+        phone: string;
         fullName: string;
     }>;
     getAllLeads(): Promise<{
@@ -23,8 +23,8 @@ export declare class LeadsService {
         id: string;
         createdAt: Date;
         deletedAt: Date | null;
-        phone: string;
         status: string;
+        phone: string;
         fullName: string;
     }[]>;
     updateLeadStatus(id: string, status: string): Promise<{
@@ -32,8 +32,8 @@ export declare class LeadsService {
         id: string;
         createdAt: Date;
         deletedAt: Date | null;
-        phone: string;
         status: string;
+        phone: string;
         fullName: string;
     }>;
 }

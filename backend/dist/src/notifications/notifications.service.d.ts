@@ -14,16 +14,16 @@ export declare class NotificationService {
         type?: string;
     }): Promise<{
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        type: string;
+        companyId: string;
+        title: string;
         message: string;
+        isRead: boolean;
+        type: string;
         senderId: string | null;
         receiverUserId: string | null;
         receiverDealerId: string | null;
-        title: string;
-        isRead: boolean;
     }>;
     createForDealer(params: {
         companyId: string;
@@ -34,16 +34,16 @@ export declare class NotificationService {
         type?: string;
     }): Promise<{
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        type: string;
+        companyId: string;
+        title: string;
         message: string;
+        isRead: boolean;
+        type: string;
         senderId: string | null;
         receiverUserId: string | null;
         receiverDealerId: string | null;
-        title: string;
-        isRead: boolean;
     }>;
     broadcastToCompany(params: {
         companyId: string;
@@ -60,16 +60,16 @@ export declare class NotificationService {
             };
         } & {
             id: string;
-            companyId: string;
             createdAt: Date;
             deletedAt: Date | null;
-            type: string;
+            companyId: string;
+            title: string;
             message: string;
+            isRead: boolean;
+            type: string;
             senderId: string | null;
             receiverUserId: string | null;
             receiverDealerId: string | null;
-            title: string;
-            isRead: boolean;
         })[];
         total: number;
         unreadCount: number;
@@ -81,14 +81,14 @@ export declare class NotificationService {
     getUnreadCount(userId: string, companyId: string): Promise<number>;
     getTemplates(companyId: string): Promise<{
         id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
         companyId: string;
         isActive: boolean;
-        createdAt: Date;
-        deletedAt: Date | null;
-        name: string;
-        updatedAt: Date;
-        type: string;
         message: import("@prisma/client/runtime/library").JsonValue;
+        type: string;
     }[]>;
     createTemplate(companyId: string, body: {
         name: string;
@@ -97,14 +97,14 @@ export declare class NotificationService {
         isActive?: boolean;
     }): Promise<{
         id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
         companyId: string;
         isActive: boolean;
-        createdAt: Date;
-        deletedAt: Date | null;
-        name: string;
-        updatedAt: Date;
-        type: string;
         message: import("@prisma/client/runtime/library").JsonValue;
+        type: string;
     }>;
     updateTemplate(companyId: string, id: string, body: {
         name?: string;
@@ -119,8 +119,8 @@ export declare class NotificationService {
         };
     } & {
         id: string;
-        companyId: string;
         createdAt: Date;
+        companyId: string;
         status: string;
         dealerId: string | null;
         message: string;

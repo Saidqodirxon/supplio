@@ -108,6 +108,30 @@ export class PrismaService
    */
   private async _applySchemaPatches() {
     const patches: string[] = [
+      // 2026-04-20: global system settings text columns may be missing on older DBs
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "maintenanceMode" BOOLEAN DEFAULT FALSE`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "backupFrequency" TEXT DEFAULT 'DAILY'`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "lastBackupAt" TIMESTAMP(3)`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "defaultTrialDays" INTEGER DEFAULT 14`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "newsEnabled" BOOLEAN DEFAULT TRUE`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "superAdminPhone" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "systemVersion" TEXT DEFAULT '1.0.0'`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "globalNotifyUz" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "globalNotifyRu" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "globalNotifyEn" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "globalNotifyTr" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "termsUz" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "termsRu" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "termsEn" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "termsUzCyr" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "privacyUz" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "privacyRu" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "privacyEn" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "privacyUzCyr" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "contractUz" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "contractRu" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "contractEn" TEXT`,
+      `ALTER TABLE "SystemSettings" ADD COLUMN IF NOT EXISTS "contractUzCyr" TEXT`,
       // 2026-04-13: dealer registration extra fields
       `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "region" TEXT`,
       `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "district" TEXT`,

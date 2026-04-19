@@ -11,8 +11,8 @@ export declare class LeadsController {
         id: string;
         createdAt: Date;
         deletedAt: Date | null;
-        phone: string;
         status: string;
+        phone: string;
         fullName: string;
     }>;
     findAll(): Promise<{
@@ -20,8 +20,8 @@ export declare class LeadsController {
         id: string;
         createdAt: Date;
         deletedAt: Date | null;
-        phone: string;
         status: string;
+        phone: string;
         fullName: string;
     }[]>;
     updateStatus(id: string, status: string): Promise<{
@@ -29,8 +29,8 @@ export declare class LeadsController {
         id: string;
         createdAt: Date;
         deletedAt: Date | null;
-        phone: string;
         status: string;
+        phone: string;
         fullName: string;
     }>;
 }

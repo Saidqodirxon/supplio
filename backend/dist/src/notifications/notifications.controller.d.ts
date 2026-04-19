@@ -23,16 +23,16 @@ export declare class NotificationsController {
             };
         } & {
             id: string;
-            companyId: string;
             createdAt: Date;
             deletedAt: Date | null;
-            type: string;
+            companyId: string;
+            title: string;
             message: string;
+            isRead: boolean;
+            type: string;
             senderId: string | null;
             receiverUserId: string | null;
             receiverDealerId: string | null;
-            title: string;
-            isRead: boolean;
         })[];
         total: number;
         unreadCount: number;
@@ -53,19 +53,19 @@ export declare class NotificationsController {
         message: string;
         type?: string;
         receiverDealerId?: string;
-    }): Promise<import(".prisma/client").Prisma.BatchPayload | {
+    }): Promise<{
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        type: string;
+        companyId: string;
+        title: string;
         message: string;
+        isRead: boolean;
+        type: string;
         senderId: string | null;
         receiverUserId: string | null;
         receiverDealerId: string | null;
-        title: string;
-        isRead: boolean;
-    }>;
+    } | import(".prisma/client").Prisma.BatchPayload>;
     sendToUser(req: AuthenticatedRequest, body: {
         receiverUserId: string;
         title: string;
@@ -73,16 +73,16 @@ export declare class NotificationsController {
         type?: string;
     }): Promise<{
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        type: string;
+        companyId: string;
+        title: string;
         message: string;
+        isRead: boolean;
+        type: string;
         senderId: string | null;
         receiverUserId: string | null;
         receiverDealerId: string | null;
-        title: string;
-        isRead: boolean;
     }>;
     broadcast(req: AuthenticatedRequest, body: {
         title: string;
@@ -91,14 +91,14 @@ export declare class NotificationsController {
     }): Promise<import(".prisma/client").Prisma.BatchPayload>;
     getTemplates(req: AuthenticatedRequest): Promise<{
         id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
         companyId: string;
         isActive: boolean;
-        createdAt: Date;
-        deletedAt: Date | null;
-        name: string;
-        updatedAt: Date;
-        type: string;
         message: import("@prisma/client/runtime/library").JsonValue;
+        type: string;
     }[]>;
     createTemplate(req: AuthenticatedRequest, body: {
         name: string;
@@ -107,14 +107,14 @@ export declare class NotificationsController {
         isActive?: boolean;
     }): Promise<{
         id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
         companyId: string;
         isActive: boolean;
-        createdAt: Date;
-        deletedAt: Date | null;
-        name: string;
-        updatedAt: Date;
-        type: string;
         message: import("@prisma/client/runtime/library").JsonValue;
+        type: string;
     }>;
     updateTemplate(req: AuthenticatedRequest, id: string, body: {
         name?: string;
@@ -129,8 +129,8 @@ export declare class NotificationsController {
         };
     } & {
         id: string;
-        companyId: string;
         createdAt: Date;
+        companyId: string;
         status: string;
         dealerId: string | null;
         message: string;

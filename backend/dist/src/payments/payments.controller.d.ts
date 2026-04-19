@@ -4,16 +4,16 @@ export declare class PaymentsController {
     constructor(paymentsService: PaymentsService);
     create(req: any, body: any): Promise<{
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
-        branchId: string | null;
+        companyId: string;
         note: string | null;
         dealerId: string;
+        branchId: string | null;
         amount: number;
-        reference: string | null;
         method: string;
+        reference: string | null;
     }>;
     createAdjustment(req: any, body: any): Promise<{
         success: boolean;
@@ -30,16 +30,16 @@ export declare class PaymentsController {
         };
     } & {
         id: string;
-        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
-        branchId: string | null;
+        companyId: string;
         note: string | null;
         dealerId: string;
+        branchId: string | null;
         amount: number;
-        reference: string | null;
         method: string;
+        reference: string | null;
     })[]>;
     getDealerDebt(req: any, dealerId: string): Promise<{
         dealerId: string;
