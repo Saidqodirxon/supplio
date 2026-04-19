@@ -14,6 +14,7 @@ RESET="\033[0m"
 log()  { echo -e "${CYAN}[SYNC]${RESET}   $1"; }
 ok()   { echo -e "${GREEN}[OK]${RESET}    $1"; }
 warn() { echo -e "${YELLOW}[WARN]${RESET}  $1"; }
+fail() { echo -e "${RED}[ERROR]${RESET} $1"; exit 1; }
 
 # 1. Local DB ma'lumotlari
 # .env dagi DATABASE_URL bo'lsa o'shani olamiz, bo'lmasa fallback URL ishlatamiz.
@@ -33,38 +34,33 @@ BACKUP_FILE="db_backup_selective.sql"
 
 log "Selektiv ma'lumotlar bazasi barkarorlanmoqda (tarifflar ISTISNO)..."
 
-# ============================================================
-# Exclude tables (bu tablalarni SAQLAMIZ, dump-ga kiritmaymiz):
-# ============================================================
-# EXCLUDE_TABLES:
-#   - tariffs: tarif ma'lumotlari (saqlanadi)
-#   - orders: buyurtmalar (saqlanadi)
-#   - transactions: tranzaksiyalar (saqlanadi)
-#   - invoices: hisob-kitoblar (saqlanadi)
-#   - notifications: bildirishnomalar (saqlanadi)
-# 
-# INCLUDE (dump-ga kiritiladi):
-#   - categories: kategoriyalar
-#   - units: o'lchov birliklari
-#   - company_settings: kompaniya sozlamalari
-#   - terms: shartlar va yo'riqnomalar
-#   - support_contacts: qo'llab-quvvatlash aloqalari
-#   - system_settings: global sozlamalar
-# ============================================================
+# Faqat kerakli mock/settings tablalarni ko'chiramiz (orders/tariffs umuman dump qilinmaydi).
+TABLE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_name)
+FROM information_schema.tables
+WHERE table_schema = 'public'
+    AND table_name IN (
+        'system_settings','categories','units','support_contacts','company_settings',
+        'SystemSettings','Category','Unit','SupportContact','CompanySettings'
+    )
+ORDER BY 1;"
 
-# pg_dump bilan exclude qilish
+TABLE_LIST=$(psql "$DB_URL_CLEAN" -At -c "$TABLE_QUERY" 2>/dev/null)
+
+if [ -z "$TABLE_LIST" ]; then
+        fail "Ko'chirish uchun mos table topilmadi. DB nomi/yoki schema ni tekshiring."
+fi
+
+TABLE_ARGS=()
+while IFS= read -r tbl; do
+        [ -n "$tbl" ] && TABLE_ARGS+=("--table=$tbl")
+done <<< "$TABLE_LIST"
+
 pg_dump \
-  --clean \
-  --if-exists \
-  --no-owner \
-  --no-privileges \
-  --exclude-table-data=tariffs \
-  --exclude-table-data=orders \
-  --exclude-table-data=transactions \
-  --exclude-table-data=invoices \
-  --exclude-table-data=notifications \
-  --exclude-table-data=analytics \
-  --exclude-table-data=dealer_activity \
+    --data-only \
+    --disable-triggers \
+    --no-owner \
+    --no-privileges \
+    "${TABLE_ARGS[@]}" \
     -d "$DB_URL_CLEAN" > "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then

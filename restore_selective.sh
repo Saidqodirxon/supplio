@@ -74,6 +74,24 @@ export PGPASSWORD="$DB_PASS"
 
 log "Ma'lumotlar bazasi tiklanmoqda..."
 
+# Faqat selektiv import qilinadigan tablalarni oldindan tozalaymiz.
+TRUNCATE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_name)
+FROM information_schema.tables
+WHERE table_schema = 'public'
+    AND table_name IN (
+        'system_settings','categories','units','support_contacts','company_settings',
+        'SystemSettings','Category','Unit','SupportContact','CompanySettings'
+    )
+ORDER BY 1;"
+
+TRUNCATE_TABLES=$(psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" --no-password -At -c "$TRUNCATE_QUERY" 2>/dev/null)
+
+if [ -n "$TRUNCATE_TABLES" ]; then
+        while IFS= read -r tbl; do
+                [ -n "$tbl" ] && psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" --no-password -c "TRUNCATE TABLE $tbl CASCADE;" >/dev/null 2>&1
+        done <<< "$TRUNCATE_TABLES"
+fi
+
 if psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
     --no-password -f db_backup_selective.sql > /dev/null 2>&1; then
     ok "Ma'lumotlar bazasi muvaffaqiyatli tikland!"
