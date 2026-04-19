@@ -10,9 +10,13 @@ export class MaintenanceMiddleware implements NestMiddleware {
   constructor(private prisma: PrismaService) {}
 
   async use(req: any, res: any, next: () => void) {
-    const settings = await this.prisma.systemSettings.findUnique({
-      where: { id: "GLOBAL" },
-    });
+    const rows = await this.prisma.$queryRawUnsafe<Array<{ maintenanceMode: boolean | null }>>(
+      `SELECT "maintenanceMode"
+       FROM "SystemSettings"
+       WHERE id = 'GLOBAL'
+       LIMIT 1`
+    );
+    const settings = rows[0] ?? null;
 
     if (settings?.maintenanceMode) {
       // Allow SuperAdmins even in maintenance mode if needed

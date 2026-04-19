@@ -13,8 +13,14 @@ exports.DemoReadonlyMiddleware = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_service_1 = require("../../prisma/prisma.service");
-const DEMO_VIEWER_PHONE = "+998901000000";
-const SAFE_MUTATING_PATH_PREFIXES = [
+const BLOCKED_PATTERNS = [
+    "/api/auth/change-password",
+    "/api/auth/password",
+    "/api/profile/password",
+    "/api/company/me",
+    "/api/telegram/bots",
+];
+const ALWAYS_ALLOWED = [
     "/api/auth/login",
     "/api/leads",
     "/api/demo/access",
@@ -30,7 +36,7 @@ let DemoReadonlyMiddleware = class DemoReadonlyMiddleware {
             return next();
         }
         const path = String(req.originalUrl || req.url || "").split("?")[0];
-        if (SAFE_MUTATING_PATH_PREFIXES.some((prefix) => path.startsWith(prefix))) {
+        if (ALWAYS_ALLOWED.some((prefix) => path.startsWith(prefix))) {
             return next();
         }
         const authHeader = String(req.headers?.authorization || "");
@@ -42,28 +48,26 @@ let DemoReadonlyMiddleware = class DemoReadonlyMiddleware {
             const payload = this.jwtService.verify(token, {
                 secret: process.env.JWT_SECRET || "secretKey",
             });
-            if (!payload?.sub) {
+            if (!payload?.sub)
                 return next();
-            }
             const user = await this.prisma.user.findUnique({
                 where: { id: payload.sub },
-                select: {
-                    phone: true,
-                    company: { select: { isDemo: true } },
-                },
+                select: { company: { select: { isDemo: true } } },
             });
-            if (!user?.company?.isDemo) {
+            if (!user?.company?.isDemo)
                 return next();
+            const isBlocked = BLOCKED_PATTERNS.some((p) => path.includes(p));
+            if (isBlocked) {
+                throw new common_1.ForbiddenException("Demo rejimida bu amalni bajarib bo'lmaydi. Parolni, bot va tashkilot sozlamalarini o'zgartirish cheklangan.");
             }
-            if (user.phone === DEMO_VIEWER_PHONE) {
-                throw new common_1.ForbiddenException("DEMO_READ_ONLY: Bu demo akkaunt faqat ko'rish uchun. Edit/Create uchun demo so'rov yuboring.");
+            if (method === "DELETE" && path.includes("/api/telegram")) {
+                throw new common_1.ForbiddenException("Demo rejimida bot o'chirib bo'lmaydi.");
             }
             return next();
         }
         catch (error) {
-            if (error instanceof common_1.ForbiddenException) {
+            if (error instanceof common_1.ForbiddenException)
                 throw error;
-            }
             return next();
         }
     }

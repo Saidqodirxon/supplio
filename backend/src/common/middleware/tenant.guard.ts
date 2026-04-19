@@ -42,9 +42,13 @@ export class TenantGuard implements CanActivate {
     }
 
     // 1. Check Global System Maintenance (Enterprise Requirement 4)
-    const settings = await this.prisma.systemSettings.findUnique({
-      where: { id: "GLOBAL" },
-    });
+    const rows = await this.prisma.$queryRawUnsafe<Array<{ maintenanceMode: boolean | null }>>(
+      `SELECT "maintenanceMode"
+       FROM "SystemSettings"
+       WHERE id = 'GLOBAL'
+       LIMIT 1`
+    );
+    const settings = rows[0] ?? null;
     if (settings?.maintenanceMode && user.roleType !== "SUPER_ADMIN") {
       throw new ServiceUnavailableException(
         "SYSTEM_MAINTENANCE: Try again in 30 minutes."

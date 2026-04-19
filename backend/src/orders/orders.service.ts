@@ -273,6 +273,7 @@ export class OrdersService {
     companyId: string,
     id: string,
     status: string,
+    subStatus?: string,
     actor?: { id?: string; phone?: string; roleType?: string }
   ) {
     const prev = await this.prisma.order.findFirst({
@@ -283,12 +284,12 @@ export class OrdersService {
 
     const order = await this.prisma.order.update({
       where: { id, companyId },
-      data: { status: status as any },
+      data: { status: status as any, subStatus },
     });
 
     // Notify dealer via Telegram (fire-and-forget)
     this.telegramService
-      .sendOrderStatusUpdate(companyId, id, status, order.dealerId)
+      .sendOrderStatusUpdate(companyId, id, status, order.dealerId, subStatus)
       .catch(() => {});
 
     // Distributor log group: only order status changes + who/when edited

@@ -32,7 +32,7 @@ type Lang = keyof typeof T;
 
 function getPublicStoreBaseUrl() {
   return (
-    import.meta.env.VITE_PUBLIC_STORE_BASE_URL || window.location.origin
+    import.meta.env.VITE_PUBLIC_STORE_BASE_URL || "https://supplio.uz"
   ).replace(/\/+$/, "");
 }
 

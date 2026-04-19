@@ -28,8 +28,14 @@ let PublicController = class PublicController {
     getContent() {
         return this.publicService.getContent();
     }
+    getNewsList(lang = "uz", limit) {
+        return this.publicService.getNewsList(lang, limit ? Number(limit) : 20);
+    }
     getNews(slug, lang = "uz") {
         return this.publicService.getNewsBySlug(slug, lang);
+    }
+    getLegal(type, lang = "uz") {
+        return this.publicService.getLegalContent(type, lang);
     }
     incrementView(id) {
         return this.publicService.incrementNewsView(id);
@@ -55,6 +61,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], PublicController.prototype, "getContent", null);
 __decorate([
+    (0, common_1.Get)("news"),
+    __param(0, (0, common_1.Query)("lang")),
+    __param(1, (0, common_1.Query)("limit")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PublicController.prototype, "getNewsList", null);
+__decorate([
     (0, common_1.Get)("news/:slug"),
     __param(0, (0, common_1.Param)("slug")),
     __param(1, (0, common_1.Query)("lang")),
@@ -62,6 +76,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], PublicController.prototype, "getNews", null);
+__decorate([
+    (0, common_1.Get)("legal/:type"),
+    __param(0, (0, common_1.Param)("type")),
+    __param(1, (0, common_1.Query)("lang")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], PublicController.prototype, "getLegal", null);
 __decorate([
     (0, common_1.Post)("news/:id/view"),
     __param(0, (0, common_1.Param)("id")),

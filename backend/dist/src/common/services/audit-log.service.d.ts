@@ -11,11 +11,11 @@ export declare class AuditLogService {
     }): Promise<{
         id: string;
         createdAt: Date;
-        action: string;
-        resource: string | null;
-        metadata: import("@prisma/client/runtime/library").JsonValue | null;
         ip: string | null;
+        resource: string | null;
+        action: string;
         userId: string | null;
+        metadata: import("@prisma/client/runtime/library").JsonValue | null;
     }>;
     getLogs(filters: {
         userId?: string;
@@ -24,28 +24,28 @@ export declare class AuditLogService {
     }): Promise<({
         user: {
             id: string;
+            companyId: string;
+            isActive: boolean;
             createdAt: Date;
-            updatedAt: Date;
             deletedAt: Date | null;
+            updatedAt: Date;
             deletedBy: string | null;
             phone: string;
-            companyId: string;
+            branchId: string | null;
             passwordHash: string;
             fullName: string | null;
             photoUrl: string | null;
             roleType: import(".prisma/client").$Enums.RoleType;
-            isActive: boolean;
             language: string;
-            branchId: string | null;
             customRoleId: string | null;
         };
     } & {
         id: string;
         createdAt: Date;
-        action: string;
-        resource: string | null;
-        metadata: import("@prisma/client/runtime/library").JsonValue | null;
         ip: string | null;
+        resource: string | null;
+        action: string;
         userId: string | null;
+        metadata: import("@prisma/client/runtime/library").JsonValue | null;
     })[]>;
 }

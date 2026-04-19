@@ -678,6 +678,8 @@ export default function Staff() {
     customRoleId: "",
   });
   const [editForm, setEditForm] = useState({
+    phone: "",
+    fullName: "",
     roleType: "SALES",
     branchId: "",
     customRoleId: "",
@@ -796,6 +798,8 @@ export default function Staff() {
   const openEditStaff = (member: StaffMember) => {
     setEditStaffId(member.id);
     setEditForm({
+      phone: member.phone,
+      fullName: member.fullName || "",
       roleType: member.roleType,
       branchId: member.branchId || "",
       customRoleId: member.customRoleId || "",
@@ -808,6 +812,8 @@ export default function Staff() {
     try {
       setSaving(true);
       await api.patch(`/company/users/${editStaffId}`, {
+        phone: editForm.phone || undefined,
+        fullName: editForm.fullName || undefined,
         roleType: editForm.roleType,
         branchId: editForm.branchId || undefined,
         customRoleId: editForm.customRoleId || undefined,
@@ -1484,6 +1490,30 @@ export default function Staff() {
                     onSubmit={handleEditStaff}
                     className="overflow-y-auto flex-1 px-6 py-5 space-y-4"
                   >
+                    {/* FullName */}
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
+                        {tx("fullName", lang)}
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.fullName}
+                        onChange={(e) => setEditForm((f) => ({ ...f, fullName: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
+                      />
+                    </div>
+                    {/* Phone */}
+                    <div>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">
+                        {tx("phone", lang)}
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.phone}
+                        onChange={(e) => setEditForm((f) => ({ ...f, phone: e.target.value }))}
+                        className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
+                      />
+                    </div>
                     {/* Role */}
                     <div>
                       <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">

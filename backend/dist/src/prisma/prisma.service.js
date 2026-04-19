@@ -89,6 +89,12 @@ let PrismaService = class PrismaService extends client_1.PrismaClient {
             `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "district" TEXT`,
             `ALTER TABLE "Dealer" ADD COLUMN IF NOT EXISTS "contactPhone" TEXT`,
             `ALTER TABLE "SupportMessage" ADD COLUMN IF NOT EXISTS "imageUrl" TEXT`,
+            `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "contactPhone" TEXT`,
+            `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "contactAddress" TEXT`,
+            `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "botPaused" BOOLEAN DEFAULT FALSE`,
+            `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "botAutoSchedule" BOOLEAN DEFAULT TRUE`,
+            `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "logGroupChatId" TEXT`,
+            `ALTER TABLE "Company" ADD COLUMN IF NOT EXISTS "orderGroupChatId" TEXT`,
         ];
         for (const sql of patches) {
             try {

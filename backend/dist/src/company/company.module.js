@@ -12,12 +12,13 @@ const company_controller_1 = require("./company.controller");
 const company_service_1 = require("./company.service");
 const prisma_module_1 = require("../prisma/prisma.module");
 const plan_limits_service_1 = require("../common/services/plan-limits.service");
+const telegram_module_1 = require("../telegram/telegram.module");
 let CompanyModule = class CompanyModule {
 };
 exports.CompanyModule = CompanyModule;
 exports.CompanyModule = CompanyModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule],
+        imports: [prisma_module_1.PrismaModule, telegram_module_1.TelegramModule],
         controllers: [company_controller_1.CompanyController],
         providers: [company_service_1.CompanyService, plan_limits_service_1.PlanLimitsService],
     })

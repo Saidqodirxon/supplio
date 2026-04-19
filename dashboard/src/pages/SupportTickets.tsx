@@ -159,7 +159,7 @@ export default function SupportTickets() {
             Murojaatlar va Qo'llab-quvvatlash
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
-            Super dmin bilan bog'lanish va savollaringizga javob olish
+            Super admin bilan bog'lanish va savollaringizga javob olish
           </p>
         </div>
         <button

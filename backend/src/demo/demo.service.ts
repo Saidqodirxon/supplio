@@ -72,9 +72,9 @@ export class DemoService {
       .catch(() => {});
   }
 
-  @Cron("0 0 */2 * *")
+  @Cron("0 0 */3 * *")
   async handleDailyReset() {
-    this.logger.log("CRON: Starting Demo Environment Reset (every 2 days)...");
+    this.logger.log("CRON: Starting Demo Environment Reset (every 3 days)...");
 
     const demoCompanies = await this.prisma.company.findMany({
       where: { isDemo: true },

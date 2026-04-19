@@ -23,6 +23,9 @@ export declare class TelegramService implements OnModuleInit {
     private buildLanguageKeyboard;
     private buildMainMenuKeyboard;
     private buildAdminMenuKeyboard;
+    private isWithinWorkingHours;
+    private buildWorkingHoursText;
+    private buildClosedMessage;
     initBot(botId: string, companyId: string, token: string, companyName: string): Promise<void>;
     private handleDebt;
     private handleProducts;
@@ -39,8 +42,10 @@ export declare class TelegramService implements OnModuleInit {
         sent: number;
         failed: number;
     }>;
-    sendOrderStatusUpdate(companyId: string, orderId: string, newStatus: string, dealerId: string): Promise<void>;
+    sendOrderStatusUpdate(companyId: string, orderId: string, newStatus: string, dealerId: string, subStatus?: string): Promise<void>;
     private handleHelp;
+    private resolveChatId;
+    applyBotBranding(botToken: string, companyId: string): Promise<Record<string, string>>;
     private getDealerByChatId;
     private progressBar;
     getBot(botId: string): Telegraf | undefined;
@@ -148,6 +153,31 @@ export declare class TelegramService implements OnModuleInit {
         description: string | null;
         webhookUrl: string | null;
     }[]>;
+    adminReloadBot(botId: string): Promise<{
+        success: boolean;
+        status: "connected" | "stopped" | "not_found";
+    }>;
+    adminHardDeleteBot(botId: string): Promise<{
+        success: boolean;
+    }>;
+    adminUpdateBot(botId: string, data: {
+        token?: string;
+        isActive?: boolean;
+    }): Promise<{
+        status: "connected" | "stopped" | "not_found";
+        id: string;
+        companyId: string;
+        token: string;
+        username: string | null;
+        isActive: boolean;
+        hasWebApp: boolean;
+        watermark: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        botName: string | null;
+        description: string | null;
+        webhookUrl: string | null;
+    }>;
     notifyDealerApprovalResult(companyId: string, dealerId: string, approved: boolean): Promise<void>;
     stopAll(): Promise<void>;
 }

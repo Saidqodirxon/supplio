@@ -29,6 +29,10 @@ model SystemSettings {
   privacyRu        String?
   privacyEn        String?
   privacyUzCyr     String?
+  contractUz       String?
+  contractRu       String?
+  contractEn       String?
+  contractUzCyr    String?
 }
 
 model Company {
@@ -50,6 +54,8 @@ model Company {
   deletedAt             DateTime?
   deletedBy             String?
   cashbackPercent       Float                   @default(0)
+  preparingVariants     Json?
+  dealerStatusLabels    Json?
   branches              Branch[]
   categories            Category[]
   customBots            CustomBot[]
@@ -277,6 +283,7 @@ model Order {
   totalAmount Float
   totalCost   Float       @default(0)
   status      OrderStatus @default(PENDING)
+  subStatus   String?
   items       Json
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -536,6 +543,23 @@ model Testimonial {
   avatar    String?
   isActive  Boolean  @default(true)
   order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  name      String
+  roleUz    String   @default("")
+  roleRu    String   @default("")
+  roleEn    String   @default("")
+  roleTr    String   @default("")
+  bioUz     String   @default("")
+  bioRu     String   @default("")
+  bioEn     String   @default("")
+  bioTr     String   @default("")
+  avatar    String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 }
 

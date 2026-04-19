@@ -515,4 +515,56 @@ export class SuperAdminController {
   ) {
     return this.superAdminService.updateUpgradeRequest(id, body);
   }
+
+  // ── Testimonials ──────────────────────────────────────────────────────────
+
+  @Get("testimonials")
+  @Roles("SUPER_ADMIN")
+  async getTestimonials() {
+    return this.superAdminService.getTestimonials();
+  }
+
+  @Post("testimonials")
+  @Roles("SUPER_ADMIN")
+  async createTestimonial(@Body() body: any) {
+    return this.superAdminService.createTestimonial(body);
+  }
+
+  @Patch("testimonials/:id")
+  @Roles("SUPER_ADMIN")
+  async updateTestimonial(@Param("id") id: string, @Body() body: any) {
+    return this.superAdminService.updateTestimonial(id, body);
+  }
+
+  @Delete("testimonials/:id")
+  @Roles("SUPER_ADMIN")
+  async deleteTestimonial(@Param("id") id: string) {
+    return this.superAdminService.deleteTestimonial(id);
+  }
+
+  // ── Team Members ──────────────────────────────────────────────────────────
+
+  @Get("team")
+  @Roles("SUPER_ADMIN")
+  async getTeamMembers() {
+    return this.superAdminService.getTeamMembers();
+  }
+
+  @Post("team")
+  @Roles("SUPER_ADMIN")
+  async createTeamMember(@Body() body: any) {
+    return this.superAdminService.createTeamMember(body);
+  }
+
+  @Patch("team/:id")
+  @Roles("SUPER_ADMIN")
+  async updateTeamMember(@Param("id") id: string, @Body() body: any) {
+    return this.superAdminService.updateTeamMember(id, body);
+  }
+
+  @Delete("team/:id")
+  @Roles("SUPER_ADMIN")
+  async deleteTeamMember(@Param("id") id: string) {
+    return this.superAdminService.deleteTeamMember(id);
+  }
 }

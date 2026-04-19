@@ -371,6 +371,27 @@ const MESSAGE_MAP: Record<string, Record<Lang, string>> = {
     tr: "Do'kon o'chirildi",
     oz: 'Дукон учирилди',
   },
+  'Demo rejimida bu amalni bajarib bo\'lmaydi. Parolni, bot va tashkilot sozlamalarini o\'zgartirish cheklangan.': {
+    uz: "Demo rejimida bu amal cheklangan. Bot, parol va sozlamalarni o'zgartirish mumkin emas.",
+    ru: 'В демо-режиме это действие недоступно. Нельзя менять пароль, добавлять ботов и изменять настройки.',
+    en: 'This action is restricted in demo mode. Password, bots, and settings cannot be changed.',
+    tr: "Demo modunda bu işlem kısıtlanmış. Şifre, bot ve ayarlar değiştirilemez.",
+    oz: "Демо режимида бу амал чекланган. Бот, парол ва созламаларни ўзгартириб бўлмайди.",
+  },
+  'Demo rejimida bot o\'chirib bo\'lmaydi.': {
+    uz: "Demo rejimida bot o'chirib bo'lmaydi.",
+    ru: 'В демо-режиме нельзя удалить бота.',
+    en: 'Cannot delete bot in demo mode.',
+    tr: "Demo modunda bot silinemez.",
+    oz: "Демо режимида ботни учириб бўлмайди.",
+  },
+  'Plan limit reached': {
+    uz: "Tarif limiti to'ldi. Tarifni oshiring.",
+    ru: 'Достигнут лимит тарифа. Повысьте тариф.',
+    en: 'Plan limit reached. Please upgrade your plan.',
+    tr: 'Tarif limiti doldu. Tarifı yükseltin.',
+    oz: "Тариф лимити тулди. Тарифни оширинг.",
+  },
 };
 
 function getLanguage(): Lang {

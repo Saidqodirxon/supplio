@@ -17,9 +17,11 @@ let MaintenanceMiddleware = class MaintenanceMiddleware {
         this.prisma = prisma;
     }
     async use(req, res, next) {
-        const settings = await this.prisma.systemSettings.findUnique({
-            where: { id: "GLOBAL" },
-        });
+        const rows = await this.prisma.$queryRawUnsafe(`SELECT "maintenanceMode"
+       FROM "SystemSettings"
+       WHERE id = 'GLOBAL'
+       LIMIT 1`);
+        const settings = rows[0] ?? null;
         if (settings?.maintenanceMode) {
             if (req.user?.roleType === "SUPER_ADMIN") {
                 return next();

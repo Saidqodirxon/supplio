@@ -76,9 +76,128 @@ function normalizeApiBaseUrl(rawUrl?: string) {
   return value.endsWith("/api") ? value.slice(0, -4) : value;
 }
 
+const STORE_TEXTS = {
+  en: {
+    change: "Change",
+    searchPlaceholder: "Search products...",
+    all: "All",
+    noProducts: "No products found",
+    outOfStock: "Out of stock",
+    left: "left",
+    items: "Items:",
+    total: "Total:",
+    creditStatus: "Credit Status",
+    currentDebt: "Current debt:",
+    availableCredit: "Available credit:",
+    confirmOrder: "Confirm Order",
+    checkout: "Checkout",
+    storeUnavailable: "Store unavailable",
+    botRequired: "Please open the Telegram bot to place orders.",
+    openBot: "Open bot",
+    phoneNotFound: "Phone number not found. Please check again.",
+    catalogNotice:
+      "This page is in catalog mode only. You can browse products and prices, but ordering requires Telegram.",
+    debt: "Debt:",
+    limit: "Limit:",
+  },
+  uz: {
+    change: "O'zgartirish",
+    searchPlaceholder: "Mahsulotlarni qidirish...",
+    all: "Barchasi",
+    noProducts: "Mahsulotlar topilmadi",
+    outOfStock: "Tugagan",
+    left: "qoldi",
+    items: "Mahsulotlar:",
+    total: "Jami:",
+    creditStatus: "Kredit holati",
+    currentDebt: "Joriy qarz:",
+    availableCredit: "Mavjud kredit:",
+    confirmOrder: "Buyurtmani tasdiqlash",
+    checkout: "Buyurtma",
+    storeUnavailable: "Do'kon mavjud emas",
+    botRequired: "Buyurtma berish uchun Telegram botni oching.",
+    openBot: "Botni ochish",
+    phoneNotFound: "Telefon raqami topilmadi. Qayta tekshiring.",
+    catalogNotice:
+      "Bu sahifa faqat katalog rejimida ishlaydi. Mahsulot va narxlarni ko'rasiz, buyurtma uchun Telegram kerak.",
+    debt: "Qarz:",
+    limit: "Limit:",
+  },
+  ru: {
+    change: "Изменить",
+    searchPlaceholder: "Поиск товаров...",
+    all: "Все",
+    noProducts: "Товары не найдены",
+    outOfStock: "Нет в наличии",
+    left: "осталось",
+    items: "Позиций:",
+    total: "Итого:",
+    creditStatus: "Статус кредита",
+    currentDebt: "Текущий долг:",
+    availableCredit: "Доступный кредит:",
+    confirmOrder: "Подтвердить заказ",
+    checkout: "Оформление",
+    storeUnavailable: "Магазин недоступен",
+    botRequired: "Чтобы оформить заказ, откройте Telegram-бот.",
+    openBot: "Открыть бот",
+    phoneNotFound: "Номер телефона не найден. Проверьте ещё раз.",
+    catalogNotice:
+      "Эта страница работает только в режиме каталога. Можно смотреть товары и цены, но для заказа нужен Telegram.",
+    debt: "Долг:",
+    limit: "Лимит:",
+  },
+  tr: {
+    change: "Değiştir",
+    searchPlaceholder: "Ürün ara...",
+    all: "Tümü",
+    noProducts: "Ürün bulunamadı",
+    outOfStock: "Stokta yok",
+    left: "kaldı",
+    items: "Ürünler:",
+    total: "Toplam:",
+    creditStatus: "Kredi Durumu",
+    currentDebt: "Mevcut borç:",
+    availableCredit: "Kullanılabilir kredi:",
+    confirmOrder: "Siparişi Onayla",
+    checkout: "Ödeme",
+    storeUnavailable: "Mağaza kullanılamıyor",
+    botRequired: "Sipariş vermek için lütfen Telegram botunu açın.",
+    openBot: "Botu aç",
+    phoneNotFound: "Telefon numarası bulunamadı. Lütfen tekrar kontrol edin.",
+    catalogNotice:
+      "Bu sayfa yalnızca katalog modunda çalışır. Ürün ve fiyatları görebilirsiniz, sipariş için Telegram gerekir.",
+    debt: "Borç:",
+    limit: "Limit:",
+  },
+  oz: {
+    change: "Ўзгартириш",
+    searchPlaceholder: "Маҳсулотларни қидириш...",
+    all: "Барчаси",
+    noProducts: "Маҳсулотлар топилмади",
+    outOfStock: "Тугаган",
+    left: "қолди",
+    items: "Маҳсулотлар:",
+    total: "Жами:",
+    creditStatus: "Кредит ҳолати",
+    currentDebt: "Жорий қарз:",
+    availableCredit: "Мавжуд кредит:",
+    confirmOrder: "Буюртмани тасдиқлаш",
+    checkout: "Буюртма",
+    storeUnavailable: "Дўкон мавжуд эмас",
+    botRequired: "Буюртма бериш учун Telegram ботни очинг.",
+    openBot: "Ботни очиш",
+    phoneNotFound: "Телефон рақами топилмади. Қайта текширинг.",
+    catalogNotice:
+      "Бу саҳифа фақат каталог режимида ишлайди. Маҳсулот ва нархларни кўрасиз, буюртма учун Telegram керак.",
+    debt: "Қарз:",
+    limit: "Лимит:",
+  },
+} as const;
+
 export default function StorePage() {
   const params = useParams();
   const companySlug = params.slug as string;
+  const [uiLang, setUiLang] = useState<keyof typeof STORE_TEXTS>("uz");
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -109,9 +228,19 @@ export default function StorePage() {
   const API = normalizeApiBaseUrl(process.env.NEXT_PUBLIC_API_URL);
   const imgUrl = (url?: string | null) =>
     !url ? "" : url.startsWith("http") ? url : `${API}${url}`;
+  const ui = STORE_TEXTS[uiLang] || STORE_TEXTS.en;
   const botUrl = company?.telegram
     ? `https://t.me/${company.telegram.replace("@", "")}`
     : "https://t.me";
+
+  useEffect(() => {
+    const browser = (navigator.language || "uz").slice(0, 2).toLowerCase();
+    if (browser === "ru" || browser === "tr" || browser === "uz") {
+      setUiLang(browser);
+    } else {
+      setUiLang("en");
+    }
+  }, []);
 
   const detectTelegramWebApp = () => {
     if (typeof window === "undefined") return false;
@@ -223,13 +352,23 @@ export default function StorePage() {
           setCompany(await companyRes.json());
         } else {
           const err = await companyRes.json();
-          setError(err.message || "Store unavailable");
+          setError(err.message || ui.storeUnavailable);
         }
         if (categoriesRes.ok) {
           setCategories(await categoriesRes.json());
         }
       } catch {
-        setError("Failed to load store. Please try again.");
+        setError(
+          uiLang === "uz"
+            ? "Do'konni yuklab bo'lmadi. Qayta urinib ko'ring."
+            : uiLang === "ru"
+              ? "Не удалось загрузить магазин. Попробуйте ещё раз."
+              : uiLang === "tr"
+                ? "Mağaza yüklenemedi. Lütfen tekrar deneyin."
+                : uiLang === "oz"
+                  ? "Дўконни юклаб бўлмади. Қайта уриниб кўринг."
+                  : "Failed to load store. Please try again."
+        );
       } finally {
         setLoading(false);
       }
@@ -274,7 +413,7 @@ export default function StorePage() {
   const handleIdentify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isTelegramWebApp) {
-      setPhoneError("Buyurtma berish uchun Telegram botga kiring.");
+      setPhoneError(ui.botRequired);
       return;
     }
     setPhoneError("");
@@ -304,9 +443,7 @@ export default function StorePage() {
         }
       } else {
         const err = await res.json();
-        setPhoneError(
-          err.message || "Raqam topilmadi. Qayta tekshiring."
-        );
+        setPhoneError(err.message || ui.phoneNotFound);
       }
     } catch {
       setPhoneError("Ulanishda xatolik. Qayta urinib ko'ring.");
@@ -316,7 +453,7 @@ export default function StorePage() {
   const handlePlaceOrder = async () => {
     if (!isTelegramWebApp) {
       setOrderState("error");
-      setOrderError("Buyurtma berish uchun Telegram botdan foydalaning.");
+      setOrderError(ui.botRequired);
       return;
     }
     if (!dealer) return;
@@ -367,14 +504,14 @@ export default function StorePage() {
             <AlertCircle className="w-8 h-8 text-rose-500" />
           </div>
           <h2 className="text-xl font-bold text-slate-900">
-            Store Unavailable
+            {ui.storeUnavailable}
           </h2>
           <p className="text-slate-500 text-sm">{error}</p>
           <Link
             href="/"
             className="inline-block px-6 py-3 bg-slate-900 text-white rounded-xl font-semibold text-sm hover:bg-slate-800 transition-colors"
           >
-            Go to Supplio
+            Supplio
           </Link>
         </div>
       </div>
@@ -449,11 +586,10 @@ export default function StorePage() {
           <div className="mb-6 p-4 rounded-2xl border border-amber-200 bg-amber-50 flex flex-wrap items-center justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-amber-900">
-                Bu sahifa faqat katalog rejimida ishlayapti
+                {ui.catalogNotice}
               </p>
               <p className="text-xs text-amber-700">
-                Narxlar va mahsulotlarni ko'rasiz. Buyurtma berish uchun
-                Telegram botga kiring.
+                {ui.botRequired}
               </p>
             </div>
             <a
@@ -462,7 +598,7 @@ export default function StorePage() {
               rel="noopener noreferrer"
               className="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-colors"
             >
-              Botni ochish
+              {ui.openBot}
             </a>
           </div>
         )}
@@ -481,11 +617,11 @@ export default function StorePage() {
                   {dealer.name}
                 </p>
                 <p className="text-xs text-emerald-600">
-                  Debt: <b>{dealer.currentDebt.toLocaleString()} UZS</b>
+                  {ui.debt} <b>{dealer.currentDebt.toLocaleString()} UZS</b>
                   {dealer.creditLimit > 0 && (
                     <>
                       {" "}
-                      · Limit: <b>{dealer.creditLimit.toLocaleString()} UZS</b>
+                      · {ui.limit} <b>{dealer.creditLimit.toLocaleString()} UZS</b>
                     </>
                   )}
                 </p>
@@ -499,7 +635,7 @@ export default function StorePage() {
               }}
               className="text-xs text-emerald-600 hover:text-emerald-800 font-semibold"
             >
-              Change
+              {ui.change}
             </button>
           </motion.div>
         )}
@@ -511,7 +647,7 @@ export default function StorePage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products..."
+            placeholder={ui.searchPlaceholder}
             className="w-full pl-12 pr-4 py-3.5 bg-white rounded-2xl border border-slate-200 text-sm font-medium text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           />
         </div>
@@ -527,7 +663,7 @@ export default function StorePage() {
                   : "bg-white text-slate-500 border border-slate-200 hover:border-blue-200 hover:text-blue-600"
               }`}
             >
-              All
+              {ui.all}
             </button>
             {categories.map((cat) => (
               <button
@@ -552,7 +688,7 @@ export default function StorePage() {
           <div className="text-center py-24 space-y-4">
             <Package className="w-16 h-16 text-slate-200 mx-auto" />
             <p className="text-lg font-semibold text-slate-400">
-              No products found
+              {ui.noProducts}
             </p>
           </div>
         ) : (
@@ -581,14 +717,14 @@ export default function StorePage() {
                       {product.stock <= 0 && (
                         <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center">
                           <span className="px-3 py-1 bg-rose-100 text-rose-600 text-xs font-bold rounded-full">
-                            Out of stock
+                            {ui.outOfStock}
                           </span>
                         </div>
                       )}
                       {product.stock > 0 && product.stock <= 10 && (
                         <div className="absolute top-3 right-3">
                           <span className="px-2 py-1 bg-amber-100 text-amber-700 text-[10px] font-bold rounded-full">
-                            {product.stock} left
+                            {product.stock} {ui.left}
                           </span>
                         </div>
                       )}
@@ -648,7 +784,15 @@ export default function StorePage() {
                           className="w-full py-2.5 bg-slate-900 text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-blue-600 active:scale-[0.97] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           <ShoppingBag className="w-4 h-4" />
-                          Add to cart
+                          {uiLang === "uz"
+                            ? "Savatchaga qo'shish"
+                            : uiLang === "ru"
+                              ? "В корзину"
+                              : uiLang === "tr"
+                                ? "Sepete ekle"
+                                : uiLang === "oz"
+                                  ? "Саватга қўшиш"
+                                  : "Add to cart"}
                         </button>
                       ) : (
                         <a
@@ -658,7 +802,15 @@ export default function StorePage() {
                           className="w-full py-2.5 bg-slate-100 text-slate-700 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 hover:bg-slate-200 transition-all"
                         >
                           <Phone className="w-4 h-4" />
-                          Buyurtma uchun botga o'ting
+                          {uiLang === "uz"
+                            ? "Buyurtma uchun botga o'ting"
+                            : uiLang === "ru"
+                              ? "Откройте бот для заказа"
+                              : uiLang === "tr"
+                                ? "Sipariş için botu açın"
+                                : uiLang === "oz"
+                                  ? "Буюртма учун ботга ўтинг"
+                                  : "Open the bot to order"}
                         </a>
                       )}
                     </div>
@@ -861,14 +1013,39 @@ export default function StorePage() {
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-slate-900 mb-2">
-                      Order Placed!
+                      {uiLang === "uz"
+                        ? "Buyurtma yuborildi!"
+                        : uiLang === "ru"
+                          ? "Заказ оформлен!"
+                          : uiLang === "tr"
+                            ? "Sipariş verildi!"
+                            : uiLang === "oz"
+                              ? "Буюртма юборилди!"
+                              : "Order placed!"}
                     </h3>
                     {orderId && (
-                      <p className="text-slate-500 text-sm">Order #{orderId}</p>
+                      <p className="text-slate-500 text-sm">
+                        {uiLang === "uz"
+                          ? `Buyurtma #${orderId}`
+                          : uiLang === "ru"
+                            ? `Заказ #${orderId}`
+                            : uiLang === "tr"
+                              ? `Sipariş #${orderId}`
+                              : uiLang === "oz"
+                                ? `Буюртма #${orderId}`
+                                : `Order #${orderId}`}
+                      </p>
                     )}
                     <p className="text-slate-500 text-sm mt-2">
-                      Your order has been received and will be processed
-                      shortly.
+                      {uiLang === "uz"
+                        ? "Buyurtmangiz qabul qilindi va tez orada ko'rib chiqiladi."
+                        : uiLang === "ru"
+                          ? "Ваш заказ принят и скоро будет обработан."
+                          : uiLang === "tr"
+                            ? "Siparişiniz alındı ve kısa süre içinde işlenecek."
+                            : uiLang === "oz"
+                              ? "Буюртмангиз қабул қилинди ва тез орада кўриб чиқилади."
+                              : "Your order has been received and will be processed shortly."}
                     </p>
                   </div>
                   <button
@@ -878,7 +1055,15 @@ export default function StorePage() {
                     }}
                     className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-blue-600 transition-all"
                   >
-                    Continue Shopping
+                    {uiLang === "uz"
+                      ? "Xaridni davom etish"
+                      : uiLang === "ru"
+                        ? "Продолжить покупки"
+                        : uiLang === "tr"
+                          ? "Alışverişe devam et"
+                          : uiLang === "oz"
+                            ? "Харидни давом эттириш"
+                            : "Continue Shopping"}
                   </button>
                 </div>
               ) : (
@@ -887,7 +1072,7 @@ export default function StorePage() {
                     <div className="flex items-center gap-3">
                       <ShoppingBag className="w-5 h-5 text-slate-600" />
                       <h3 className="text-xl font-bold text-slate-900">
-                        Checkout
+                        {ui.checkout}
                       </h3>
                     </div>
                     <button
@@ -953,14 +1138,14 @@ export default function StorePage() {
                     <div className="p-4 bg-slate-50 rounded-2xl space-y-2 border border-slate-100">
                       <div className="flex justify-between text-sm">
                         <span className="text-slate-500 font-medium">
-                          Items:
+                          {ui.items}
                         </span>
                         <span className="font-bold text-slate-700">
                           {totalItems}
                         </span>
                       </div>
                       <div className="flex justify-between pt-2 border-t border-slate-200">
-                        <span className="font-bold text-slate-900">Total:</span>
+                        <span className="font-bold text-slate-900">{ui.total}</span>
                         <span className="text-blue-600 font-black text-lg">
                           {totalPrice.toLocaleString()} UZS
                         </span>
@@ -973,16 +1158,16 @@ export default function StorePage() {
                         className={`p-4 rounded-2xl space-y-2 ${totalPrice > (dealer.creditLimit || 0) - (dealer.currentDebt || 0) && dealer.creditLimit > 0 ? "bg-rose-50 border border-rose-100" : "bg-blue-50 border border-blue-100"}`}
                       >
                         <div className="flex items-center gap-2 font-bold text-sm text-blue-700">
-                          <ShieldCheck className="w-4 h-4" /> Credit Status
+                          <ShieldCheck className="w-4 h-4" /> {ui.creditStatus}
                         </div>
                         <div className="text-xs text-blue-600/80 space-y-1">
                           <p>
-                            Current debt:{" "}
+                            {ui.currentDebt}{" "}
                             <b>{dealer.currentDebt.toLocaleString()} UZS</b>
                           </p>
                           {dealer.creditLimit > 0 && (
                             <p>
-                              Available credit:{" "}
+                              {ui.availableCredit}{" "}
                               <b>
                                 {Math.max(
                                   0,
@@ -1022,7 +1207,7 @@ export default function StorePage() {
                       ) : (
                         <>
                           <CheckCircle className="w-5 h-5" />
-                          Confirm Order
+                          {ui.confirmOrder}
                         </>
                       )}
                     </button>

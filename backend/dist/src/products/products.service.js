@@ -125,6 +125,18 @@ let ProductsService = class ProductsService {
         await this.findOne(id, companyId);
         return this.prisma.product.update({ where: { id }, data: { stock: Number(stock) } });
     }
+    async adjustStock(id, companyId, delta, _note) {
+        const product = await this.findOne(id, companyId);
+        const newStock = Math.max(0, (product.stock ?? 0) + delta);
+        return this.prisma.product.update({
+            where: { id },
+            data: { stock: newStock },
+            include: {
+                category: { select: { id: true, name: true } },
+                unitRef: { select: { id: true, name: true, symbol: true } },
+            },
+        });
+    }
     async remove(id, companyId, deletedBy) {
         await this.findOne(id, companyId);
         return this.prisma.product.update({

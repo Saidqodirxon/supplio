@@ -1,5 +1,6 @@
 import { ArrowUpRight, DollarSign, ShoppingCart, Users, Activity, TrendingUp, Package } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import type { Dealer } from '../types';
 import { useAuthStore } from '../store/authStore';
@@ -32,6 +33,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const { language, user } = useAuthStore();
   const t = dashboardTranslations[language];
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -44,7 +46,11 @@ export default function Dashboard() {
         ]);
 
         if (dealersRes.status === 'fulfilled') setDealers(dealersRes.value.data);
-        if (analyticsRes.status === 'fulfilled') setStats(analyticsRes.value.data.stats);
+        // Gracefully handle 402 plan limit — analytics may not be available on current plan
+        if (analyticsRes.status === 'fulfilled') {
+          setStats(analyticsRes.value.data.stats);
+        }
+        // analyticsRes.status === 'rejected' is OK — we'll use dealer fallback data
         if (ordersRes.status === 'fulfilled') {
           const data = ordersRes.value.data;
           setRecentOrders(Array.isArray(data) ? data.slice(0, 5) : (data.orders || []).slice(0, 5));
@@ -80,15 +86,15 @@ export default function Dashboard() {
       trendPositive: true,
     },
     {
-      name: language === 'ru' ? 'Заказы (период)' : language === 'en' ? 'Orders (period)' : "Buyurtmalar",
-      value: `${periodOrders} ${language === 'ru' ? 'шт' : language === 'en' ? 'pcs' : 'ta'}`,
+      name: t.orders.title,
+      value: `${periodOrders} ${language === 'uz' ? 'ta' : language === 'ru' ? 'шт' : 'pcs'}`,
       icon: ShoppingCart,
       trend: stats ? `${stats.periodRevenue.toLocaleString()} ${t.common.uzs}` : '—',
       trendPositive: true,
     },
     {
-      name: language === 'ru' ? 'Продукты' : language === 'en' ? 'Products' : "Mahsulotlar",
-      value: `${totalProducts} ${language === 'ru' ? 'шт' : language === 'en' ? 'pcs' : 'ta'}`,
+      name: t.sidebar.products,
+      value: `${totalProducts} ${language === 'uz' ? 'ta' : language === 'ru' ? 'шт' : 'pcs'}`,
       icon: Package,
       trend: '—',
       trendPositive: true,
@@ -137,10 +143,7 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="px-5 py-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-black text-[10px] uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all active:scale-95">
-            {t.common.export}
-          </button>
-          <button className="premium-button">
+          <button onClick={() => navigate('/orders')} className="premium-button">
             <ShoppingCart className="w-4 h-4" />
             {t.common.newOrder}
           </button>
@@ -178,7 +181,7 @@ export default function Dashboard() {
         <div className="xl:col-span-2 glass-card overflow-hidden">
           <div className="p-10 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
             <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{t.dashboard.criticalDebtors}</h3>
-            <button className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">{t.common.viewMore}</button>
+            <button onClick={() => navigate('/dealers')} className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline">{t.common.viewMore}</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -196,7 +199,7 @@ export default function Dashboard() {
                     <td colSpan={4} className="px-10 py-12 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.common.noData}</td>
                   </tr>
                 ) : topDebtors.map((debtor) => (
-                  <tr key={debtor.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
+                  <tr key={debtor.id} onClick={() => navigate('/dealers')} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer">
                     <td className="px-10 py-6">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-black group-hover:bg-blue-600 group-hover:text-white transition-all shadow-sm">
@@ -205,7 +208,7 @@ export default function Dashboard() {
                         <span className="text-sm font-black text-slate-700 dark:text-slate-200 tracking-tight">{debtor.name}</span>
                       </div>
                     </td>
-                    <td className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{debtor.branch?.name || 'MAIN'}</td>
+                    <td className="px-10 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">{debtor.branch?.name || t.branches.mainPoint}</td>
                     <td className="px-10 py-6 text-sm font-black text-slate-900 dark:text-white">
                       {(debtor.currentDebt || 0).toLocaleString()} <span className="text-[10px] text-slate-400 ml-1">{t.common.uzs}</span>
                     </td>

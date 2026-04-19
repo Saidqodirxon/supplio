@@ -3,9 +3,10 @@ import { CompanyController } from "./company.controller";
 import { CompanyService } from "./company.service";
 import { PrismaModule } from "../prisma/prisma.module";
 import { PlanLimitsService } from "../common/services/plan-limits.service";
+import { TelegramModule } from "../telegram/telegram.module";
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, TelegramModule],
   controllers: [CompanyController],
   providers: [CompanyService, PlanLimitsService],
 })

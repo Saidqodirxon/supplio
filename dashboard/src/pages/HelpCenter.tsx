@@ -33,6 +33,12 @@ function normalizeTelegramLink(value?: string) {
   return `https://t.me/${v}`;
 }
 
+function telegramUsername(value?: string) {
+  const link = normalizeTelegramLink(value);
+  if (!link) return "";
+  return link.replace(/^https?:\/\/t\.me\//, "@").replace(/\/$/, "");
+}
+
 export default function HelpCenter() {
   const { language, user } = useAuthStore();
   const [loading, setLoading] = useState(false);
@@ -59,7 +65,7 @@ export default function HelpCenter() {
     if (language === "ru") {
       return {
         title: "Центр помощи",
-        subtitle: "Все способы связи и отправка обращения об ошибке",
+        subtitle: "Все способы связи с администрацией и отправка обращения",
         methods: "Способы связи",
         report: "Отправить обращение",
         category: "Категория",
@@ -90,7 +96,7 @@ export default function HelpCenter() {
     if (language === "en") {
       return {
         title: "Help Center",
-        subtitle: "All support channels and issue request form",
+        subtitle: "All ways to contact the admin team and submit a request",
         methods: "Contact Methods",
         report: "Report an Issue",
         category: "Category",
@@ -121,7 +127,7 @@ export default function HelpCenter() {
     if (language === "tr") {
       return {
         title: "Yardım Merkezi",
-        subtitle: "Tüm destek kanalları ve hata bildirim formu",
+        subtitle: "Admin ekibiyle iletişim kurmanın tüm yolları ve hata bildirimi",
         methods: "İletişim Kanalları",
         report: "Hata Bildir",
         category: "Kategori",
@@ -151,8 +157,8 @@ export default function HelpCenter() {
     }
     return {
       title: "Yordam markazi",
-      subtitle: "Barcha aloqa usullari va xatolik arizasi formi",
-      methods: "Yordam olish usullari",
+      subtitle: "Admin bilan bog'lanish usullari va savollaringizga javob olish",
+      methods: "Admin bilan bog'lanish",
       report: "Xatolik arizasi yuborish",
       category: "Kategoriya",
       subject: "Mavzu",
@@ -180,13 +186,14 @@ export default function HelpCenter() {
     };
   }, [language]);
 
-  const phone = (landing?.contactPhone || "+998901112233").trim();
+  const phone = (landing?.contactPhone || "+998 90 111 22 33").trim();
   const phoneHref = `tel:${phone.replace(/[^\d+]/g, "")}`;
-  const email = landing?.contactEmail?.trim() || "";
-  const emailHref = email ? `mailto:${email}` : "";
-  const tg = normalizeTelegramLink(landing?.socialTelegram);
-  const instagram = landing?.socialInstagram?.trim() || "";
-  const linkedin = landing?.socialLinkedin?.trim() || "";
+  const email = landing?.contactEmail?.trim() || "support@supplio.uz";
+  const emailHref = email ? `mailto:${email}` : "#";
+  const tg = normalizeTelegramLink(landing?.socialTelegram || "https://t.me/supplioapp");
+  const tgDisplay = telegramUsername(landing?.socialTelegram || "https://t.me/supplioapp");
+  const instagram = landing?.socialInstagram?.trim() || "https://www.instagram.com/supplio__app/";
+  const linkedin = landing?.socialLinkedin?.trim() || "https://www.linkedin.com/company/supplioapp";
   const twitter = landing?.socialTwitter?.trim() || "";
   const address = landing?.contactAddress?.trim() || "";
   const addressUrl = landing?.contactAddressUrl?.trim() || "";
@@ -194,16 +201,16 @@ export default function HelpCenter() {
   const methods = [
     { label: text.labels.Phone, value: phone, href: phoneHref, icon: Phone },
     { label: text.labels.Email, value: email, href: emailHref, icon: Mail },
-    { label: text.labels.Telegram, value: tg, href: tg, icon: Send },
+    { label: text.labels.Telegram, value: tgDisplay, href: tg, icon: Send },
     {
       label: text.labels.Instagram,
-      value: instagram,
+      value: instagram ? "Instagram" : "",
       href: instagram,
       icon: ExternalLink,
     },
     {
       label: text.labels.LinkedIn,
-      value: linkedin,
+      value: linkedin ? "LinkedIn" : "",
       href: linkedin,
       icon: ExternalLink,
     },

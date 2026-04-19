@@ -41,6 +41,9 @@ let ProductsController = class ProductsController {
     async updateStock(req, id, stock) {
         return this.productsService.updateStock(id, req.companyId, stock);
     }
+    async adjustStock(req, id, delta, note) {
+        return this.productsService.adjustStock(id, req.companyId, Number(delta), note);
+    }
     async restore(req, id) {
         return this.productsService.restore(id, req.companyId);
     }
@@ -104,6 +107,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, Number]),
     __metadata("design:returntype", Promise)
 ], ProductsController.prototype, "updateStock", null);
+__decorate([
+    (0, common_1.Patch)(":id/adjust-stock"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN", "OWNER", "MANAGER", "SALES"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __param(2, (0, common_1.Body)("delta")),
+    __param(3, (0, common_1.Body)("note")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Number, String]),
+    __metadata("design:returntype", Promise)
+], ProductsController.prototype, "adjustStock", null);
 __decorate([
     (0, common_1.Patch)(":id/restore"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN", "OWNER", "MANAGER"),

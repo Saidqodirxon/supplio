@@ -11,6 +11,8 @@ import { useAuthStore } from '../store/authStore';
 import { dashboardTranslations } from '../i18n/translations';
 import { motion } from 'framer-motion';
 import api from '../services/api';
+import { usePlanLimits } from '../hooks/usePlanLimits';
+import UpgradeModal from '../components/UpgradeModal';
 
 type Period = '7d' | '30d' | '1y' | 'all';
 
@@ -206,9 +208,12 @@ export default function Analytics() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [topDealers, setTopDealers] = useState<TopDealer[]>([]);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
+  const { showUpgrade, setShowUpgrade, upgradeReason, handleApiError } = usePlanLimits();
+  const [planError, setPlanError] = useState(false);
 
   const fetchAll = useCallback(async (p: Period) => {
     setLoading(true);
+    setPlanError(false);
     try {
       const [dash, dealers, products] = await Promise.all([
         api.get<DashboardData>(`/analytics/dashboard?period=${p}`),
@@ -218,12 +223,16 @@ export default function Analytics() {
       setData(dash.data);
       setTopDealers(Array.isArray(dealers.data) ? dealers.data : []);
       setTopProducts(Array.isArray(products.data) ? products.data : []);
-    } catch (err) {
-      console.error('Analytics fetch failed:', err);
+    } catch (err: any) {
+      if (handleApiError(err)) {
+        setPlanError(true);
+      } else {
+        console.error('Analytics fetch failed:', err);
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [handleApiError]);
 
   useEffect(() => { fetchAll(period); }, [period, fetchAll]);
 
@@ -242,6 +251,43 @@ export default function Analytics() {
           {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-slate-100 dark:bg-slate-900 rounded-[2rem]" />)}
         </div>
         <div className="h-80 bg-slate-50 dark:bg-slate-900/50 rounded-[3rem]" />
+      </div>
+    );
+  }
+
+  if (planError) {
+    return (
+      <div className="space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t.sidebar.analytics}</h1>
+            <p className="text-slate-500 dark:text-slate-400 mt-1 text-[10px] font-bold uppercase tracking-widest opacity-70">
+              {t.dashboard.subtitle}
+            </p>
+          </div>
+        </div>
+        
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-3xl p-12 flex flex-col items-center justify-center text-center">
+          <TrendingUp className="w-16 h-16 text-amber-600 dark:text-amber-400 mb-4 opacity-70" />
+          <h2 className="text-2xl font-black text-amber-900 dark:text-amber-100 mb-2">
+            {t.dashboard.analyticsUnavailable}
+          </h2>
+          <p className="text-amber-700 dark:text-amber-300 font-bold max-w-md mb-6">
+            {t.dashboard.analyticsUnavailableDesc}
+          </p>
+          <button
+            onClick={() => setShowUpgrade(true)}
+            className="premium-button"
+          >
+            {t.dashboard.upgradePlan}
+          </button>
+        </div>
+        <UpgradeModal
+          isOpen={showUpgrade}
+          onClose={() => setShowUpgrade(false)}
+          reason={upgradeReason}
+          language={language}
+        />
       </div>
     );
   }
@@ -265,7 +311,7 @@ export default function Analytics() {
     {
       label: t.dashboard.balance,
       value: stats?.debt ?? 0,
-      sub: `Collected: ${fmt(stats?.collected ?? 0)}`,
+      sub: `${t.dashboard.collected}: ${fmt(stats?.collected ?? 0)}`,
       icon: CreditCard,
       color: 'text-rose-600',
       bg: 'bg-rose-50 dark:bg-rose-900/20',
@@ -273,15 +319,15 @@ export default function Analytics() {
     {
       label: t.dashboard.activeDealers,
       value: stats?.activeDealers ?? 0,
-      sub: `Orders: ${stats?.periodOrders ?? 0}`,
+      sub: `${t.orders.title}: ${stats?.periodOrders ?? 0}`,
       icon: Users,
       color: 'text-blue-600',
       bg: 'bg-blue-50 dark:bg-blue-900/20',
     },
     {
-      label: 'Profit',
+      label: t.dashboard.profit,
       value: stats?.profit ?? 0,
-      sub: `Period: ${fmt(stats?.periodProfit ?? 0)}`,
+      sub: `${t.dashboard.period}: ${fmt(stats?.periodProfit ?? 0)}`,
       icon: TrendingUp,
       color: 'text-indigo-600',
       bg: 'bg-indigo-50 dark:bg-indigo-900/20',
@@ -332,11 +378,11 @@ export default function Analytics() {
       </div>
 
       {/* Period summary row */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
-          { label: 'Period Revenue', value: fmt(stats?.periodRevenue ?? 0), icon: DollarSign, color: 'text-blue-500' },
-          { label: 'Period Profit', value: fmt(stats?.periodProfit ?? 0), icon: TrendingUp, color: 'text-emerald-500' },
-          { label: 'Period Orders', value: String(stats?.periodOrders ?? 0), icon: ShoppingCart, color: 'text-indigo-500' },
+          { label: t.dashboard.periodRevenue, value: fmt(stats?.periodRevenue ?? 0), icon: DollarSign, color: 'text-blue-500' },
+          { label: t.dashboard.periodProfit, value: fmt(stats?.periodProfit ?? 0), icon: TrendingUp, color: 'text-emerald-500' },
+          { label: t.dashboard.periodOrders, value: String(stats?.periodOrders ?? 0), icon: ShoppingCart, color: 'text-indigo-500' },
         ].map((s, i) => (
           <div key={i} className="glass-card p-5 flex items-center gap-4">
             <s.icon className={`w-8 h-8 ${s.color} flex-shrink-0`} />
@@ -352,13 +398,13 @@ export default function Analytics() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 glass-card p-8 flex flex-col gap-6">
           <div className="flex justify-between items-center">
-            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Revenue & Profit</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{t.dashboard.revenueAndProfit}</h3>
           </div>
           <BarChart data={chart} />
         </div>
 
         <div className="glass-card p-8 flex flex-col gap-6">
-          <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Order Status</h3>
+          <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{t.dashboard.orderStatusChart}</h3>
           <DonutChart data={statusDist} />
         </div>
       </div>
@@ -369,7 +415,7 @@ export default function Analytics() {
         <div className="glass-card p-8">
           <div className="flex items-center gap-3 mb-6">
             <Users className="w-5 h-5 text-blue-500" />
-            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Top Dealers</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{t.dashboard.topDealers}</h3>
           </div>
           {topDealers.length === 0 ? (
             <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">{t.common.noData}</p>
@@ -402,7 +448,7 @@ export default function Analytics() {
                     {/* Debt bar */}
                     {debtPct > 0 && (
                       <div className="flex items-center gap-2">
-                        <span className="text-[9px] text-slate-400 font-bold uppercase">Debt {debtPct}%</span>
+                        <span className="text-[9px] text-slate-400 font-bold uppercase">{t.dashboard.debtPercent} {debtPct}%</span>
                         <div className="flex-1 h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                           <div
                             className={`h-full rounded-full ${debtPct > 80 ? 'bg-rose-500' : debtPct > 50 ? 'bg-amber-400' : 'bg-emerald-400'}`}
@@ -422,7 +468,7 @@ export default function Analytics() {
         <div className="glass-card p-8">
           <div className="flex items-center gap-3 mb-6">
             <Package className="w-5 h-5 text-indigo-500" />
-            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Top Products</h3>
+            <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{t.dashboard.topProducts}</h3>
           </div>
           {topProducts.length === 0 ? (
             <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">{t.common.noData}</p>
@@ -460,6 +506,13 @@ export default function Analytics() {
           )}
         </div>
       </div>
+      
+      <UpgradeModal
+        isOpen={showUpgrade}
+        onClose={() => setShowUpgrade(false)}
+        reason={upgradeReason}
+        language={language}
+      />
     </div>
   );
 }

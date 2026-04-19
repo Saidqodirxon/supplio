@@ -61,6 +61,17 @@ export class ProductsController {
     return this.productsService.updateStock(id, req.companyId, stock);
   }
 
+  @Patch(":id/adjust-stock")
+  @Roles("SUPER_ADMIN", "OWNER", "MANAGER", "SALES")
+  async adjustStock(
+    @Req() req: any,
+    @Param("id") id: string,
+    @Body("delta") delta: number,
+    @Body("note") note?: string
+  ) {
+    return this.productsService.adjustStock(id, req.companyId, Number(delta), note);
+  }
+
   @Patch(":id/restore")
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER")
   async restore(@Req() req: any, @Param("id") id: string) {

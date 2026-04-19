@@ -5,6 +5,57 @@ import { PrismaService } from "../prisma/prisma.service";
 export class PublicService {
   constructor(private prisma: PrismaService) {}
 
+  private async loadGlobalSettings() {
+    try {
+      const rows = await this.prisma.$queryRawUnsafe<
+        Array<{
+          newsEnabled: boolean | null;
+          systemVersion: string | null;
+          maintenanceMode: boolean | null;
+          superAdminPhone: string | null;
+          termsUz: string | null;
+          termsRu: string | null;
+          termsEn: string | null;
+          termsUzCyr: string | null;
+          privacyUz: string | null;
+          privacyRu: string | null;
+          privacyEn: string | null;
+          privacyUzCyr: string | null;
+          contractUz: string | null;
+          contractRu: string | null;
+          contractEn: string | null;
+          contractUzCyr: string | null;
+          updatedAt: Date | string | null;
+        }>
+      >(
+        `SELECT
+          "newsEnabled",
+          "systemVersion",
+          "maintenanceMode",
+          "superAdminPhone",
+          "termsUz",
+          "termsRu",
+          "termsEn",
+          "termsUzCyr",
+          "privacyUz",
+          "privacyRu",
+          "privacyEn",
+          "privacyUzCyr",
+          "contractUz",
+          "contractRu",
+          "contractEn",
+          "contractUzCyr",
+          "updatedAt"
+        FROM "SystemSettings"
+        WHERE id = 'GLOBAL'
+        LIMIT 1`
+      );
+      return rows[0] ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   async getHomeData() {
     const [news, tariffs, settings, landing] = await Promise.all([
       (this.prisma as any).news.findMany({
@@ -36,21 +87,43 @@ export class PublicService {
         where: { isActive: true },
         orderBy: { order: "asc" },
       }),
-      this.prisma.systemSettings.findUnique({
-        where: { id: "GLOBAL" },
-        select: {
-          newsEnabled: true,
-          systemVersion: true,
-          maintenanceMode: true,
-          superAdminPhone: true,
-        },
-      }),
+      this.loadGlobalSettings(),
       (this.prisma as any).landingContent
         .findUnique({ where: { id: "LANDING" } })
         .catch(() => null),
     ]);
 
     return { news, tariffs, settings, landing };
+  }
+
+  async getNewsList(_lang: string, limit: number = 20) {
+    const take = Number.isFinite(limit) && limit > 0 ? Math.min(limit, 50) : 20;
+    return (this.prisma as any).news.findMany({
+      where: { isPublished: true },
+      orderBy: { createdAt: "desc" },
+      take,
+      select: {
+        id: true,
+        slugUz: true,
+        slugRu: true,
+        slugEn: true,
+        slugTr: true,
+        slugUzCyr: true,
+        titleUz: true,
+        titleRu: true,
+        titleEn: true,
+        titleTr: true,
+        titleUzCyr: true,
+        excerptUz: true,
+        excerptRu: true,
+        excerptEn: true,
+        excerptTr: true,
+        excerptUzCyr: true,
+        image: true,
+        createdAt: true,
+        viewCount: true,
+      },
+    });
   }
 
   async getTariffs() {
@@ -96,8 +169,18 @@ export class PublicService {
       orders = 0;
     }
 
+    let teamMembers: any[] = [];
+    try {
+      teamMembers = await this.prisma.$queryRawUnsafe<any[]>(
+        `SELECT id, name, "roleUz", "roleRu", "roleEn", "roleTr", "bioUz", "bioRu", "bioEn", "bioTr", avatar, "order" FROM "TeamMember" WHERE "isActive" = true ORDER BY "order" ASC`
+      );
+    } catch (_e) {
+      teamMembers = [];
+    }
+
     return {
       testimonials,
+      teamMembers,
       stats: {
         companies,
         orders,
@@ -144,6 +227,35 @@ export class PublicService {
         createdAt: true,
       },
     });
+  }
+
+  async getLegalContent(type: string, lang: string) {
+    const suffix =
+      lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
+    const field = `${type}${suffix}`;
+    const settings = await this.loadGlobalSettings();
+
+    if (!settings) {
+      return { type, lang, content: "", updatedAt: null };
+    }
+
+    const settingsRecord = settings as Record<string, unknown>;
+    const getStringField = (key: string): string | undefined => {
+      const value = settingsRecord[key];
+      return typeof value === "string" ? value : undefined;
+    };
+
+    const content =
+      getStringField(field) ||
+      getStringField(`${type}En`) ||
+      getStringField(`${type}Uz`);
+
+    return {
+      type,
+      lang,
+      content: typeof content === "string" ? content : "",
+      updatedAt: settings.updatedAt,
+    };
   }
 
   async incrementNewsView(id: string) {

@@ -462,7 +462,7 @@ export default function NewsDetailPage() {
             animate={{ opacity: 1, x: 0 }}
           >
             <Link
-              href={`/${params.lang}#news`}
+              href={`/${params.lang}/news`}
               className="inline-flex items-center gap-3 text-slate-400 hover:text-blue-600 transition-colors font-black text-[10px] uppercase tracking-[0.3em] group"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />{" "}
@@ -597,7 +597,7 @@ export default function NewsDetailPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-24 px-6 border-t border-slate-100 bg-white">
+      <footer className="py-16 sm:py-20 px-5 sm:px-6 border-t border-slate-100 bg-slate-50 text-left">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-10">
           <div className="flex flex-col items-center md:items-start gap-4">
             <Link href={`/${params.lang}`}>
@@ -621,10 +621,16 @@ export default function NewsDetailPage() {
               {uiText.home}
             </Link>
             <Link
-              href={`/${params.lang}#news`}
+              href={`/${params.lang}/news`}
               className="hover:text-blue-600 transition-colors"
             >
               {uiText.allArticles}
+            </Link>
+            <Link
+              href={`/${params.lang}/docs`}
+              className="hover:text-blue-600 transition-colors"
+            >
+              {t.footer.docs}
             </Link>
           </div>
         </div>

@@ -16,6 +16,35 @@ let PublicService = class PublicService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    async loadGlobalSettings() {
+        try {
+            const rows = await this.prisma.$queryRawUnsafe(`SELECT
+          "newsEnabled",
+          "systemVersion",
+          "maintenanceMode",
+          "superAdminPhone",
+          "termsUz",
+          "termsRu",
+          "termsEn",
+          "termsUzCyr",
+          "privacyUz",
+          "privacyRu",
+          "privacyEn",
+          "privacyUzCyr",
+          "contractUz",
+          "contractRu",
+          "contractEn",
+          "contractUzCyr",
+          "updatedAt"
+        FROM "SystemSettings"
+        WHERE id = 'GLOBAL'
+        LIMIT 1`);
+            return rows[0] ?? null;
+        }
+        catch {
+            return null;
+        }
+    }
     async getHomeData() {
         const [news, tariffs, settings, landing] = await Promise.all([
             this.prisma.news.findMany({
@@ -47,20 +76,41 @@ let PublicService = class PublicService {
                 where: { isActive: true },
                 orderBy: { order: "asc" },
             }),
-            this.prisma.systemSettings.findUnique({
-                where: { id: "GLOBAL" },
-                select: {
-                    newsEnabled: true,
-                    systemVersion: true,
-                    maintenanceMode: true,
-                    superAdminPhone: true,
-                },
-            }),
+            this.loadGlobalSettings(),
             this.prisma.landingContent
                 .findUnique({ where: { id: "LANDING" } })
                 .catch(() => null),
         ]);
         return { news, tariffs, settings, landing };
+    }
+    async getNewsList(_lang, limit = 20) {
+        const take = Number.isFinite(limit) && limit > 0 ? Math.min(limit, 50) : 20;
+        return this.prisma.news.findMany({
+            where: { isPublished: true },
+            orderBy: { createdAt: "desc" },
+            take,
+            select: {
+                id: true,
+                slugUz: true,
+                slugRu: true,
+                slugEn: true,
+                slugTr: true,
+                slugUzCyr: true,
+                titleUz: true,
+                titleRu: true,
+                titleEn: true,
+                titleTr: true,
+                titleUzCyr: true,
+                excerptUz: true,
+                excerptRu: true,
+                excerptEn: true,
+                excerptTr: true,
+                excerptUzCyr: true,
+                image: true,
+                createdAt: true,
+                viewCount: true,
+            },
+        });
     }
     async getTariffs() {
         return this.prisma.tariffPlan.findMany({
@@ -93,8 +143,16 @@ let PublicService = class PublicService {
         catch (_e) {
             orders = 0;
         }
+        let teamMembers = [];
+        try {
+            teamMembers = await this.prisma.$queryRawUnsafe(`SELECT id, name, "roleUz", "roleRu", "roleEn", "roleTr", "bioUz", "bioRu", "bioEn", "bioTr", avatar, "order" FROM "TeamMember" WHERE "isActive" = true ORDER BY "order" ASC`);
+        }
+        catch (_e) {
+            teamMembers = [];
+        }
         return {
             testimonials,
+            teamMembers,
             stats: {
                 companies,
                 orders,
@@ -139,6 +197,28 @@ let PublicService = class PublicService {
                 createdAt: true,
             },
         });
+    }
+    async getLegalContent(type, lang) {
+        const suffix = lang === "oz" ? "UzCyr" : lang.charAt(0).toUpperCase() + lang.slice(1);
+        const field = `${type}${suffix}`;
+        const settings = await this.loadGlobalSettings();
+        if (!settings) {
+            return { type, lang, content: "", updatedAt: null };
+        }
+        const settingsRecord = settings;
+        const getStringField = (key) => {
+            const value = settingsRecord[key];
+            return typeof value === "string" ? value : undefined;
+        };
+        const content = getStringField(field) ||
+            getStringField(`${type}En`) ||
+            getStringField(`${type}Uz`);
+        return {
+            type,
+            lang,
+            content: typeof content === "string" ? content : "",
+            updatedAt: settings.updatedAt,
+        };
     }
     async incrementNewsView(id) {
         try {

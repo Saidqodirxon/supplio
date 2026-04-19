@@ -33,10 +33,10 @@ export default function Payments() {
   const [dealers, setDealers] = useState<{ id: string; name: string }[]>([]);
   const dealerOptions: SelectOption[] = dealers.map(d => ({ value: d.id, label: d.name }));
   const methodOptions: SelectOption[] = [
-    { value: 'CASH', label: 'Cash' },
-    { value: 'BANK', label: 'Bank' },
-    { value: 'CLICK', label: 'Click' },
-    { value: 'PAYME', label: 'Payme' },
+    { value: 'CASH', label: t.payments.methodCash },
+    { value: 'BANK', label: t.payments.methodBank },
+    { value: 'CLICK', label: t.payments.methodClick },
+    { value: 'PAYME', label: t.payments.methodPayme },
   ];
 
   // Adjustment modal
@@ -54,7 +54,7 @@ export default function Payments() {
       const dealersRes = await api.get('/dealers');
       setDealers(Array.isArray(dealersRes.data) ? dealersRes.data : []);
     } catch (err: unknown) {
-      setError(t.common?.error || 'Xatolik yuz berdi');
+      setError(t.common.error);
       setPayments([]);
       console.error(err);
     } finally {
@@ -92,8 +92,7 @@ export default function Payments() {
       toast.success(t.payments.confirmReceipt);
       fetchPayments();
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : (t.common?.error || 'Xatolik');
-      toast.error(msg);
+      toast.error(t.common.error);
     }
   };
 
@@ -355,7 +354,7 @@ export default function Payments() {
                       <div className="w-24 h-24 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-700 flex items-center justify-center">
                         <DollarSign className="w-12 h-12" />
                       </div>
-                      <p className="text-2xl font-black italic tracking-tighter uppercase text-slate-900 dark:text-white">{t.payments?.noPayments || 'To\'lovlar yo\'q'}</p>
+                      <p className="text-2xl font-black italic tracking-tighter uppercase text-slate-900 dark:text-white">{t.payments.noPayments}</p>
                     </div>
                   </td>
                 </tr>

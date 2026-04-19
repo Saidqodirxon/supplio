@@ -64,9 +64,9 @@ export class OrdersController {
   async updateStatus(
     @Req() req: AuthenticatedRequest,
     @Param("id") id: string,
-    @Body() body: { status: string }
+    @Body() body: { status: string; subStatus?: string }
   ) {
-    return this.ordersService.updateStatus(req.companyId, id, body.status, {
+    return this.ordersService.updateStatus(req.companyId, id, body.status, body.subStatus, {
       id: req.user.id,
       phone: req.user.phone,
       roleType: req.user.roleType,

@@ -20,11 +20,11 @@ export declare class AuthController {
         };
     }): Promise<{
         id: string;
+        isActive: boolean;
         phone: string;
         fullName: string;
         photoUrl: string;
         roleType: import(".prisma/client").$Enums.RoleType;
-        isActive: boolean;
         language: string;
     }>;
     updateProfile(req: {
@@ -37,19 +37,19 @@ export declare class AuthController {
         language?: string;
     }): Promise<{
         id: string;
+        companyId: string;
+        isActive: boolean;
         createdAt: Date;
-        updatedAt: Date;
         deletedAt: Date | null;
+        updatedAt: Date;
         deletedBy: string | null;
         phone: string;
-        companyId: string;
+        branchId: string | null;
         passwordHash: string;
         fullName: string | null;
         photoUrl: string | null;
         roleType: import(".prisma/client").$Enums.RoleType;
-        isActive: boolean;
         language: string;
-        branchId: string | null;
         customRoleId: string | null;
     }>;
     changePassword(req: {

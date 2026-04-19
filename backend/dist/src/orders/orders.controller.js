@@ -36,7 +36,11 @@ let OrdersController = class OrdersController {
         return this.ordersService.findOne(req.companyId, id);
     }
     async updateStatus(req, id, body) {
-        return this.ordersService.updateStatus(req.companyId, id, body.status);
+        return this.ordersService.updateStatus(req.companyId, id, body.status, body.subStatus, {
+            id: req.user.id,
+            phone: req.user.phone,
+            roleType: req.user.roleType,
+        });
     }
 };
 exports.OrdersController = OrdersController;

@@ -12,8 +12,6 @@ import {
   ArrowRight,
   Menu,
   X,
-  Check,
-  Phone,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { translations, slugToLang } from "@/i18n/translations";
@@ -21,6 +19,7 @@ import type { Language } from "@/i18n/translations";
 import Link from "next/link";
 import { LangSelect } from "@/components/LangSelect";
 import LeadModal from "@/components/LeadModal";
+import { Footer } from "@/components/Footer";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 24 },
@@ -32,16 +31,27 @@ const fadeInUp = {
   },
 };
 
-const TEAM = [
-  {
-    name: "Saidqodirxon Rahimov",
-    role: "CEO, Founder",
-    avatar: "SR",
-    color: "bg-blue-600",
-  },
+const VALUE_ICONS = [Zap, BarChart3, Users, ShieldCheck];
+
+const AVATAR_COLORS = [
+  "bg-blue-600",
+  "bg-indigo-600",
+  "bg-violet-600",
+  "bg-emerald-600",
+  "bg-amber-500",
+  "bg-rose-600",
+  "bg-cyan-600",
+  "bg-teal-600",
 ];
 
-const VALUE_ICONS = [Zap, BarChart3, Users, ShieldCheck];
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
 
 const APP_LOGIN_URL = `${(process.env.NEXT_PUBLIC_APP_URL || "https://app.supplio.uz").replace(/\/+$/, "")}/login`;
 
@@ -60,6 +70,11 @@ export default function AboutPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
   const [tariffs, setTariffs] = useState<Record<string, unknown>[]>([]);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+
+  type PublicContentResponse = {
+    teamMembers?: unknown;
+  };
 
   const BACKEND = normalizeBackendBaseUrl(process.env.NEXT_PUBLIC_BACKEND_URL);
 
@@ -72,17 +87,24 @@ export default function AboutPage() {
   useEffect(() => {
     fetch(`${BACKEND}/api/public/tariffs`)
       .then((res) => (res.ok ? res.json() : []))
-      .then((data) => {
-        setTariffs(Array.isArray(data) ? data : []);
-      })
+      .then((data) => setTariffs(Array.isArray(data) ? data : []))
       .catch(() => setTariffs([]));
+
+    fetch(`${BACKEND}/api/public/content`)
+      .then((res) => (res.ok ? res.json() : {}))
+      .then((data: PublicContentResponse) => {
+        if (Array.isArray(data?.teamMembers) && data.teamMembers.length > 0) {
+          setTeamMembers(data.teamMembers);
+        }
+      })
+      .catch(() => {});
   }, [BACKEND]);
 
   return (
     <div className="min-h-screen bg-white text-left overflow-x-hidden font-sans selection:bg-blue-600 selection:text-white">
       {/* ===== Nav ===== */}
       <nav
-        className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl border-b border-slate-200/60 py-3 shadow-sm" : "bg-transparent py-5"}`}
+        className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? "bg-white/95 backdrop-blur-xl border-b border-slate-200/60 py-3 shadow-sm" : "bg-white/90 backdrop-blur-md py-4 border-b border-slate-100"}`}
       >
         <div className="max-w-7xl mx-auto px-5 sm:px-6 flex items-center justify-between">
           <Link href={`/${params.lang}`} className="flex items-center shrink-0">
@@ -99,7 +121,7 @@ export default function AboutPage() {
             {[
               { name: t.nav.features, href: `/${params.lang}#features` },
               { name: t.nav.pricing, href: `/${params.lang}#pricing` },
-              { name: t.nav.news, href: `/${params.lang}#news` },
+              { name: t.nav.news, href: `/${params.lang}/news` },
               { name: t.nav.about, href: `/${params.lang}/about` },
             ].map((item) => (
               <Link
@@ -160,7 +182,7 @@ export default function AboutPage() {
               {t.nav.pricing}
             </Link>
             <Link
-              href={`/${params.lang}#news`}
+              href={`/${params.lang}/news`}
               onClick={() => setIsMenuOpen(false)}
             >
               {t.nav.news}
@@ -348,28 +370,76 @@ export default function AboutPage() {
             </p>
           </motion.div>
           <div className="flex flex-wrap justify-center gap-8">
-            {TEAM.map((member, i) => (
+            {teamMembers.map((member, i) => {
+              const roleKey =
+                `role${lang === "oz" ? "Uz" : lang.charAt(0).toUpperCase() + lang.slice(1)}` as keyof typeof member;
+              const bioKey =
+                `bio${lang === "oz" ? "Uz" : lang.charAt(0).toUpperCase() + lang.slice(1)}` as keyof typeof member;
+              const role = (member[roleKey] ||
+                member.roleEn ||
+                member.roleUz ||
+                "") as string;
+              const bio = (member[bioKey] ||
+                member.bioEn ||
+                member.bioUz ||
+                "") as string;
+              const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
+              return (
+                <motion.div
+                  key={member.id ?? i}
+                  {...fadeInUp}
+                  transition={{ delay: i * 0.08 }}
+                  className="text-center space-y-5 flex flex-col items-center max-w-[180px]"
+                >
+                  <div
+                    className={`w-24 h-24 sm:w-28 sm:h-28 rounded-3xl ${color} text-white flex items-center justify-center text-2xl font-black shadow-2xl shadow-blue-600/30 overflow-hidden`}
+                  >
+                    {member.avatar ? (
+                      <img
+                        src={member.avatar}
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      getInitials(member.name)
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <p className="font-bold text-white text-base leading-tight">
+                      {member.name}
+                    </p>
+                    {role && (
+                      <p className="text-blue-400 text-sm font-semibold leading-tight">
+                        {role}
+                      </p>
+                    )}
+                    {bio && (
+                      <p className="text-slate-400 text-xs leading-relaxed">
+                        {bio}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+            {teamMembers.length === 0 && (
               <motion.div
-                key={i}
                 {...fadeInUp}
-                transition={{ delay: i * 0.08 }}
                 className="text-center space-y-5 flex flex-col items-center"
               >
-                <div
-                  className={`w-24 h-24 sm:w-28 sm:h-28 rounded-3xl ${member.color} text-white flex items-center justify-center text-2xl font-black shadow-2xl shadow-blue-600/30`}
-                >
-                  {member.avatar}
+                <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-blue-600 text-white flex items-center justify-center text-2xl font-black shadow-2xl shadow-blue-600/30">
+                  SR
                 </div>
                 <div className="space-y-1">
                   <p className="font-bold text-white text-base leading-tight">
-                    {member.name}
+                    Saidqodirxon Rahimov
                   </p>
-                  <p className="text-slate-400 text-sm mt-1 leading-tight">
-                    {member.role}
+                  <p className="text-blue-400 text-sm font-semibold leading-tight">
+                    CEO, Founder
                   </p>
                 </div>
               </motion.div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -404,26 +474,7 @@ export default function AboutPage() {
       </section>
 
       {/* ===== Footer ===== */}
-      <footer className="py-12 px-5 sm:px-6 border-t border-slate-100 bg-slate-50">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-6">
-          <Link href={`/${params.lang}`} className="flex items-center">
-            <div className="h-10 overflow-hidden flex items-center">
-              <img
-                src="/logo.png"
-                alt="Supplio"
-                className="h-full object-contain"
-              />
-            </div>
-          </Link>
-          <p className="text-slate-400 text-sm">{t.footer.copyright}</p>
-          <div className="flex items-center gap-2">
-            <Check className="w-4 h-4 text-emerald-500" />
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              All systems operational
-            </span>
-          </div>
-        </div>
-      </footer>
+      <Footer lang={lang} />
 
       <LeadModal
         isOpen={isLeadModalOpen}

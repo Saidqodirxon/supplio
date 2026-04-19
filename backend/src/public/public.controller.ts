@@ -20,9 +20,25 @@ export class PublicController {
     return this.publicService.getContent();
   }
 
+  @Get("news")
+  getNewsList(
+    @Query("lang") lang: string = "uz",
+    @Query("limit") limit?: string
+  ) {
+    return this.publicService.getNewsList(lang, limit ? Number(limit) : 20);
+  }
+
   @Get("news/:slug")
   getNews(@Param("slug") slug: string, @Query("lang") lang: string = "uz") {
     return this.publicService.getNewsBySlug(slug, lang);
+  }
+
+  @Get("legal/:type")
+  getLegal(
+    @Param("type") type: string,
+    @Query("lang") lang: string = "uz"
+  ) {
+    return this.publicService.getLegalContent(type, lang);
   }
 
   @Post("news/:id/view")

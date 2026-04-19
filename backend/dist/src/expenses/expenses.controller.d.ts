@@ -8,12 +8,12 @@ export declare class ExpensesController {
         };
     } & {
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        deletedBy: string | null;
-        companyId: string;
-        branchId: string | null;
         description: string | null;
+        deletedBy: string | null;
+        branchId: string | null;
         category: string;
         amount: number;
     }>;
@@ -23,12 +23,12 @@ export declare class ExpensesController {
         };
     } & {
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        deletedBy: string | null;
-        companyId: string;
-        branchId: string | null;
         description: string | null;
+        deletedBy: string | null;
+        branchId: string | null;
         category: string;
         amount: number;
     })[]>;
@@ -38,12 +38,12 @@ export declare class ExpensesController {
     }>;
     remove(req: any, id: string): Promise<{
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        deletedBy: string | null;
-        companyId: string;
-        branchId: string | null;
         description: string | null;
+        deletedBy: string | null;
+        branchId: string | null;
         category: string;
         amount: number;
     }>;

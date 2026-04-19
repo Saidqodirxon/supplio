@@ -13,16 +13,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LeadsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
-const telegraf_1 = require("telegraf");
+const telegram_logger_service_1 = require("../telegram/telegram-logger.service");
 let LeadsService = LeadsService_1 = class LeadsService {
-    constructor(prisma) {
+    constructor(prisma, telegramLogger) {
         this.prisma = prisma;
+        this.telegramLogger = telegramLogger;
         this.logger = new common_1.Logger(LeadsService_1.name);
-        this.adminBot = null;
-        const token = process.env.TELEGRAM_BOT_TOKEN;
-        if (token) {
-            this.adminBot = new telegraf_1.Telegraf(token);
-        }
     }
     async createLead(data) {
         const lead = await this.prisma.lead.create({
@@ -32,7 +28,7 @@ let LeadsService = LeadsService_1 = class LeadsService {
                 info: data.info,
             },
         });
-        await this.notifyAdmin(lead);
+        this.telegramLogger.sendLeadNotification(lead).catch(() => { });
         return lead;
     }
     async getAllLeads() {
@@ -46,22 +42,11 @@ let LeadsService = LeadsService_1 = class LeadsService {
             data: { status },
         });
     }
-    async notifyAdmin(lead) {
-        const chatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
-        if (!this.adminBot || !chatId)
-            return;
-        const message = `🚀 New Lead!\nName: ${lead.fullName}\nPhone: ${lead.phone}\nInfo: ${lead.info || "None"}`;
-        try {
-            await this.adminBot.telegram.sendMessage(chatId, message);
-        }
-        catch (e) {
-            this.logger.error("Failed to send TG notification");
-        }
-    }
 };
 exports.LeadsService = LeadsService;
 exports.LeadsService = LeadsService = LeadsService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        telegram_logger_service_1.TelegramLoggerService])
 ], LeadsService);
 //# sourceMappingURL=leads.service.js.map

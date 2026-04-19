@@ -5,12 +5,12 @@ export declare class CategoriesController {
     findAll(req: any): Promise<({
         subcategories: {
             id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            deletedAt: Date | null;
-            deletedBy: string | null;
             companyId: string;
+            createdAt: Date;
+            deletedAt: Date | null;
+            name: string;
+            updatedAt: Date;
+            deletedBy: string | null;
             categoryId: string;
         }[];
         _count: {
@@ -18,57 +18,57 @@ export declare class CategoriesController {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
     })[]>;
     create(req: any, name: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
     }>;
     update(req: any, id: string, name: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
     }>;
     remove(req: any, id: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
     }>;
     restore(req: any, id: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
     }>;
     createSubcategory(req: any, categoryId: string, name: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         categoryId: string;
     }>;
     updateSubcategory(req: any, id: string, body: {
@@ -76,32 +76,32 @@ export declare class CategoriesController {
         categoryId?: string;
     }): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         categoryId: string;
     }>;
     removeSubcategory(req: any, id: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         categoryId: string;
     }>;
     restoreSubcategory(req: any, id: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         categoryId: string;
     }>;
 }

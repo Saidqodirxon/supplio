@@ -9,23 +9,33 @@ import { Observable } from "rxjs";
 import { PrismaService } from "../../prisma/prisma.service";
 
 /**
- * Enterprise Demo Isolation Guard
+ * Demo Mode Guard
  *
- * Ensures that Demo environments are Read-Only by default for anonymous
- * or public trial users, preventing data corruption in the shared demo DB.
+ * Allows most CRUD operations so users can explore the full system.
+ * Blocks only: password changes, bot management, company profile edits.
+ * Data resets every 3 days via cron.
  */
 @Injectable()
 export class DemoReadOnlyInterceptor implements NestInterceptor {
   constructor(private prisma: PrismaService) {}
+
+  // These URL patterns are blocked in demo mode
+  private readonly BLOCKED_PATTERNS = [
+    "/auth/change-password",
+    "/auth/password",
+    "/profile/password",
+    "/company/me",         // company settings edit
+    "/telegram/bots",      // bot creation
+    "/company/users",      // adding/removing staff
+  ];
 
   async intercept(
     context: ExecutionContext,
     next: CallHandler
   ): Promise<Observable<any>> {
     const request = context.switchToHttp().getRequest();
-    const { method, headers } = request;
+    const { method, headers, url } = request;
 
-    // 1. Identify Demo Context (via header or subdomain)
     const companyId = headers["x-company-id"];
     if (!companyId) return next.handle();
 
@@ -34,22 +44,24 @@ export class DemoReadOnlyInterceptor implements NestInterceptor {
       select: { isDemo: true },
     });
 
-    // 2. Enforce Read-Only for mutating methods in Demo mode
-    // Standard ENTERPRISE policy: Allowed only 'GET' or whitelisted test actions.
+    if (!company?.isDemo) return next.handle();
+
     const isMutating = ["POST", "PUT", "PATCH", "DELETE"].includes(method);
+    if (!isMutating) return next.handle();
 
-    if (company?.isDemo && isMutating) {
-      // Whitelist certain demo interactions if needed (e.g. creating an order for UX testing)
-      const whitelistedPaths = ["/demo/test-action", "/orders/preview"];
-      const isWhitelisted = whitelistedPaths.some((path) =>
-        request.url.includes(path)
+    // Check blocked patterns
+    const isBlocked = this.BLOCKED_PATTERNS.some((p) => url.includes(p));
+    if (isBlocked) {
+      throw new ForbiddenException(
+        "Demo rejimida bu amalni bajarib bo'lmaydi. Parolni, bot va tashkilot sozlamalarini o'zgartirish cheklangan."
       );
+    }
 
-      if (!isWhitelisted) {
-        throw new ForbiddenException(
-          "DEMO_MODE_RESTRICTION: This is 100% read-only demo environment. Data persistence is disabled to protect shared mock data. To test full capability, please request a Private Trial."
-        );
-      }
+    // Block DELETE on bots
+    if (method === "DELETE" && url.includes("/telegram")) {
+      throw new ForbiddenException(
+        "Demo rejimida bot o'chirib bo'lmaydi."
+      );
     }
 
     return next.handle();

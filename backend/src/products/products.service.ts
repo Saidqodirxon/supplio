@@ -153,6 +153,19 @@ export class ProductsService {
     return this.prisma.product.update({ where: { id }, data: { stock: Number(stock) } });
   }
 
+  async adjustStock(id: string, companyId: string, delta: number, _note?: string) {
+    const product = await this.findOne(id, companyId);
+    const newStock = Math.max(0, (product.stock ?? 0) + delta);
+    return this.prisma.product.update({
+      where: { id },
+      data: { stock: newStock },
+      include: {
+        category: { select: { id: true, name: true } },
+        unitRef: { select: { id: true, name: true, symbol: true } },
+      },
+    });
+  }
+
   async remove(id: string, companyId: string, deletedBy: string) {
     await this.findOne(id, companyId);
     return this.prisma.product.update({

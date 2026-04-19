@@ -202,7 +202,7 @@ export default function LeadModal({
                                 ? "Выберите тариф"
                                 : lang === "tr"
                                   ? "Tarifi seçin"
-                                  : "Select a Plan"}
+                                  : t.common.leadForm.selectPlan}
                           </option>
                           {tariffs.map(
                             (tItem: Record<string, unknown>, i: number) => {

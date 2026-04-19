@@ -56,6 +56,7 @@ export default function Dealers() {
   const [dealerOrders, setDealerOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [dealerStats, setDealerStats] = useState<Map<string, { totalOrders: number; totalAmount: number }>>(new Map());
+  const [statusLabels, setStatusLabels] = useState<{ healthy?: string; hasDebt?: string; overLimit?: string }>({});
 
   const { language } = useAuthStore();
   const t = dashboardTranslations[language];
@@ -87,11 +88,27 @@ export default function Dealers() {
 
   useEffect(() => { fetchDealers(); }, [fetchDealers]);
 
+  useEffect(() => {
+    api.get('/company/me').then((r) => {
+      if (r.data?.dealerStatusLabels) setStatusLabels(r.data.dealerStatusLabels);
+    }).catch(() => {});
+  }, []);
+
+  const statusLabel = (key: 'healthy' | 'hasDebt' | 'overLimit') => {
+    if (statusLabels[key]) return statusLabels[key]!;
+    if (key === 'healthy') return t.dealers.healthy;
+    if (key === 'hasDebt') return t.dealers.hasDebt;
+    return t.dealers.limitReached;
+  };
+
   const filtered = dealers.filter((d) => {
+    const q = searchTerm.toLowerCase().trim();
     const matchSearch =
-      !searchTerm ||
-      d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      d.phone.includes(searchTerm);
+      !q ||
+      d.name.toLowerCase().includes(q) ||
+      d.phone.includes(q) ||
+      d.id.toLowerCase().includes(q) ||
+      d.id.slice(0, 8).toLowerCase().includes(q);
     const matchStatus = statusFilter === 'ALL' || (d as any).status === statusFilter;
     return matchSearch && matchStatus;
   });
@@ -115,25 +132,39 @@ export default function Dealers() {
     setMenuOpenId(null);
   };
 
+  const errMap = {
+    nameRequired: { uz: 'Ism kiritilmadi', ru: 'Введите имя', en: 'Name required', tr: 'İsim gerekli', oz: 'Ism kiritilmadi' },
+    phoneInvalid: { uz: 'Telefon noto\'g\'ri', ru: 'Неверный телефон', en: 'Invalid phone', tr: 'Geçersiz telefon', oz: 'Telefon noto\'g\'ri' },
+    branchRequired: { uz: 'Filial tanlanmadi', ru: 'Выберите филиал', en: 'Branch required', tr: 'Şube gerekli', oz: 'Filial tanlanmadi' },
+    updated: { uz: 'Diler yangilandi', ru: 'Дилер обновлён', en: 'Dealer updated', tr: 'Bayi güncellendi', oz: 'Diler yangilandi' },
+    added: { uz: 'Diler qo\'shildi', ru: 'Дилер добавлен', en: 'Dealer added', tr: 'Bayi eklendi', oz: 'Diler qo\'shildi' },
+    deleted: { uz: 'Diler o\'chirildi', ru: 'Дилер удалён', en: 'Dealer deleted', tr: 'Bayi silindi', oz: 'Diler o\'chirildi' },
+    deleteErr: { uz: 'O\'chirishda xatolik', ru: 'Ошибка удаления', en: 'Delete failed', tr: 'Silme hatası', oz: 'O\'chirishda xatolik' },
+    blocked: { uz: 'Diler bloklandi', ru: 'Дилер заблокирован', en: 'Dealer blocked', tr: 'Bayi engellendi', oz: 'Diler bloklandi' },
+    unblocked: { uz: 'Blok olib tashlandi', ru: 'Блокировка снята', en: 'Unblocked', tr: 'Engel kaldırıldı', oz: 'Blok olib tashlandi' },
+    error: { uz: 'Xatolik yuz berdi', ru: 'Произошла ошибка', en: 'An error occurred', tr: 'Bir hata oluştu', oz: 'Xatolik yuz berdi' },
+  };
+  const em = (key: keyof typeof errMap) => errMap[key][language as keyof typeof errMap[typeof key]] || errMap[key].uz;
+
   const handleSubmit = async () => {
-    if (!form.name.trim()) return toast.error('Ism kiritilmadi');
-    if (!form.phone || form.phone.replace(/\D/g, '').length < 12) return toast.error('Telefon raqami noto\'g\'ri');
-    if (!form.branchId) return toast.error('Filial tanlanmadi');
+    if (!form.name.trim()) return toast.error(em('nameRequired'));
+    if (!form.phone || form.phone.replace(/\D/g, '').length < 12) return toast.error(em('phoneInvalid'));
+    if (!form.branchId) return toast.error(em('branchRequired'));
 
     try {
       setSaving(true);
       if (editingDealer) {
         await api.patch(`/dealers/${editingDealer.id}`, form);
-        toast.success('Diler yangilandi');
+        toast.success(em('updated'));
       } else {
         await api.post('/dealers', form);
-        toast.success('Diler qo\'shildi');
+        toast.success(em('added'));
       }
       setModalOpen(false);
       fetchDealers();
     } catch (e: unknown) {
       if (!handleApiError(e)) {
-        const msg = (e as any)?.response?.data?.message ?? 'Xatolik yuz berdi';
+        const msg = (e as any)?.response?.data?.message ?? em('error');
         toast.error(msg);
       }
     } finally {
@@ -144,26 +175,29 @@ export default function Dealers() {
   const handleDelete = async (id: string) => {
     try {
       await api.delete(`/dealers/${id}`);
-      toast.success('Diler o\'chirildi');
+      toast.success(em('deleted'));
       setDeleteId(null);
       setMenuOpenId(null);
       fetchDealers();
     } catch {
-      toast.error('O\'chirishda xatolik');
+      toast.error(em('deleteErr'));
     }
   };
 
   const handleToggleBlock = async (dealer: Dealer) => {
     const isBlocked = (dealer as any).isBlocked;
     const action = isBlocked ? 'unblock' : 'block';
-    if (!window.confirm(isBlocked ? 'Dilerni blokdan chiqarasizmi?' : 'Bu dilerni bloklamoqchimisiz?')) return;
+    const confirmMsg = isBlocked
+      ? { uz: 'Dilerni blokdan chiqarasizmi?', ru: 'Разблокировать дилера?', en: 'Unblock dealer?', tr: 'Bayi engelini kaldır?', oz: 'Dilerni blokdan chiqarasizmi?' }
+      : { uz: 'Bu dilerni bloklamoqchimisiz?', ru: 'Заблокировать дилера?', en: 'Block this dealer?', tr: 'Bayi engellensin mi?', oz: 'Bu dilerni bloklamoqchimisiz?' };
+    if (!window.confirm(confirmMsg[language as keyof typeof confirmMsg] || confirmMsg.uz)) return;
     setBlockingId(dealer.id);
     try {
       await api.post(`/dealers/${dealer.id}/${action}`);
-      toast.success(isBlocked ? 'Blok olib tashlandi' : 'Diler bloklandi');
+      toast.success(isBlocked ? em('unblocked') : em('blocked'));
       fetchDealers();
     } catch {
-      toast.error('Xatolik yuz berdi');
+      toast.error(em('error'));
     } finally {
       setBlockingId(null);
     }
@@ -228,8 +262,13 @@ export default function Dealers() {
                   : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-500'
               }`}
             >
-              {s === 'ALL' ? t.common.filter : s === 'HEALTHY' ? '✅' : s === 'HAS_DEBT' ? '⚠️' : '🔴'}
-              {s !== 'ALL' && <span className="ml-1">{s.replace('_', ' ')}</span>}
+              {s === 'ALL'
+                ? t.common.all
+                : s === 'HEALTHY'
+                  ? `✅ ${statusLabel('healthy')}`
+                  : s === 'HAS_DEBT'
+                    ? `⚠️ ${statusLabel('hasDebt')}`
+                    : `🔴 ${statusLabel('overLimit')}`}
             </button>
           ))}
         </div>
@@ -249,6 +288,7 @@ export default function Dealers() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.04 }}
+                onClick={() => openDealerDetail(dealer)}
                 className="glass-card p-8 group hover:border-blue-200 dark:hover:border-blue-900/50 cursor-pointer overflow-hidden relative"
               >
                 <div className="flex justify-between items-start mb-8">
@@ -266,7 +306,7 @@ export default function Dealers() {
                       🔒 Bloklangan
                     </span>
                   )}
-                  <div className="relative">
+                  <div className="relative" onClick={(e) => e.stopPropagation()}>
                     <button
                       onClick={() => setMenuOpenId(menuOpenId === dealer.id ? null : dealer.id)}
                       className="p-2 text-slate-300 hover:text-slate-700 dark:hover:text-white rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
@@ -347,15 +387,9 @@ export default function Dealers() {
                     </p>
                   </div>
                   <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black tracking-widest uppercase border ${overLimit ? 'bg-rose-50 text-rose-600 border-rose-100' : hasDebt ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
-                    {overLimit ? 'OVER LIMIT' : hasDebt ? 'HAS DEBT' : t.dealers.healthy}
+                    {overLimit ? `🔴 ${statusLabel('overLimit')}` : hasDebt ? `⚠️ ${statusLabel('hasDebt')}` : `✅ ${statusLabel('healthy')}`}
                   </span>
                 </div>
-                <button
-                  onClick={() => openDealerDetail(dealer)}
-                  className="mt-6 w-full py-3 bg-slate-50 dark:bg-slate-800 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2"
-                >
-                  <ShoppingCart className="w-3.5 h-3.5" /> View Orders
-                </button>
               </motion.div>
             );
           })
@@ -535,9 +569,28 @@ export default function Dealers() {
                 </div>
               </div>
 
+              {/* Balance action panel */}
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 shrink-0 space-y-3">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments?.title ?? "To'lovlar"}</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); window.location.href = `/payments?dealer=${detailDealer!.id}`; }}
+                    className="flex-1 py-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-100 dark:border-emerald-900/30"
+                  >
+                    + {t.payments.recordPayment}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setDetailDealer(null); openEdit(detailDealer!); }}
+                    className="flex-1 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 text-[10px] font-black uppercase tracking-widest hover:bg-blue-100 transition-all border border-blue-100 dark:border-blue-900/30"
+                  >
+                    ✎ {t.common.edit ?? "Tahrirlash"}
+                  </button>
+                </div>
+              </div>
+
               {/* Orders list */}
               <div className="flex-1 overflow-y-auto p-6 space-y-3">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Order History</p>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">{t.orders?.title ?? "Buyurtmalar tarixi"}</p>
 
                 {loadingOrders ? (
                   <div className="flex items-center justify-center py-16">

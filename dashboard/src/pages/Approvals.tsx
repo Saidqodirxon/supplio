@@ -19,135 +19,12 @@ interface PendingDealer {
   branch: { name: string };
 }
 
-const T = {
-  en: {
-    title: 'Dealer Approvals',
-    subtitle: 'Review and approve dealer registration requests.',
-    pending: 'Pending',
-    approved: 'Approved',
-    empty: 'No pending requests',
-    emptyDesc: 'All dealer registrations have been reviewed.',
-    approve: 'Approve',
-    reject: 'Reject',
-    approving: 'Approving...',
-    rejecting: 'Rejecting...',
-    confirmReject: 'Reject this dealer?',
-    creditLimit: 'Credit Limit',
-    branch: 'Branch',
-    registered: 'Registered',
-    region: 'Region',
-    district: 'District',
-    contactPhone: 'Contact Phone',
-    setCreditLimit: 'Set Credit Limit',
-    creditLimitDesc: 'Set the credit limit for this dealer. They will only be able to purchase up to this amount.',
-    limitPlaceholder: 'e.g. 5 000 000',
-    cancel: 'Cancel',
-    confirm: 'Approve',
-  },
-  uz: {
-    title: 'Diler Tasdiqlari',
-    subtitle: 'Diler ro\'yxatdan o\'tish so\'rovlarini ko\'rib chiqing va tasdiqlang.',
-    pending: 'Kutilmoqda',
-    approved: 'Tasdiqlangan',
-    empty: 'Kutilayotgan so\'rovlar yo\'q',
-    emptyDesc: 'Barcha diler ro\'yxatga olish so\'rovlari ko\'rib chiqilgan.',
-    approve: 'Tasdiqlash',
-    reject: 'Rad etish',
-    approving: 'Tasdiqlanmoqda...',
-    rejecting: 'Rad etilmoqda...',
-    confirmReject: 'Bu dilerni rad etasizmi?',
-    creditLimit: 'Kredit limiti',
-    branch: 'Filial',
-    registered: 'Ro\'yxatdan o\'tgan',
-    region: 'Viloyat',
-    district: 'Tuman',
-    contactPhone: 'Aloqa raqami',
-    setCreditLimit: 'Kredit limitini belgilang',
-    creditLimitDesc: 'Diler uchun kredit limitini kiriting. U faqat shu miqdorgacha xarid qila oladi.',
-    limitPlaceholder: 'Masalan: 5 000 000',
-    cancel: 'Bekor qilish',
-    confirm: 'Tasdiqlash',
-  },
-  oz: {
-    title: 'Дилер Тасдиқлари',
-    subtitle: 'Дилер рўйхатдан ўтиш сўровларини кўриб чиқинг.',
-    pending: 'Кутилмоқда',
-    approved: 'Тасдиқланган',
-    empty: 'Сўровлар йўқ',
-    emptyDesc: 'Барча сўровлар кўриб чиқилди.',
-    approve: 'Тасдиқлаш',
-    reject: 'Рад этиш',
-    approving: 'Тасдиқланмоқда...',
-    rejecting: 'Рад этилмоқда...',
-    confirmReject: 'Бу дилерни рад этасизми?',
-    creditLimit: 'Кредит лимити',
-    branch: 'Филиал',
-    registered: 'Рўйхатдан ўтган',
-    region: 'Вилоят',
-    district: 'Туман',
-    contactPhone: 'Алоқа рақами',
-    setCreditLimit: 'Кредит лимитини белгиланг',
-    creditLimitDesc: 'Дилер учун кредит лимитини киритинг.',
-    limitPlaceholder: 'Масалан: 5 000 000',
-    cancel: 'Бекор қилиш',
-    confirm: 'Тасдиқлаш',
-  },
-  tr: {
-    title: 'Bayi Onayları',
-    subtitle: 'Bayi kayıt taleplerini inceleyin ve onaylayın.',
-    pending: 'Bekliyor',
-    approved: 'Onaylandı',
-    empty: 'Bekleyen istek yok',
-    emptyDesc: 'Tüm bayi kayıt talepleri incelendi.',
-    approve: 'Onayla',
-    reject: 'Reddet',
-    approving: 'Onaylanıyor...',
-    rejecting: 'Reddediliyor...',
-    confirmReject: 'Bu bayiyi reddetmek istiyor musunuz?',
-    creditLimit: 'Kredi Limiti',
-    branch: 'Şube',
-    registered: 'Kayıt Tarihi',
-    region: 'Bölge',
-    district: 'İlçe',
-    contactPhone: 'İletişim Telefonu',
-    setCreditLimit: 'Kredi Limiti Belirle',
-    creditLimitDesc: 'Bu bayi için kredi limitini girin.',
-    limitPlaceholder: 'Örn: 5 000 000',
-    cancel: 'İptal',
-    confirm: 'Onayla',
-  },
-  ru: {
-    title: 'Одобрение Дилеров',
-    subtitle: 'Рассматривайте и одобряйте заявки на регистрацию дилеров.',
-    pending: 'Ожидают',
-    approved: 'Одобрен',
-    empty: 'Нет ожидающих заявок',
-    emptyDesc: 'Все заявки на регистрацию дилеров рассмотрены.',
-    approve: 'Одобрить',
-    reject: 'Отклонить',
-    approving: 'Одобряю...',
-    rejecting: 'Отклоняю...',
-    confirmReject: 'Отклонить этого дилера?',
-    creditLimit: 'Кредитный лимит',
-    branch: 'Филиал',
-    registered: 'Зарегистрирован',
-    region: 'Область',
-    district: 'Район',
-    contactPhone: 'Контактный телефон',
-    setCreditLimit: 'Установить кредитный лимит',
-    creditLimitDesc: 'Введите кредитный лимит для этого дилера.',
-    limitPlaceholder: 'Напр: 5 000 000',
-    cancel: 'Отмена',
-    confirm: 'Одобрить',
-  },
-} as const;
-type Lang = keyof typeof T;
+
 
 export default function Approvals() {
   const { language } = useAuthStore();
-  const lang = (language in T ? language : 'en') as Lang;
-  const t = T[lang];
-  const dt = dashboardTranslations[language as keyof typeof dashboardTranslations] ?? dashboardTranslations.en;
+  const t = dashboardTranslations[language].approvals;
+  const common = dashboardTranslations[language].common;
 
   const [dealers, setDealers] = useState<PendingDealer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,11 +41,11 @@ export default function Approvals() {
       const res = await api.get('/dealers/pending-approvals');
       setDealers(res.data);
     } catch {
-      toast.error(dt.common?.error ?? 'Failed to load');
+      toast.error(common.error);
     } finally {
       setLoading(false);
     }
-  }, [dt.common?.error]);
+  }, [common.error]);
 
   useEffect(() => { fetchPending(); }, [fetchPending]);
 
@@ -189,7 +66,7 @@ export default function Approvals() {
       toast.success(t.approved);
       setDealers(prev => prev.filter(d => d.id !== id));
     } catch {
-      toast.error('Failed to approve');
+      toast.error(common.error);
     } finally {
       setActionId(null);
       setActionType(null);
@@ -202,10 +79,10 @@ export default function Approvals() {
     setActionType('reject');
     try {
       await api.post(`/dealers/${id}/reject`);
-      toast.success('Rejected');
+      toast.success(common.delete);
       setDealers(prev => prev.filter(d => d.id !== id));
     } catch {
-      toast.error('Failed to reject');
+      toast.error(common.error);
     } finally {
       setActionId(null);
       setActionType(null);

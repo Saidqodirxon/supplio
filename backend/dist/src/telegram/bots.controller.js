@@ -15,13 +15,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BotsController = void 0;
 const common_1 = require("@nestjs/common");
 const telegram_service_1 = require("./telegram.service");
+const company_notifier_service_1 = require("./company-notifier.service");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const tenant_guard_1 = require("../common/middleware/tenant.guard");
 const roles_guard_1 = require("../common/middleware/roles.guard");
 const roles_decorator_1 = require("../common/decorators/roles.decorator");
 let BotsController = class BotsController {
-    constructor(telegramService) {
+    constructor(telegramService, companyNotifier) {
         this.telegramService = telegramService;
+        this.companyNotifier = companyNotifier;
     }
     async getBots(req) {
         const bots = await this.telegramService.getBotsForCompany(req.companyId);
@@ -55,8 +57,38 @@ let BotsController = class BotsController {
     async reloadBots(req) {
         return this.telegramService.reloadCompanyBots(req.companyId);
     }
+    async applyBotBranding(req, id) {
+        const bots = await this.telegramService.getBotsForCompany(req.companyId);
+        const bot = bots.find((b) => b.id === id);
+        if (!bot)
+            return { error: "Bot not found" };
+        return this.telegramService.applyBotBranding(bot.token, req.companyId);
+    }
+    async adminCreateBot(body) {
+        return this.telegramService.createBot(body.companyId, {
+            token: body.token,
+            botName: body.botName,
+            description: body.description,
+        });
+    }
+    async testGroup(req, type) {
+        return this.companyNotifier.testGroup(req.companyId, type);
+    }
+    async sendManualReport(req) {
+        await this.companyNotifier.sendDailyReport(req.companyId);
+        return { ok: true };
+    }
     async getAllBotsAdmin() {
         return this.telegramService.getAllBotsAdmin();
+    }
+    async adminReloadBot(id) {
+        return this.telegramService.adminReloadBot(id);
+    }
+    async adminUpdateBot(id, body) {
+        return this.telegramService.adminUpdateBot(id, body);
+    }
+    async adminHardDeleteBot(id) {
+        return this.telegramService.adminHardDeleteBot(id);
     }
 };
 exports.BotsController = BotsController;
@@ -86,7 +118,7 @@ __decorate([
 ], BotsController.prototype, "getBotStatus", null);
 __decorate([
     (0, common_1.Post)("bots"),
-    (0, roles_decorator_1.Roles)("OWNER", "SUPER_ADMIN"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -95,7 +127,7 @@ __decorate([
 ], BotsController.prototype, "createBot", null);
 __decorate([
     (0, common_1.Patch)("bots/:id"),
-    (0, roles_decorator_1.Roles)("OWNER", "SUPER_ADMIN"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)("id")),
     __param(2, (0, common_1.Body)()),
@@ -105,7 +137,7 @@ __decorate([
 ], BotsController.prototype, "updateBot", null);
 __decorate([
     (0, common_1.Delete)("bots/:id"),
-    (0, roles_decorator_1.Roles)("OWNER", "SUPER_ADMIN"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
     __param(0, (0, common_1.Req)()),
     __param(1, (0, common_1.Param)("id")),
     __metadata("design:type", Function),
@@ -123,12 +155,46 @@ __decorate([
 ], BotsController.prototype, "broadcast", null);
 __decorate([
     (0, common_1.Post)("bots/reload"),
-    (0, roles_decorator_1.Roles)("OWNER", "SUPER_ADMIN"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
     __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], BotsController.prototype, "reloadBots", null);
+__decorate([
+    (0, common_1.Post)("bots/:id/branding"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER", "SUPER_ADMIN"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "applyBotBranding", null);
+__decorate([
+    (0, common_1.Post)("admin/bots"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "adminCreateBot", null);
+__decorate([
+    (0, common_1.Post)("groups/test/:type"),
+    (0, roles_decorator_1.Roles)("OWNER", "SUPER_ADMIN"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("type")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "testGroup", null);
+__decorate([
+    (0, common_1.Post)("groups/report"),
+    (0, roles_decorator_1.Roles)("OWNER", "SUPER_ADMIN"),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "sendManualReport", null);
 __decorate([
     (0, common_1.Get)("admin/bots"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
@@ -136,9 +202,35 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], BotsController.prototype, "getAllBotsAdmin", null);
+__decorate([
+    (0, common_1.Post)("admin/bots/:id/reload"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "adminReloadBot", null);
+__decorate([
+    (0, common_1.Patch)("admin/bots/:id"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "adminUpdateBot", null);
+__decorate([
+    (0, common_1.Delete)("admin/bots/:id"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "adminHardDeleteBot", null);
 exports.BotsController = BotsController = __decorate([
     (0, common_1.Controller)("telegram"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, tenant_guard_1.TenantGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [telegram_service_1.TelegramService])
+    __metadata("design:paramtypes", [telegram_service_1.TelegramService,
+        company_notifier_service_1.CompanyNotifierService])
 ], BotsController);
 //# sourceMappingURL=bots.controller.js.map

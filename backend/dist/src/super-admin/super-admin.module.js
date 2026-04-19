@@ -15,6 +15,8 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const analytics_service_1 = require("../analytics/analytics.service");
 const backup_service_1 = require("../common/services/backup/backup.service");
 const units_service_1 = require("../units/units.service");
+const telegram_logger_service_1 = require("../telegram/telegram-logger.service");
+const company_notifier_service_1 = require("../telegram/company-notifier.service");
 let SuperAdminModule = class SuperAdminModule {
 };
 exports.SuperAdminModule = SuperAdminModule;
@@ -28,6 +30,8 @@ exports.SuperAdminModule = SuperAdminModule = __decorate([
             analytics_service_1.AnalyticsService,
             backup_service_1.BackupService,
             units_service_1.UnitsService,
+            telegram_logger_service_1.TelegramLoggerService,
+            company_notifier_service_1.CompanyNotifierService,
         ],
         exports: [super_admin_service_1.SuperAdminService],
     })

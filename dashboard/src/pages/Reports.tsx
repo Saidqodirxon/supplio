@@ -110,6 +110,7 @@ export default function Reports() {
   const [dashData, setDashData] = useState<DashData | null>(null);
   const [topDealers, setTopDealers] = useState<TopDealer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [planError, setPlanError] = useState(false);
 
   const isUz = ["uz", "oz"].includes(language);
   const isRu = language === "ru";
@@ -156,12 +157,25 @@ export default function Reports() {
 
   const loadAll = async () => {
     setLoading(true);
+    setPlanError(false);
     try {
       const [debtRes, statsRes, topRes] = await Promise.allSettled([
         api.get("/analytics/debts"),
         api.get("/analytics/dashboard?period=all"),
         api.get("/analytics/top-dealers?limit=20"),
       ]);
+      // Check if any 402 plan-limit error occurred (same as Analytics page pattern)
+      const isPlanError = [debtRes, statsRes, topRes].some(
+        (r) => r.status === "rejected" && (
+          r.reason?.response?.status === 402 ||
+          r.reason?.response?.data?.limitReached === true
+        )
+      );
+      if (isPlanError) {
+        setPlanError(true);
+        setLoading(false);
+        return;
+      }
       if (debtRes.status === "fulfilled") setDebtReport(debtRes.value.data);
       if (statsRes.status === "fulfilled") setDashData(statsRes.value.data);
       if (topRes.status === "fulfilled") setTopDealers(topRes.value.data);
@@ -260,6 +274,38 @@ export default function Reports() {
     else if (tab === "debts") exportDebts();
     else exportTop();
   };
+
+  if (planError) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">{t.title}</h1>
+          <p className="text-slate-400 text-sm font-bold mt-1">
+            {isUz ? "Kompaniya faoliyati bo'yicha to'liq hisobot" : isRu ? "Полный отчёт по деятельности компании" : "Full company activity report"}
+          </p>
+        </div>
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-3xl p-12 flex flex-col items-center justify-center text-center">
+          <BarChart3 className="w-16 h-16 text-amber-600 dark:text-amber-400 mb-4 opacity-70" />
+          <h2 className="text-2xl font-black text-amber-900 dark:text-amber-100 mb-2">
+            {isUz ? "Hisobotlar mavjud emas" : isRu ? "Отчёты недоступны" : "Reports Unavailable"}
+          </h2>
+          <p className="text-amber-700 dark:text-amber-300 font-bold max-w-md mb-6">
+            {isUz
+              ? "Hisobotlar funksiyasi tarifingizda mavjud emas. Yangilash uchun tarifni upgrade qiling."
+              : isRu
+                ? "Отчёты недоступны в текущем плане. Пожалуйста, обновите тариф."
+                : "Reports are not available on your current plan. Please upgrade your tariff."}
+          </p>
+          <a
+            href="/subscription"
+            className="premium-button"
+          >
+            {isUz ? "Tarifni yangilash" : isRu ? "Обновить тариф" : "Upgrade Plan"}
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

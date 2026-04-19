@@ -15,6 +15,7 @@ import {
   Ruler,
   RotateCcw,
   BarChart3,
+  Warehouse,
 } from "lucide-react";
 import api from "../services/api";
 import type {
@@ -83,6 +84,8 @@ function CategoryManager({
   onClose: () => void;
   onRefresh: () => void;
 }) {
+  const { language } = useAuthStore();
+  const t = dashboardTranslations[language];
   const [newCat, setNewCat] = useState("");
   const [newSub, setNewSub] = useState("");
   const [selectedCat, setSelectedCat] = useState("");
@@ -147,7 +150,7 @@ function CategoryManager({
       >
         <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 shrink-0">
           <h3 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
-            <Tags className="w-5 h-5 text-blue-600" /> Categories
+            <Tags className="w-5 h-5 text-blue-600" /> {t.products.categories}
           </h3>
           <button
             onClick={onClose}
@@ -161,14 +164,14 @@ function CategoryManager({
           {/* Add Category */}
           <div>
             <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
-              New Category
+              {t.products.newCategory}
             </label>
             <div className="flex gap-2">
               <input
                 value={newCat}
                 onChange={(e) => setNewCat(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addCategory()}
-                placeholder="Category name"
+                placeholder={t.products.name}
                 className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
               <button
@@ -183,7 +186,7 @@ function CategoryManager({
           {/* Add Subcategory */}
           <div>
             <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
-              New Subcategory
+              {t.products.newSubcategory}
             </label>
             <div className="flex gap-2 mb-2">
               <select
@@ -191,7 +194,7 @@ function CategoryManager({
                 onChange={(e) => setSelectedCat(e.target.value)}
                 className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none"
               >
-                <option value="">Select category...</option>
+                <option value="">{t.products.selectCategory}...</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -204,7 +207,7 @@ function CategoryManager({
                 value={newSub}
                 onChange={(e) => setNewSub(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addSubcategory()}
-                placeholder="Subcategory name"
+                placeholder={t.products.name}
                 className="flex-1 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
               />
               <button
@@ -229,7 +232,7 @@ function CategoryManager({
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-[9px] font-black text-slate-400 uppercase">
-                      {cat._count?.products ?? 0} products
+                      {cat._count?.products ?? 0} {t.dashboard.productsCount.toLowerCase()}
                     </span>
                     <button
                       onClick={() => deleteCat(cat.id)}
@@ -294,6 +297,11 @@ export default function Products() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [form, setForm] = useState<ProductForm>(defaultForm);
   const [saving, setSaving] = useState(false);
+
+  // Inventory
+  const [stockAdjId, setStockAdjId] = useState<string | null>(null);
+  const [stockDelta, setStockDelta] = useState<string>("");
+  const [stockSaving, setStockSaving] = useState(false);
 
   const { language } = useAuthStore();
   const t = dashboardTranslations[language];
@@ -404,6 +412,21 @@ export default function Products() {
     setShowModal(true);
   };
 
+  const handleAdjustStock = async (productId: string, delta: number) => {
+    try {
+      setStockSaving(true);
+      await api.patch(`/products/${productId}/adjust-stock`, { delta });
+      toast.success(delta > 0 ? `+${delta} ${t.products?.stock || 'stock'} qo'shildi` : `${delta} ${t.products?.stock || 'stock'} ayirildi`);
+      setStockAdjId(null);
+      setStockDelta("");
+      fetchProducts();
+    } catch {
+      toast.error(t.common.error);
+    } finally {
+      setStockSaving(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.price) return toast.error(t.common.error);
@@ -473,7 +496,7 @@ export default function Products() {
             {t.products?.title || "Products"}
           </h2>
           <p className="text-slate-500 dark:text-slate-400 mt-3 font-bold opacity-70 leading-relaxed uppercase tracking-widest text-[10px]">
-            {t.products?.subtitle || ""} • {response?.total ?? 0} total
+            {t.products?.subtitle || ""} • {response?.total ?? 0} {t.products.total}
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -481,7 +504,7 @@ export default function Products() {
             onClick={() => setShowCatManager(true)}
             className="flex items-center gap-2 px-5 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 font-black text-[10px] uppercase tracking-widest text-slate-600 hover:bg-slate-50 transition-all active:scale-95"
           >
-            <Tags className="w-4 h-4" /> Categories
+            <Tags className="w-4 h-4" /> {t.products.categories}
           </button>
           <button onClick={openAdd} className="premium-button">
             <Plus className="w-4 h-4" />
@@ -494,22 +517,22 @@ export default function Products() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
           {
-            label: "Total Products",
+            label: t.products.totalProducts,
             value: stats?.totalCount ?? 0,
             suffix: "",
           },
           {
-            label: "Inventory Cost",
+            label: t.products.inventoryCost,
             value: (stats?.inventoryValue ?? 0).toLocaleString(),
             suffix: t.common.uzs,
           },
           {
-            label: "Retail Value",
+            label: t.products.retailValue,
             value: (stats?.totalRevenuePotential ?? 0).toLocaleString(),
             suffix: t.common.uzs,
           },
           {
-            label: "Avg Margin",
+            label: t.products.avgMargin,
             value: `${stats?.avgMargin ?? 0}%`,
             suffix: "",
           },
@@ -555,7 +578,7 @@ export default function Products() {
             }}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
           >
-            <option value="">All Categories</option>
+            <option value="">{t.products.allCategories}</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -570,7 +593,7 @@ export default function Products() {
             disabled={!filterCategory || subcategories.length === 0}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all disabled:opacity-50"
           >
-            <option value="">All Subcategories</option>
+            <option value="">{t.products.allSubcategories}</option>
             {subcategories.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -588,14 +611,14 @@ export default function Products() {
             }}
             className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
           >
-            <option value="createdAt:desc">Newest First</option>
-            <option value="createdAt:asc">Oldest First</option>
-            <option value="name:asc">Name A-Z</option>
-            <option value="name:desc">Name Z-A</option>
-            <option value="price:asc">Price Low-High</option>
-            <option value="price:desc">Price High-Low</option>
-            <option value="stock:asc">Stock Low-High</option>
-            <option value="stock:desc">Stock High-Low</option>
+            <option value="createdAt:desc">{t.products.newestFirst}</option>
+            <option value="createdAt:asc">{t.products.oldestFirst}</option>
+            <option value="name:asc">{t.products.nameAZ}</option>
+            <option value="name:desc">{t.products.nameZA}</option>
+            <option value="price:asc">{t.products.priceLowHigh}</option>
+            <option value="price:desc">{t.products.priceHighLow}</option>
+            <option value="stock:asc">{t.products.stockLowHigh}</option>
+            <option value="stock:desc">{t.products.stockHighLow}</option>
           </select>
 
           {/* Reset */}
@@ -610,7 +633,7 @@ export default function Products() {
             }}
             className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all active:scale-95"
           >
-            <RotateCcw className="w-4 h-4" /> Reset
+            <RotateCcw className="w-4 h-4" /> {t.common.reset}
           </button>
         </div>
       </div>
@@ -619,14 +642,14 @@ export default function Products() {
       <div className="glass-card overflow-hidden">
         <div className="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
           <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
-            Products{" "}
+            {t.products.title}{" "}
             <span className="text-slate-400 font-bold text-sm ml-2">
               ({response?.total ?? 0})
             </span>
           </h3>
           <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
             <Filter className="w-3 h-3" />
-            {search || filterCategory ? "Filtered" : "All"}
+            {search || filterCategory ? t.common.filtered : t.common.all}
           </div>
         </div>
 
@@ -656,10 +679,10 @@ export default function Products() {
               <thead>
                 <tr className="bg-slate-50/30 dark:bg-slate-900/50">
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Product
+                    {t.products.name}
                   </th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Category
+                    {t.products.categories}
                   </th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                     {t.products?.price || "Price"}
@@ -674,7 +697,7 @@ export default function Products() {
                     {t.products?.stock || "Stock"}
                   </th>
                   <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                    Actions
+                    {t.superadmin.actionsCol}
                   </th>
                 </tr>
               </thead>
@@ -712,7 +735,7 @@ export default function Products() {
                               {product.name}
                               {(product as any).isPromo && (
                                 <span className="inline-flex items-center px-2 py-0.5 rounded-lg bg-amber-500 text-white text-[9px] font-black uppercase tracking-widest ml-2">
-                                  AKSIYA
+                                  {t.products.promo}
                                 </span>
                               )}
                             </p>
@@ -796,27 +819,76 @@ export default function Products() {
                         </div>
                       </td>
                       <td className="px-8 py-5">
-                        <span
-                          className={clsx(
-                            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black tracking-widest uppercase",
-                            product.stock > 0
-                              ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 border border-emerald-100 dark:border-emerald-900/50"
-                              : "bg-rose-50 dark:bg-rose-900/20 text-rose-600 border border-rose-100 dark:border-rose-900/50"
-                          )}
-                        >
-                          <div
-                            className={clsx(
-                              "w-1.5 h-1.5 rounded-full",
-                              product.stock > 0
-                                ? "bg-emerald-500"
-                                : "bg-rose-500 animate-pulse"
+                        {stockAdjId === product.id ? (
+                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            {/* Quick delta buttons */}
+                            {[-10, -5, -1].map((d) => (
+                              <button key={d} onClick={() => handleAdjustStock(product.id, d)}
+                                disabled={stockSaving || product.stock + d < 0}
+                                className="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-600 text-xs font-black hover:bg-rose-100 disabled:opacity-30 transition-all">
+                                {d}
+                              </button>
+                            ))}
+                            <input
+                              type="number"
+                              value={stockDelta}
+                              onChange={(e) => setStockDelta(e.target.value)}
+                              placeholder="±"
+                              className="w-14 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold text-center bg-white dark:bg-slate-800 focus:outline-none focus:border-blue-500"
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && stockDelta) {
+                                  handleAdjustStock(product.id, parseInt(stockDelta));
+                                }
+                              }}
+                            />
+                            {[1, 5, 10].map((d) => (
+                              <button key={d} onClick={() => handleAdjustStock(product.id, d)}
+                                disabled={stockSaving}
+                                className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 text-xs font-black hover:bg-emerald-100 disabled:opacity-30 transition-all">
+                                +{d}
+                              </button>
+                            ))}
+                            {stockDelta && (
+                              <button onClick={() => handleAdjustStock(product.id, parseInt(stockDelta))}
+                                disabled={stockSaving}
+                                className="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-xs font-black hover:bg-blue-700 transition-all">
+                                OK
+                              </button>
                             )}
-                          />
-                          {product.stock} {unitLabel}
-                        </span>
+                            <button onClick={() => { setStockAdjId(null); setStockDelta(""); }}
+                              className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-all">
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => { setStockAdjId(product.id); setStockDelta(""); }}
+                            className={clsx(
+                              "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black tracking-widest uppercase hover:scale-105 transition-all cursor-pointer",
+                              product.stock <= 0
+                                ? "bg-rose-50 dark:bg-rose-900/20 text-rose-600 border border-rose-100 dark:border-rose-900/50"
+                                : product.stock <= 5
+                                  ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600 border border-amber-100 dark:border-amber-900/50"
+                                  : "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 border border-emerald-100 dark:border-emerald-900/50"
+                            )}
+                          >
+                            <div className={clsx("w-1.5 h-1.5 rounded-full",
+                              product.stock <= 0 ? "bg-rose-500 animate-pulse" : product.stock <= 5 ? "bg-amber-500" : "bg-emerald-500"
+                            )} />
+                            {product.stock} {unitLabel}
+                            {product.stock <= 5 && product.stock > 0 && <AlertTriangle className="w-3 h-3 ml-0.5" />}
+                          </button>
+                        )}
                       </td>
                       <td className="px-8 py-5">
-                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => { setStockAdjId(product.id); setStockDelta(""); }}
+                            title={t.products?.stock || 'Stock'}
+                            className="p-2 rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-slate-400 hover:text-emerald-600 transition-all"
+                          >
+                            <Warehouse className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => openEdit(product)}
                             className="p-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 text-slate-400 hover:text-blue-600 transition-all"
@@ -843,7 +915,7 @@ export default function Products() {
         {response && response.pages > 1 && (
           <div className="p-6 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-              Page {response.page} of {response.pages} • {response.total} total
+              {t.products.page} {response.page} {t.products.of} {response.pages} • {response.total} {t.products.total}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -949,14 +1021,14 @@ export default function Products() {
                       }
                       required
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
-                      placeholder="Product name"
+                      placeholder={t.products.name}
                     />
                   </div>
 
                   {/* Category */}
                   <div>
                     <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
-                      Category
+                      {t.products.categories}
                     </label>
                     <select
                       value={form.categoryId}
@@ -969,7 +1041,7 @@ export default function Products() {
                       }
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
                     >
-                      <option value="">No category</option>
+                      <option value="">{t.products.noCategory}</option>
                       {categories.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
@@ -981,7 +1053,7 @@ export default function Products() {
                   {/* Subcategory */}
                   <div>
                     <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">
-                      Subcategory
+                      {t.products.subcategory}
                     </label>
                     <select
                       value={form.subcategoryId}
@@ -996,7 +1068,7 @@ export default function Products() {
                       }
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all disabled:opacity-50"
                     >
-                      <option value="">No subcategory</option>
+                      <option value="">{t.products.noSubcategory}</option>
                       {formSubcategories.map((s) => (
                         <option key={s.id} value={s.id}>
                           {s.name}
@@ -1045,7 +1117,7 @@ export default function Products() {
                   {/* Discount Price */}
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      Chegirma narxi (ixtiyoriy)
+                      {t.products.discountPrice}
                     </label>
                     <input
                       type="number"
@@ -1066,10 +1138,10 @@ export default function Products() {
                   <div className="flex items-center justify-between px-5 py-4 bg-slate-50 dark:bg-slate-800 rounded-2xl">
                     <div>
                       <p className="text-sm font-black text-slate-900 dark:text-white">
-                        Aksiya mahsulot
+                        {t.products.promoProduct}
                       </p>
                       <p className="text-[10px] text-slate-400 font-bold">
-                        Botda "AKSIYA" belgisi ko'rinadi
+                        {t.products.promoProductDesc}
                       </p>
                     </div>
                     <button
@@ -1122,7 +1194,7 @@ export default function Products() {
                         }}
                         className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all"
                       >
-                        <option value="">Custom unit</option>
+                        <option value="">{t.products.customUnit}</option>
                         {units.map((u) => (
                           <option key={u.id} value={u.id}>
                             {u.name} ({u.symbol})
@@ -1178,7 +1250,7 @@ export default function Products() {
                       />
                     </button>
                     <span className="text-xs font-black text-slate-600 dark:text-slate-400 uppercase tracking-widest">
-                      {form.isActive ? "Active" : "Inactive"}
+                      {form.isActive ? t.products.active : t.products.inactive}
                     </span>
                   </div>
 
@@ -1194,7 +1266,7 @@ export default function Products() {
                       }
                       rows={2}
                       className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all resize-none"
-                      placeholder="Optional description"
+                      placeholder={t.products.description}
                     />
                   </div>
                 </div>

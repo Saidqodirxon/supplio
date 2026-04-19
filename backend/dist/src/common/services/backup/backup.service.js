@@ -19,6 +19,8 @@ const path = require("path");
 const https = require("https");
 const schedule_1 = require("@nestjs/schedule");
 const prisma_service_1 = require("../../../prisma/prisma.service");
+const telegram_logger_service_1 = require("../../../telegram/telegram-logger.service");
+const company_notifier_service_1 = require("../../../telegram/company-notifier.service");
 const execPromise = (0, util_1.promisify)(child_process_1.exec);
 function sanitizeFilePart(value) {
     return value.replace(/[^a-zA-Z0-9_\-.]/g, "_").replace(/_+/g, "_").replace(/^_+|_+$/g, "") || "backup";
@@ -66,8 +68,10 @@ function toInserts(tableName, rows) {
     return header + stmts + "\n\n";
 }
 let BackupService = BackupService_1 = class BackupService {
-    constructor(prisma) {
+    constructor(prisma, loggerService, companyNotifier) {
         this.prisma = prisma;
+        this.loggerService = loggerService;
+        this.companyNotifier = companyNotifier;
         this.logger = new common_1.Logger(BackupService_1.name);
         this.backupDir = path.join(process.cwd(), "backups");
         if (!fs.existsSync(this.backupDir))
@@ -82,7 +86,21 @@ let BackupService = BackupService_1 = class BackupService {
         this.logger.log("Daily Backup Triggered: 01:00 AM");
         try {
             const result = await this.createFullBackup();
-            await this.sendToTelegram(result.zipPath, path.basename(result.zipPath), process.env.LOG_BOT_TOKEN, process.env.BACKUP_CHAT_ID || process.env.LOG_CHAT_ID);
+            const fileName = path.basename(result.zipPath);
+            await this.loggerService.sendBackupFile(result.zipPath, fileName, 'Daily Full Backup');
+            const companies = await this.prisma.company.findMany({
+                where: { deletedAt: null },
+                select: { id: true, name: true, slug: true },
+            });
+            for (const company of companies) {
+                try {
+                    const sqlResult = await this.createCompanyBackup(company.id);
+                    await this.companyNotifier.notifyBackup(company.id, sqlResult.path, sqlResult.name);
+                }
+                catch (e) {
+                    this.logger.warn(`Per-company backup notify failed for ${company.name}: ${e?.message}`);
+                }
+            }
             this.logger.log("Daily backup complete");
             await this.cleanupOldBackups(2);
         }
@@ -331,6 +349,8 @@ __decorate([
 ], BackupService.prototype, "purgeSoftDeletedRecords", null);
 exports.BackupService = BackupService = BackupService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        telegram_logger_service_1.TelegramLoggerService,
+        company_notifier_service_1.CompanyNotifierService])
 ], BackupService);
 //# sourceMappingURL=backup.service.js.map

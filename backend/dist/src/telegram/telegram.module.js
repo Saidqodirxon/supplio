@@ -14,6 +14,7 @@ const bots_controller_1 = require("./bots.controller");
 const prisma_module_1 = require("../prisma/prisma.module");
 const telegram_logger_service_1 = require("./telegram-logger.service");
 const plan_limits_service_1 = require("../common/services/plan-limits.service");
+const company_notifier_service_1 = require("./company-notifier.service");
 let TelegramModule = class TelegramModule {
 };
 exports.TelegramModule = TelegramModule;
@@ -21,8 +22,8 @@ exports.TelegramModule = TelegramModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule],
         controllers: [telegram_controller_1.TelegramController, bots_controller_1.BotsController],
-        providers: [telegram_service_1.TelegramService, telegram_logger_service_1.TelegramLoggerService, plan_limits_service_1.PlanLimitsService],
-        exports: [telegram_service_1.TelegramService, telegram_logger_service_1.TelegramLoggerService],
+        providers: [telegram_service_1.TelegramService, telegram_logger_service_1.TelegramLoggerService, plan_limits_service_1.PlanLimitsService, company_notifier_service_1.CompanyNotifierService],
+        exports: [telegram_service_1.TelegramService, telegram_logger_service_1.TelegramLoggerService, company_notifier_service_1.CompanyNotifierService],
     })
 ], TelegramModule);
 //# sourceMappingURL=telegram.module.js.map

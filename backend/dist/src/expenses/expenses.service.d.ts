@@ -13,12 +13,12 @@ export declare class ExpensesService {
         };
     } & {
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        deletedBy: string | null;
-        companyId: string;
-        branchId: string | null;
         description: string | null;
+        deletedBy: string | null;
+        branchId: string | null;
         category: string;
         amount: number;
     }>;
@@ -28,12 +28,12 @@ export declare class ExpensesService {
         };
     } & {
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        deletedBy: string | null;
-        companyId: string;
-        branchId: string | null;
         description: string | null;
+        deletedBy: string | null;
+        branchId: string | null;
         category: string;
         amount: number;
     })[]>;
@@ -43,23 +43,23 @@ export declare class ExpensesService {
         };
     } & {
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        deletedBy: string | null;
-        companyId: string;
-        branchId: string | null;
         description: string | null;
+        deletedBy: string | null;
+        branchId: string | null;
         category: string;
         amount: number;
     }>;
     remove(id: string, companyId: string, deletedBy: string): Promise<{
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
-        deletedBy: string | null;
-        companyId: string;
-        branchId: string | null;
         description: string | null;
+        deletedBy: string | null;
+        branchId: string | null;
         category: string;
         amount: number;
     }>;

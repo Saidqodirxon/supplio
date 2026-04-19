@@ -5,10 +5,10 @@ export declare class UnitsService {
     findAll(companyId: string): Promise<{
         symbol: string;
         id: string;
-        name: string;
+        companyId: string | null;
         createdAt: Date;
         deletedAt: Date | null;
-        companyId: string | null;
+        name: string;
     }[]>;
     create(companyId: string, data: {
         name: string;
@@ -16,10 +16,10 @@ export declare class UnitsService {
     }): Promise<{
         symbol: string;
         id: string;
-        name: string;
+        companyId: string | null;
         createdAt: Date;
         deletedAt: Date | null;
-        companyId: string | null;
+        name: string;
     }>;
     update(id: string, companyId: string, data: {
         name?: string;
@@ -27,18 +27,18 @@ export declare class UnitsService {
     }): Promise<{
         symbol: string;
         id: string;
-        name: string;
+        companyId: string | null;
         createdAt: Date;
         deletedAt: Date | null;
-        companyId: string | null;
+        name: string;
     }>;
     remove(id: string, companyId: string): Promise<{
         symbol: string;
         id: string;
-        name: string;
+        companyId: string | null;
         createdAt: Date;
         deletedAt: Date | null;
-        companyId: string | null;
+        name: string;
     }>;
     seedDefaults(): Promise<void>;
 }

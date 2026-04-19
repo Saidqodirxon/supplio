@@ -44,15 +44,15 @@ export declare class ProductsService {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -81,15 +81,15 @@ export declare class ProductsService {
             };
         } & {
             id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            deletedAt: Date | null;
-            deletedBy: string | null;
             companyId: string;
             isActive: boolean;
-            sku: string | null;
+            createdAt: Date;
+            deletedAt: Date | null;
             description: string | null;
+            name: string;
+            updatedAt: Date;
+            deletedBy: string | null;
+            sku: string | null;
             costPrice: number;
             price: number;
             stock: number;
@@ -122,15 +122,15 @@ export declare class ProductsService {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -158,15 +158,15 @@ export declare class ProductsService {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -180,15 +180,47 @@ export declare class ProductsService {
     }>;
     updateStock(id: string, companyId: string, stock: number): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
+        costPrice: number;
+        price: number;
+        stock: number;
+        unit: string;
+        categoryId: string | null;
+        imageUrl: string | null;
+        subcategoryId: string | null;
+        unitId: string | null;
+        discountPrice: number | null;
+        isPromo: boolean;
+    }>;
+    adjustStock(id: string, companyId: string, delta: number, _note?: string): Promise<{
+        category: {
+            id: string;
+            name: string;
+        };
+        unitRef: {
+            symbol: string;
+            id: string;
+            name: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -202,15 +234,15 @@ export declare class ProductsService {
     }>;
     remove(id: string, companyId: string, deletedBy: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -224,15 +256,15 @@ export declare class ProductsService {
     }>;
     restore(id: string, companyId: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;

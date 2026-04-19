@@ -4,10 +4,10 @@ export declare class PaymentsController {
     constructor(paymentsService: PaymentsService);
     create(req: any, body: any): Promise<{
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
-        companyId: string;
         branchId: string | null;
         note: string | null;
         dealerId: string;
@@ -30,10 +30,10 @@ export declare class PaymentsController {
         };
     } & {
         id: string;
+        companyId: string;
         createdAt: Date;
         deletedAt: Date | null;
         deletedBy: string | null;
-        companyId: string;
         branchId: string | null;
         note: string | null;
         dealerId: string;

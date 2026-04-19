@@ -45,6 +45,8 @@ interface CompanySettings {
   subscriptionStatus: string;
   trialExpiresAt: string;
   cashbackPercent: number;
+  preparingVariants: string[] | null;
+  dealerStatusLabels: { healthy?: string; hasDebt?: string; overLimit?: string } | null;
 }
 
 // Cashback explanation per language (sodda til)
@@ -735,6 +737,113 @@ export default function Settings() {
                       )}
                     />
                   </button>
+                </div>
+              </div>
+
+              {/* Order Preparation Variants */}
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">
+                        {t.settings.preparingVariantsTitle}
+                      </p>
+                      <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mt-1">
+                        {t.settings.preparingVariantsDesc}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {(company.preparingVariants || []).map((variant, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl text-xs font-bold border border-blue-100 dark:border-blue-900/50"
+                      >
+                        {variant}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newVariants = (company.preparingVariants || []).filter((_, i) => i !== idx);
+                            setCompany({ ...company, preparingVariants: newVariants });
+                          }}
+                          className="hover:text-rose-500 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder={t.settings.newVariantPlaceholder}
+                        className="input-field py-1 px-3 text-xs w-36"
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            const val = (e.target as HTMLInputElement).value.trim();
+                            if (val && !(company.preparingVariants || []).includes(val)) {
+                              setCompany({
+                                ...company,
+                                preparingVariants: [...(company.preparingVariants || []), val],
+                              });
+                              (e.target as HTMLInputElement).value = "";
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase italic">
+                    {t.settings.enterToAdd}
+                  </p>
+                </div>
+              </div>
+
+              {/* Dealer Status Labels */}
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm font-black text-slate-900 dark:text-white tracking-tight">
+                      {t.settings.dealerStatusLabelsTitle}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none mt-1">
+                      {t.settings.dealerStatusLabelsDesc}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {(["healthy", "hasDebt", "overLimit"] as const).map((key) => {
+                      const icons: Record<string, string> = { healthy: "✅", hasDebt: "⚠️", overLimit: "🔴" };
+                      const defaults: Record<string, string> = {
+                        healthy: t.dealers.healthy,
+                        hasDebt: t.dealers.hasDebt,
+                        overLimit: t.dealers.limitReached,
+                      };
+                      const labelKey = `label${key.charAt(0).toUpperCase() + key.slice(1)}` as "labelHealthy" | "labelHasDebt" | "labelLimitReached";
+                      return (
+                        <div key={key} className="space-y-1.5">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                            {icons[key]} {t.settings[labelKey]}
+                          </label>
+                          <input
+                            type="text"
+                            value={(company.dealerStatusLabels as any)?.[key] ?? ""}
+                            onChange={(e) =>
+                              setCompany({
+                                ...company,
+                                dealerStatusLabels: {
+                                  ...(company.dealerStatusLabels ?? {}),
+                                  [key]: e.target.value,
+                                },
+                              })
+                            }
+                            placeholder={defaults[key]}
+                            className="input-field py-2 px-3 text-xs w-full"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 

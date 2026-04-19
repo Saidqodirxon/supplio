@@ -79,8 +79,14 @@ export class TelegramLoggerService implements OnModuleInit {
 
   async sendLog(level: 'INFO' | 'WARN' | 'ERROR', message: string, meta?: Record<string, unknown>) {
     const icon = level === 'ERROR' ? '🔴' : level === 'WARN' ? '🟡' : '🟢';
-    const metaStr = meta ? '\n\n```json\n' + JSON.stringify(meta, null, 2).slice(0, 800) + '\n```' : '';
-    await this.sendToLog(`${icon} *[${level}]* ${new Date().toISOString()}\n\n${message}${metaStr} #LOG`);
+    const metaLines = meta
+      ? '\n' + Object.entries(meta)
+          .filter(([, v]) => v !== undefined && v !== null)
+          .map(([k, v]) => `• ${k}: \`${v}\``)
+          .join('\n')
+      : '';
+    const time = new Date().toLocaleString('uz-UZ');
+    await this.sendToLog(`${icon} *[${level}]* ${time}\n\n${message}${metaLines}\n#LOG`);
   }
 
   async sendError(context: string, error: Error | string, extra?: Record<string, unknown>) {
@@ -161,6 +167,25 @@ export class TelegramLoggerService implements OnModuleInit {
       `🎯 *Tarif yangilandi!* #TARIFF\n\n` +
       `🏢 Kompaniya: *${data.companyName}*\n` +
       `📦 ${data.oldPlan} → *${data.newPlan}*\n` +
+      `📅 ${new Date().toLocaleString('uz-UZ')}`;
+    await this.sendToLog(text);
+  }
+
+  async sendDailyReportSummary(data: {
+    companyName: string;
+    slug: string;
+    totalOrders: number;
+    todayOrders: number;
+    todayRevenue: number;
+    pendingOrders: number;
+    totalDealers: number;
+  }) {
+    const text =
+      `📊 *Kunlik hisobot — ${data.companyName}* #REPORT\n\n` +
+      `📦 Bugungi buyurtmalar: *${data.todayOrders}* (jami: ${data.totalOrders})\n` +
+      `💰 Bugungi tushum: *${data.todayRevenue.toLocaleString()} so'm*\n` +
+      `⏳ Kutilayotgan: *${data.pendingOrders}* ta\n` +
+      `👥 Faol dilerlar: *${data.totalDealers}*\n` +
       `📅 ${new Date().toLocaleString('uz-UZ')}`;
     await this.sendToLog(text);
   }

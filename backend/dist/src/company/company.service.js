@@ -13,12 +13,14 @@ exports.CompanyService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const plan_limits_service_1 = require("../common/services/plan-limits.service");
+const telegram_service_1 = require("../telegram/telegram.service");
 const client_1 = require("@prisma/client");
 const bcrypt = require("bcrypt");
 let CompanyService = class CompanyService {
-    constructor(prisma, planLimits) {
+    constructor(prisma, planLimits, telegramService) {
         this.prisma = prisma;
         this.planLimits = planLimits;
+        this.telegramService = telegramService;
     }
     async getCompany(companyId) {
         const company = await this.prisma.company.findUnique({
@@ -35,8 +37,20 @@ let CompanyService = class CompanyService {
             "website",
             "instagram",
             "telegram",
+            "facebook",
+            "tiktok",
+            "youtube",
             "siteActive",
             "cashbackPercent",
+            "workingHours",
+            "contactPhone",
+            "contactAddress",
+            "botPaused",
+            "botAutoSchedule",
+            "logGroupChatId",
+            "orderGroupChatId",
+            "preparingVariants",
+            "dealerStatusLabels",
         ];
         const filteredData = {};
         for (const field of allowedFields) {
@@ -44,10 +58,23 @@ let CompanyService = class CompanyService {
                 filteredData[field] = data[field];
             }
         }
-        return this.prisma.company.update({
+        const updated = await this.prisma.company.update({
             where: { id: companyId },
             data: filteredData,
         });
+        if (filteredData.name !== undefined || filteredData.logo !== undefined) {
+            this.prisma.customBot
+                .findMany({ where: { companyId, isActive: true, deletedAt: null }, select: { token: true } })
+                .then((bots) => {
+                for (const bot of bots) {
+                    this.telegramService
+                        .applyBotBranding(bot.token, companyId)
+                        .catch(() => { });
+                }
+            })
+                .catch(() => { });
+        }
+        return updated;
     }
     async getSubscriptionInfo(companyId) {
         const company = await this.prisma.company.findUnique({
@@ -127,6 +154,39 @@ let CompanyService = class CompanyService {
                 branchId: data.branchId || null,
                 customRoleId: data.customRoleId || null,
             },
+            select: {
+                id: true, phone: true, fullName: true, roleType: true,
+                branchId: true, customRoleId: true, createdAt: true,
+                customRole: { select: { id: true, name: true, permissions: true } },
+            },
+        });
+    }
+    async updateStaff(companyId, userId, data) {
+        const user = await this.prisma.user.findFirst({ where: { id: userId, companyId } });
+        if (!user)
+            throw new common_1.NotFoundException("User not found");
+        if (user.roleType === client_1.RoleType.OWNER || user.roleType === client_1.RoleType.SUPER_ADMIN) {
+            throw new common_1.BadRequestException("Cannot edit owner or super admin");
+        }
+        if (data.phone && data.phone !== user.phone) {
+            const existing = await this.prisma.user.findFirst({ where: { phone: data.phone, deletedAt: null } });
+            if (existing)
+                throw new common_1.BadRequestException("Bu telefon raqam allaqachon ishlatilmoqda");
+        }
+        const updateData = {};
+        if (data.phone)
+            updateData.phone = data.phone;
+        if (data.fullName !== undefined)
+            updateData.fullName = data.fullName;
+        if (data.roleType)
+            updateData.roleType = data.roleType;
+        if (data.branchId !== undefined)
+            updateData.branchId = data.branchId || null;
+        if (data.customRoleId !== undefined)
+            updateData.customRoleId = data.customRoleId || null;
+        return this.prisma.user.update({
+            where: { id: userId },
+            data: updateData,
             select: {
                 id: true, phone: true, fullName: true, roleType: true,
                 branchId: true, customRoleId: true, createdAt: true,
@@ -254,6 +314,7 @@ exports.CompanyService = CompanyService;
 exports.CompanyService = CompanyService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        plan_limits_service_1.PlanLimitsService])
+        plan_limits_service_1.PlanLimitsService,
+        telegram_service_1.TelegramService])
 ], CompanyService);
 //# sourceMappingURL=company.service.js.map

@@ -19,6 +19,7 @@ import {
   TrendingUp,
   Send,
   User,
+  MessageSquare,
 } from "lucide-react";
 import clsx from "clsx";
 import { useAuthStore } from "../store/authStore";
@@ -70,7 +71,6 @@ export default function Layout() {
     if (tab === "distributors") return t.superadmin.distributors;
     if (tab === "news") return t.superadmin.news;
     if (tab === "tariffs") return t.superadmin.tariffs;
-    if (tab === "cms") return t.superadmin.landingCmsTitle;
     if (tab === "activities") return t.superadmin.recentLogs;
     if (tab === "backups") return t.superadmin.backups;
     if (tab === "settings") return t.superadmin.settings;
@@ -79,6 +79,8 @@ export default function Layout() {
     if (tab === "leads") return "Lidlar";
     if (tab === "notify") return language === "ru" ? "Рассылка" : "Xabarnoma";
     if (tab === "editor") return t.superadmin.editor;
+    if (tab === "testimonials") return language === "ru" ? "Отзывы клиентов" : language === "en" ? "Testimonials" : "Mijozlar sharhlari";
+    if (tab === "team") return language === "ru" ? "Команда" : language === "en" ? "Team" : "Jamoa a'zolari";
     return t.sidebar.overview;
   };
 
@@ -93,7 +95,8 @@ export default function Layout() {
     { name: language === "ru" ? "Рассылка" : "Xabarnoma", href: "/?tab=notify", icon: Send, badge: 0 },
     { name: t.superadmin.news, href: "/?tab=news", icon: Newspaper, badge: 0 },
     { name: t.superadmin.tariffs, href: "/?tab=tariffs", icon: CreditCard, badge: 0 },
-    { name: t.superadmin.landingCmsTitle, href: "/?tab=cms", icon: LayoutIcon, badge: 0 },
+    { name: language === "ru" ? "Отзывы клиентов" : language === "en" ? "Testimonials" : "Mijozlar sharhlari", href: "/?tab=testimonials", icon: MessageSquare, badge: 0 },
+    { name: language === "ru" ? "Команда" : language === "en" ? "Team" : "Jamoa a'zolari", href: "/?tab=team", icon: Users, badge: 0 },
     { name: t.superadmin.recentLogs, href: "/?tab=activities", icon: Activity, badge: 0 },
     { name: t.superadmin.backups, href: "/?tab=backups", icon: Database, badge: 0 },
     { name: t.superadmin.settings, href: "/?tab=settings", icon: Globe, badge: 0 },

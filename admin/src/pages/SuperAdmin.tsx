@@ -41,6 +41,11 @@ import {
   Circle,
   Power,
   KeyRound,
+  MessageSquare,
+  Users,
+  Star,
+  Pencil,
+  LifeBuoy,
 } from "lucide-react";
 import clsx from "clsx";
 import { useScrollLock } from "../utils/useScrollLock";
@@ -80,11 +85,13 @@ type TabId =
   | "tickets"
   | "tariffs"
   | "cms"
+  | "testimonials"
   | "distributors"
   | "notify"
   | "upgrades"
   | "support"
-  | "bots";
+  | "bots"
+  | "team";
 
 const validTabs: TabId[] = [
   "overview",
@@ -96,7 +103,8 @@ const validTabs: TabId[] = [
   "leads",
   "tickets",
   "tariffs",
-  "cms",
+  "testimonials",
+  "team",
   "distributors",
   "notify",
   "upgrades",
@@ -187,11 +195,39 @@ interface TariffPlan {
   trialDays: number;
 }
 
+interface Testimonial {
+  id: string;
+  name: string;
+  company?: string;
+  roleTitle?: string;
+  contentUz: string;
+  contentRu: string;
+  contentEn: string;
+  contentTr?: string;
+  rating: number;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+}
+
 interface GlobalSettings {
   telegram?: string;
   defaultTrialDays?: number;
   maintenanceMode?: boolean;
   superAdminPhone?: string;
+  newsEnabled?: boolean;
+  termsUz?: string;
+  termsRu?: string;
+  termsEn?: string;
+  termsUzCyr?: string;
+  privacyUz?: string;
+  privacyRu?: string;
+  privacyEn?: string;
+  privacyUzCyr?: string;
+  contractUz?: string;
+  contractRu?: string;
+  contractEn?: string;
+  contractUzCyr?: string;
 }
 
 interface LandingContent {
@@ -357,6 +393,24 @@ export default function SuperAdmin() {
   const [backups, setBackups] = useState<BackupItem[]>([]);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [tariffs, setTariffs] = useState<TariffPlan[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [testimonialForm, setTestimonialForm] = useState<Partial<Testimonial>>({
+    name: "", company: "", roleTitle: "",
+    contentUz: "", contentRu: "", contentEn: "", contentTr: "",
+    rating: 5, isActive: true, order: 0,
+  });
+  const [editingTestimonialId, setEditingTestimonialId] = useState<string | null>(null);
+  const [showTestimonialForm, setShowTestimonialForm] = useState(false);
+
+  // Team members
+  const [teamMembers, setTeamMembers] = useState<{
+    id: string; name: string; roleUz: string; roleRu: string; roleEn: string; roleTr: string;
+    bioUz: string; bioRu: string; bioEn: string; bioTr: string;
+    avatar?: string; order: number; isActive: boolean;
+  }[]>([]);
+  const [teamForm, setTeamForm] = useState({ name: "", roleUz: "", roleRu: "", roleEn: "", roleTr: "", bioUz: "", bioRu: "", bioEn: "", bioTr: "", order: 0, isActive: true });
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [showTeamForm, setShowTeamForm] = useState(false);
   const [landingContent, setLandingContent] = useState<LandingContent>({
     heroTitleUz: "",
     heroTitleRu: "",
@@ -370,14 +424,14 @@ export default function SuperAdmin() {
     heroBadgeRu: "",
     heroBadgeEn: "",
     heroBadgeTr: "",
-    contactPhone: "",
-    contactEmail: "",
+    contactPhone: "+998 (90) 123-45-67",
+    contactEmail: "support@supplio.uz",
     contactAddress: "",
     contactAddressUrl: "",
-    socialTelegram: "",
-    socialInstagram: "",
-    socialLinkedin: "",
-    socialTwitter: "",
+    socialTelegram: "https://t.me/supplio_support",
+    socialInstagram: "https://www.instagram.com/supplio__app/",
+    socialLinkedin: "https://www.linkedin.com/company/supplioapp",
+    socialTwitter: "https://x.com/supplioapp",
     footerDescUz: "",
     footerDescRu: "",
     footerDescEn: "",
@@ -813,13 +867,19 @@ export default function SuperAdmin() {
         setLeads(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
         setLeadsTotal(Number(res.data?.total || 0));
       } else if (activeTab === "settings") {
-        const res = await api.get("/super/settings");
-        setSettings(res.data);
+        const [settingsRes, landingRes] = await Promise.all([
+          api.get("/super/settings"),
+          api.get("/super/landing").catch(() => ({ data: null })),
+        ]);
+        setSettings(settingsRes.data);
+        if (landingRes.data) {
+          setLandingContent((prev) => ({ ...prev, ...landingRes.data }));
+        }
       } else if (activeTab === "backups") {
         await refreshBackups();
       } else if (activeTab === "activities") {
         const res = await api.get("/super/audit-logs", {
-          params: { page: activitiesPage, limit: 10 },
+          params: { page: activitiesPage, limit: 100 },
         });
         setActivities(
           Array.isArray(res.data) ? res.data : (res.data?.items ?? [])
@@ -830,6 +890,12 @@ export default function SuperAdmin() {
         setTariffs(
           Array.isArray(res.data) ? res.data : (res.data?.items ?? [])
         );
+      } else if (activeTab === "testimonials") {
+        const res = await api.get("/super/testimonials");
+        setTestimonials(Array.isArray(res.data) ? res.data : []);
+      } else if (activeTab === "team") {
+        const res = await api.get("/super/team");
+        setTeamMembers(Array.isArray(res.data) ? res.data : []);
       } else if (activeTab === "overview") {
         const [metricsRes, summaryRes] = await Promise.all([
           api.get("/super/metrics"),
@@ -1037,11 +1103,20 @@ export default function SuperAdmin() {
           bg: "bg-cyan-50 dark:bg-cyan-900/20",
         },
         {
-          id: "cms",
-          label: t.superadmin.landingCmsTitle,
-          icon: Layout,
-          color: "text-teal-600",
-          bg: "bg-teal-50 dark:bg-teal-900/20",
+          id: "testimonials",
+          label: language === "ru" ? "Отзывы клиентов" : language === "en" ? "Testimonials" : "Mijozlar sharhlari",
+          icon: MessageSquare,
+          color: "text-amber-600",
+          bg: "bg-amber-50 dark:bg-amber-900/20",
+          badge: testimonials.length || undefined,
+        },
+        {
+          id: "team",
+          label: language === "ru" ? "Команда" : language === "en" ? "Team" : "Jamoa a'zolari",
+          icon: Users,
+          color: "text-indigo-600",
+          bg: "bg-indigo-50 dark:bg-indigo-900/20",
+          badge: teamMembers.length || undefined,
         },
         {
           id: "notify",
@@ -1396,7 +1471,7 @@ export default function SuperAdmin() {
                               colSpan={5}
                               className="px-8 py-16 text-center text-sm font-bold text-slate-400"
                             >
-                              Audit loglar hozircha yo'q
+                              Harakatlar tarixi mavjud emas
                             </td>
                           </tr>
                         )}
@@ -1453,7 +1528,7 @@ export default function SuperAdmin() {
                   {renderPagination(
                     activitiesPage,
                     activitiesTotal,
-                    10,
+                    100,
                     setActivitiesPage
                   )}
                 </div>
@@ -2459,23 +2534,6 @@ export default function SuperAdmin() {
 
                     <div className="space-y-4">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 px-2">
-                        <Bell className="w-3 h-3 text-indigo-600" />{" "}
-                        {t.superadmin.systemSupportTelegram}
-                      </label>
-                      <input
-                        type="text"
-                        value={settings?.telegram || "@supplio_admin"}
-                        onChange={(e) =>
-                          setSettings((s) =>
-                            s ? { ...s, telegram: e.target.value } : null
-                          )
-                        }
-                        className="w-full px-8 py-5 bg-white dark:bg-white/5 rounded-3xl border-2 border-slate-100 dark:border-white/10 text-xl font-black focus:border-blue-600 transition-all font-mono"
-                      />
-                    </div>
-
-                    <div className="space-y-4">
-                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 px-2">
                         <ShieldCheck className="w-3 h-3 text-emerald-600" />{" "}
                         Admin telefon raqami (login sahifasida ko'rinadi)
                       </label>
@@ -2491,6 +2549,125 @@ export default function SuperAdmin() {
                         className="w-full px-8 py-5 bg-white dark:bg-white/5 rounded-3xl border-2 border-slate-100 dark:border-white/10 text-xl font-black focus:border-blue-600 transition-all font-mono"
                       />
                     </div>
+
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 px-2">
+                        <LifeBuoy className="w-4 h-4 text-blue-600" />
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          Dashboard yordam markazi kontaktlari
+                        </label>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-slate-500 uppercase px-2">
+                            Support telefon
+                          </label>
+                          <input
+                            type="text"
+                            value={landingContent.contactPhone || ""}
+                            onChange={(e) =>
+                              setLandingContent((p) => ({
+                                ...p,
+                                contactPhone: e.target.value,
+                              }))
+                            }
+                            placeholder="+998901112233"
+                            className="w-full px-5 py-3.5 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-bold focus:border-blue-600 transition-all text-sm"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-[9px] font-bold text-slate-500 uppercase px-2">
+                            Support email
+                          </label>
+                          <input
+                            type="email"
+                            value={landingContent.contactEmail || ""}
+                            onChange={(e) =>
+                              setLandingContent((p) => ({
+                                ...p,
+                                contactEmail: e.target.value,
+                              }))
+                            }
+                            placeholder="support@supplio.uz"
+                            className="w-full px-5 py-3.5 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-bold focus:border-blue-600 transition-all text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase px-2">
+                          Support Telegram username
+                        </label>
+                        <input
+                          type="text"
+                          value={landingContent.socialTelegram || ""}
+                          onChange={(e) =>
+                            setLandingContent((p) => ({
+                              ...p,
+                              socialTelegram: e.target.value,
+                            }))
+                          }
+                          placeholder="@supplioapp yoki https://t.me/supplioapp"
+                          className="w-full px-5 py-3.5 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-bold focus:border-blue-600 transition-all text-sm"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 px-2">
+                        <FileCode className="w-4 h-4 text-violet-600" />
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                          Legal pages
+                        </label>
+                      </div>
+
+                      {[
+                        { key: "terms", label: "Terms / Shartlar" },
+                        { key: "privacy", label: "Privacy Policy / Maxfiylik" },
+                        { key: "contract", label: "Contract / Shartnoma" },
+                      ].map((page) => (
+                        <div
+                          key={page.key}
+                          className="rounded-[2rem] border border-slate-100 dark:border-white/10 p-6 space-y-4 bg-slate-50/60 dark:bg-white/5"
+                        >
+                          <p className="text-sm font-black text-slate-900 dark:text-white">
+                            {page.label}
+                          </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {(["Uz", "Ru", "En", "UzCyr"] as const).map(
+                              (langKey) => {
+                                const field = `${page.key}${langKey}` as keyof GlobalSettings;
+                                return (
+                                  <div key={langKey} className="space-y-2">
+                                    <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest px-2">
+                                      {langKey}
+                                    </label>
+                                    <textarea
+                                      rows={5}
+                                      value={String(settings?.[field] || "")}
+                                      onChange={(e) =>
+                                        setSettings((s) =>
+                                          s
+                                            ? {
+                                                ...s,
+                                                [field]: e.target.value,
+                                              }
+                                            : null
+                                        )
+                                      }
+                                      className="w-full px-5 py-4 bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/10 font-semibold text-sm outline-none focus:border-violet-500 resize-y"
+                                      placeholder={`${page.label} (${langKey})`}
+                                    />
+                                  </div>
+                                );
+                              }
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <button
@@ -2498,6 +2675,11 @@ export default function SuperAdmin() {
                       try {
                         setLoading(true);
                         await api.patch("/super/settings", settings);
+                        await api.patch("/super/landing", {
+                          contactPhone: landingContent.contactPhone,
+                          contactEmail: landingContent.contactEmail,
+                          socialTelegram: landingContent.socialTelegram,
+                        });
                         toast.success(t.superadmin.saveSettingsSuccess);
                       } catch {
                         toast.error(t.common.error);
@@ -3504,6 +3686,340 @@ export default function SuperAdmin() {
                   )}
                 </div>
               )}
+              {activeTab === "testimonials" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                      {language === "ru" ? "Отзывы клиентов" : language === "en" ? "Client Testimonials" : "Mijozlar sharhlari"}
+                    </h3>
+                    <button
+                      onClick={() => {
+                        setTestimonialForm({ name: "", company: "", roleTitle: "", contentUz: "", contentRu: "", contentEn: "", contentTr: "", rating: 5, isActive: true, order: testimonials.length });
+                        setEditingTestimonialId(null);
+                        setShowTestimonialForm(true);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all"
+                    >
+                      + {language === "ru" ? "Добавить" : language === "en" ? "Add" : "Qo'shish"}
+                    </button>
+                  </div>
+
+                  {showTestimonialForm && (
+                    <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 space-y-4 border border-slate-200 dark:border-slate-700">
+                      <h4 className="font-black text-sm text-slate-700 dark:text-slate-300 uppercase tracking-widest">
+                        {editingTestimonialId ? (language === "ru" ? "Редактировать" : "Tahrirlash") : (language === "ru" ? "Новый отзыв" : "Yangi sharh")}
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+                            {language === "ru" ? "Имя *" : "Ism *"}
+                          </label>
+                          <input
+                            value={testimonialForm.name || ""}
+                            onChange={(e) => setTestimonialForm((f) => ({ ...f, name: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+                            {language === "ru" ? "Компания" : "Kompaniya"}
+                          </label>
+                          <input
+                            value={testimonialForm.company || ""}
+                            onChange={(e) => setTestimonialForm((f) => ({ ...f, company: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+                            {language === "ru" ? "Должность" : "Lavozim"}
+                          </label>
+                          <input
+                            value={testimonialForm.roleTitle || ""}
+                            onChange={(e) => setTestimonialForm((f) => ({ ...f, roleTitle: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">
+                            {language === "ru" ? "Рейтинг (1-5)" : "Reyting (1-5)"}
+                          </label>
+                          <select
+                            value={testimonialForm.rating || 5}
+                            onChange={(e) => setTestimonialForm((f) => ({ ...f, rating: Number(e.target.value) }))}
+                            className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none"
+                          >
+                            {[5,4,3,2,1].map(n => <option key={n} value={n}>{n} ⭐</option>)}
+                          </select>
+                        </div>
+                      </div>
+                      {[
+                        { key: "contentUz", label: "Matn (UZ)" },
+                        { key: "contentRu", label: "Текст (RU)" },
+                        { key: "contentEn", label: "Text (EN)" },
+                        { key: "contentTr", label: "Metin (TR)" },
+                      ].map(({ key, label }) => (
+                        <div key={key}>
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">{label}</label>
+                          <textarea
+                            value={(testimonialForm as any)[key] || ""}
+                            onChange={(e) => setTestimonialForm((f) => ({ ...f, [key]: e.target.value }))}
+                            rows={3}
+                            className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30 resize-none"
+                          />
+                        </div>
+                      ))}
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={testimonialForm.isActive !== false}
+                            onChange={(e) => setTestimonialForm((f) => ({ ...f, isActive: e.target.checked }))}
+                            className="w-4 h-4 rounded"
+                          />
+                          {language === "ru" ? "Активный" : "Faol"}
+                        </label>
+                        <input
+                          type="number"
+                          value={testimonialForm.order || 0}
+                          onChange={(e) => setTestimonialForm((f) => ({ ...f, order: Number(e.target.value) }))}
+                          placeholder={language === "ru" ? "Порядок" : "Tartib"}
+                          className="w-24 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={async () => {
+                            if (!testimonialForm.name?.trim()) return toast.error("Ism kiritilmadi");
+                            try {
+                              setLoading(true);
+                              if (editingTestimonialId) {
+                                await api.patch(`/super/testimonials/${editingTestimonialId}`, testimonialForm);
+                              } else {
+                                await api.post("/super/testimonials", testimonialForm);
+                              }
+                              const res = await api.get("/super/testimonials");
+                              setTestimonials(Array.isArray(res.data) ? res.data : []);
+                              setShowTestimonialForm(false);
+                              setEditingTestimonialId(null);
+                              toast.success(language === "ru" ? "Сохранено" : "Saqlandi");
+                            } catch { toast.error(t.common.error); }
+                            finally { setLoading(false); }
+                          }}
+                          disabled={loading}
+                          className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all disabled:opacity-50"
+                        >
+                          {t.common.save}
+                        </button>
+                        <button
+                          onClick={() => { setShowTestimonialForm(false); setEditingTestimonialId(null); }}
+                          className="px-5 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-300 transition-all"
+                        >
+                          {t.common.cancel}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    {testimonials.length === 0 ? (
+                      <p className="text-center text-slate-400 py-12 font-bold text-sm">
+                        {language === "ru" ? "Отзывов пока нет" : language === "en" ? "No testimonials yet" : "Hozircha sharhlar yo'q"}
+                      </p>
+                    ) : testimonials.map((tm) => (
+                      <div key={tm.id} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 flex items-start justify-between gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-1">
+                            <span className="font-black text-slate-900 dark:text-white text-sm">{tm.name}</span>
+                            {tm.company && <span className="text-slate-400 text-xs">· {tm.company}</span>}
+                            {tm.roleTitle && <span className="text-slate-400 text-xs">· {tm.roleTitle}</span>}
+                            <span className="text-amber-500 text-xs">{"⭐".repeat(tm.rating)}</span>
+                            {!tm.isActive && <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full">{language === "ru" ? "Неакт." : "Nofaol"}</span>}
+                          </div>
+                          <p className="text-slate-600 dark:text-slate-400 text-xs line-clamp-2">{tm.contentUz || tm.contentRu || tm.contentEn}</p>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => {
+                              setTestimonialForm({ ...tm });
+                              setEditingTestimonialId(tm.id);
+                              setShowTestimonialForm(true);
+                            }}
+                            className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 transition-all"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!confirm(language === "ru" ? "Удалить?" : "O'chirasizmi?")) return;
+                              try {
+                                await api.delete(`/super/testimonials/${tm.id}`);
+                                setTestimonials((prev) => prev.filter((t) => t.id !== tm.id));
+                                toast.success(language === "ru" ? "Удалено" : "O'chirildi");
+                              } catch { toast.error(t.common.error); }
+                            }}
+                            className="p-2 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 hover:bg-rose-100 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "team" && (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-black text-slate-900 dark:text-white">
+                        {language === "ru" ? "Члены команды" : language === "en" ? "Team Members" : "Jamoa a'zolari"}
+                      </h3>
+                      <p className="text-xs text-slate-400 font-bold mt-0.5">
+                        {language === "ru" ? "Отображаются на странице 'О нас'" : language === "en" ? "Shown on the About page" : "'Biz haqimizda' sahifasida ko'rinadi"}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setTeamForm({ name: "", roleUz: "", roleRu: "", roleEn: "", roleTr: "", bioUz: "", bioRu: "", bioEn: "", bioTr: "", order: teamMembers.length, isActive: true });
+                        setEditingTeamId(null);
+                        setShowTeamForm(true);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      {language === "ru" ? "Добавить" : language === "en" ? "Add" : "Qo'shish"}
+                    </button>
+                  </div>
+
+                  {showTeamForm && (
+                    <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-6 space-y-4 border border-slate-200 dark:border-slate-700">
+                      <h4 className="font-black text-sm text-slate-700 dark:text-slate-300 uppercase tracking-widest">
+                        {editingTeamId ? (language === "ru" ? "Редактировать" : "Tahrirlash") : (language === "ru" ? "Новый участник" : "Yangi a'zo")}
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Ism / Name *</label>
+                          <input value={teamForm.name} onChange={e => setTeamForm(f => ({ ...f, name: e.target.value }))}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold" placeholder="Ali Karimov" />
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">Tartib / Order</label>
+                          <input type="number" value={teamForm.order} onChange={e => setTeamForm(f => ({ ...f, order: Number(e.target.value) }))}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {[
+                          { key: "roleUz", label: "Lavozim (UZ)" },
+                          { key: "roleRu", label: "Должность (RU)" },
+                          { key: "roleEn", label: "Role (EN)" },
+                          { key: "roleTr", label: "Görev (TR)" },
+                        ].map(f => (
+                          <div key={f.key}>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">{f.label}</label>
+                            <input value={(teamForm as any)[f.key]} onChange={e => setTeamForm(p => ({ ...p, [f.key]: e.target.value }))}
+                              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold" placeholder="CEO, Founder" />
+                          </div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {[
+                          { key: "bioUz", label: "Bio (UZ)" },
+                          { key: "bioRu", label: "Bio (RU)" },
+                          { key: "bioEn", label: "Bio (EN)" },
+                          { key: "bioTr", label: "Bio (TR)" },
+                        ].map(f => (
+                          <div key={f.key}>
+                            <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block mb-1">{f.label}</label>
+                            <textarea rows={2} value={(teamForm as any)[f.key]} onChange={e => setTeamForm(p => ({ ...p, [f.key]: e.target.value }))}
+                              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold resize-none" />
+                          </div>
+                        ))}
+                      </div>
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked={teamForm.isActive} onChange={e => setTeamForm(f => ({ ...f, isActive: e.target.checked }))} className="w-4 h-4 rounded" />
+                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{language === "ru" ? "Активен" : "Faol"}</span>
+                      </label>
+                      <div className="flex gap-3">
+                        <button
+                          onClick={async () => {
+                            try {
+                              if (editingTeamId) {
+                                const res = await api.patch(`/super/team/${editingTeamId}`, teamForm);
+                                setTeamMembers(prev => prev.map(m => m.id === editingTeamId ? res.data : m));
+                              } else {
+                                const res = await api.post("/super/team", teamForm);
+                                setTeamMembers(prev => [...prev, res.data]);
+                              }
+                              setShowTeamForm(false);
+                              setEditingTeamId(null);
+                              toast.success(language === "ru" ? "Сохранено" : "Saqlandi");
+                            } catch { toast.error(t.common.error); }
+                          }}
+                          className="px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all"
+                        >
+                          {t.common.save}
+                        </button>
+                        <button
+                          onClick={() => { setShowTeamForm(false); setEditingTeamId(null); }}
+                          className="px-5 py-2.5 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-300 transition-all"
+                        >
+                          {t.common.cancel}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    {teamMembers.length === 0 ? (
+                      <p className="text-center text-slate-400 py-12 font-bold text-sm">
+                        {language === "ru" ? "Команда пуста" : language === "en" ? "No team members yet" : "Jamoa bo'sh"}
+                      </p>
+                    ) : teamMembers.map(m => (
+                      <div key={m.id} className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-100 dark:border-slate-700 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shrink-0">
+                            {m.name.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-black text-slate-900 dark:text-white text-sm">{m.name}</p>
+                            <p className="text-slate-400 text-xs font-semibold">{m.roleUz || m.roleEn}</p>
+                            {!m.isActive && <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-500 text-[10px] font-bold rounded-full">{language === "ru" ? "Неакт." : "Nofaol"}</span>}
+                          </div>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                          <button
+                            onClick={() => {
+                              setTeamForm({ name: m.name, roleUz: m.roleUz, roleRu: m.roleRu, roleEn: m.roleEn, roleTr: m.roleTr, bioUz: m.bioUz, bioRu: m.bioRu, bioEn: m.bioEn, bioTr: m.bioTr, order: m.order, isActive: m.isActive });
+                              setEditingTeamId(m.id);
+                              setShowTeamForm(true);
+                            }}
+                            className="p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 hover:bg-blue-100 transition-all"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!confirm(language === "ru" ? "Удалить?" : "O'chirasizmi?")) return;
+                              try {
+                                await api.delete(`/super/team/${m.id}`);
+                                setTeamMembers(prev => prev.filter(x => x.id !== m.id));
+                                toast.success(language === "ru" ? "Удалено" : "O'chirildi");
+                              } catch { toast.error(t.common.error); }
+                            }}
+                            className="p-2 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-600 hover:bg-rose-100 transition-all"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {activeTab === "bots" && (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between mb-2">
@@ -5347,8 +5863,8 @@ export default function SuperAdmin() {
                   placeholder="Kamida 6 ta belgi"
                 />
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold px-1">
-                  Bu amal distributor kompaniyasining `OWNER` user parolini
-                  yangilaydi.
+                  Ushbu amal distributor kompaniyasining `OWNER` user parolini
+                  yangilash imkonini beradi.
                 </p>
               </div>
 

@@ -93,6 +93,15 @@ export class BotsController {
     return this.telegramService.reloadCompanyBots(req.companyId);
   }
 
+  @Post("bots/:id/branding")
+  @Roles("OWNER", "MANAGER", "SUPER_ADMIN")
+  async applyBotBranding(@Req() req: any, @Param("id") id: string) {
+    const bots = await this.telegramService.getBotsForCompany(req.companyId);
+    const bot = bots.find((b) => b.id === id);
+    if (!bot) return { error: "Bot not found" };
+    return this.telegramService.applyBotBranding(bot.token, req.companyId);
+  }
+
   @Post("admin/bots")
   @Roles("SUPER_ADMIN")
   async adminCreateBot(

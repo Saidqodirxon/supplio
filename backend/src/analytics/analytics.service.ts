@@ -26,7 +26,7 @@ export class AnalyticsService {
     const since = getPeriodStart(period);
     const dateFilter = since ? { gte: since } : undefined;
 
-    const [allOrders, periodOrders, payments, activeDealers, orderStatusGroups, products, expensesAgg] =
+    const [allOrders, periodOrders, payments, activeDealers, orderStatusGroups, products] =
       await Promise.all([
         this.prisma.order.findMany({
           where: { companyId, deletedAt: null },
@@ -48,18 +48,23 @@ export class AnalyticsService {
           _sum: { totalAmount: true },
         }),
         this.prisma.product.count({ where: { companyId, deletedAt: null } }),
-        this.prisma.expense.aggregate({
-          where: { companyId, deletedAt: null },
-          _sum: { amount: true },
-        }),
       ]);
 
-    const totalRevenue = allOrders.reduce((s, o) => s + o.totalAmount, 0);
-    const totalCost = allOrders.reduce((s, o) => s + o.totalCost, 0);
+    // Expenses may not be migrated yet — safe fallback
+    let totalExpenses = 0;
+    try {
+      const expensesAgg = await this.prisma.expense.aggregate({
+        where: { companyId, deletedAt: null },
+        _sum: { amount: true },
+      });
+      totalExpenses = Number(expensesAgg._sum.amount ?? 0);
+    } catch { totalExpenses = 0; }
+
+    const totalRevenue = allOrders.reduce((s, o) => s + Number(o.totalAmount), 0);
+    const totalCost = allOrders.reduce((s, o) => s + Number(o.totalCost), 0);
     const grossProfit = totalRevenue - totalCost;
-    const totalExpenses = expensesAgg._sum.amount ?? 0;
     const totalProfit = grossProfit - totalExpenses;
-    const totalCollected = payments.reduce((s, p) => s + p.amount, 0);
+    const totalCollected = payments.reduce((s, p) => s + Number(p.amount), 0);
     const totalDebt = totalRevenue - totalCollected;
 
     // Period revenue/profit chart
@@ -82,8 +87,8 @@ export class AnalyticsService {
     periodOrders.forEach((o) => {
       const k = dateKey(o.createdAt, period);
       const existing = buckets.get(k) || { revenue: 0, profit: 0, orders: 0 };
-      existing.revenue += o.totalAmount;
-      existing.profit += o.totalAmount - o.totalCost;
+      existing.revenue += Number(o.totalAmount);
+      existing.profit += Number(o.totalAmount) - Number(o.totalCost);
       existing.orders += 1;
       buckets.set(k, existing);
     });
@@ -93,8 +98,8 @@ export class AnalyticsService {
       .sort((a, b) => a.date.localeCompare(b.date));
 
     // Period totals
-    const periodRevenue = periodOrders.reduce((s, o) => s + o.totalAmount, 0);
-    const periodProfit = periodOrders.reduce((s, o) => s + (o.totalAmount - o.totalCost), 0);
+    const periodRevenue = periodOrders.reduce((s, o) => s + Number(o.totalAmount), 0);
+    const periodProfit = periodOrders.reduce((s, o) => s + (Number(o.totalAmount) - Number(o.totalCost)), 0);
 
     // Order status distribution
     const statusDistribution = orderStatusGroups.map((g) => ({
@@ -204,8 +209,8 @@ export class AnalyticsService {
           take: 3,
         });
 
-        const currentDebt = dealer.currentDebt ?? 0;
-        const creditLimit = dealer.creditLimit ?? 0;
+        const currentDebt = Number(dealer.currentDebt ?? 0);
+        const creditLimit = Number(dealer.creditLimit ?? 0);
         const utilizationPercent =
           creditLimit > 0 ? Math.round((currentDebt / creditLimit) * 100) : 0;
 

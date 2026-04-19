@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { PlanLimitsService } from "../common/services/plan-limits.service";
+import { TelegramService } from "../telegram/telegram.service";
 import { RoleType } from "@prisma/client";
 import * as bcrypt from "bcrypt";
 
@@ -9,6 +10,7 @@ export class CompanyService {
   constructor(
     private prisma: PrismaService,
     private planLimits: PlanLimitsService,
+    private telegramService: TelegramService,
   ) {}
 
   async getCompany(companyId: string) {
@@ -39,6 +41,8 @@ export class CompanyService {
       "botAutoSchedule",
       "logGroupChatId",
       "orderGroupChatId",
+      "preparingVariants",
+      "dealerStatusLabels",
     ];
     const filteredData: any = {};
     for (const field of allowedFields) {
@@ -47,10 +51,25 @@ export class CompanyService {
       }
     }
 
-    return this.prisma.company.update({
+    const updated = await this.prisma.company.update({
       where: { id: companyId },
       data: filteredData,
     });
+
+    if (filteredData.name !== undefined || filteredData.logo !== undefined) {
+      this.prisma.customBot
+        .findMany({ where: { companyId, isActive: true, deletedAt: null }, select: { token: true } })
+        .then((bots) => {
+          for (const bot of bots) {
+            this.telegramService
+              .applyBotBranding(bot.token, companyId)
+              .catch(() => {});
+          }
+        })
+        .catch(() => {});
+    }
+
+    return updated;
   }
 
   async getSubscriptionInfo(companyId: string) {
@@ -147,6 +166,37 @@ export class CompanyService {
         branchId: data.branchId || null,
         customRoleId: data.customRoleId || null,
       },
+      select: {
+        id: true, phone: true, fullName: true, roleType: true,
+        branchId: true, customRoleId: true, createdAt: true,
+        customRole: { select: { id: true, name: true, permissions: true } },
+      },
+    });
+  }
+
+  async updateStaff(
+    companyId: string,
+    userId: string,
+    data: { phone?: string; fullName?: string; roleType?: string; branchId?: string; customRoleId?: string }
+  ) {
+    const user = await this.prisma.user.findFirst({ where: { id: userId, companyId } });
+    if (!user) throw new NotFoundException("User not found");
+    if (user.roleType === RoleType.OWNER || user.roleType === RoleType.SUPER_ADMIN) {
+      throw new BadRequestException("Cannot edit owner or super admin");
+    }
+    if (data.phone && data.phone !== user.phone) {
+      const existing = await this.prisma.user.findFirst({ where: { phone: data.phone, deletedAt: null } });
+      if (existing) throw new BadRequestException("Bu telefon raqam allaqachon ishlatilmoqda");
+    }
+    const updateData: any = {};
+    if (data.phone) updateData.phone = data.phone;
+    if (data.fullName !== undefined) updateData.fullName = data.fullName;
+    if (data.roleType) updateData.roleType = data.roleType as RoleType;
+    if (data.branchId !== undefined) updateData.branchId = data.branchId || null;
+    if (data.customRoleId !== undefined) updateData.customRoleId = data.customRoleId || null;
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: updateData,
       select: {
         id: true, phone: true, fullName: true, roleType: true,
         branchId: true, customRoleId: true, createdAt: true,

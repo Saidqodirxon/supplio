@@ -11,13 +11,15 @@ const common_1 = require("@nestjs/common");
 const audit_log_service_1 = require("./audit-log.service");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const backup_service_1 = require("./backup/backup.service");
+const telegram_logger_service_1 = require("../../telegram/telegram-logger.service");
+const company_notifier_service_1 = require("../../telegram/company-notifier.service");
 let AuditLogModule = class AuditLogModule {
 };
 exports.AuditLogModule = AuditLogModule;
 exports.AuditLogModule = AuditLogModule = __decorate([
     (0, common_1.Module)({
-        providers: [audit_log_service_1.AuditLogService, prisma_service_1.PrismaService, backup_service_1.BackupService],
-        exports: [audit_log_service_1.AuditLogService],
+        providers: [audit_log_service_1.AuditLogService, prisma_service_1.PrismaService, backup_service_1.BackupService, telegram_logger_service_1.TelegramLoggerService, company_notifier_service_1.CompanyNotifierService],
+        exports: [audit_log_service_1.AuditLogService, backup_service_1.BackupService],
     })
 ], AuditLogModule);
 //# sourceMappingURL=audit-log.module.js.map

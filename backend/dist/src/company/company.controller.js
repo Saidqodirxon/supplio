@@ -37,6 +37,9 @@ let CompanyController = class CompanyController {
     async createStaff(req, body) {
         return this.companyService.createStaff(req.user.companyId, body);
     }
+    async updateStaff(req, id, body) {
+        return this.companyService.updateStaff(req.user.companyId, id, body);
+    }
     async deactivateStaff(req, id) {
         return this.companyService.deactivateStaff(req.user.companyId, id);
     }
@@ -102,6 +105,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], CompanyController.prototype, "createStaff", null);
+__decorate([
+    (0, common_1.Patch)("users/:id"),
+    (0, roles_decorator_1.Roles)("OWNER", "MANAGER"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, Object]),
+    __metadata("design:returntype", Promise)
+], CompanyController.prototype, "updateStaff", null);
 __decorate([
     (0, common_1.Delete)("users/:id"),
     (0, roles_decorator_1.Roles)("OWNER", "MANAGER"),

@@ -40,9 +40,11 @@ let TenantGuard = class TenantGuard {
         if (!company) {
             throw new common_1.ForbiddenException("SEC_ERR: Registered Company not found");
         }
-        const settings = await this.prisma.systemSettings.findUnique({
-            where: { id: "GLOBAL" },
-        });
+        const rows = await this.prisma.$queryRawUnsafe(`SELECT "maintenanceMode"
+       FROM "SystemSettings"
+       WHERE id = 'GLOBAL'
+       LIMIT 1`);
+        const settings = rows[0] ?? null;
         if (settings?.maintenanceMode && user.roleType !== "SUPER_ADMIN") {
             throw new common_1.ServiceUnavailableException("SYSTEM_MAINTENANCE: Try again in 30 minutes.");
         }

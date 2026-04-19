@@ -15,10 +15,18 @@ const prisma_service_1 = require("../../prisma/prisma.service");
 let DemoReadOnlyInterceptor = class DemoReadOnlyInterceptor {
     constructor(prisma) {
         this.prisma = prisma;
+        this.BLOCKED_PATTERNS = [
+            "/auth/change-password",
+            "/auth/password",
+            "/profile/password",
+            "/company/me",
+            "/telegram/bots",
+            "/company/users",
+        ];
     }
     async intercept(context, next) {
         const request = context.switchToHttp().getRequest();
-        const { method, headers } = request;
+        const { method, headers, url } = request;
         const companyId = headers["x-company-id"];
         if (!companyId)
             return next.handle();
@@ -26,13 +34,17 @@ let DemoReadOnlyInterceptor = class DemoReadOnlyInterceptor {
             where: { id: companyId },
             select: { isDemo: true },
         });
+        if (!company?.isDemo)
+            return next.handle();
         const isMutating = ["POST", "PUT", "PATCH", "DELETE"].includes(method);
-        if (company?.isDemo && isMutating) {
-            const whitelistedPaths = ["/demo/test-action", "/orders/preview"];
-            const isWhitelisted = whitelistedPaths.some((path) => request.url.includes(path));
-            if (!isWhitelisted) {
-                throw new common_1.ForbiddenException("DEMO_MODE_RESTRICTION: This is 100% read-only demo environment. Data persistence is disabled to protect shared mock data. To test full capability, please request a Private Trial.");
-            }
+        if (!isMutating)
+            return next.handle();
+        const isBlocked = this.BLOCKED_PATTERNS.some((p) => url.includes(p));
+        if (isBlocked) {
+            throw new common_1.ForbiddenException("Demo rejimida bu amalni bajarib bo'lmaydi. Parolni, bot va tashkilot sozlamalarini o'zgartirish cheklangan.");
+        }
+        if (method === "DELETE" && url.includes("/telegram")) {
+            throw new common_1.ForbiddenException("Demo rejimida bot o'chirib bo'lmaydi.");
         }
         return next.handle();
     }

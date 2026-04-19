@@ -15,15 +15,18 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const client_1 = require("@prisma/client");
 const telegram_bot_manager_1 = require("../telegram/telegram-bot.manager");
+const telegram_logger_service_1 = require("../telegram/telegram-logger.service");
 const client_2 = require("@prisma/client");
 let SubscriptionService = SubscriptionService_1 = class SubscriptionService {
-    constructor(prisma, botManager) {
+    constructor(prisma, botManager, telegramLogger) {
         this.prisma = prisma;
         this.botManager = botManager;
+        this.telegramLogger = telegramLogger;
         this.logger = new common_1.Logger(SubscriptionService_1.name);
     }
     async upgradeCompanyPlan(companyId, plan) {
         this.logger.log(`Subscription Engine: Upgrading company ${companyId} to ${plan}...`);
+        const oldCompany = await this.prisma.company.findUnique({ where: { id: companyId }, select: { subscriptionPlan: true, name: true } });
         const company = await this.prisma.company.update({
             where: { id: companyId },
             data: {
@@ -32,6 +35,11 @@ let SubscriptionService = SubscriptionService_1 = class SubscriptionService {
                 trialExpiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
             },
         });
+        this.telegramLogger.sendTariffUpgradeNotification({
+            companyName: oldCompany?.name ?? companyId,
+            oldPlan: oldCompany?.subscriptionPlan ?? 'UNKNOWN',
+            newPlan: plan,
+        }).catch(() => { });
         if (!company.dbConnectionUrl && plan !== client_1.SubscriptionPlan.FREE) {
             const tenantDbUrl = process.env.DATABASE_URL?.replace("supplio", `supplio_tenant_${company.slug}`);
             await this.prisma.company.update({
@@ -78,6 +86,7 @@ exports.SubscriptionService = SubscriptionService;
 exports.SubscriptionService = SubscriptionService = SubscriptionService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        telegram_bot_manager_1.TelegramBotManager])
+        telegram_bot_manager_1.TelegramBotManager,
+        telegram_logger_service_1.TelegramLoggerService])
 ], SubscriptionService);
 //# sourceMappingURL=subscription.service.js.map

@@ -18,15 +18,15 @@ export declare class ProductsController {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -55,15 +55,15 @@ export declare class ProductsController {
             };
         } & {
             id: string;
-            name: string;
-            createdAt: Date;
-            updatedAt: Date;
-            deletedAt: Date | null;
-            deletedBy: string | null;
             companyId: string;
             isActive: boolean;
-            sku: string | null;
+            createdAt: Date;
+            deletedAt: Date | null;
             description: string | null;
+            name: string;
+            updatedAt: Date;
+            deletedBy: string | null;
+            sku: string | null;
             costPrice: number;
             price: number;
             stock: number;
@@ -103,15 +103,15 @@ export declare class ProductsController {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -139,15 +139,15 @@ export declare class ProductsController {
         };
     } & {
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -161,15 +161,47 @@ export declare class ProductsController {
     }>;
     updateStock(req: any, id: string, stock: number): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
+        costPrice: number;
+        price: number;
+        stock: number;
+        unit: string;
+        categoryId: string | null;
+        imageUrl: string | null;
+        subcategoryId: string | null;
+        unitId: string | null;
+        discountPrice: number | null;
+        isPromo: boolean;
+    }>;
+    adjustStock(req: any, id: string, delta: number, note?: string): Promise<{
+        category: {
+            id: string;
+            name: string;
+        };
+        unitRef: {
+            symbol: string;
+            id: string;
+            name: string;
+        };
+    } & {
+        id: string;
+        companyId: string;
+        isActive: boolean;
+        createdAt: Date;
+        deletedAt: Date | null;
+        description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -183,15 +215,15 @@ export declare class ProductsController {
     }>;
     restore(req: any, id: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;
@@ -205,15 +237,15 @@ export declare class ProductsController {
     }>;
     remove(req: any, id: string): Promise<{
         id: string;
-        name: string;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         companyId: string;
         isActive: boolean;
-        sku: string | null;
+        createdAt: Date;
+        deletedAt: Date | null;
         description: string | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        sku: string | null;
         costPrice: number;
         price: number;
         stock: number;

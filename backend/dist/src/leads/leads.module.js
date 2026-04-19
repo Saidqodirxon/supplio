@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const leads_controller_1 = require("./leads.controller");
 const leads_service_1 = require("./leads.service");
 const prisma_module_1 = require("../prisma/prisma.module");
+const telegram_logger_service_1 = require("../telegram/telegram-logger.service");
 let LeadsModule = class LeadsModule {
 };
 exports.LeadsModule = LeadsModule;
@@ -18,7 +19,7 @@ exports.LeadsModule = LeadsModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule],
         controllers: [leads_controller_1.LeadsController],
-        providers: [leads_service_1.LeadsService],
+        providers: [leads_service_1.LeadsService, telegram_logger_service_1.TelegramLoggerService],
     })
 ], LeadsModule);
 //# sourceMappingURL=leads.module.js.map

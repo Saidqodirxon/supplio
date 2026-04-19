@@ -207,6 +207,7 @@ export default function Subscription() {
   const [usage, setUsage] = useState<UsageStats | null>(null);
   const [tariffs, setTariffs] = useState<TariffPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [billingYearly, setBillingYearly] = useState(false);
   const { language } = useAuthStore();
   const { showUpgrade, setShowUpgrade, upgradeReason, triggerUpgrade } = usePlanLimits();
   const t = dashboardTranslations[language];
@@ -472,8 +473,28 @@ export default function Subscription() {
 
       {tariffs.length > 0 && (
         <div className="glass-card overflow-hidden">
-          <div className="p-8 border-b border-slate-50 dark:border-slate-800">
+          <div className="p-8 border-b border-slate-50 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">{t.subscription?.features || 'Plan Features'}</h3>
+            {/* Billing toggle */}
+            <div className="flex items-center gap-3">
+              <span className={`text-[10px] font-black uppercase tracking-widest ${!billingYearly ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
+                {language === 'ru' ? 'Ежемесячно' : language === 'en' ? 'Monthly' : language === 'tr' ? 'Aylık' : 'Oylik'}
+              </span>
+              <button
+                onClick={() => setBillingYearly(!billingYearly)}
+                className={`relative w-12 h-6 rounded-full transition-all duration-300 ${billingYearly ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-700'}`}
+              >
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all duration-300 ${billingYearly ? 'left-6' : 'left-0.5'}`} />
+              </button>
+              <div className="flex items-center gap-1.5">
+                <span className={`text-[10px] font-black uppercase tracking-widest ${billingYearly ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
+                  {language === 'ru' ? 'Ежегодно' : language === 'en' ? 'Yearly' : language === 'tr' ? 'Yıllık' : 'Yillik'}
+                </span>
+                <span className="text-[9px] font-black bg-emerald-500 text-white px-2 py-0.5 rounded-full">
+                  {language === 'ru' ? '−20%' : language === 'en' ? '−20%' : '−20%'}
+                </span>
+              </div>
+            </div>
           </div>
 
           <div className={clsx(
@@ -501,10 +522,27 @@ export default function Subscription() {
                   </div>
 
                   <div>
-                    <p className="text-lg font-black text-slate-900 dark:text-white">
-                      {Number(tariff.priceMonthly).toLocaleString()}
-                      <span className="text-xs font-bold text-slate-400 ml-1">{t.common?.uzs || 'UZS'}{copy.perMonth}</span>
-                    </p>
+                    {billingYearly && Number(tariff.priceYearly) > 0 ? (
+                      <>
+                        <p className="text-lg font-black text-slate-900 dark:text-white">
+                          {Math.round(Number(tariff.priceYearly) / 12).toLocaleString()}
+                          <span className="text-xs font-bold text-slate-400 ml-1">{t.common?.uzs || 'UZS'}{copy.perMonth}</span>
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-bold">
+                          {Number(tariff.priceYearly).toLocaleString()} {t.common?.uzs || 'UZS'}/{language === 'ru' ? 'год' : language === 'en' ? 'yr' : 'yil'}
+                          {Number(tariff.priceMonthly) > 0 && (
+                            <span className="ml-1.5 text-emerald-600 font-black">
+                              ({language === 'ru' ? 'экономия' : language === 'en' ? 'save' : language === 'tr' ? 'tasarruf' : 'tejash'} {(Number(tariff.priceMonthly) * 12 - Number(tariff.priceYearly)).toLocaleString()})
+                            </span>
+                          )}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-lg font-black text-slate-900 dark:text-white">
+                        {Number(tariff.priceMonthly).toLocaleString()}
+                        <span className="text-xs font-bold text-slate-400 ml-1">{t.common?.uzs || 'UZS'}{copy.perMonth}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-1.5">

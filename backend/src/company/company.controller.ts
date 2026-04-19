@@ -39,6 +39,12 @@ export class CompanyController {
     return this.companyService.createStaff(req.user.companyId, body);
   }
 
+  @Patch("users/:id")
+  @Roles("OWNER", "MANAGER")
+  async updateStaff(@Req() req: any, @Param("id") id: string, @Body() body: any) {
+    return this.companyService.updateStaff(req.user.companyId, id, body);
+  }
+
   @Delete("users/:id")
   @Roles("OWNER", "MANAGER")
   async deactivateStaff(@Req() req: any, @Param("id") id: string) {

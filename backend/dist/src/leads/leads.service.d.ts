@@ -1,9 +1,10 @@
 import { PrismaService } from "../prisma/prisma.service";
+import { TelegramLoggerService } from "../telegram/telegram-logger.service";
 export declare class LeadsService {
     private prisma;
+    private telegramLogger;
     private readonly logger;
-    private adminBot;
-    constructor(prisma: PrismaService);
+    constructor(prisma: PrismaService, telegramLogger: TelegramLoggerService);
     createLead(data: {
         fullName: string;
         phone: string;
@@ -14,8 +15,8 @@ export declare class LeadsService {
         createdAt: Date;
         deletedAt: Date | null;
         phone: string;
-        fullName: string;
         status: string;
+        fullName: string;
     }>;
     getAllLeads(): Promise<{
         info: string | null;
@@ -23,8 +24,8 @@ export declare class LeadsService {
         createdAt: Date;
         deletedAt: Date | null;
         phone: string;
-        fullName: string;
         status: string;
+        fullName: string;
     }[]>;
     updateLeadStatus(id: string, status: string): Promise<{
         info: string | null;
@@ -32,8 +33,7 @@ export declare class LeadsService {
         createdAt: Date;
         deletedAt: Date | null;
         phone: string;
-        fullName: string;
         status: string;
+        fullName: string;
     }>;
-    private notifyAdmin;
 }

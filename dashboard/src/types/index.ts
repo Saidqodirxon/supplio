@@ -188,6 +188,7 @@ export interface Order {
   totalAmount: number;
   totalCost: number;
   status: OrderStatus;
+  subStatus?: string;
   items: OrderItem[];
   createdAt: string;
   dealer?: Dealer;

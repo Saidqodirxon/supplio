@@ -349,18 +349,14 @@ export class CompanyNotifierService implements OnModuleInit {
     if (info.logChatId) {
       await this.send(info.token, info.logChatId, text);
     }
-    await this.telegramLogger.sendLog(
-      "INFO",
-      `[${info.companyName}] Kunlik hisobot`,
-      {
-        companyId,
-        slug: info.slug,
-        totalOrders,
-        todayOrders,
-        totalDealers,
-        pendingOrders,
-        todayRevenue: todayRevenue._sum.totalAmount ?? 0,
-      }
-    );
+    await this.telegramLogger.sendDailyReportSummary({
+      companyName: info.companyName,
+      slug: info.slug,
+      totalOrders,
+      todayOrders,
+      totalDealers,
+      pendingOrders,
+      todayRevenue: todayRevenue._sum.totalAmount ?? 0,
+    });
   }
 }

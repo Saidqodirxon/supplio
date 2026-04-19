@@ -1,9 +1,13 @@
 import { PrismaService } from "../../../prisma/prisma.service";
+import { TelegramLoggerService } from "../../../telegram/telegram-logger.service";
+import { CompanyNotifierService } from "../../../telegram/company-notifier.service";
 export declare class BackupService {
     private prisma;
+    private loggerService;
+    private companyNotifier;
     private readonly logger;
     private readonly backupDir;
-    constructor(prisma: PrismaService);
+    constructor(prisma: PrismaService, loggerService: TelegramLoggerService, companyNotifier: CompanyNotifierService);
     private buildCompanyBackupFileName;
     handleDailyBackup(): Promise<void>;
     private cleanupOldBackups;

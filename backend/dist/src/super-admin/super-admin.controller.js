@@ -223,6 +223,30 @@ let SuperAdminController = class SuperAdminController {
     async updateUpgradeRequest(id, body) {
         return this.superAdminService.updateUpgradeRequest(id, body);
     }
+    async getTestimonials() {
+        return this.superAdminService.getTestimonials();
+    }
+    async createTestimonial(body) {
+        return this.superAdminService.createTestimonial(body);
+    }
+    async updateTestimonial(id, body) {
+        return this.superAdminService.updateTestimonial(id, body);
+    }
+    async deleteTestimonial(id) {
+        return this.superAdminService.deleteTestimonial(id);
+    }
+    async getTeamMembers() {
+        return this.superAdminService.getTeamMembers();
+    }
+    async createTeamMember(body) {
+        return this.superAdminService.createTeamMember(body);
+    }
+    async updateTeamMember(id, body) {
+        return this.superAdminService.updateTeamMember(id, body);
+    }
+    async deleteTeamMember(id) {
+        return this.superAdminService.deleteTeamMember(id);
+    }
 };
 exports.SuperAdminController = SuperAdminController;
 __decorate([
@@ -633,6 +657,70 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "updateUpgradeRequest", null);
+__decorate([
+    (0, common_1.Get)("testimonials"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "getTestimonials", null);
+__decorate([
+    (0, common_1.Post)("testimonials"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "createTestimonial", null);
+__decorate([
+    (0, common_1.Patch)("testimonials/:id"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "updateTestimonial", null);
+__decorate([
+    (0, common_1.Delete)("testimonials/:id"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "deleteTestimonial", null);
+__decorate([
+    (0, common_1.Get)("team"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "getTeamMembers", null);
+__decorate([
+    (0, common_1.Post)("team"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "createTeamMember", null);
+__decorate([
+    (0, common_1.Patch)("team/:id"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "updateTeamMember", null);
+__decorate([
+    (0, common_1.Delete)("team/:id"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "deleteTeamMember", null);
 exports.SuperAdminController = SuperAdminController = __decorate([
     (0, common_1.Controller)("super"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

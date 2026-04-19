@@ -48,8 +48,8 @@ const jsonLd = {
     url: "https://supplio.uz",
     logo: "https://supplio.uz/favicon.png",
     sameAs: [
-      "https://t.me/supplio_uz",
-      "https://instagram.com/supplio.uz",
+      "https://www.instagram.com/supplio__app/",
+      "https://www.linkedin.com/company/supplioapp",
     ],
     contactPoint: {
       "@type": "ContactPoint",

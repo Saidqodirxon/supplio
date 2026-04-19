@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
 import * as bcrypt from "bcrypt";
 import * as ExcelJS from "exceljs";
@@ -23,15 +23,89 @@ export class SuperAdminService {
         superAdminPhone: "+998901112233",
         defaultTrialDays: 14,
         newsEnabled: true,
+        termsUz:
+          "1. Supplio xizmatidan foydalanganda siz ushbu shartlarga rozilik bildirasiz.\n2. Hisob qaydnomangiz xavfsizligini saqlash sizning javobgarligingizdir.\n3. Tizimdan noqonuniy foydalanish, spam yoki zararli harakatlar taqiqlanadi.\n4. To'lovlar tanlangan tarif va amaldagi shartlarga ko'ra hisoblanadi.\n5. Supplio xizmat sifatini yaxshilash uchun funksiyalarni yangilash yoki cheklash huquqini saqlab qoladi.",
+        termsEn:
+          "1. By using Supplio, you agree to these terms.\n2. You are responsible for keeping your account secure.\n3. Illegal use, spam, or harmful activity is prohibited.\n4. Payments are calculated based on the selected plan and current terms.\n5. Supplio may update or limit features to improve service quality.",
+        privacyUz:
+          "1. Biz faqat xizmatni taqdim etish uchun zarur ma'lumotlarni yig'amiz.\n2. Ma'lumotlaringiz hisob boshqaruvi, qo'llab-quvvatlash va tahlil uchun ishlatiladi.\n3. Biz ma'lumotlarni uchinchi tomonlarga faqat qonuniy talab yoki xizmat integratsiyasi bo'lsa uzatamiz.\n4. Foydalanuvchi ma'lumotlari xavfsizligini ta'minlash uchun texnik va tashkiliy choralar qo'llaniladi.\n5. Maxfiylik bo'yicha savollar uchun biz bilan bog'lanishingiz mumkin.",
+        privacyEn:
+          "1. We collect only the data needed to provide the service.\n2. Your data is used for account management, support, and analytics.\n3. We share data with third parties only when required by law or for service integrations.\n4. Technical and organizational measures are used to protect user data.\n5. Contact us if you have questions about privacy.",
+        contractUz:
+          "1. Ushbu shartnoma Supplio va mijoz o'rtasidagi xizmat ko'rsatish tartibini belgilaydi.\n2. Mijoz tanlangan tarif uchun o'z vaqtida to'lov qilishga majbur.\n3. Supplio xizmatni barqaror taqdim etish uchun zarur texnik ishlarni amalga oshirishi mumkin.\n4. Tomonlardan biri majburiyatlarni buzsa, xizmat vaqtincha to'xtatilishi yoki bekor qilinishi mumkin.\n5. Nizolar amaldagi qonunchilik va tomonlar kelishuvi asosida hal etiladi.",
+        contractEn:
+          "1. This agreement defines the service relationship between Supplio and the customer.\n2. The customer must pay for the selected plan on time.\n3. Supplio may perform technical work needed to keep the service stable.\n4. The service may be suspended or terminated if either party breaches its obligations.\n5. Disputes are resolved under applicable law and mutual agreement.",
       },
     });
   }
 
   async updateGlobalSettings(data: Record<string, unknown>) {
     const { id, updatedAt, ...safeData } = data as any;
-    return this.prisma.systemSettings.update({
+    const allowedKeys = new Set([
+      "maintenanceMode",
+      "backupFrequency",
+      "lastBackupAt",
+      "defaultTrialDays",
+      "newsEnabled",
+      "superAdminPhone",
+      "systemVersion",
+      "globalNotifyUz",
+      "globalNotifyRu",
+      "globalNotifyEn",
+      "globalNotifyTr",
+      "termsUz",
+      "termsRu",
+      "termsEn",
+      "termsUzCyr",
+      "privacyUz",
+      "privacyRu",
+      "privacyEn",
+      "privacyUzCyr",
+      "contractUz",
+      "contractRu",
+      "contractEn",
+      "contractUzCyr",
+    ]);
+
+    const filteredData = Object.fromEntries(
+      Object.entries(safeData).filter(
+        ([key, value]) => allowedKeys.has(key) && value !== undefined
+      )
+    );
+
+    const normalizedData: Record<string, unknown> = { ...filteredData };
+
+    if (typeof normalizedData.backupFrequency === "string") {
+      const freq = normalizedData.backupFrequency.toUpperCase();
+      if (["DAILY", "WEEKLY", "MONTHLY"].includes(freq)) {
+        normalizedData.backupFrequency = freq;
+      } else {
+        delete normalizedData.backupFrequency;
+      }
+    }
+
+    for (const key of ["maintenanceMode", "newsEnabled"]) {
+      const value = normalizedData[key];
+      if (value === "true") normalizedData[key] = true;
+      if (value === "false") normalizedData[key] = false;
+    }
+
+    if (normalizedData.defaultTrialDays !== undefined) {
+      const days = Number(normalizedData.defaultTrialDays);
+      if (Number.isFinite(days) && days > 0) {
+        normalizedData.defaultTrialDays = Math.floor(days);
+      } else {
+        delete normalizedData.defaultTrialDays;
+      }
+    }
+
+    return this.prisma.systemSettings.upsert({
       where: { id: "GLOBAL" },
-      data: safeData as any,
+      update: normalizedData as any,
+      create: {
+        id: "GLOBAL",
+        ...(normalizedData as any),
+      },
     });
   }
 
@@ -512,7 +586,17 @@ export class SuperAdminService {
     return (this.prisma as any).landingContent.upsert({
       where: { id: "LANDING" },
       update: {},
-      create: { id: "LANDING" },
+      create: {
+        id: "LANDING",
+        contactPhone: "+998 90 111 22 33",
+        contactEmail: "support@supplio.uz",
+        socialTelegram: "https://t.me/supplioapp",
+        socialInstagram: "https://www.instagram.com/supplio__app/",
+        socialLinkedin: "https://www.linkedin.com/company/supplioapp",
+        footerDescUz: "Supplio — O'zbekistondagi yetakchi B2B savdo boshqaruv platformasi. Buyurtmalar, dilerlar va to'lovlarni bir joyda boshqaring.",
+        footerDescRu: "Supplio — ведущая платформа управления B2B продажами в Узбекистане. Управляйте заказами, дилерами и платежами в одном месте.",
+        footerDescEn: "Supplio — the leading B2B sales management platform in Uzbekistan. Manage orders, dealers and payments in one place.",
+      },
     });
   }
 
@@ -961,5 +1045,143 @@ export class SuperAdminService {
       const msg = err instanceof Error ? err.message : String(err);
       this.logger.error("Billing reminder cron failed: " + msg);
     }
+  }
+
+  // ── Testimonials ──────────────────────────────────────────────────────────
+
+  async getTestimonials() {
+    return (this.prisma as any).testimonial.findMany({
+      orderBy: { order: "asc" },
+    });
+  }
+
+  async createTestimonial(data: {
+    name: string;
+    company?: string;
+    roleTitle?: string;
+    contentUz: string;
+    contentRu: string;
+    contentEn: string;
+    contentTr?: string;
+    rating?: number;
+    isActive?: boolean;
+    order?: number;
+  }) {
+    return (this.prisma as any).testimonial.create({ data });
+  }
+
+  async updateTestimonial(
+    id: string,
+    data: Partial<{
+      name: string;
+      company: string;
+      roleTitle: string;
+      contentUz: string;
+      contentRu: string;
+      contentEn: string;
+      contentTr: string;
+      rating: number;
+      isActive: boolean;
+      order: number;
+    }>
+  ) {
+    return (this.prisma as any).testimonial.update({ where: { id }, data });
+  }
+
+  async deleteTestimonial(id: string) {
+    return (this.prisma as any).testimonial.delete({ where: { id } });
+  }
+
+  // ── Team Members ──────────────────────────────────────────────────────────
+
+  async getTeamMembers() {
+    return this.prisma.$queryRawUnsafe<any[]>(
+      `SELECT * FROM "TeamMember" ORDER BY "order" ASC, "createdAt" ASC`
+    );
+  }
+
+  async createTeamMember(data: {
+    name: string;
+    roleUz?: string;
+    roleRu?: string;
+    roleEn?: string;
+    roleTr?: string;
+    bioUz?: string;
+    bioRu?: string;
+    bioEn?: string;
+    bioTr?: string;
+    avatar?: string;
+    order?: number;
+    isActive?: boolean;
+  }) {
+    const id = require("crypto").randomUUID();
+    await this.prisma.$executeRawUnsafe(
+      `INSERT INTO "TeamMember" (id, name, "roleUz", "roleRu", "roleEn", "roleTr", "bioUz", "bioRu", "bioEn", "bioTr", avatar, "order", "isActive", "createdAt")
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,NOW())`,
+      id,
+      data.name,
+      data.roleUz ?? "",
+      data.roleRu ?? "",
+      data.roleEn ?? "",
+      data.roleTr ?? "",
+      data.bioUz ?? "",
+      data.bioRu ?? "",
+      data.bioEn ?? "",
+      data.bioTr ?? "",
+      data.avatar ?? null,
+      data.order ?? 0,
+      data.isActive ?? true
+    );
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
+      `SELECT * FROM "TeamMember" WHERE id = $1`,
+      id
+    );
+    return rows[0];
+  }
+
+  async updateTeamMember(
+    id: string,
+    data: Partial<{
+      name: string;
+      roleUz: string;
+      roleRu: string;
+      roleEn: string;
+      roleTr: string;
+      bioUz: string;
+      bioRu: string;
+      bioEn: string;
+      bioTr: string;
+      avatar: string;
+      order: number;
+      isActive: boolean;
+    }>
+  ) {
+    const fields = Object.entries(data)
+      .filter(([, v]) => v !== undefined)
+      .map(([k], i) => `"${k}" = $${i + 2}`)
+      .join(", ");
+    const values = Object.values(data).filter((v) => v !== undefined);
+    if (!fields)
+      return this.prisma
+        .$queryRawUnsafe<any[]>(`SELECT * FROM "TeamMember" WHERE id = $1`, id)
+        .then((r) => r[0]);
+    await this.prisma.$executeRawUnsafe(
+      `UPDATE "TeamMember" SET ${fields} WHERE id = $1`,
+      id,
+      ...values
+    );
+    const rows = await this.prisma.$queryRawUnsafe<any[]>(
+      `SELECT * FROM "TeamMember" WHERE id = $1`,
+      id
+    );
+    return rows[0];
+  }
+
+  async deleteTeamMember(id: string) {
+    await this.prisma.$executeRawUnsafe(
+      `DELETE FROM "TeamMember" WHERE id = $1`,
+      id
+    );
+    return { id };
   }
 }

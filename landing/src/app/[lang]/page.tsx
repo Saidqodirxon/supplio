@@ -19,8 +19,11 @@ import {
   Mail,
   MapPin,
   LifeBuoy,
-  ExternalLink,
   ChevronLeft,
+  Users,
+  Package,
+  Globe,
+  CreditCard,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -33,6 +36,7 @@ import type { Language } from "@/i18n/translations";
 import Link from "next/link";
 import { LangSelect } from "@/components/LangSelect";
 import LeadModal from "@/components/LeadModal";
+import { Footer } from "@/components/Footer";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 24 },
@@ -147,6 +151,16 @@ function sanitizeExternalUrl(raw?: string | null) {
   }
 }
 
+function normalizeTelegramUrl(raw?: string | null) {
+  const value = (raw || "").trim();
+  if (!value) return null;
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    return sanitizeExternalUrl(value);
+  }
+  const handle = value.replace(/^@/, "").trim();
+  return handle ? `https://t.me/${handle}` : null;
+}
+
 interface DynamicSettings {
   newsEnabled: boolean;
   defaultTrialDays?: number;
@@ -154,6 +168,7 @@ interface DynamicSettings {
   globalNotifyRu?: string;
   globalNotifyEn?: string;
   globalNotifyTr?: string;
+  telegram?: string;
   superAdminPhone?: string;
   [key: string]: string | number | boolean | undefined;
 }
@@ -211,6 +226,9 @@ export default function LandingPage() {
     }>
   >([]);
   const [testimonialIdx, setTestimonialIdx] = useState(0);
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
+    "monthly"
+  );
 
   const BACKEND = normalizeBackendBaseUrl(process.env.NEXT_PUBLIC_BACKEND_URL);
   const APP_LOGIN_URL = `${normalizeAppBaseUrl(process.env.NEXT_PUBLIC_APP_URL)}/login`;
@@ -272,10 +290,18 @@ export default function LandingPage() {
   const contactEmailHref = contactEmail ? `mailto:${contactEmail}` : null;
   const contactAddress = landing?.contactAddress?.trim() || null;
   const contactAddressUrl = sanitizeExternalUrl(landing?.contactAddressUrl);
-  const socialTelegram = sanitizeExternalUrl(landing?.socialTelegram);
   const socialInstagram = sanitizeExternalUrl(landing?.socialInstagram);
   const socialLinkedin = sanitizeExternalUrl(landing?.socialLinkedin);
   const socialTwitter = sanitizeExternalUrl(landing?.socialTwitter);
+  const footerSocialLinks = [
+    { label: "Instagram", href: socialInstagram },
+    { label: "LinkedIn", href: socialLinkedin },
+    { label: "Twitter", href: socialTwitter },
+  ].filter(
+    (item, index, array): item is { label: string; href: string } =>
+      Boolean(item.href) &&
+      array.findIndex((other) => other.href === item.href) === index
+  );
 
   return (
     <div className="min-h-screen selection:bg-blue-600 selection:text-white overflow-x-hidden font-sans bg-white text-left">
@@ -308,7 +334,7 @@ export default function LandingPage() {
             {[
               { name: t.nav.features, href: "#features" },
               { name: t.nav.pricing, href: "#pricing" },
-              { name: t.nav.news, href: "#news" },
+              { name: t.nav.news, href: `/${params.lang}/news` },
               { name: t.nav.about, href: `/${params.lang}/about` },
             ].map((item) => (
               <Link
@@ -364,7 +390,10 @@ export default function LandingPage() {
               <Link href="#pricing" onClick={() => setIsMenuOpen(false)}>
                 {t.nav.pricing}
               </Link>
-              <Link href="#news" onClick={() => setIsMenuOpen(false)}>
+              <Link
+                href={`/${params.lang}/news`}
+                onClick={() => setIsMenuOpen(false)}
+              >
                 {t.nav.news}
               </Link>
               <hr className="border-slate-100" />
@@ -517,49 +546,72 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
             {[
               {
-                title: t.features.item1,
-                desc: t.features.item1Desc,
+                title: (t.features as any).item1,
+                desc: (t.features as any).item1Desc,
                 icon: MessageCircle,
                 color: "text-blue-600",
                 bg: "bg-blue-50",
               },
               {
-                title: t.features.item2,
-                desc: t.features.item2Desc,
-                icon: BarChart3,
+                title: (t.features as any).item2,
+                desc: (t.features as any).item2Desc,
+                icon: CreditCard,
                 color: "text-emerald-600",
                 bg: "bg-emerald-50",
               },
               {
-                title: t.features.item3,
-                desc: t.features.item3Desc,
-                icon: ShieldCheck,
+                title: (t.features as any).item3,
+                desc: (t.features as any).item3Desc,
+                icon: Users,
+                color: "text-violet-600",
+                bg: "bg-violet-50",
+              },
+              {
+                title: (t.features as any).item4,
+                desc: (t.features as any).item4Desc,
+                icon: Package,
+                color: "text-amber-600",
+                bg: "bg-amber-50",
+              },
+              {
+                title: (t.features as any).item5,
+                desc: (t.features as any).item5Desc,
+                icon: BarChart3,
+                color: "text-rose-600",
+                bg: "bg-rose-50",
+              },
+              {
+                title: (t.features as any).item6,
+                desc: (t.features as any).item6Desc,
+                icon: Globe,
                 color: "text-indigo-600",
                 bg: "bg-indigo-50",
               },
-            ].map((feature, i) => (
-              <motion.div
-                key={i}
-                {...fadeInUp}
-                transition={{ delay: i * 0.15 }}
-                className="group space-y-5 p-8 rounded-2xl border border-slate-100 hover:border-blue-100 hover:shadow-lg transition-all duration-300"
-              >
-                <div
-                  className={`w-14 h-14 rounded-2xl ${feature.bg} ${feature.color} flex items-center justify-center group-hover:scale-105 transition-transform`}
+            ]
+              .filter((f) => f.title)
+              .map((feature, i) => (
+                <motion.div
+                  key={i}
+                  {...fadeInUp}
+                  transition={{ delay: i * 0.1 }}
+                  className="group space-y-4 p-7 rounded-2xl border border-slate-100 hover:border-blue-100 hover:shadow-xl transition-all duration-300 bg-white"
                 >
-                  <feature.icon className="w-7 h-7" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900">
-                  {feature.title}
-                </h3>
-                <p className="text-slate-500 leading-relaxed text-sm">
-                  {feature.desc}
-                </p>
-              </motion.div>
-            ))}
+                  <div
+                    className={`w-12 h-12 rounded-xl ${feature.bg} ${feature.color} flex items-center justify-center group-hover:scale-110 transition-transform`}
+                  >
+                    <feature.icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 leading-snug">
+                    {feature.title}
+                  </h3>
+                  <p className="text-slate-500 leading-relaxed text-sm">
+                    {feature.desc}
+                  </p>
+                </motion.div>
+              ))}
           </div>
         </div>
       </section>
@@ -849,13 +901,50 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 w-[40%] h-[40%] bg-indigo-500/10 blur-[120px] rounded-full -z-10" />
 
         <div className="max-w-7xl mx-auto">
-          <motion.div {...fadeInUp} className="text-center mb-20">
+          <motion.div {...fadeInUp} className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-6">
               {t.pricing.title}
             </h2>
             <p className="text-slate-400 max-w-2xl mx-auto text-lg">
               {t.pricing.subtitle}
             </p>
+          </motion.div>
+
+          {/* Billing toggle */}
+          <motion.div {...fadeInUp} className="flex justify-center mb-14">
+            <div className="relative inline-flex items-center bg-slate-800 rounded-2xl p-1.5 border border-slate-700">
+              <button
+                onClick={() => setBillingPeriod("monthly")}
+                className={`relative z-10 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 ${billingPeriod === "monthly" ? "bg-white text-slate-900 shadow-md" : "text-slate-400 hover:text-slate-200"}`}
+              >
+                {lang === "uz"
+                  ? "Oylik"
+                  : lang === "ru"
+                    ? "Ежемесячно"
+                    : lang === "tr"
+                      ? "Aylık"
+                      : lang === "oz"
+                        ? "Ойлик"
+                        : "Monthly"}
+              </button>
+              <button
+                onClick={() => setBillingPeriod("yearly")}
+                className={`relative z-10 px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2 ${billingPeriod === "yearly" ? "bg-white text-slate-900 shadow-md" : "text-slate-400 hover:text-slate-200"}`}
+              >
+                {lang === "uz"
+                  ? "Yillik"
+                  : lang === "ru"
+                    ? "Ежегодно"
+                    : lang === "tr"
+                      ? "Yıllık"
+                      : lang === "oz"
+                        ? "Йиллик"
+                        : "Yearly"}
+                <span className="px-2 py-0.5 bg-green-500 text-white text-[10px] font-extrabold rounded-full leading-none">
+                  {lang === "uz" ? "-17%" : lang === "ru" ? "-17%" : "-17%"}
+                </span>
+              </button>
+            </div>
           </motion.div>
 
           {(() => {
@@ -892,14 +981,28 @@ export default function LandingPage() {
                   : plan.features;
               const isPopular = plan.isPopular;
               const monthlyAmount = parsePriceValue(plan.priceMonthly);
+              const yearlyAmount = parsePriceValue(plan.priceYearly);
               const fallbackAmount = parsePriceValue(plan.price);
-              const effectiveRawPrice =
-                monthlyAmount > 0
-                  ? plan.priceMonthly
-                  : fallbackAmount > 0
-                    ? plan.price
-                    : "0";
-              const price = formatPriceDisplay(effectiveRawPrice);
+              const effectiveMonthly =
+                monthlyAmount > 0 ? monthlyAmount : fallbackAmount;
+              const effectiveYearly =
+                yearlyAmount > 0 ? yearlyAmount : effectiveMonthly * 10;
+              const yearlyPerMonth = effectiveYearly / 12;
+              const savingsPct =
+                effectiveMonthly > 0
+                  ? Math.round(
+                      ((effectiveMonthly * 12 - effectiveYearly) /
+                        (effectiveMonthly * 12)) *
+                        100
+                    )
+                  : 0;
+              const savingsAmount = effectiveMonthly * 12 - effectiveYearly;
+              const displayAmount =
+                billingPeriod === "yearly" ? yearlyPerMonth : effectiveMonthly;
+              const price =
+                displayAmount > 0
+                  ? Math.round(displayAmount).toLocaleString("en-US")
+                  : "0";
               const trialDays =
                 (plan.trialDays as number) || settings?.defaultTrialDays || 14;
               const maxCustomBots = Number(plan.maxCustomBots || 0);
@@ -929,11 +1032,18 @@ export default function LandingPage() {
                   )}
 
                   <div className="mb-8 text-left">
-                    <h3
-                      className={`text-lg font-bold mb-4 ${isPopular ? "text-blue-600" : "text-white"}`}
-                    >
-                      {name}
-                    </h3>
+                    <div className="flex items-start justify-between gap-2 mb-4">
+                      <h3
+                        className={`text-lg font-bold ${isPopular ? "text-blue-600" : "text-white"}`}
+                      >
+                        {name}
+                      </h3>
+                      {billingPeriod === "yearly" && savingsPct > 0 && (
+                        <span className="shrink-0 px-2 py-1 bg-green-500 text-white text-[10px] font-extrabold rounded-lg leading-none">
+                          -{savingsPct}% OFF
+                        </span>
+                      )}
+                    </div>
                     <div className="flex items-baseline gap-1.5">
                       <span
                         className={`text-4xl font-bold ${isPopular ? "text-slate-900" : "text-white"}`}
@@ -944,6 +1054,21 @@ export default function LandingPage() {
                         {t.pricing.month}
                       </span>
                     </div>
+                    {billingPeriod === "yearly" && savingsAmount > 0 && (
+                      <p
+                        className={`text-xs font-semibold mt-1.5 ${isPopular ? "text-green-600" : "text-green-400"}`}
+                      >
+                        {lang === "uz"
+                          ? `Yiliga ${Math.round(effectiveYearly).toLocaleString("en-US")} so'm • ${savingsAmount.toLocaleString("en-US")} tejaladi`
+                          : lang === "ru"
+                            ? `${Math.round(effectiveYearly).toLocaleString("en-US")} в год • Экономия ${savingsAmount.toLocaleString("en-US")}`
+                            : lang === "tr"
+                              ? `Yıllık ${Math.round(effectiveYearly).toLocaleString("en-US")} • ${savingsAmount.toLocaleString("en-US")} tasarruf`
+                              : lang === "oz"
+                                ? `Йилига ${Math.round(effectiveYearly).toLocaleString("en-US")} • ${savingsAmount.toLocaleString("en-US")} тежалади`
+                                : `${Math.round(effectiveYearly).toLocaleString("en-US")}/year • Save ${savingsAmount.toLocaleString("en-US")}`}
+                      </p>
+                    )}
                     {trialDays > 0 && (
                       <p
                         className={`text-xs font-semibold mt-2 ${isPopular ? "text-blue-600" : "text-blue-400"}`}
@@ -1044,10 +1169,13 @@ export default function LandingPage() {
                   {t.news.subtitle}
                 </p>
               </div>
-              <button className="group px-6 py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all flex items-center gap-3 shrink-0">
+              <Link
+                href={`/${params.lang}/news`}
+                className="group px-6 py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-all flex items-center gap-3 shrink-0"
+              >
                 {t.news.more}{" "}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </button>
+              </Link>
             </motion.div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1137,12 +1265,7 @@ export default function LandingPage() {
       )}
 
       {/* ===== Contact / Quick Contact ===== */}
-      {(contactPhone ||
-        contactEmail ||
-        socialTelegram ||
-        socialInstagram ||
-        socialLinkedin ||
-        socialTwitter) && (
+      {(contactPhone || contactEmail || contactAddress) && (
         <section className="py-16 sm:py-20 px-5 sm:px-6 bg-linear-to-br from-blue-600 to-indigo-700 text-white">
           <div className="max-w-4xl mx-auto text-center space-y-8">
             <div className="space-y-3">
@@ -1197,174 +1320,21 @@ export default function LandingPage() {
                   {contactEmail}
                 </a>
               )}
-              {socialTelegram && (
+              {contactAddress && (
                 <a
-                  href={socialTelegram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white text-blue-700 hover:bg-blue-50 rounded-2xl font-black text-sm transition-all shadow-lg shadow-blue-900/20"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Telegram
-                </a>
-              )}
-              {socialInstagram && (
-                <a
-                  href={socialInstagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={contactAddressUrl || "#"}
+                  target={contactAddressUrl ? "_blank" : undefined}
+                  rel={contactAddressUrl ? "noopener noreferrer" : undefined}
                   className="inline-flex items-center gap-2.5 px-6 py-3.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl font-bold text-sm transition-all"
                 >
-                  Instagram
+                  <MapPin className="w-4 h-4" />
+                  {contactAddress}
                 </a>
               )}
             </div>
           </div>
         </section>
       )}
-
-      {/* ===== Footer ===== */}
-      <footer className="py-16 sm:py-20 px-5 sm:px-6 border-t border-slate-100 bg-slate-50 text-left">
-        <div className="max-w-7xl mx-auto flex flex-col lg:grid lg:grid-cols-[2fr_1fr_1fr_1fr] gap-12 mb-16">
-          <div className="space-y-5">
-            <Link href={`/${params.lang}`} className="flex items-center">
-              <div className="h-11 overflow-hidden flex items-center">
-                <img
-                  src="/logo.png"
-                  alt="Supplio"
-                  className="h-full object-contain"
-                />
-              </div>
-            </Link>
-            <p className="text-slate-500 max-w-sm leading-relaxed text-sm">
-              {footerDesc}
-            </p>
-            {contactPhone && (
-              <a
-                href={contactPhoneHref || "#"}
-                className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
-              >
-                <Phone className="w-4 h-4 text-blue-600" />
-                <span>{contactPhone}</span>
-              </a>
-            )}
-            {contactEmail && contactEmailHref && (
-              <a
-                href={contactEmailHref}
-                className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
-              >
-                <Mail className="w-4 h-4 text-blue-600" />
-                <span>{contactEmail}</span>
-              </a>
-            )}
-            {contactAddress &&
-              (contactAddressUrl ? (
-                <a
-                  href={contactAddressUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
-                >
-                  <MapPin className="w-4 h-4 text-blue-600" />
-                  <span>{contactAddress}</span>
-                </a>
-              ) : (
-                <div className="flex items-center gap-2 text-slate-500 text-sm font-medium">
-                  <MapPin className="w-4 h-4 text-blue-600" />
-                  <span>{contactAddress}</span>
-                </div>
-              ))}
-            <button
-              onClick={() => setIsHelpModalOpen(true)}
-              className="inline-flex items-center gap-2 mt-2 text-slate-500 text-sm font-medium hover:text-blue-600 transition-colors"
-            >
-              <LifeBuoy className="w-4 h-4 text-blue-600" />
-              {lang === "uz"
-                ? "Yordam markazi"
-                : lang === "ru"
-                  ? "Центр помощи"
-                  : lang === "tr"
-                    ? "Yardım Merkezi"
-                    : lang === "oz"
-                      ? "Ёрдам маркази"
-                      : "Help Center"}
-            </button>
-          </div>
-
-          {[
-            {
-              title: t.footer.product,
-              links: [
-                { name: t.nav.features, href: "#features" },
-                { name: t.nav.pricing, href: "#pricing" },
-                { name: t.footer.demo, href: "https://demo.supplio.uz" },
-              ],
-            },
-            {
-              title: t.footer.resources,
-              links: [
-                { name: t.nav.news, href: "#news" },
-                { name: t.footer.docs, href: "#" },
-              ],
-            },
-            {
-              title: t.footer.company,
-              links: [
-                { name: t.nav.about, href: `/${params.lang}/about` },
-                { name: t.footer.privacy, href: "#" },
-                { name: t.footer.terms, href: "#" },
-              ],
-            },
-          ].map((col, i) => (
-            <div key={i} className="space-y-4 text-left">
-              <p className="text-sm font-semibold text-slate-900">
-                {col.title}
-              </p>
-              <div className="flex flex-col gap-3 text-sm text-slate-500">
-                {col.links.map((link, j) => (
-                  <Link
-                    key={j}
-                    href={link.href}
-                    target={link.href.startsWith("http") ? "_blank" : undefined}
-                    rel={
-                      link.href.startsWith("http")
-                        ? "noopener noreferrer"
-                        : undefined
-                    }
-                    className="hover:text-blue-600 transition-colors"
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="max-w-7xl mx-auto pt-8 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-6">
-          <p className="text-slate-500 text-sm">{t.footer.copyright}</p>
-          <div className="flex gap-6">
-            {[
-              { label: "Twitter", href: socialTwitter },
-              { label: "Instagram", href: socialInstagram },
-              { label: "LinkedIn", href: socialLinkedin },
-              { label: "Telegram", href: socialTelegram },
-            ]
-              .filter((s) => s.href)
-              .map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href || "#"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-slate-400 hover:text-blue-600 transition-colors uppercase tracking-widest font-bold"
-                >
-                  {social.label}
-                </a>
-              ))}
-          </div>
-        </div>
-      </footer>
 
       <LeadModal
         isOpen={isLeadModalOpen}
@@ -1378,134 +1348,8 @@ export default function LandingPage() {
         }
       />
 
-      <AnimatePresence>
-        {isHelpModalOpen && (
-          <div className="fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-              onClick={() => setIsHelpModalOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 10 }}
-              className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 space-y-4"
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-black text-slate-900 tracking-tight inline-flex items-center gap-2">
-                  <LifeBuoy className="w-5 h-5 text-blue-600" />
-                  {lang === "uz"
-                    ? "Yordam markazi"
-                    : lang === "ru"
-                      ? "Центр помощи"
-                      : lang === "tr"
-                        ? "Yardım Merkezi"
-                        : lang === "oz"
-                          ? "Ёрдам маркази"
-                          : "Help Center"}
-                </h3>
-                <button
-                  onClick={() => setIsHelpModalOpen(false)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {contactPhone && (
-                  <a
-                    href={contactPhoneHref || "#"}
-                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
-                  >
-                    <span className="inline-flex items-center gap-2 font-bold text-slate-700">
-                      <Phone className="w-4 h-4 text-blue-600" />
-                      {lang === "ru"
-                        ? "Телефон"
-                        : lang === "tr"
-                          ? "Telefon"
-                          : lang === "oz"
-                            ? "Телефон"
-                            : "Telefon"}
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {contactPhone}
-                    </span>
-                  </a>
-                )}
-                {contactEmail && contactEmailHref && (
-                  <a
-                    href={contactEmailHref}
-                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
-                  >
-                    <span className="inline-flex items-center gap-2 font-bold text-slate-700">
-                      <Mail className="w-4 h-4 text-blue-600" /> Email
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      {contactEmail}
-                    </span>
-                  </a>
-                )}
-                {contactAddress && (
-                  <a
-                    href={contactAddressUrl || "#"}
-                    target={contactAddressUrl ? "_blank" : undefined}
-                    rel={contactAddressUrl ? "noopener noreferrer" : undefined}
-                    className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
-                  >
-                    <span className="inline-flex items-center gap-2 font-bold text-slate-700">
-                      <MapPin className="w-4 h-4 text-blue-600" />
-                      {lang === "ru"
-                        ? "Адрес"
-                        : lang === "tr"
-                          ? "Adres"
-                          : lang === "oz"
-                            ? "Манзил"
-                            : "Manzil"}
-                    </span>
-                    <span className="text-xs text-slate-500 truncate max-w-[55%]">
-                      {contactAddress}
-                    </span>
-                  </a>
-                )}
-                {[
-                  { label: "Telegram", href: socialTelegram },
-                  { label: "Instagram", href: socialInstagram },
-                  { label: "LinkedIn", href: socialLinkedin },
-                  { label: "Twitter", href: socialTwitter },
-                ]
-                  .filter((s) => s.href)
-                  .map((social) => (
-                    <a
-                      key={social.label}
-                      href={social.href || "#"}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-between p-3 rounded-2xl border border-slate-100 hover:bg-slate-50"
-                    >
-                      <span className="inline-flex items-center gap-2 font-bold text-slate-700">
-                        <ExternalLink className="w-4 h-4 text-blue-600" />{" "}
-                        {social.label}
-                      </span>
-                      <span className="text-xs text-slate-500">
-                        {lang === "ru"
-                          ? "Открыть"
-                          : lang === "tr"
-                            ? "Aç"
-                            : lang === "oz"
-                              ? "Очиш"
-                              : "Ochish"}
-                      </span>
-                    </a>
-                  ))}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* ===== Footer ===== */}
+      <Footer lang={lang} />
     </div>
   );
 }

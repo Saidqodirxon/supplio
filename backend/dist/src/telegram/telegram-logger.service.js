@@ -9,74 +9,140 @@ var TelegramLoggerService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TelegramLoggerService = void 0;
 const common_1 = require("@nestjs/common");
+const fs = require("fs");
 const telegraf_1 = require("telegraf");
 let TelegramLoggerService = TelegramLoggerService_1 = class TelegramLoggerService {
     constructor() {
         this.logger = new common_1.Logger(TelegramLoggerService_1.name);
-        this.bot = null;
-        this.chatId = null;
+        this.logBot = null;
+        this.logChatId = null;
+        this.backupBot = null;
+        this.backupChatId = null;
     }
     onModuleInit() {
-        const token = process.env.LOG_BOT_TOKEN;
-        this.chatId = process.env.LOG_CHAT_ID || null;
-        if (!token || !this.chatId) {
-            this.logger.warn('LOG_BOT_TOKEN or LOG_CHAT_ID not set — Telegram logging disabled');
-            return;
+        const logToken = process.env.LOG_BOT_TOKEN;
+        this.logChatId = process.env.LOG_CHAT_ID ?? null;
+        if (logToken && this.logChatId) {
+            try {
+                this.logBot = new telegraf_1.Telegraf(logToken);
+                this.logger.log('✅ Super-admin Log Bot initialized');
+            }
+            catch (e) {
+                this.logger.error('Log Bot init failed: ' + e?.message);
+            }
         }
-        try {
-            this.bot = new telegraf_1.Telegraf(token);
-            this.logger.log('✅ Telegram Log Bot initialized');
+        else {
+            this.logger.warn('LOG_BOT_TOKEN or LOG_CHAT_ID not set — log notifications disabled');
         }
-        catch (e) {
-            const msg = e instanceof Error ? e.message : String(e);
-            this.logger.error('Failed to init log bot: ' + msg);
+        const backupToken = process.env.BACKUP_BOT_TOKEN ?? logToken;
+        this.backupChatId = process.env.BACKUP_CHAT_ID ?? this.logChatId;
+        if (backupToken && this.backupChatId) {
+            try {
+                this.backupBot = new telegraf_1.Telegraf(backupToken);
+                this.logger.log('✅ Super-admin Backup Bot initialized');
+            }
+            catch (e) {
+                this.logger.error('Backup Bot init failed: ' + e?.message);
+            }
+        }
+        else {
+            this.logger.warn('BACKUP_BOT_TOKEN or BACKUP_CHAT_ID not set — backup notifications disabled');
         }
     }
-    async sendLog(level, message, meta) {
-        if (!this.bot || !this.chatId)
+    async sendToLog(text) {
+        if (!this.logBot || !this.logChatId)
             return;
-        const icon = level === 'ERROR' ? '🔴' : level === 'WARN' ? '🟡' : '🟢';
-        const metaStr = meta ? '\n\n```json\n' + JSON.stringify(meta, null, 2).slice(0, 800) + '\n```' : '';
-        const text = `${icon} *[${level}]* ${new Date().toISOString()}\n\n${message}${metaStr}`;
         try {
-            await this.bot.telegram.sendMessage(this.chatId, text, { parse_mode: 'Markdown' });
+            await this.logBot.telegram.sendMessage(this.logChatId, text, { parse_mode: 'Markdown' });
         }
         catch {
         }
     }
-    async sendOrderNotification(order) {
-        if (!this.bot || !this.chatId)
+    async sendDocumentToBackup(filePath, fileName, caption) {
+        if (!this.backupBot || !this.backupChatId)
             return;
-        const text = `🛍 *Yangi buyurtma!*\n\n` +
+        if (!fs.existsSync(filePath))
+            return;
+        try {
+            await this.backupBot.telegram.sendDocument(this.backupChatId, { source: fs.createReadStream(filePath), filename: fileName }, { caption, parse_mode: 'Markdown' });
+        }
+        catch (e) {
+            this.logger.warn('Backup send failed: ' + e?.message);
+        }
+    }
+    async sendLog(level, message, meta) {
+        const icon = level === 'ERROR' ? '🔴' : level === 'WARN' ? '🟡' : '🟢';
+        const metaLines = meta
+            ? '\n' + Object.entries(meta)
+                .filter(([, v]) => v !== undefined && v !== null)
+                .map(([k, v]) => `• ${k}: \`${v}\``)
+                .join('\n')
+            : '';
+        const time = new Date().toLocaleString('uz-UZ');
+        await this.sendToLog(`${icon} *[${level}]* ${time}\n\n${message}${metaLines}\n#LOG`);
+    }
+    async sendError(context, error, extra) {
+        const msg = error instanceof Error ? error.message : error;
+        await this.sendLog('ERROR', `*${context}*\n${msg}`, extra);
+    }
+    async sendOrderNotification(order) {
+        const text = `🛍 *Yangi buyurtma!* #ORDER\n\n` +
             `🏢 Kompaniya: *${order.companyName}*\n` +
             `👤 Diler: *${order.dealerName}*\n` +
             `💰 Summa: *${order.totalAmount.toLocaleString()} so'm*\n` +
             `📦 Mahsulotlar: *${order.itemCount} ta*\n` +
             `🆔 ID: \`${order.id.slice(-8).toUpperCase()}\`\n` +
             `📅 ${new Date().toLocaleString('uz-UZ')}`;
-        try {
-            await this.bot.telegram.sendMessage(this.chatId, text, { parse_mode: 'Markdown' });
-        }
-        catch {
-        }
+        await this.sendToLog(text);
     }
     async sendDealerApprovalRequest(dealer) {
-        if (!this.bot || !this.chatId)
-            return;
-        const text = `👤 *Yangi diler so'rovi!*\n\n` +
+        const text = `👤 *Yangi diler so'rovi!* #DEALER\n\n` +
             `🏢 Kompaniya: *${dealer.companyName}*\n` +
             `👤 Ism: *${dealer.name}*\n` +
             `📞 Telefon: *${dealer.phone}*\n` +
             `⏳ Tasdiqlash kutilmoqda`;
-        try {
-            await this.bot.telegram.sendMessage(this.chatId, text, { parse_mode: 'Markdown' });
-        }
-        catch {
-        }
+        await this.sendToLog(text);
     }
-    async sendError(context, error, extra) {
-        const msg = error instanceof Error ? error.message : error;
-        await this.sendLog('ERROR', `*${context}*\n${msg}`, extra);
+    async sendLeadNotification(lead) {
+        const text = `🚀 *Yangi Lead!* #LEAD\n\n` +
+            `👤 Ism: *${lead.fullName}*\n` +
+            `📞 Telefon: *${lead.phone}*\n` +
+            (lead.info ? `📝 Info: ${lead.info}\n` : '') +
+            `📅 ${new Date().toLocaleString('uz-UZ')}`;
+        await this.sendToLog(text);
+    }
+    async sendPasswordResetNotification(data) {
+        const text = `🔑 *Parol o'zgartirildi* #RESET\n\n` +
+            `👤 Foydalanuvchi: *${data.userFullName}*\n` +
+            `🏢 Kompaniya: *${data.companyName}*\n` +
+            `📞 Telefon: *${data.phone}*\n` +
+            `📅 ${new Date().toLocaleString('uz-UZ')}`;
+        await this.sendToLog(text);
+    }
+    async sendTariffUpgradeNotification(data) {
+        const text = `🎯 *Tarif yangilandi!* #TARIFF\n\n` +
+            `🏢 Kompaniya: *${data.companyName}*\n` +
+            `📦 ${data.oldPlan} → *${data.newPlan}*\n` +
+            `📅 ${new Date().toLocaleString('uz-UZ')}`;
+        await this.sendToLog(text);
+    }
+    async sendDailyReportSummary(data) {
+        const text = `📊 *Kunlik hisobot — ${data.companyName}* #REPORT\n\n` +
+            `📦 Bugungi buyurtmalar: *${data.todayOrders}* (jami: ${data.totalOrders})\n` +
+            `💰 Bugungi tushum: *${data.todayRevenue.toLocaleString()} so'm*\n` +
+            `⏳ Kutilayotgan: *${data.pendingOrders}* ta\n` +
+            `👥 Faol dilerlar: *${data.totalDealers}*\n` +
+            `📅 ${new Date().toLocaleString('uz-UZ')}`;
+        await this.sendToLog(text);
+    }
+    async sendBackupFile(filePath, fileName, label = 'Full Backup') {
+        const stats = fs.existsSync(filePath) ? fs.statSync(filePath) : null;
+        const sizeKb = stats ? (stats.size / 1024).toFixed(1) : '?';
+        const caption = `💾 *${label}* #BACKUP\n` +
+            `📄 ${fileName}\n` +
+            `📦 ${sizeKb} KB\n` +
+            `📅 ${new Date().toLocaleString('uz-UZ')}`;
+        await this.sendDocumentToBackup(filePath, fileName, caption);
     }
 };
 exports.TelegramLoggerService = TelegramLoggerService;
