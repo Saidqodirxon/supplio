@@ -89,7 +89,10 @@ log "Ma'lumotlar bazasi tiklanmoqda..."
 # Masalan, eski serverlarda `SET transaction_timeout` parametri bo'lmasligi mumkin.
 TMP_SQL=$(mktemp /tmp/restore_selective.XXXXXX.sql)
 trap 'rm -f "$TMP_SQL"' EXIT
-sed '/^SET transaction_timeout =/d' db_backup_selective.sql > "$TMP_SQL"
+sed -e '/^SET transaction_timeout =/d' \
+    -e '/^ALTER TABLE .* DISABLE TRIGGER ALL;/d' \
+    -e '/^ALTER TABLE .* ENABLE TRIGGER ALL;/d' \
+    db_backup_selective.sql > "$TMP_SQL"
 
 # Faqat selektiv import qilinadigan tablalarni oldindan tozalaymiz.
 TRUNCATE_QUERY="SELECT quote_ident(table_schema) || '.' || quote_ident(table_name)

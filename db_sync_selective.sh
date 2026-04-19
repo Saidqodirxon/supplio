@@ -66,7 +66,6 @@ done <<< "$TABLE_LIST"
 
 pg_dump \
     --data-only \
-    --disable-triggers \
     --no-owner \
     --no-privileges \
     --schema="$DB_SCHEMA" \
