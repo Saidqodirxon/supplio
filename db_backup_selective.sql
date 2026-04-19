@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict EpVLjqNpX7Mhxj9aR7cQqC3riGgnLo7Jad9wEaQmLjgzAAv3W3Oau0d48HH3t7h
+\restrict rNWOdevR78PdhL6HYkju4cJ6DfbQJYFA4KDHJeZjk3uCvl2fxJS9UeJpUnjd0Mp
 
 -- Dumped from database version 18.3
 -- Dumped by pg_dump version 18.3
@@ -23,10 +23,6 @@ SET row_security = off;
 -- Data for Name: Unit; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-SET SESSION AUTHORIZATION DEFAULT;
-
-ALTER TABLE public."Unit" DISABLE TRIGGER ALL;
-
 COPY public."Unit" (id, "companyId", name, symbol, "createdAt", "deletedAt") FROM stdin;
 ab5c9bd4-8333-4134-a5ed-60d54e62eceb	\N	Dona	dona	2026-03-29 08:54:28.985	\N
 ed0677af-d839-44aa-b373-dedf6d40b743	\N	Kilogramm	kg	2026-03-29 08:54:29	\N
@@ -40,11 +36,9 @@ fdffc8b0-1dc1-45fb-8263-37fea3ffc0d1	\N	Paket	paket	2026-03-29 08:54:29.022	\N
 \.
 
 
-ALTER TABLE public."Unit" ENABLE TRIGGER ALL;
-
 --
 -- PostgreSQL database dump complete
 --
 
-\unrestrict EpVLjqNpX7Mhxj9aR7cQqC3riGgnLo7Jad9wEaQmLjgzAAv3W3Oau0d48HH3t7h
+\unrestrict rNWOdevR78PdhL6HYkju4cJ6DfbQJYFA4KDHJeZjk3uCvl2fxJS9UeJpUnjd0Mp
 
