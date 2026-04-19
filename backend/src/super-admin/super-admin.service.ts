@@ -31,10 +31,6 @@ export class SuperAdminService {
           "1. Biz faqat xizmatni taqdim etish uchun zarur ma'lumotlarni yig'amiz.\n2. Ma'lumotlaringiz hisob boshqaruvi, qo'llab-quvvatlash va tahlil uchun ishlatiladi.\n3. Biz ma'lumotlarni uchinchi tomonlarga faqat qonuniy talab yoki xizmat integratsiyasi bo'lsa uzatamiz.\n4. Foydalanuvchi ma'lumotlari xavfsizligini ta'minlash uchun texnik va tashkiliy choralar qo'llaniladi.\n5. Maxfiylik bo'yicha savollar uchun biz bilan bog'lanishingiz mumkin.",
         privacyEn:
           "1. We collect only the data needed to provide the service.\n2. Your data is used for account management, support, and analytics.\n3. We share data with third parties only when required by law or for service integrations.\n4. Technical and organizational measures are used to protect user data.\n5. Contact us if you have questions about privacy.",
-        contractUz:
-          "1. Ushbu shartnoma Supplio va mijoz o'rtasidagi xizmat ko'rsatish tartibini belgilaydi.\n2. Mijoz tanlangan tarif uchun o'z vaqtida to'lov qilishga majbur.\n3. Supplio xizmatni barqaror taqdim etish uchun zarur texnik ishlarni amalga oshirishi mumkin.\n4. Tomonlardan biri majburiyatlarni buzsa, xizmat vaqtincha to'xtatilishi yoki bekor qilinishi mumkin.\n5. Nizolar amaldagi qonunchilik va tomonlar kelishuvi asosida hal etiladi.",
-        contractEn:
-          "1. This agreement defines the service relationship between Supplio and the customer.\n2. The customer must pay for the selected plan on time.\n3. Supplio may perform technical work needed to keep the service stable.\n4. The service may be suspended or terminated if either party breaches its obligations.\n5. Disputes are resolved under applicable law and mutual agreement.",
       },
     });
   }
@@ -61,10 +57,6 @@ export class SuperAdminService {
       "privacyRu",
       "privacyEn",
       "privacyUzCyr",
-      "contractUz",
-      "contractRu",
-      "contractEn",
-      "contractUzCyr",
     ]);
 
     const filteredData = Object.fromEntries(

@@ -282,9 +282,19 @@ export class OrdersService {
     });
     if (!prev) throw new BadRequestException("Order not found");
 
+    const orderData: Record<string, unknown> = { status: status as any };
+    const orderFields =
+      ((this.prisma as any)?._runtimeDataModel?.models?.Order?.fields as
+        | Array<{ name: string }>
+        | undefined) ?? [];
+    const hasSubStatus = orderFields.some((f) => f.name === "subStatus");
+    if (hasSubStatus && typeof subStatus === "string") {
+      orderData.subStatus = subStatus;
+    }
+
     const order = await this.prisma.order.update({
       where: { id, companyId },
-      data: { status: status as any, subStatus },
+      data: orderData as any,
     });
 
     // Notify dealer via Telegram (fire-and-forget)

@@ -17,11 +17,11 @@ export declare class OrdersService {
         }[];
     }): Promise<{
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;
@@ -48,11 +48,11 @@ export declare class OrdersService {
             phone: string;
         };
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;
@@ -74,11 +74,11 @@ export declare class OrdersService {
             name: string;
         };
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;
@@ -93,11 +93,11 @@ export declare class OrdersService {
         roleType?: string;
     }): Promise<{
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;
@@ -124,11 +124,11 @@ export declare class OrdersService {
             phone: string;
         };
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;

@@ -227,9 +227,15 @@ let OrdersService = class OrdersService {
         });
         if (!prev)
             throw new common_1.BadRequestException("Order not found");
+        const orderData = { status: status };
+        const orderFields = this.prisma?._runtimeDataModel?.models?.Order?.fields ?? [];
+        const hasSubStatus = orderFields.some((f) => f.name === "subStatus");
+        if (hasSubStatus && typeof subStatus === "string") {
+            orderData.subStatus = subStatus;
+        }
         const order = await this.prisma.order.update({
             where: { id, companyId },
-            data: { status: status, subStatus },
+            data: orderData,
         });
         this.telegramService
             .sendOrderStatusUpdate(companyId, id, status, order.dealerId, subStatus)

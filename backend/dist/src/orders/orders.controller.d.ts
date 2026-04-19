@@ -15,11 +15,11 @@ export declare class OrdersController {
     constructor(ordersService: OrdersService);
     create(req: AuthenticatedRequest, body: any): Promise<{
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;
@@ -46,11 +46,11 @@ export declare class OrdersController {
             phone: string;
         };
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;
@@ -72,11 +72,11 @@ export declare class OrdersController {
             name: string;
         };
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;
@@ -102,11 +102,11 @@ export declare class OrdersController {
             phone: string;
         };
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;
@@ -120,11 +120,11 @@ export declare class OrdersController {
         subStatus?: string;
     }): Promise<{
         id: string;
-        companyId: string;
+        updatedAt: Date;
         createdAt: Date;
         deletedAt: Date | null;
-        updatedAt: Date;
         deletedBy: string | null;
+        companyId: string;
         branchId: string;
         totalAmount: number;
         totalCost: number;
