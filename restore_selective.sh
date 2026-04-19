@@ -28,9 +28,9 @@ log "Faylni tekshiryapman..."
 
 # 2. Production .env faylidan oxiri o'qish
 if [ -f "backend/.env.production" ]; then
-    DATABASE_URL=$(grep "^DATABASE_URL=" backend/.env.production | cut -d'=' -f2 | sed 's/"//g')
+    DATABASE_URL=$(grep "^DATABASE_URL=" backend/.env.production | cut -d'=' -f2- | sed 's/^"//; s/"$//')
 elif [ -f "backend/.env" ]; then
-    DATABASE_URL=$(grep "^DATABASE_URL=" backend/.env | cut -d'=' -f2 | sed 's/"//g')
+    DATABASE_URL=$(grep "^DATABASE_URL=" backend/.env | cut -d'=' -f2- | sed 's/^"//; s/"$//')
 fi
 
 if [ -z "$DATABASE_URL" ]; then
@@ -86,7 +86,11 @@ unset PGPASSWORD
 # 6. Verification
 log "Tekshiryapman..."
 TABLE_COUNT=$(psql -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" -d "$DB_NAME" \
-  --no-password -t -c "SELECT count(*) FROM pg_tables WHERE schemaname='public';" 2>/dev/null || echo "0")
+    --no-password -At -c "SELECT count(*) FROM information_schema.tables WHERE table_schema='public';" 2>/dev/null)
+
+if [ -z "$TABLE_COUNT" ]; then
+        TABLE_COUNT="0"
+fi
 
 ok "Jami tablolar: $TABLE_COUNT"
 
@@ -96,5 +100,5 @@ echo " ✓ TAYYOQ! Terms va boshqa datalar yangilandi"
 echo " ✓ Tarifflar saqlanib qoldi"
 echo ""
 echo " Endi backend'ni qayta ishlat:"
-echo "   npm run start:prod"
+echo "   cd backend && npm run start:prod"
 echo "=========================================================="

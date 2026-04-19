@@ -7,6 +7,7 @@
 BOLD="\033[1m"
 GREEN="\033[0;32m"
 YELLOW="\033[0;33m"
+RED="\033[0;31m"
 CYAN="\033[0;36m"
 RESET="\033[0m"
 
@@ -15,7 +16,19 @@ ok()   { echo -e "${GREEN}[OK]${RESET}    $1"; }
 warn() { echo -e "${YELLOW}[WARN]${RESET}  $1"; }
 
 # 1. Local DB ma'lumotlari
-DB_URL="postgresql://postgres:2007@127.0.0.1:5432/supplio_main"
+# .env dagi DATABASE_URL bo'lsa o'shani olamiz, bo'lmasa fallback URL ishlatamiz.
+if [ -f "backend/.env" ]; then
+    DB_URL=$(grep "^DATABASE_URL=" backend/.env | cut -d'=' -f2- | sed 's/^"//; s/"$//')
+elif [ -f "backend/.env.production" ]; then
+    DB_URL=$(grep "^DATABASE_URL=" backend/.env.production | cut -d'=' -f2- | sed 's/^"//; s/"$//')
+fi
+
+if [ -z "$DB_URL" ]; then
+    DB_URL="postgresql://postgres:2007@127.0.0.1:5432/supplio_main"
+fi
+
+# Prisma URL dagi query parametrlar (masalan ?schema=public) pg_dump uchun muammo beradi.
+DB_URL_CLEAN="${DB_URL%%\?*}"
 BACKUP_FILE="db_backup_selective.sql"
 
 log "Selektiv ma'lumotlar bazasi barkarorlanmoqda (tarifflar ISTISNO)..."
@@ -52,7 +65,7 @@ pg_dump \
   --exclude-table-data=notifications \
   --exclude-table-data=analytics \
   --exclude-table-data=dealer_activity \
-  -d "$DB_URL" > "$BACKUP_FILE"
+    -d "$DB_URL_CLEAN" > "$BACKUP_FILE"
 
 if [ $? -eq 0 ]; then
     ok "Selektiv dump yaratildi: $BACKUP_FILE"
