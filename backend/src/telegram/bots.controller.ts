@@ -166,6 +166,12 @@ export class BotsController {
     return this.telegramService.adminUpdateBot(id, body);
   }
 
+  @Delete("admin/bots/all")
+  @Roles("SUPER_ADMIN")
+  async adminDeleteAllBots() {
+    return this.telegramService.adminDeleteAllBots();
+  }
+
   @Delete("admin/bots/:id")
   @Roles("SUPER_ADMIN")
   async adminHardDeleteBot(@Param("id") id: string) {

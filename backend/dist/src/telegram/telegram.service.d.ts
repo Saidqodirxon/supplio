@@ -123,18 +123,7 @@ export declare class TelegramService implements OnModuleInit {
         webhookUrl: string | null;
     }>;
     removeBot(id: string, companyId: string): Promise<{
-        id: string;
-        companyId: string;
-        token: string;
-        username: string | null;
-        isActive: boolean;
-        hasWebApp: boolean;
-        watermark: boolean;
-        createdAt: Date;
-        deletedAt: Date | null;
-        botName: string | null;
-        description: string | null;
-        webhookUrl: string | null;
+        success: boolean;
     }>;
     getAllBotsAdmin(): Promise<{
         status: "connected" | "stopped" | "not_found";
@@ -188,5 +177,8 @@ export declare class TelegramService implements OnModuleInit {
         webhookUrl: string | null;
     }>;
     notifyDealerApprovalResult(companyId: string, dealerId: string, approved: boolean): Promise<void>;
+    adminDeleteAllBots(): Promise<{
+        deleted: number;
+    }>;
     stopAll(): Promise<void>;
 }

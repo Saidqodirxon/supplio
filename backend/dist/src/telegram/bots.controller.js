@@ -90,6 +90,9 @@ let BotsController = class BotsController {
     async adminUpdateBot(id, body) {
         return this.telegramService.adminUpdateBot(id, body);
     }
+    async adminDeleteAllBots() {
+        return this.telegramService.adminDeleteAllBots();
+    }
     async adminHardDeleteBot(id) {
         return this.telegramService.adminHardDeleteBot(id);
     }
@@ -229,6 +232,13 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], BotsController.prototype, "adminUpdateBot", null);
+__decorate([
+    (0, common_1.Delete)("admin/bots/all"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], BotsController.prototype, "adminDeleteAllBots", null);
 __decorate([
     (0, common_1.Delete)("admin/bots/:id"),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN"),

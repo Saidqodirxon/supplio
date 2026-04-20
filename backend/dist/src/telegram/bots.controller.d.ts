@@ -76,18 +76,7 @@ export declare class BotsController {
         webhookUrl: string | null;
     }>;
     removeBot(req: any, id: string): Promise<{
-        id: string;
-        companyId: string;
-        token: string;
-        username: string | null;
-        isActive: boolean;
-        hasWebApp: boolean;
-        watermark: boolean;
-        createdAt: Date;
-        deletedAt: Date | null;
-        botName: string | null;
-        description: string | null;
-        webhookUrl: string | null;
+        success: boolean;
     }>;
     broadcast(req: any, body: {
         message: string;
@@ -176,6 +165,9 @@ export declare class BotsController {
         botName: string | null;
         description: string | null;
         webhookUrl: string | null;
+    }>;
+    adminDeleteAllBots(): Promise<{
+        deleted: number;
     }>;
     adminHardDeleteBot(id: string): Promise<{
         success: boolean;

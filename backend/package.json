@@ -19,7 +19,9 @@
     "seed:landing": "ts-node scripts/seed-landing.ts",
     "tariffs:export": "ts-node scripts/export-tariffs.ts",
     "tariffs:import": "ts-node scripts/import-tariffs.ts",
-    "tariffs:fix-missing": "ts-node scripts/fix-missing-plan-users.ts"
+    "tariffs:fix-missing": "ts-node scripts/fix-missing-plan-users.ts",
+    "bots:clear": "ts-node scripts/clear-bots.ts",
+    "bots:clear:dry": "ts-node scripts/clear-bots.ts --dry-run"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

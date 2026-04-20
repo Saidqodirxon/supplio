@@ -58,7 +58,8 @@
       "Bash(node_modules/.bin/nest build:*)",
       "Bash(2>&1)",
       "Bash(find e:/projects/realcoder/supplio/backend/src -name \"tenant.guard.ts\" -exec cat {} \\\\;)",
-      "Bash(xargs cat *)"
+      "Bash(xargs cat *)",
+      "Bash(awk -F: '$2>4300 && $2<4920')"
     ]
   }
 }

@@ -1,6 +1,6 @@
 -- Supplio Company Export
 -- Company: Supplio Demo
--- Exported: 2026-04-18T20:00:05.619Z
+-- Exported: 2026-04-20T20:00:03.283Z
 -- ID: 49e18d1f-089d-482a-81c8-b11f0c8a067a
 
 -- Branch (1 rows)

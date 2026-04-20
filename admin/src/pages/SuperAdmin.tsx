@@ -60,6 +60,7 @@ import { uz, ru, enUS, tr } from "date-fns/locale";
 import type { Locale } from "date-fns";
 import { formatPhoneNumber, unformatPhoneNumber } from "../utils/formatters";
 import ImageUploader from "../components/ImageUploader";
+import BotsTab from "./SuperAdmin/components/BotsTab";
 
 const BACKEND = BACKEND_BASE_URL;
 const LANDING_PREVIEW_URL =
@@ -124,193 +125,20 @@ const LEAD_STATUS_COLORS: Record<string, string> = {
     "bg-slate-200 dark:bg-white/5 text-slate-500 border-slate-200 dark:border-white/10",
 };
 
-interface Lead {
-  id: string;
-  fullName: string;
-  phone: string;
-  info?: string;
-  status: string;
-  createdAt: string;
-  updatedAt?: string;
-}
-
-interface NewsItem {
-  id: string;
-  titleUz: string;
-  titleRu: string;
-  titleEn: string;
-  titleTr?: string;
-  titleUzCyr?: string;
-  excerptUz?: string;
-  excerptRu?: string;
-  excerptEn?: string;
-  excerptTr?: string;
-  excerptUzCyr?: string;
-  contentUz: string;
-  contentRu: string;
-  contentEn: string;
-  contentTr?: string;
-  contentUzCyr?: string;
-  slugUz: string;
-  slugRu: string;
-  slugEn: string;
-  slugTr?: string;
-  slugUzCyr?: string;
-  image?: string;
-  viewCount?: number;
-  isPublished: boolean;
-  createdAt: string;
-}
-
-interface TariffPlan {
-  id: string;
-  planKey: string;
-  order: number;
-  nameUz: string;
-  nameRu: string;
-  nameEn: string;
-  nameTr?: string;
-  nameUzCyr?: string;
-  price: string;
-  priceMonthly: string;
-  priceYearly: string;
-  isActive: boolean;
-  isPopular: boolean;
-  featuresUz: string[];
-  featuresRu: string[];
-  featuresEn: string[];
-  featuresTr?: string[];
-  featuresUzCyr?: string[];
-  maxBranches: number;
-  maxUsers: number;
-  maxCustomBots: number;
-  maxDealers: number;
-  maxProducts: number;
-  allowCustomBot: boolean;
-  allowWebStore: boolean;
-  allowAnalytics: boolean;
-  allowNotifications: boolean;
-  allowMultiCompany: boolean;
-  allowBulkImport: boolean;
-  trialDays: number;
-}
-
-interface Testimonial {
-  id: string;
-  name: string;
-  company?: string;
-  roleTitle?: string;
-  contentUz: string;
-  contentRu: string;
-  contentEn: string;
-  contentTr?: string;
-  rating: number;
-  isActive: boolean;
-  order: number;
-  createdAt: string;
-}
-
-interface GlobalSettings {
-  telegram?: string;
-  defaultTrialDays?: number;
-  maintenanceMode?: boolean;
-  superAdminPhone?: string;
-  newsEnabled?: boolean;
-  termsUz?: string;
-  termsRu?: string;
-  termsEn?: string;
-  termsUzCyr?: string;
-  privacyUz?: string;
-  privacyRu?: string;
-  privacyEn?: string;
-  privacyUzCyr?: string;
-  contractUz?: string;
-  contractRu?: string;
-  contractEn?: string;
-  contractUzCyr?: string;
-}
-
-interface LandingContent {
-  heroTitleUz: string;
-  heroTitleRu: string;
-  heroTitleEn: string;
-  heroTitleTr: string;
-  heroSubtitleUz: string;
-  heroSubtitleRu: string;
-  heroSubtitleEn: string;
-  heroSubtitleTr: string;
-  heroBadgeUz: string;
-  heroBadgeRu: string;
-  heroBadgeEn: string;
-  heroBadgeTr: string;
-  contactPhone: string;
-  contactEmail: string;
-  contactAddress: string;
-  contactAddressUrl: string;
-  socialTelegram: string;
-  socialInstagram: string;
-  socialLinkedin: string;
-  socialTwitter: string;
-  supportTelegramUsername: string;
-  footerDescUz: string;
-  footerDescRu: string;
-  footerDescEn: string;
-  footerDescTr: string;
-  heroGlobalBannerUz?: string;
-  heroGlobalBannerRu?: string;
-  heroGlobalBannerEn?: string;
-  heroGlobalBannerTr?: string;
-}
-
-interface SupportMessage {
-  id: string;
-  ticketId: string;
-  senderId: string | null;
-  senderType: "SUPER_ADMIN" | "DISTRIBUTOR";
-  message: string;
-  imageUrl?: string;
-  createdAt: string;
-}
-
-interface SupportTicket {
-  id: string;
-  companyId: string;
-  subject: string;
-  message: string;
-  status: "OPEN" | "IN_PROGRESS" | "CLOSED";
-  lastReplyAt: string;
-  createdAt: string;
-  company?: { name: string };
-  messages: SupportMessage[];
-}
-
-interface BackupItem {
-  name: string;
-  size: number;
-  createdAt: string;
-}
-
-interface Distributor {
-  id: string;
-  name: string;
-  slug: string;
-  subscriptionPlan: string;
-  subscriptionStatus: string;
-  trialExpiresAt: string;
-  createdAt: string;
-  users: { id: string; phone: string; fullName?: string; isActive: boolean }[];
-  _count: { dealers: number; orders: number; users: number };
-}
-
-interface DistributorForm {
-  companyName: string;
-  slug: string;
-  phone: string;
-  fullName: string;
-  password: string;
-  subscriptionPlan: string;
-  trialDays: number;
-}
+type Lead = any;
+type NewsItem = any;
+type TariffPlan = any;
+type Testimonial = any;
+type GlobalSettings = any;
+type LandingContent = any;
+type SupportMessage = any;
+type SupportTicket = any;
+type BackupItem = any;
+type Distributor = any;
+type DistributorForm = any;
+type ActivityLog = any;
+type OverviewSummary = any;
+type ServerMetric = any;
 
 const emptyDistForm: DistributorForm = {
   companyName: "",
@@ -322,34 +150,6 @@ const emptyDistForm: DistributorForm = {
   trialDays: 14,
 };
 
-interface ActivityLog {
-  id: string;
-  action: string;
-  resource?: string;
-  metadata?: Record<string, unknown> | null;
-  userId?: string;
-  ip?: string | null;
-  createdAt: string;
-  user?: { phone: string; fullName?: string };
-}
-
-interface OverviewSummary {
-  totalCompanies: number;
-  totalLeads: number;
-  openTickets: number;
-  pendingUpgrades: number;
-  activeSubscriptions: number;
-  collectedPayments: number;
-  subscriptionRevenue: number;
-}
-
-interface ServerMetric {
-  cpuUsage: number;
-  ramUsage: number;
-  activeUsers: number;
-  timestamp: string;
-}
-
 const locales: Record<string, Locale> = { uz, ru, en: enUS, tr };
 
 function formatPlanMonthlyPrice(value: unknown): string {
@@ -359,7 +159,6 @@ function formatPlanMonthlyPrice(value: unknown): string {
 
   if (typeof value !== "string") return "0";
 
-  // Keep only digits and decimal separator, then normalize comma to dot.
   const normalized = value.replace(/[^\d.,-]/g, "").replace(/,/g, ".");
   const parsed = Number.parseFloat(normalized);
   return Number.isFinite(parsed) ? parsed.toLocaleString() : "0";
@@ -386,16 +185,15 @@ export default function SuperAdmin() {
 
   const [authorized, setAuthorized] = useState(false);
   const [rootPass, setRootPass] = useState("");
-
   const [loading, setLoading] = useState(false);
-  const [news, setNews] = useState<NewsItem[]>([]);
-  const [leads, setLeads] = useState<Lead[]>([]);
+  const [news, setNews] = useState<any[]>([]);
+  const [leads, setLeads] = useState<any[]>([]);
   const [settings, setSettings] = useState<GlobalSettings | null>(null);
-  const [backups, setBackups] = useState<BackupItem[]>([]);
-  const [activities, setActivities] = useState<ActivityLog[]>([]);
-  const [tariffs, setTariffs] = useState<TariffPlan[]>([]);
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [testimonialForm, setTestimonialForm] = useState<Partial<Testimonial>>({
+  const [backups, setBackups] = useState<any[]>([]);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [tariffs, setTariffs] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [testimonialForm, setTestimonialForm] = useState<any>({
     name: "",
     company: "",
     roleTitle: "",
@@ -407,30 +205,10 @@ export default function SuperAdmin() {
     isActive: true,
     order: 0,
   });
-  const [editingTestimonialId, setEditingTestimonialId] = useState<
-    string | null
-  >(null);
+  const [editingTestimonialId, setEditingTestimonialId] = useState<string | null>(null);
   const [showTestimonialForm, setShowTestimonialForm] = useState(false);
-
-  // Team members
-  const [teamMembers, setTeamMembers] = useState<
-    {
-      id: string;
-      name: string;
-      roleUz: string;
-      roleRu: string;
-      roleEn: string;
-      roleTr: string;
-      bioUz: string;
-      bioRu: string;
-      bioEn: string;
-      bioTr: string;
-      avatar?: string;
-      order: number;
-      isActive: boolean;
-    }[]
-  >([]);
-  const [teamForm, setTeamForm] = useState({
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [teamForm, setTeamForm] = useState<any>({
     name: "",
     roleUz: "",
     roleRu: "",
@@ -445,7 +223,7 @@ export default function SuperAdmin() {
   });
   const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
   const [showTeamForm, setShowTeamForm] = useState(false);
-  const [landingContent, setLandingContent] = useState<LandingContent>({
+  const [landingContent, setLandingContent] = useState<any>({
     heroTitleUz: "",
     heroTitleRu: "",
     heroTitleEn: "",
@@ -473,109 +251,41 @@ export default function SuperAdmin() {
     footerDescTr: "",
   });
   const [cmsLoading, setCmsLoading] = useState(false);
-
-  const [editorData, setEditorData] = useState({
-    model: "Company",
-    id: "",
-    field: "",
-    value: "",
-  });
-
-  const [metrics, setMetrics] = useState<ServerMetric[]>([]);
-  const [upgradeRequests, setUpgradeRequests] = useState<
-    Array<{
-      id: string;
-      companyId: string;
-      companyName: string;
-      currentPlan: string;
-      requestedPlan?: string;
-      ownerPhone: string;
-      ownerName?: string;
-      dealersCount: number;
-      usersCount: number;
-      branchesCount: number;
-      productsCount: number;
-      status: string;
-      note?: string;
-      createdAt: string;
-    }>
-  >([]);
-  const [supportTickets, setSupportTickets] = useState<SupportTicket[]>([]);
-  const [overviewSummary, setOverviewSummary] =
-    useState<OverviewSummary | null>(null);
+  const [editorData, setEditorData] = useState({ model: "Company", id: "", field: "", value: "" });
+  const [metrics, setMetrics] = useState<any[]>([]);
+  const [upgradeRequests, setUpgradeRequests] = useState<any[]>([]);
+  const [supportTickets, setSupportTickets] = useState<any[]>([]);
+  const [overviewSummary, setOverviewSummary] = useState<any | null>(null);
   const [activitiesPage, setActivitiesPage] = useState(1);
   const [activitiesTotal, setActivitiesTotal] = useState(0);
   const [leadsPage, setLeadsPage] = useState(1);
   const [leadsTotal, setLeadsTotal] = useState(0);
   const [ticketsPage, setTicketsPage] = useState(1);
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(
-    null
-  );
+  const [selectedTicket, setSelectedTicket] = useState<any | null>(null);
   const [replyMessage, setReplyMessage] = useState("");
-  const [replyImagePreview, setReplyImagePreview] = useState<string | null>(
-    null
-  );
+  const [replyImagePreview, setReplyImagePreview] = useState<string | null>(null);
   const [replyImageFile, setReplyImageFile] = useState<File | null>(null);
   const [sendingReply, setSendingReply] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [pendingAction, setPendingAction] = useState<
-    (() => Promise<void>) | null
-  >(null);
-
-  // Modals handle
+  const [pendingAction, setPendingAction] = useState<(() => Promise<void>) | null>(null);
   const [isNewsModalOpen, setIsNewsModalOpen] = useState(false);
   const [isTariffModalOpen, setIsTariffModalOpen] = useState(false);
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
-  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
-    useState(false);
-  const [editingItem, setEditingItem] = useState<
-    NewsItem | Lead | TariffPlan | null
-  >(null);
-  const [resetPasswordTarget, setResetPasswordTarget] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
+  const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<any | null>(null);
+  const [resetPasswordTarget, setResetPasswordTarget] = useState<any | null>(null);
   const [resetPasswordValue, setResetPasswordValue] = useState("");
-
-  const [adminBots, setAdminBots] = useState<
-    Array<{
-      id: string;
-      botName: string | null;
-      description?: string | null;
-      username: string | null;
-      isActive: boolean;
-      status: string;
-      createdAt: string;
-      company: { id: string; name: string; slug: string };
-    }>
-  >([]);
-  const [botActionLoading, setBotActionLoading] = useState<
-    Record<string, string>
-  >({});
-  const [botEditModal, setBotEditModal] = useState<{
-    id: string;
-    token: string;
-    botName: string;
-    description: string;
-    isActive: boolean;
-  } | null>(null);
+  const [adminBots, setAdminBots] = useState<any[]>([]);
+  const [botActionLoading, setBotActionLoading] = useState<Record<string, string>>({});
+  const [botEditModal, setBotEditModal] = useState<any | null>(null);
   const [botDeleteConfirm, setBotDeleteConfirm] = useState<string | null>(null);
-  const [botCreateModal, setBotCreateModal] = useState<{
-    companyId: string;
-    token: string;
-    botName: string;
-    description: string;
-  } | null>(null);
+  const [botCreateModal, setBotCreateModal] = useState<any | null>(null);
   const [botCreateLoading, setBotCreateLoading] = useState(false);
   const [botsReloadingAll, setBotsReloadingAll] = useState(false);
-
-  const [newsLangTab, setNewsLangTab] = useState<
-    "Uz" | "En" | "Ru" | "Tr" | "UzCyr"
-  >("Uz");
-
-  const [newsForm, setNewsForm] = useState<Partial<NewsItem>>({
+  const [newsLangTab, setNewsLangTab] = useState<"Uz" | "En" | "Ru" | "Tr" | "UzCyr">("Uz");
+  const [newsForm, setNewsForm] = useState<any>({
     titleUz: "",
     titleRu: "",
     titleEn: "",
@@ -599,8 +309,7 @@ export default function SuperAdmin() {
     slugTr: "",
     slugUzCyr: "",
   });
-
-  const [tariffForm, setTariffForm] = useState<Partial<TariffPlan>>({
+  const [tariffForm, setTariffForm] = useState<any>({
     planKey: "",
     nameUz: "",
     nameRu: "",
@@ -631,105 +340,23 @@ export default function SuperAdmin() {
     allowMultiCompany: false,
     allowBulkImport: false,
   });
-
-  const [leadForm, setLeadForm] = useState<Partial<Lead>>({
-    fullName: "",
-    phone: "",
-    info: "",
-    status: "NEW",
-  });
-  const [viewingLead, setViewingLead] = useState<Lead | null>(null);
-
-  // Distributors tab
-  const [distributors, setDistributors] = useState<Distributor[]>([]);
+  const [leadForm, setLeadForm] = useState<any>({ fullName: "", phone: "", info: "", status: "NEW" });
+  const [viewingLead, setViewingLead] = useState<any | null>(null);
+  const [distributors, setDistributors] = useState<any[]>([]);
   const [distSearch, setDistSearch] = useState("");
   const [isDistModalOpen, setIsDistModalOpen] = useState(false);
-  const [distForm, setDistForm] = useState<DistributorForm>(emptyDistForm);
+  const [distForm, setDistForm] = useState<any>(emptyDistForm);
   const [distSaving, setDistSaving] = useState(false);
-  const [subscriptionTarget, setSubscriptionTarget] =
-    useState<Distributor | null>(null);
+  const [subscriptionTarget, setSubscriptionTarget] = useState<any | null>(null);
   const [subscriptionExpiresAt, setSubscriptionExpiresAt] = useState("");
   const [subscriptionSaving, setSubscriptionSaving] = useState(false);
   const [overviewExporting, setOverviewExporting] = useState(false);
   const [exportingDistId, setExportingDistId] = useState<string | null>(null);
-
-  const refreshBackups = useCallback(async () => {
-    const res = await api.get("/super/backups");
-    setBackups(Array.isArray(res.data) ? res.data : (res.data?.items ?? []));
-  }, []);
-
-  const downloadBackup = useCallback(async (name: string) => {
-    const res = await api.get("/super/backups/download", {
-      params: { name },
-      responseType: "blob",
-    });
-    const contentDisposition = res.headers["content-disposition"] as
-      | string
-      | undefined;
-    const matchedName = contentDisposition?.match(
-      /filename="?([^"]+)"?$/i
-    )?.[1];
-    const fileName = matchedName ? decodeURIComponent(matchedName) : name;
-    const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(blobUrl);
-  }, []);
-
-  const downloadBlobFile = useCallback(
-    async (url: string, fileName: string, params?: Record<string, string>) => {
-      const res = await api.get(url, {
-        params,
-        responseType: "blob",
-      });
-      const contentDisposition = res.headers["content-disposition"] as
-        | string
-        | undefined;
-      const matchedName = contentDisposition?.match(
-        /filename="?([^"]+)"?$/i
-      )?.[1];
-      const finalName = matchedName
-        ? decodeURIComponent(matchedName)
-        : fileName;
-      const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
-      const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = finalName;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(blobUrl);
-    },
-    []
-  );
-
-  const openSubscriptionModal = useCallback((dist: Distributor) => {
-    const currentExpiry = dist.trialExpiresAt
-      ? new Date(dist.trialExpiresAt)
-      : new Date();
-    const defaultExpiry = new Date(
-      Math.max(currentExpiry.getTime(), Date.now())
-    );
-    defaultExpiry.setDate(defaultExpiry.getDate() + 30);
-    setSubscriptionTarget(dist);
-    setSubscriptionExpiresAt(defaultExpiry.toISOString().split("T")[0]);
-  }, []);
-
-  // Notify distributors tab
-  const [notifyForm, setNotifyForm] = useState({
-    title: "",
-    message: "",
-    type: "INFO",
-  });
+  const [notifyForm, setNotifyForm] = useState({ title: "", message: "", type: "INFO" });
   const [notifyAll, setNotifyAll] = useState(true);
   const [selectedDistIds, setSelectedDistIds] = useState<string[]>([]);
   const [notifySending, setNotifySending] = useState(false);
 
-  // Scroll lock — must be after all modal state declarations
   useScrollLock(
     isNewsModalOpen ||
       isTariffModalOpen ||
@@ -743,35 +370,15 @@ export default function SuperAdmin() {
   const getLeadStatusLabel = (status: string) => {
     switch (status) {
       case "NEW":
-        return language === "ru"
-          ? "Новый"
-          : language === "en"
-            ? "New"
-            : "Yangi";
+        return language === "ru" ? "Новый" : language === "en" ? "New" : "Yangi";
       case "CONTACTED":
-        return language === "ru"
-          ? "Связались"
-          : language === "en"
-            ? "Contacted"
-            : "Bog'lanildi";
+        return language === "ru" ? "Связались" : language === "en" ? "Contacted" : "Bog'lanildi";
       case "QUALIFIED":
-        return language === "ru"
-          ? "Квалифицирован"
-          : language === "en"
-            ? "Qualified"
-            : "Saralandi";
+        return language === "ru" ? "Квалифицирован" : language === "en" ? "Qualified" : "Saralandi";
       case "CONVERTED":
-        return language === "ru"
-          ? "Konvert qilingan"
-          : language === "en"
-            ? "Converted"
-            : "Mijozga aylandi";
+        return language === "ru" ? "Konvert qilingan" : language === "en" ? "Converted" : "Mijozga aylandi";
       case "REJECTED":
-        return language === "ru"
-          ? "Отклонён"
-          : language === "en"
-            ? "Rejected"
-            : "Rad etildi";
+        return language === "ru" ? "Отклонён" : language === "en" ? "Rejected" : "Rad etildi";
       default:
         return status;
     }
@@ -802,24 +409,12 @@ export default function SuperAdmin() {
   };
 
   const supportQuickReplies = [
-    {
-      label: "TG support",
-      text: `Telegram: ${landingContent.supportTelegramUsername || "@supplio_support"}`,
-    },
-    {
-      label: "Instagram",
-      text: `Instagram: ${landingContent.socialInstagram || "@supplio__app"}`,
-    },
-    {
-      label: "LinkedIn",
-      text: `LinkedIn: ${landingContent.socialLinkedin || "supplioapp"}`,
-    },
+    { label: "TG support", text: `Telegram: ${landingContent.supportTelegramUsername || "@supplio_support"}` },
+    { label: "Instagram", text: `Instagram: ${landingContent.socialInstagram || "@supplio__app"}` },
+    { label: "LinkedIn", text: `LinkedIn: ${landingContent.socialLinkedin || "supplioapp"}` },
   ];
 
-  const paginatedTickets = supportTickets.slice(
-    (ticketsPage - 1) * 10,
-    ticketsPage * 10
-  );
+  const paginatedTickets = supportTickets.slice((ticketsPage - 1) * 10, ticketsPage * 10);
   const ticketTotalPages = Math.max(1, Math.ceil(supportTickets.length / 10));
 
   const renderPagination = (
@@ -836,18 +431,8 @@ export default function SuperAdmin() {
 
     return (
       <div className="flex items-center justify-end gap-2 p-4">
-        <button
-          type="button"
-          onClick={() => onChange(Math.max(1, currentPage - 1))}
-          disabled={currentPage === 1}
-          className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-black disabled:opacity-40"
-        >
-          Prev
-        </button>
-        {Array.from(
-          { length: endPage - startPage + 1 },
-          (_, i) => startPage + i
-        ).map((page) => (
+        <button type="button" onClick={() => onChange(Math.max(1, currentPage - 1))} disabled={currentPage === 1} className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-black disabled:opacity-40">Prev</button>
+        {Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i).map((page) => (
           <button
             key={page}
             type="button"
@@ -862,14 +447,7 @@ export default function SuperAdmin() {
             {page}
           </button>
         ))}
-        <button
-          type="button"
-          onClick={() => onChange(Math.min(totalPages, currentPage + 1))}
-          disabled={currentPage === totalPages}
-          className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-black disabled:opacity-40"
-        >
-          Next
-        </button>
+        <button type="button" onClick={() => onChange(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages} className="px-3 py-2 rounded-xl border border-slate-200 dark:border-white/10 text-xs font-black disabled:opacity-40">Next</button>
       </div>
     );
   };
@@ -898,10 +476,7 @@ export default function SuperAdmin() {
 
       setSelectedTicket({
         ...selectedTicket,
-        messages: [
-          ...selectedTicket.messages,
-          { ...res.data, imageUrl: res.data?.imageUrl || imageUrl },
-        ],
+        messages: [...selectedTicket.messages, { ...res.data, imageUrl: res.data?.imageUrl || imageUrl }],
         status: "IN_PROGRESS",
       });
       setReplyMessage("");
@@ -915,6 +490,11 @@ export default function SuperAdmin() {
       setSendingReply(false);
     }
   };
+
+  const refreshBackups = useCallback(async () => {
+    const res = await api.get("/super/backups");
+    setBackups(Array.isArray(res.data) ? res.data : []);
+  }, []);
 
   const fetchData = useCallback(async () => {
     try {
@@ -4482,842 +4062,25 @@ export default function SuperAdmin() {
                 </div>
               )}
 
-              {activeTab === "bots" && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="space-y-1">
-                      <p className="text-sm text-slate-500 dark:text-slate-400 font-bold">
-                        {language === "ru"
-                          ? `Всего ботов: ${adminBots.length}`
-                          : language === "en"
-                            ? `Total bots: ${adminBots.length}`
-                            : `Jami botlar: ${adminBots.length}`}
-                      </p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 font-bold">
-                        {language === "ru"
-                          ? `Активные: ${adminBots.filter((b) => b.isActive).length} · Неактивные: ${adminBots.length - adminBots.filter((b) => b.isActive).length}`
-                          : language === "en"
-                            ? `Active: ${adminBots.filter((b) => b.isActive).length} · Inactive: ${adminBots.length - adminBots.filter((b) => b.isActive).length}`
-                            : `Faol: ${adminBots.filter((b) => b.isActive).length} · Faol emas: ${adminBots.length - adminBots.filter((b) => b.isActive).length}`}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          if (!distributors.length) {
-                            api
-                              .get("/super/distributors", {
-                                params: { page: 1, limit: 200 },
-                              })
-                              .then((res) => {
-                                setDistributors(
-                                  Array.isArray(res.data)
-                                    ? res.data
-                                    : (res.data?.items ?? [])
-                                );
-                              })
-                              .catch(() => {});
-                          }
-                          setBotCreateModal({
-                            companyId: "",
-                            token: "",
-                            botName: "",
-                            description: "",
-                          });
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        {language === "ru"
-                          ? "Добавить"
-                          : language === "en"
-                            ? "Add Bot"
-                            : "Bot qo'shish"}
-                      </button>
-                      <button
-                        disabled={botsReloadingAll}
-                        onClick={async () => {
-                          setBotsReloadingAll(true);
-                          try {
-                            await api.post("/telegram/admin/bots/reload-all");
-                            const res = await api.get("/telegram/admin/bots");
-                            setAdminBots(
-                              Array.isArray(res.data) ? res.data : []
-                            );
-                            toast.success(
-                              language === "ru"
-                                ? "Полный reload выполнен"
-                                : language === "en"
-                                  ? "Full reload completed"
-                                  : "To'liq obnovit bajarildi"
-                            );
-                          } catch {
-                            toast.error("Xato");
-                          } finally {
-                            setBotsReloadingAll(false);
-                          }
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-sky-50 dark:bg-sky-900/20 text-sky-600 rounded-xl hover:bg-sky-100 dark:hover:bg-sky-900/40 transition-all disabled:opacity-60"
-                      >
-                        {botsReloadingAll ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        ) : (
-                          <RotateCcw className="w-3.5 h-3.5" />
-                        )}
-                        {language === "ru"
-                          ? "Обновить (сброс)"
-                          : language === "en"
-                            ? "Refresh (Reset)"
-                            : "Obnovit (reset)"}
-                      </button>
-                    </div>
-                  </div>
-
-                  {adminBots.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-center bg-white dark:bg-white/5 rounded-2xl border border-slate-100 dark:border-white/5">
-                      <Bot className="w-12 h-12 text-slate-300 mb-4" />
-                      <p className="text-slate-500 font-bold">
-                        {language === "ru"
-                          ? "Нет подключённых ботов"
-                          : language === "en"
-                            ? "No bots connected"
-                            : "Ulangan bot yo'q"}
-                      </p>
-                    </div>
-                  ) : (
-                    adminBots.map((bot) => (
-                      <div
-                        key={bot.id}
-                        className="bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 rounded-2xl p-5"
-                      >
-                        <div className="flex items-center gap-4">
-                          <div
-                            className={clsx(
-                              "w-11 h-11 rounded-2xl flex items-center justify-center shrink-0",
-                              bot.isActive
-                                ? "bg-sky-50 dark:bg-sky-900/20 text-sky-600"
-                                : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                            )}
-                          >
-                            <Bot className="w-5 h-5" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-black text-sm text-slate-800 dark:text-white truncate">
-                                {bot.botName || bot.username || bot.id}
-                              </span>
-                              {bot.username && (
-                                <span className="text-[10px] font-bold text-slate-400">
-                                  @{bot.username}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 mt-1 flex-wrap">
-                              <span className="text-xs text-slate-500 dark:text-slate-400 font-bold">
-                                {bot.company.name}
-                              </span>
-                              <span className="text-slate-300">·</span>
-                              <span className="text-[10px] text-slate-400">
-                                {new Date(bot.createdAt).toLocaleDateString()}
-                              </span>
-                            </div>
-                            {bot.description && (
-                              <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400 line-clamp-2">
-                                {bot.description}
-                              </p>
-                            )}
-                          </div>
-                          <div className="shrink-0">
-                            {bot.status === "connected" ? (
-                              <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-xl">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                {language === "ru"
-                                  ? "Работает"
-                                  : language === "en"
-                                    ? "Connected"
-                                    : "Ulangan"}
-                              </span>
-                            ) : bot.status === "stopped" ? (
-                              <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-amber-600 bg-amber-50 dark:bg-amber-900/20 px-3 py-1.5 rounded-xl">
-                                <XCircle className="w-3.5 h-3.5" />
-                                {language === "ru"
-                                  ? "Остановлен"
-                                  : language === "en"
-                                    ? "Stopped"
-                                    : "To'xtatilgan"}
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-xl">
-                                <Circle className="w-3.5 h-3.5" />
-                                {language === "ru"
-                                  ? "Не найден"
-                                  : language === "en"
-                                    ? "Not Found"
-                                    : "Topilmadi"}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Action buttons */}
-                        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-white/5 flex-wrap">
-                          {/* Reload */}
-                          <button
-                            disabled={!!botActionLoading[bot.id]}
-                            onClick={async () => {
-                              setBotActionLoading((p) => ({
-                                ...p,
-                                [bot.id]: "reload",
-                              }));
-                              try {
-                                await api.post(
-                                  `/telegram/admin/bots/${bot.id}/reload`
-                                );
-                                const res = await api.get(
-                                  "/telegram/admin/bots"
-                                );
-                                setAdminBots(
-                                  Array.isArray(res.data) ? res.data : []
-                                );
-                                toast.success(
-                                  language === "ru"
-                                    ? "Перезапущен"
-                                    : language === "en"
-                                      ? "Reloaded"
-                                      : "Qayta ishga tushirildi"
-                                );
-                              } catch {
-                                toast.error("Xato");
-                              } finally {
-                                setBotActionLoading((p) => {
-                                  const n = { ...p };
-                                  delete n[bot.id];
-                                  return n;
-                                });
-                              }
-                            }}
-                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-sky-50 dark:bg-sky-900/20 text-sky-600 rounded-xl hover:bg-sky-100 dark:hover:bg-sky-900/40 transition-all disabled:opacity-50"
-                          >
-                            {botActionLoading[bot.id] === "reload" ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <RotateCcw className="w-3.5 h-3.5" />
-                            )}
-                            {language === "ru"
-                              ? "Перезапуск"
-                              : language === "en"
-                                ? "Reload"
-                                : "Reload"}
-                          </button>
-
-                          {/* Edit token */}
-                          <button
-                            disabled={!!botActionLoading[bot.id]}
-                            onClick={() =>
-                              setBotEditModal({
-                                id: bot.id,
-                                token: "",
-                                botName: bot.botName || "",
-                                description: bot.description || "",
-                                isActive: !!bot.isActive,
-                              })
-                            }
-                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-violet-50 dark:bg-violet-900/20 text-violet-600 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-all disabled:opacity-50"
-                          >
-                            <KeyRound className="w-3.5 h-3.5" />
-                            {language === "ru"
-                              ? "Глубокое редактирование"
-                              : language === "en"
-                                ? "Deep Edit"
-                                : "Chuqur edit"}
-                          </button>
-
-                          {/* Activate / Deactivate */}
-                          <button
-                            disabled={!!botActionLoading[bot.id]}
-                            onClick={async () => {
-                              setBotActionLoading((p) => ({
-                                ...p,
-                                [bot.id]: "toggle",
-                              }));
-                              try {
-                                await api.patch(
-                                  `/telegram/admin/bots/${bot.id}`,
-                                  { isActive: !bot.isActive }
-                                );
-                                const res = await api.get(
-                                  "/telegram/admin/bots"
-                                );
-                                setAdminBots(
-                                  Array.isArray(res.data) ? res.data : []
-                                );
-                                toast.success(
-                                  bot.isActive
-                                    ? language === "ru"
-                                      ? "Деактивирован"
-                                      : language === "en"
-                                        ? "Deactivated"
-                                        : "O'chirildi"
-                                    : language === "ru"
-                                      ? "Активирован"
-                                      : language === "en"
-                                        ? "Activated"
-                                        : "Yoqildi"
-                                );
-                              } catch {
-                                toast.error("Xato");
-                              } finally {
-                                setBotActionLoading((p) => {
-                                  const n = { ...p };
-                                  delete n[bot.id];
-                                  return n;
-                                });
-                              }
-                            }}
-                            className={clsx(
-                              "flex items-center gap-1.5 px-3 py-2 text-xs font-bold rounded-xl transition-all disabled:opacity-50",
-                              bot.isActive
-                                ? "bg-amber-50 dark:bg-amber-900/20 text-amber-600 hover:bg-amber-100 dark:hover:bg-amber-900/40"
-                                : "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
-                            )}
-                          >
-                            {botActionLoading[bot.id] === "toggle" ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <Power className="w-3.5 h-3.5" />
-                            )}
-                            {bot.isActive
-                              ? language === "ru"
-                                ? "Деактивировать"
-                                : language === "en"
-                                  ? "Deactivate"
-                                  : "O'chirish"
-                              : language === "ru"
-                                ? "Активировать"
-                                : language === "en"
-                                  ? "Activate"
-                                  : "Yoqish"}
-                          </button>
-
-                          {/* Hard delete */}
-                          <button
-                            disabled={!!botActionLoading[bot.id]}
-                            onClick={() => setBotDeleteConfirm(bot.id)}
-                            className="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-rose-50 dark:bg-rose-900/20 text-rose-600 rounded-xl hover:bg-rose-100 dark:hover:bg-rose-900/40 transition-all disabled:opacity-50 ml-auto"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            {language === "ru"
-                              ? "Удалить"
-                              : language === "en"
-                                ? "Delete"
-                                : "O'chirish"}
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-
-                  {/* Create bot modal */}
-                  <AnimatePresence>
-                    {botCreateModal && (
-                      <>
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          onClick={() =>
-                            !botCreateLoading && setBotCreateModal(null)
-                          }
-                          className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm"
-                        />
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                          className="fixed inset-0 z-[101] flex items-center justify-center p-4"
-                        >
-                          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6 w-full max-w-lg">
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center text-emerald-600">
-                                <Bot className="w-5 h-5" />
-                              </div>
-                              <h3 className="font-black text-slate-800 dark:text-white">
-                                {language === "ru"
-                                  ? "Добавить Telegram-бота"
-                                  : language === "en"
-                                    ? "Add Telegram Bot"
-                                    : "Telegram bot qo'shish"}
-                              </h3>
-                            </div>
-
-                            <div className="space-y-3">
-                              <div>
-                                <label className="block text-xs font-black text-slate-500 mb-1.5 uppercase tracking-wider">
-                                  {language === "ru"
-                                    ? "Дистрибьютор"
-                                    : language === "en"
-                                      ? "Distributor"
-                                      : "Distributor"}
-                                </label>
-                                <select
-                                  value={botCreateModal.companyId}
-                                  onChange={(e) =>
-                                    setBotCreateModal((p) =>
-                                      p
-                                        ? { ...p, companyId: e.target.value }
-                                        : null
-                                    )
-                                  }
-                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                >
-                                  <option value="">
-                                    {language === "ru"
-                                      ? "Выберите компанию"
-                                      : language === "en"
-                                        ? "Select company"
-                                        : "Kompaniyani tanlang"}
-                                  </option>
-                                  {distributors.map((d) => (
-                                    <option key={d.id} value={d.id}>
-                                      {d.name} ({d.slug})
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-
-                              <div>
-                                <label className="block text-xs font-black text-slate-500 mb-1.5 uppercase tracking-wider">
-                                  {language === "ru"
-                                    ? "Токен бота"
-                                    : language === "en"
-                                      ? "Bot token"
-                                      : "Bot tokeni"}
-                                </label>
-                                <input
-                                  type="text"
-                                  value={botCreateModal.token}
-                                  onChange={(e) =>
-                                    setBotCreateModal((p) =>
-                                      p ? { ...p, token: e.target.value } : null
-                                    )
-                                  }
-                                  placeholder="1234567890:AA..."
-                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                />
-                              </div>
-
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <input
-                                  type="text"
-                                  value={botCreateModal.botName}
-                                  onChange={(e) =>
-                                    setBotCreateModal((p) =>
-                                      p
-                                        ? { ...p, botName: e.target.value }
-                                        : null
-                                    )
-                                  }
-                                  placeholder={
-                                    language === "ru"
-                                      ? "Имя бота (необязательно)"
-                                      : language === "en"
-                                        ? "Bot name (optional)"
-                                        : "Bot nomi (ixtiyoriy)"
-                                  }
-                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                />
-                                <input
-                                  type="text"
-                                  value={botCreateModal.description}
-                                  onChange={(e) =>
-                                    setBotCreateModal((p) =>
-                                      p
-                                        ? { ...p, description: e.target.value }
-                                        : null
-                                    )
-                                  }
-                                  placeholder={
-                                    language === "ru"
-                                      ? "Описание (необязательно)"
-                                      : language === "en"
-                                        ? "Description (optional)"
-                                        : "Tavsif (ixtiyoriy)"
-                                  }
-                                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="flex gap-3 mt-6">
-                              <button
-                                disabled={botCreateLoading}
-                                onClick={() => setBotCreateModal(null)}
-                                className="flex-1 px-4 py-2.5 text-sm font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all disabled:opacity-50"
-                              >
-                                {language === "ru"
-                                  ? "Отмена"
-                                  : language === "en"
-                                    ? "Cancel"
-                                    : "Bekor"}
-                              </button>
-                              <button
-                                disabled={
-                                  botCreateLoading ||
-                                  !botCreateModal.companyId ||
-                                  !botCreateModal.token.trim()
-                                }
-                                onClick={async () => {
-                                  setBotCreateLoading(true);
-                                  try {
-                                    await api.post("/telegram/admin/bots", {
-                                      companyId: botCreateModal.companyId,
-                                      token: botCreateModal.token.trim(),
-                                      botName:
-                                        botCreateModal.botName.trim() ||
-                                        undefined,
-                                      description:
-                                        botCreateModal.description.trim() ||
-                                        undefined,
-                                    });
-                                    const res = await api.get(
-                                      "/telegram/admin/bots"
-                                    );
-                                    setAdminBots(
-                                      Array.isArray(res.data) ? res.data : []
-                                    );
-                                    setBotCreateModal(null);
-                                    toast.success(
-                                      language === "ru"
-                                        ? "Бот добавлен"
-                                        : language === "en"
-                                          ? "Bot added"
-                                          : "Bot qo'shildi"
-                                    );
-                                  } catch (e: any) {
-                                    const message =
-                                      e?.response?.data?.message ||
-                                      e?.message ||
-                                      (language === "ru"
-                                        ? "Ошибка при добавлении бота"
-                                        : language === "en"
-                                          ? "Failed to add bot"
-                                          : "Bot qo'shishda xatolik");
-                                    toast.error(
-                                      Array.isArray(message)
-                                        ? message[0]
-                                        : message
-                                    );
-                                  } finally {
-                                    setBotCreateLoading(false);
-                                  }
-                                }}
-                                className="flex-1 px-4 py-2.5 text-sm font-bold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition-all disabled:opacity-50 inline-flex items-center justify-center"
-                              >
-                                {botCreateLoading ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : language === "ru" ? (
-                                  "Добавить"
-                                ) : language === "en" ? (
-                                  "Add"
-                                ) : (
-                                  "Qo'shish"
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      </>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Edit token modal */}
-                  <AnimatePresence>
-                    {botEditModal && (
-                      <>
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          onClick={() => setBotEditModal(null)}
-                          className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm"
-                        />
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                          className="fixed inset-0 z-[101] flex items-center justify-center p-4"
-                        >
-                          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6 w-full max-w-md">
-                            <div className="flex items-center gap-3 mb-4">
-                              <div className="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center text-violet-600">
-                                <KeyRound className="w-5 h-5" />
-                              </div>
-                              <h3 className="font-black text-slate-800 dark:text-white">
-                                {language === "ru"
-                                  ? "Глубокое обновление бота"
-                                  : language === "en"
-                                    ? "Deep Bot Update"
-                                    : "Botni chuqur yangilash"}
-                              </h3>
-                            </div>
-                            <div className="space-y-3 mb-4">
-                              <input
-                                type="text"
-                                value={botEditModal.botName}
-                                onChange={(e) =>
-                                  setBotEditModal((p) =>
-                                    p ? { ...p, botName: e.target.value } : null
-                                  )
-                                }
-                                placeholder={
-                                  language === "ru"
-                                    ? "Название бота"
-                                    : language === "en"
-                                      ? "Bot name"
-                                      : "Bot nomi"
-                                }
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
-                              />
-                              <input
-                                type="text"
-                                value={botEditModal.description}
-                                onChange={(e) =>
-                                  setBotEditModal((p) =>
-                                    p
-                                      ? { ...p, description: e.target.value }
-                                      : null
-                                  )
-                                }
-                                placeholder={
-                                  language === "ru"
-                                    ? "Описание"
-                                    : language === "en"
-                                      ? "Description"
-                                      : "Tavsif"
-                                }
-                                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500"
-                              />
-                              <label className="flex items-center justify-between px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm font-bold text-slate-700 dark:text-slate-200">
-                                <span>
-                                  {language === "ru"
-                                    ? "Активный"
-                                    : language === "en"
-                                      ? "Active"
-                                      : "Faol"}
-                                </span>
-                                <input
-                                  type="checkbox"
-                                  checked={botEditModal.isActive}
-                                  onChange={(e) =>
-                                    setBotEditModal((p) =>
-                                      p
-                                        ? { ...p, isActive: e.target.checked }
-                                        : null
-                                    )
-                                  }
-                                  className="w-4 h-4"
-                                />
-                              </label>
-                            </div>
-                            <input
-                              type="text"
-                              value={botEditModal.token}
-                              onChange={(e) =>
-                                setBotEditModal((p) =>
-                                  p ? { ...p, token: e.target.value } : null
-                                )
-                              }
-                              placeholder={
-                                language === "ru"
-                                  ? "Новый токен (опционально)"
-                                  : language === "en"
-                                    ? "New bot token (optional)"
-                                    : "Yangi bot token (ixtiyoriy)"
-                              }
-                              className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 mb-4"
-                            />
-                            <div className="flex gap-3">
-                              <button
-                                onClick={() => setBotEditModal(null)}
-                                className="flex-1 px-4 py-2.5 text-sm font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
-                              >
-                                {language === "ru"
-                                  ? "Отмена"
-                                  : language === "en"
-                                    ? "Cancel"
-                                    : "Bekor"}
-                              </button>
-                              <button
-                                disabled={!!botActionLoading[botEditModal.id]}
-                                onClick={async () => {
-                                  const {
-                                    id,
-                                    token,
-                                    botName,
-                                    description,
-                                    isActive,
-                                  } = botEditModal;
-                                  setBotActionLoading((p) => ({
-                                    ...p,
-                                    [id]: "token",
-                                  }));
-                                  try {
-                                    const payload: Record<string, unknown> = {
-                                      botName: botName.trim(),
-                                      description: description.trim(),
-                                      isActive,
-                                    };
-                                    if (token.trim()) {
-                                      payload.token = token.trim();
-                                    }
-                                    await api.patch(
-                                      `/telegram/admin/bots/${id}`,
-                                      payload
-                                    );
-                                    const res = await api.get(
-                                      "/telegram/admin/bots"
-                                    );
-                                    setAdminBots(
-                                      Array.isArray(res.data) ? res.data : []
-                                    );
-                                    setBotEditModal(null);
-                                    toast.success(
-                                      language === "ru"
-                                        ? "Токен обновлён"
-                                        : language === "en"
-                                          ? "Token updated"
-                                          : "Token yangilandi"
-                                    );
-                                  } catch {
-                                    toast.error("Xato");
-                                  } finally {
-                                    setBotActionLoading((p) => {
-                                      const n = { ...p };
-                                      delete n[id];
-                                      return n;
-                                    });
-                                  }
-                                }}
-                                className="flex-1 px-4 py-2.5 text-sm font-bold bg-violet-600 text-white rounded-xl hover:bg-violet-700 transition-all disabled:opacity-50"
-                              >
-                                {botActionLoading[botEditModal.id] ===
-                                "token" ? (
-                                  <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-                                ) : language === "ru" ? (
-                                  "Сохранить"
-                                ) : language === "en" ? (
-                                  "Save"
-                                ) : (
-                                  "Saqlash"
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      </>
-                    )}
-                  </AnimatePresence>
-
-                  {/* Hard delete confirmation modal */}
-                  <AnimatePresence>
-                    {botDeleteConfirm && (
-                      <>
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          onClick={() => setBotDeleteConfirm(null)}
-                          className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm"
-                        />
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                          className="fixed inset-0 z-[101] flex items-center justify-center p-4"
-                        >
-                          <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
-                            <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center text-rose-600 mx-auto mb-4">
-                              <Trash2 className="w-6 h-6" />
-                            </div>
-                            <h3 className="font-black text-slate-800 dark:text-white mb-2">
-                              {language === "ru"
-                                ? "Удалить бота?"
-                                : language === "en"
-                                  ? "Delete bot?"
-                                  : "Botni o'chirish?"}
-                            </h3>
-                            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
-                              {language === "ru"
-                                ? "Это действие необратимо. Бот будет остановлен и удалён из базы данных."
-                                : language === "en"
-                                  ? "This action is irreversible. The bot will be stopped and permanently deleted."
-                                  : "Bu amal qaytarib bo'lmaydi. Bot to'xtatiladi va bazadan o'chiriladi."}
-                            </p>
-                            <div className="flex gap-3">
-                              <button
-                                onClick={() => setBotDeleteConfirm(null)}
-                                className="flex-1 px-4 py-2.5 text-sm font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
-                              >
-                                {language === "ru"
-                                  ? "Отмена"
-                                  : language === "en"
-                                    ? "Cancel"
-                                    : "Bekor"}
-                              </button>
-                              <button
-                                disabled={!!botActionLoading[botDeleteConfirm]}
-                                onClick={async () => {
-                                  const id = botDeleteConfirm;
-                                  setBotActionLoading((p) => ({
-                                    ...p,
-                                    [id]: "delete",
-                                  }));
-                                  try {
-                                    await api.delete(
-                                      `/telegram/admin/bots/${id}`
-                                    );
-                                    setAdminBots((p) =>
-                                      p.filter((b) => b.id !== id)
-                                    );
-                                    setBotDeleteConfirm(null);
-                                    toast.success(
-                                      language === "ru"
-                                        ? "Удалён"
-                                        : language === "en"
-                                          ? "Deleted"
-                                          : "O'chirildi"
-                                    );
-                                  } catch {
-                                    toast.error("Xato");
-                                  } finally {
-                                    setBotActionLoading((p) => {
-                                      const n = { ...p };
-                                      delete n[id];
-                                      return n;
-                                    });
-                                  }
-                                }}
-                                className="flex-1 px-4 py-2.5 text-sm font-bold bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition-all disabled:opacity-50"
-                              >
-                                {botActionLoading[botDeleteConfirm] ===
-                                "delete" ? (
-                                  <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-                                ) : language === "ru" ? (
-                                  "Удалить"
-                                ) : language === "en" ? (
-                                  "Delete"
-                                ) : (
-                                  "O'chirish"
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        </motion.div>
-                      </>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
+              <BotsTab
+                language={language}
+                adminBots={adminBots}
+                setAdminBots={setAdminBots}
+                distributors={distributors}
+                setDistributors={setDistributors}
+                botActionLoading={botActionLoading}
+                setBotActionLoading={setBotActionLoading}
+                botEditModal={botEditModal}
+                setBotEditModal={setBotEditModal}
+                botDeleteConfirm={botDeleteConfirm}
+                setBotDeleteConfirm={setBotDeleteConfirm}
+                botCreateModal={botCreateModal}
+                setBotCreateModal={setBotCreateModal}
+                botCreateLoading={botCreateLoading}
+                setBotCreateLoading={setBotCreateLoading}
+                botsReloadingAll={botsReloadingAll}
+                setBotsReloadingAll={setBotsReloadingAll}
+              />
             </motion.div>
           </AnimatePresence>
         </div>
