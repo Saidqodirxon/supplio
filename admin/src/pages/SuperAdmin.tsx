@@ -75,6 +75,27 @@ const fadeInUp = {
   exit: { opacity: 0, y: -10 },
 };
 
+const downloadBlobFile = async (
+  url: string,
+  fileName: string,
+  params?: any
+) => {
+  const response = await api.get(url, {
+    params,
+    responseType: "blob",
+  });
+  const blob = new Blob([response.data]);
+  const link = document.createElement("a");
+  link.href = window.URL.createObjectURL(blob);
+  link.download = fileName;
+  link.click();
+  window.URL.revokeObjectURL(link.href);
+};
+
+const downloadBackup = async (fileName: string) => {
+  await downloadBlobFile(`/super/backups/download/${fileName}`, fileName);
+};
+
 type TabId =
   | "overview"
   | "settings"
@@ -489,6 +510,15 @@ export default function SuperAdmin() {
     } finally {
       setSendingReply(false);
     }
+  };
+
+  const openSubscriptionModal = (dist: any) => {
+    setSubscriptionTarget(dist);
+    setSubscriptionExpiresAt(
+      dist.subscriptionExpiresAt
+        ? new Date(dist.subscriptionExpiresAt).toISOString().split("T")[0]
+        : ""
+    );
   };
 
   const refreshBackups = useCallback(async () => {
