@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Patch, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, UseGuards, Req, ForbiddenException } from '@nestjs/common';
 import { SupportService } from './support.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
@@ -45,14 +45,14 @@ export class SupportController {
   @Get('all')
   @ApiOperation({ summary: 'Get all tickets (SuperAdmin)' })
   getAllTickets(@Req() req: any) {
-    if (req.user.roleType !== 'SUPER_ADMIN') throw new Error('Forbidden');
+    if (req.user.roleType !== 'SUPER_ADMIN') throw new ForbiddenException('Access denied. Super admin only.');
     return this.supportService.getAllTickets();
   }
 
   @Patch('status/:id')
   @ApiOperation({ summary: 'Update ticket status (SuperAdmin)' })
   updateStatus(@Req() req: any, @Param('id') id: string, @Body() data: { status: string }) {
-    if (req.user.roleType !== 'SUPER_ADMIN') throw new Error('Forbidden');
+    if (req.user.roleType !== 'SUPER_ADMIN') throw new ForbiddenException('Access denied. Super admin only.');
     return this.supportService.updateTicketStatus(id, data.status);
   }
 }

@@ -757,7 +757,7 @@ export class SuperAdminService {
         },
       },
     });
-    if (!company) throw new Error("Company not found");
+    if (!company) throw new NotFoundException("Company not found");
 
     // Avoid duplicate pending requests
     const existing = await (this.prisma as any).upgradeRequest.findFirst({
@@ -806,7 +806,7 @@ export class SuperAdminService {
       const request = await (tx as any).upgradeRequest.findUnique({
         where: { id },
       });
-      if (!request) throw new Error("Upgrade request not found");
+      if (!request) throw new NotFoundException("Upgrade request not found");
 
       const updatedRequest = await (tx as any).upgradeRequest.update({
         where: { id },
@@ -821,13 +821,13 @@ export class SuperAdminService {
       const tariff = await tx.tariffPlan.findUnique({
         where: { planKey },
       });
-      if (!tariff) throw new Error(`Tariff plan not found: ${planKey}`);
+      if (!tariff) throw new NotFoundException(`Tariff plan not found: ${planKey}`);
 
       const company = await tx.company.findUnique({
         where: { id: request.companyId },
         select: { id: true, slug: true, dbConnectionUrl: true },
       });
-      if (!company) throw new Error("Company not found");
+      if (!company) throw new NotFoundException("Company not found");
 
       const expiresAt = new Date();
       expiresAt.setDate(

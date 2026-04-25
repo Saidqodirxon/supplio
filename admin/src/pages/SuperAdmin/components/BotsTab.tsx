@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import clsx from "clsx";
 import {
@@ -509,41 +509,70 @@ export default function BotsTab({
       </AnimatePresence>
 
       <AnimatePresence>
-        {botDeleteConfirm && (
-          <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setBotDeleteConfirm(null)} className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm" />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="fixed inset-0 z-[101] flex items-center justify-center p-4">
-              <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
-                <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center text-rose-600 mx-auto mb-4"><Trash2 className="w-6 h-6" /></div>
-                <h3 className="font-black text-slate-800 dark:text-white mb-2">{language === "ru" ? "Удалить бота?" : language === "en" ? "Delete bot?" : "Botni o'chirish?"}</h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{language === "ru" ? "Это действие необратимо. Бот будет остановлен и удалён из базы данных." : language === "en" ? "This action is irreversible. The bot will be stopped and permanently deleted." : "Bu amal qaytarib bo'lmaydi. Bot to'xtatiladi va bazadan o'chiriladi."}</p>
-                <div className="flex gap-3">
-                  <button onClick={() => setBotDeleteConfirm(null)} className="flex-1 px-4 py-2.5 text-sm font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all">{language === "ru" ? "Отмена" : language === "en" ? "Cancel" : "Bekor"}</button>
-                  <button disabled={!!botActionLoading[botDeleteConfirm]} onClick={async () => {
-                    const id = botDeleteConfirm;
-                    setBotActionLoading((p) => ({ ...p, [id]: "delete" }));
-                    try {
-                      await api.delete(`/telegram/admin/bots/${id}`);
-                      setAdminBots((p) => p.filter((b) => b.id !== id));
-                      setBotDeleteConfirm(null);
-                      toast.success(language === "ru" ? "Удалён" : language === "en" ? "Deleted" : "O'chirildi");
-                    } catch {
-                      toast.error("Xato");
-                    } finally {
-                      setBotActionLoading((p) => {
-                        const n = { ...p };
-                        delete n[id];
-                        return n;
-                      });
-                    }
-                  }} className="flex-1 px-4 py-2.5 text-sm font-bold bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition-all disabled:opacity-50">
-                    {botActionLoading[botDeleteConfirm] === "delete" ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : language === "ru" ? "Удалить" : language === "en" ? "Delete" : "O'chirish"}
-                  </button>
+        {botDeleteConfirm && (() => {
+          const targetBot = adminBots.find((b) => b.id === botDeleteConfirm);
+          return (
+            <>
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => !botActionLoading[botDeleteConfirm] && setBotDeleteConfirm(null)} className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm" />
+              <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} className="fixed inset-0 z-[101] flex items-center justify-center p-4">
+                <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-6 w-full max-w-sm text-center">
+                  <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center text-rose-600 mx-auto mb-4"><Trash2 className="w-6 h-6" /></div>
+                  <h3 className="font-black text-slate-800 dark:text-white mb-2">
+                    {language === "ru" ? "Удалить бота?" : language === "en" ? "Delete bot?" : "Botni o'chirish?"}
+                  </h3>
+                  {targetBot && (
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300 text-xs font-black mb-3">
+                      <Bot className="w-3.5 h-3.5" />
+                      {targetBot.botName || targetBot.username || targetBot.id}
+                      {targetBot.username && <span className="opacity-70">@{targetBot.username}</span>}
+                    </div>
+                  )}
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
+                    {language === "ru"
+                      ? "Это действие необратимо. Бот будет остановлен и удалён из базы данных. Повторное подключение с тем же токеном возможно."
+                      : language === "en"
+                        ? "This action is irreversible. The bot will be stopped and permanently deleted. You can reconnect the same token later."
+                        : "Bu amal qaytarib bo'lmaydi. Bot to'xtatiladi va bazadan o'chiriladi. Keyinchalik xuddi shu tokenni qayta qo'shish mumkin."}
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      disabled={!!botActionLoading[botDeleteConfirm]}
+                      onClick={() => setBotDeleteConfirm(null)}
+                      className="flex-1 px-4 py-2.5 text-sm font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all disabled:opacity-50"
+                    >
+                      {language === "ru" ? "Отмена" : language === "en" ? "Cancel" : "Bekor"}
+                    </button>
+                    <button
+                      disabled={!!botActionLoading[botDeleteConfirm]}
+                      onClick={async () => {
+                        const id = botDeleteConfirm;
+                        setBotActionLoading((p) => ({ ...p, [id]: "delete" }));
+                        try {
+                          await api.delete(`/telegram/admin/bots/${id}`);
+                          setAdminBots((p) => p.filter((b) => b.id !== id));
+                          setBotDeleteConfirm(null);
+                          toast.success(language === "ru" ? "Удалён" : language === "en" ? "Deleted" : "O'chirildi");
+                        } catch (e: any) {
+                          const msg = e?.response?.data?.message || e?.message || "Xato";
+                          toast.error(Array.isArray(msg) ? msg[0] : msg);
+                        } finally {
+                          setBotActionLoading((p) => {
+                            const n = { ...p };
+                            delete n[id];
+                            return n;
+                          });
+                        }
+                      }}
+                      className="flex-1 px-4 py-2.5 text-sm font-bold bg-rose-600 text-white rounded-xl hover:bg-rose-700 transition-all disabled:opacity-50 inline-flex items-center justify-center"
+                    >
+                      {botActionLoading[botDeleteConfirm] === "delete" ? <Loader2 className="w-4 h-4 animate-spin" /> : language === "ru" ? "Удалить" : language === "en" ? "Delete" : "O'chirish"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          </>
-        )}
+              </motion.div>
+            </>
+          );
+        })()}
       </AnimatePresence>
 
       <AnimatePresence>

@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
+import { Injectable, OnModuleInit, OnModuleDestroy, BadRequestException } from "@nestjs/common";
 import { PrismaClient, SubscriptionPlan } from "@prisma/client";
 
 @Injectable()
@@ -24,7 +24,6 @@ export class PrismaService
         "LedgerTransaction",
         "Payment",
         "Expense",
-        "CustomBot",
         "FeatureFlag",
         "Notification",
         "Lead",
@@ -52,7 +51,7 @@ export class PrismaService
               const msg = company.isDemo
                 ? "DEMO_LIMIT: Demo environments are restricted to 30 records for testing."
                 : "FREE_QUOTA_EXCEEDED: Trial accounts are limited to 50 records per type. Please upgrade.";
-              throw new Error(msg);
+              throw new BadRequestException(msg);
             }
           }
         }

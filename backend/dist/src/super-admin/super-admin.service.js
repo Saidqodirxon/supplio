@@ -609,7 +609,7 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
             },
         });
         if (!company)
-            throw new Error("Company not found");
+            throw new common_1.NotFoundException("Company not found");
         const existing = await this.prisma.upgradeRequest.findFirst({
             where: { companyId, status: "PENDING" },
         });
@@ -652,7 +652,7 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
                 where: { id },
             });
             if (!request)
-                throw new Error("Upgrade request not found");
+                throw new common_1.NotFoundException("Upgrade request not found");
             const updatedRequest = await tx.upgradeRequest.update({
                 where: { id },
                 data: { status: data.status, note: data.note },
@@ -665,13 +665,13 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
                 where: { planKey },
             });
             if (!tariff)
-                throw new Error(`Tariff plan not found: ${planKey}`);
+                throw new common_1.NotFoundException(`Tariff plan not found: ${planKey}`);
             const company = await tx.company.findUnique({
                 where: { id: request.companyId },
                 select: { id: true, slug: true, dbConnectionUrl: true },
             });
             if (!company)
-                throw new Error("Company not found");
+                throw new common_1.NotFoundException("Company not found");
             const expiresAt = new Date();
             expiresAt.setDate(expiresAt.getDate() + Math.max(tariff.trialDays || 30, 30));
             const tenantDbUrl = !company.dbConnectionUrl && planKey !== "FREE"

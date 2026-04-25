@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Calendar, DollarSign, ArrowUpRight, Activity, Plus, Search, ChevronLeft, ChevronRight, ArrowDownLeft, AlertCircle } from 'lucide-react';
+import { Calendar, DollarSign, ArrowUpRight, Activity, Plus, Search, ChevronLeft, ChevronRight, AlertCircle, TrendingDown, TrendingUp, ShoppingCart, CreditCard, X } from 'lucide-react';
 import api from '../services/api';
 import type { Payment } from '../types';
 import { format } from 'date-fns';
@@ -14,6 +14,15 @@ import type { SelectOption } from '../components/CustomSelect';
 
 const PAGE_SIZE = 10;
 
+interface DealerFull {
+  id: string;
+  name: string;
+  phone?: string;
+  currentDebt: number;
+  creditLimit: number;
+  ordersCount: number;
+}
+
 export default function Payments() {
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,14 +33,18 @@ export default function Payments() {
   const t = dashboardTranslations[language];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newPayment, setNewPayment] = useState({
+  // payType: 'add' = To'lov qo'shish (qarz kamaytiradi), 'sub' = Ayirish / Korreksiya
+  const [payType, setPayType] = useState<'add' | 'sub'>('add');
+  const [form, setForm] = useState({
     dealerId: '',
     amount: '',
     method: 'CASH',
-    reference: ''
+    note: '',
   });
-  const [dealers, setDealers] = useState<{ id: string; name: string }[]>([]);
-  const dealerOptions: SelectOption[] = dealers.map(d => ({ value: d.id, label: d.name }));
+  const [submitting, setSubmitting] = useState(false);
+
+  const [dealers, setDealers] = useState<DealerFull[]>([]);
+  const dealerOptions: SelectOption[] = dealers.map(d => ({ value: d.id, label: `${d.name}${d.phone ? ' · ' + d.phone : ''}` }));
   const methodOptions: SelectOption[] = [
     { value: 'CASH', label: t.payments.methodCash },
     { value: 'BANK', label: t.payments.methodBank },
@@ -39,67 +52,63 @@ export default function Payments() {
     { value: 'PAYME', label: t.payments.methodPayme },
   ];
 
-  // Adjustment modal
-  const [isAdjOpen, setIsAdjOpen] = useState(false);
-  const [adjForm, setAdjForm] = useState({ dealerId: '', amount: '', note: '' });
+  const selectedDealer = dealers.find(d => d.id === form.dealerId) ?? null;
 
-  useScrollLock(isModalOpen || isAdjOpen);
+  useScrollLock(isModalOpen);
 
   const fetchPayments = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.get<Payment[]>('/payments');
-      setPayments(Array.isArray(response.data) ? response.data : []);
-
-      const dealersRes = await api.get('/dealers');
+      const [paymentsRes, dealersRes] = await Promise.all([
+        api.get<Payment[]>('/payments'),
+        api.get('/dealers'),
+      ]);
+      setPayments(Array.isArray(paymentsRes.data) ? paymentsRes.data : []);
       setDealers(Array.isArray(dealersRes.data) ? dealersRes.data : []);
     } catch (err: unknown) {
       setError(t.common.error);
-      setPayments([]);
       console.error(err);
     } finally {
       setLoading(false);
     }
   }, [t.common?.error]);
 
-  const handleCreateAdjustment = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    try {
-      await api.post('/payments/adjustment', {
-        dealerId: adjForm.dealerId,
-        amount: Number(adjForm.amount),
-        note: adjForm.note,
-      });
-      setIsAdjOpen(false);
-      setAdjForm({ dealerId: '', amount: '', note: '' });
-      toast.success(t.payments.adjustmentSaved);
-      fetchPayments();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : (t.common?.error || 'Error');
-      toast.error(msg);
+    if (!form.dealerId || !form.amount) return;
+    if (payType === 'sub' && !form.note.trim()) {
+      toast.error(language === 'uz' ? 'Sabab kiritish shart' : language === 'ru' ? 'Укажите причину' : 'Reason is required');
+      return;
     }
-  };
-
-  const handleCreatePayment = async (e: React.FormEvent) => {
-    e.preventDefault();
+    setSubmitting(true);
     try {
-      await api.post('/payments', {
-        ...newPayment,
-        amount: Number(newPayment.amount)
-      });
+      const amount = Math.abs(Number(form.amount));
+      if (payType === 'add') {
+        await api.post('/payments', {
+          dealerId: form.dealerId,
+          amount,
+          method: form.method,
+          reference: form.note || undefined,
+        });
+      } else {
+        await api.post('/payments/adjustment', {
+          dealerId: form.dealerId,
+          amount: -amount,
+          note: form.note,
+        });
+      }
+      toast.success(payType === 'add' ? t.payments.confirmReceipt : t.payments.adjustmentSaved);
       setIsModalOpen(false);
-      setNewPayment({ dealerId: '', amount: '', method: 'CASH', reference: '' });
-      toast.success(t.payments.confirmReceipt);
+      setForm({ dealerId: '', amount: '', method: 'CASH', note: '' });
       fetchPayments();
     } catch (err: unknown) {
       toast.error(t.common.error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  useEffect(() => {
-    fetchPayments();
-  }, [fetchPayments]);
-
+  useEffect(() => { fetchPayments(); }, [fetchPayments]);
   useEffect(() => { setPage(1); }, [search]);
 
   const filtered = useMemo(() => {
@@ -143,30 +152,72 @@ export default function Payments() {
             {t.payments.subtitle}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => setIsAdjOpen(true)}
-            className="px-6 py-4 bg-amber-500 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all flex items-center gap-2"
-          >
-            <ArrowDownLeft className="h-4 w-4" />
-            {t.payments.adjustment}
-          </button>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            {t.payments.recordPayment}
-          </button>
-        </div>
+        <button
+          onClick={() => { setPayType('add'); setForm({ dealerId: '', amount: '', method: 'CASH', note: '' }); setIsModalOpen(true); }}
+          className="px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl active:scale-95 transition-all flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          {t.payments.recordPayment}
+        </button>
       </div>
 
+      {/* Unified Payment Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white dark:bg-slate-900 p-10 rounded-2xl max-w-lg w-full shadow-4xl space-y-8">
-              <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{t.payments.recordPayment}</h3>
-              <form onSubmit={handleCreatePayment} className="space-y-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden"
+            >
+              {/* Modal header */}
+              <div className="flex items-center justify-between px-8 pt-8 pb-6 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                  {t.payments.recordPayment}
+                </h3>
+                <button onClick={() => setIsModalOpen(false)} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                  <X className="w-4 h-4 text-slate-400" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                {/* Type toggle */}
+                <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setPayType('add')}
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                      payType === 'add'
+                        ? 'bg-emerald-600 text-white shadow-md'
+                        : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <TrendingDown className="w-3.5 h-3.5" />
+                    {language === 'uz' ? "To'lov qo'shish" : language === 'ru' ? 'Принять оплату' : 'Add Payment'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPayType('sub')}
+                    className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                      payType === 'sub'
+                        ? 'bg-rose-600 text-white shadow-md'
+                        : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                    }`}
+                  >
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    {language === 'uz' ? 'Ayirish / Korreksiya' : language === 'ru' ? 'Коррекция / Вычет' : 'Deduct / Adjust'}
+                  </button>
+                </div>
+
+                {/* Type hint */}
+                <div className={`text-[11px] font-semibold px-3 py-2 rounded-lg ${payType === 'add' ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400'}`}>
+                  {payType === 'add'
+                    ? (language === 'uz' ? "Dilerdan qabul qilingan to'lov — qarzni kamaytiradi" : language === 'ru' ? 'Оплата от дилера — уменьшает долг' : "Payment received from dealer — reduces debt")
+                    : (language === 'uz' ? 'Qarzga qo\'shish yoki korreksiya — sabab kiritish shart' : language === 'ru' ? 'Добавление к долгу или коррекция — причина обязательна' : 'Debt increase or correction — reason required')}
+                </div>
+
+                {/* Dealer select */}
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.selectDealer}</label>
                   {dealerOptions.length === 0 ? (
@@ -177,90 +228,110 @@ export default function Payments() {
                   ) : (
                     <CustomSelect
                       options={dealerOptions}
-                      value={newPayment.dealerId}
-                      onChange={v => setNewPayment({ ...newPayment, dealerId: v })}
+                      value={form.dealerId}
+                      onChange={v => setForm(f => ({ ...f, dealerId: v }))}
                       placeholder={t.payments.chooseDealerPlaceholder}
                       searchable
                     />
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.amount}</label>
+
+                {/* Dealer stats */}
+                {selectedDealer && (
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="rounded-xl bg-slate-50 dark:bg-slate-800 p-3 text-center">
+                      <ShoppingCart className="w-4 h-4 text-slate-400 mx-auto mb-1" />
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        {language === 'uz' ? 'Buyurtmalar' : language === 'ru' ? 'Заказы' : 'Orders'}
+                      </p>
+                      <p className="text-lg font-black text-slate-800 dark:text-white">{selectedDealer.ordersCount ?? 0}</p>
+                    </div>
+                    <div className={`rounded-xl p-3 text-center ${selectedDealer.currentDebt > 0 ? 'bg-rose-50 dark:bg-rose-900/20' : 'bg-emerald-50 dark:bg-emerald-900/20'}`}>
+                      <DollarSign className={`w-4 h-4 mx-auto mb-1 ${selectedDealer.currentDebt > 0 ? 'text-rose-500' : 'text-emerald-500'}`} />
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        {language === 'uz' ? 'Qarz' : language === 'ru' ? 'Долг' : 'Debt'}
+                      </p>
+                      <p className={`text-sm font-black ${selectedDealer.currentDebt > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                        {selectedDealer.currentDebt.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-blue-50 dark:bg-blue-900/20 p-3 text-center">
+                      <CreditCard className="w-4 h-4 text-blue-500 mx-auto mb-1" />
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                        {language === 'uz' ? 'Limit' : language === 'ru' ? 'Лимит' : 'Limit'}
+                      </p>
+                      <p className="text-sm font-black text-blue-600 dark:text-blue-400">
+                        {selectedDealer.creditLimit.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Amount */}
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.amount}</label>
+                  <div className="relative">
                     <input
                       type="number"
                       required
-                      className="input-field w-full"
-                      value={newPayment.amount}
-                      onChange={e => setNewPayment({ ...newPayment, amount: e.target.value })}
+                      min="1"
+                      className="input-field w-full pr-14"
+                      value={form.amount}
+                      onChange={e => setForm(f => ({ ...f, amount: e.target.value }))}
+                      placeholder="0"
                     />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase">UZS</span>
                   </div>
+                </div>
+
+                {/* Method (only for add payment) */}
+                {payType === 'add' && (
                   <div className="space-y-2">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.method}</label>
                     <CustomSelect
                       options={methodOptions}
-                      value={newPayment.method}
-                      onChange={v => setNewPayment({ ...newPayment, method: v })}
+                      value={form.method}
+                      onChange={v => setForm(f => ({ ...f, method: v }))}
                     />
                   </div>
-                </div>
+                )}
+
+                {/* Note / Reason */}
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.reference}</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                    {payType === 'sub' ? (language === 'uz' ? 'Sabab' : language === 'ru' ? 'Причина' : 'Reason') : t.payments.reference}
+                    {payType === 'sub' && <span className="text-rose-500">*</span>}
+                  </label>
                   <input
                     type="text"
+                    required={payType === 'sub'}
                     className="input-field w-full"
-                    value={newPayment.reference}
-                    onChange={e => setNewPayment({ ...newPayment, reference: e.target.value })}
+                    value={form.note}
+                    onChange={e => setForm(f => ({ ...f, note: e.target.value }))}
+                    placeholder={payType === 'sub'
+                      ? (language === 'uz' ? 'Masalan: qaytarish, xatolik tuzatish...' : language === 'ru' ? 'Например: возврат, корректировка...' : 'e.g. refund, correction...')
+                      : (language === 'uz' ? 'Kvitansiya raqami (ixtiyoriy)' : language === 'ru' ? 'Номер квитанции (необязательно)' : 'Receipt number (optional)')}
                   />
                 </div>
-                <div className="flex gap-4 pt-4">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs">{t.common.cancel}</button>
-                  <button type="submit" disabled={dealerOptions.length === 0} className="flex-1 py-4 premium-gradient text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-40 disabled:cursor-not-allowed">{t.payments.confirmReceipt}</button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
 
-      {/* Adjustment Modal */}
-      <AnimatePresence>
-        {isAdjOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
-            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white dark:bg-slate-900 p-10 rounded-2xl max-w-lg w-full shadow-4xl space-y-8">
-              <div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{t.payments.adjustmentTitle}</h3>
-                <p className="text-xs text-slate-400 mt-1 font-bold">{t.payments.adjustmentDesc}</p>
-              </div>
-              <form onSubmit={handleCreateAdjustment} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.adjustmentDealer}</label>
-                  {dealerOptions.length === 0 ? (
-                    <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 text-xs font-semibold">
-                      <AlertCircle className="w-4 h-4 shrink-0" />
-                      {t.dealers?.noDealers || 'No dealers found'}
-                    </div>
-                  ) : (
-                    <CustomSelect
-                      options={dealerOptions}
-                      value={adjForm.dealerId}
-                      onChange={v => setAdjForm({ ...adjForm, dealerId: v })}
-                      placeholder={t.payments.adjustmentDealerPlaceholder}
-                      searchable
-                    />
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.adjustmentAmount}</label>
-                  <input type="number" required className="input-field w-full" value={adjForm.amount} onChange={e => setAdjForm({ ...adjForm, amount: e.target.value })} placeholder="e.g. 50000 or -25000" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{t.payments.adjustmentNote}</label>
-                  <input type="text" required className="input-field w-full" value={adjForm.note} onChange={e => setAdjForm({ ...adjForm, note: e.target.value })} placeholder="Refund, correction, etc." />
-                </div>
-                <div className="flex gap-4 pt-4">
-                  <button type="button" onClick={() => setIsAdjOpen(false)} className="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-2xl font-black uppercase tracking-widest text-xs">{t.common.cancel}</button>
-                  <button type="submit" disabled={dealerOptions.length === 0} className="flex-1 py-4 bg-amber-500 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl disabled:opacity-40 disabled:cursor-not-allowed">{t.payments.saveAdjustment}</button>
+                {/* Actions */}
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="flex-1 py-3.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-2xl font-black uppercase tracking-widest text-[10px] hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
+                  >
+                    {t.common.cancel}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting || dealerOptions.length === 0}
+                    className={`flex-1 py-3.5 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
+                      payType === 'add' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'
+                    }`}
+                  >
+                    {submitting ? '...' : payType === 'add' ? t.payments.confirmReceipt : t.payments.saveAdjustment}
+                  </button>
                 </div>
               </form>
             </motion.div>
@@ -300,53 +371,56 @@ export default function Payments() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-              {paginated.map((payment, idx) => (
-                <motion.tr
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: idx * 0.03 }}
-                  key={payment.id}
-                  className="hover:bg-emerald-50/10 dark:hover:bg-emerald-900/5 transition-all group"
-                >
-                  <td className="px-10 py-6">
-                    <span className="font-mono text-[9px] font-black tracking-widest text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                      REC-{payment.id.slice(0, 8).toUpperCase()}
-                    </span>
-                  </td>
-                  <td className="px-10 py-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm font-bold uppercase">
-                        {payment?.dealer?.name ? payment.dealer.name.charAt(0) : 'D'}
-                      </div>
-                      <span className="text-sm font-black text-slate-700 dark:text-slate-200 tracking-tight">
-                        {payment?.dealer?.name || t.common?.noData || 'N/A'}
+              {paginated.map((payment, idx) => {
+                const isNegative = (payment.amount ?? 0) < 0;
+                return (
+                  <motion.tr
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.03 }}
+                    key={payment.id}
+                    className="hover:bg-emerald-50/10 dark:hover:bg-emerald-900/5 transition-all group"
+                  >
+                    <td className="px-10 py-6">
+                      <span className="font-mono text-[9px] font-black tracking-widest text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                        REC-{payment.id.slice(0, 8).toUpperCase()}
                       </span>
-                    </div>
-                  </td>
-                  <td className="px-10 py-6">
-                    <div className="flex items-center gap-2">
-                      <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 shadow-sm border border-emerald-100 dark:border-emerald-900/50">
-                        <ArrowUpRight className="w-3.5 h-3.5" />
+                    </td>
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm font-bold uppercase">
+                          {payment?.dealer?.name ? payment.dealer.name.charAt(0) : 'D'}
+                        </div>
+                        <span className="text-sm font-black text-slate-700 dark:text-slate-200 tracking-tight">
+                          {payment?.dealer?.name || t.common?.noData || 'N/A'}
+                        </span>
                       </div>
-                      <span className="text-xl font-black text-emerald-600 dark:text-emerald-400 tracking-tighter">
-                        {(payment.amount || 0).toLocaleString()}
+                    </td>
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-2">
+                        <div className={`p-2 rounded-xl shadow-sm border ${isNegative ? 'bg-rose-50 dark:bg-rose-900/20 text-rose-600 border-rose-100 dark:border-rose-900/50' : 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 border-emerald-100 dark:border-emerald-900/50'}`}>
+                          {isNegative ? <TrendingUp className="w-3.5 h-3.5" /> : <ArrowUpRight className="w-3.5 h-3.5" />}
+                        </div>
+                        <span className={`text-xl font-black tracking-tighter ${isNegative ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                          {(payment.amount || 0).toLocaleString()}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-black uppercase italic tracking-widest ml-1">{t.common?.uzs || 'SUM'}</span>
+                      </div>
+                    </td>
+                    <td className="px-10 py-6">
+                      <span className="px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 shadow-sm">
+                        {payment.method || '—'}
                       </span>
-                      <span className="text-[10px] text-slate-400 font-black uppercase italic tracking-widest ml-1">{t.common?.uzs || 'SUM'}</span>
-                    </div>
-                  </td>
-                  <td className="px-10 py-6">
-                    <span className="px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 shadow-sm">
-                      {payment.method}
-                    </span>
-                  </td>
-                  <td className="px-10 py-6">
-                    <div className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
-                      <Calendar className="w-4 h-4 opacity-30 text-emerald-500" />
-                      {payment.createdAt ? format(new Date(payment.createdAt), 'MMM dd, yyyy') : '-'}
-                    </div>
-                  </td>
-                </motion.tr>
-              ))}
+                    </td>
+                    <td className="px-10 py-6">
+                      <div className="flex items-center gap-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                        <Calendar className="w-4 h-4 opacity-30 text-emerald-500" />
+                        {payment.createdAt ? format(new Date(payment.createdAt), 'MMM dd, yyyy') : '-'}
+                      </div>
+                    </td>
+                  </motion.tr>
+                );
+              })}
               {paginated.length === 0 && (
                 <tr className="animate-in fade-in duration-1000">
                   <td colSpan={5} className="px-10 py-32 text-center">

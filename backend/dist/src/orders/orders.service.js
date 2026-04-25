@@ -262,7 +262,7 @@ let OrdersService = class OrdersService {
             },
         });
         if (!order)
-            return null;
+            throw new common_1.NotFoundException("Order not found");
         const rawItems = order.items;
         const productIdSet = new Set();
         if (Array.isArray(rawItems)) {

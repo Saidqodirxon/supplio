@@ -16,6 +16,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DemoController = void 0;
 const common_1 = require("@nestjs/common");
 const demo_service_1 = require("./demo.service");
+const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const roles_guard_1 = require("../common/middleware/roles.guard");
+const roles_decorator_1 = require("../common/decorators/roles.decorator");
 let DemoController = DemoController_1 = class DemoController {
     constructor(demoService) {
         this.demoService = demoService;
@@ -53,6 +56,8 @@ let DemoController = DemoController_1 = class DemoController {
 exports.DemoController = DemoController;
 __decorate([
     (0, common_1.Post)("reset"),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)

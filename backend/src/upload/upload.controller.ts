@@ -35,7 +35,7 @@ export class UploadController {
         cb(null, true);
       },
       limits: {
-        fileSize: 5 * 1024 * 1024, // 5MB
+        fileSize: 10 * 1024 * 1024, // 10MB
       },
     })
   )
@@ -43,11 +43,9 @@ export class UploadController {
     if (!file) {
       throw new BadRequestException("File is required");
     }
-    // Return the public URL
-    // Assumes the app is running on a certain port.
-    // In production, we'd use environment variables or a proper CDN URL.
+    const baseUrl = (process.env.APP_URL || "http://localhost:5000").replace(/\/+$/, "");
     return {
-      url: `/uploads/${file.filename}`,
+      url: `${baseUrl}/uploads/${file.filename}`,
     };
   }
 }

@@ -21,14 +21,22 @@ let GlobalExceptionFilter = class GlobalExceptionFilter {
         if (exception instanceof common_1.HttpException) {
             status = exception.getStatus();
             const exceptionResponse = exception.getResponse();
-            message =
-                typeof exceptionResponse === "string"
-                    ? exceptionResponse
-                    : exceptionResponse
-                        .message || exception.message;
+            const raw = typeof exceptionResponse === "string"
+                ? exceptionResponse
+                : exceptionResponse.message ||
+                    exception.message;
+            message = Array.isArray(raw) ? raw[0] : raw;
         }
         else if (exception instanceof Error) {
             message = exception.message;
+            if (message.startsWith("DEMO_LIMIT:")) {
+                status = common_1.HttpStatus.PAYMENT_REQUIRED;
+                message = message.replace("DEMO_LIMIT:", "").trim();
+            }
+            else if (message.startsWith("FREE_QUOTA_EXCEEDED:")) {
+                status = common_1.HttpStatus.PAYMENT_REQUIRED;
+                message = message.replace("FREE_QUOTA_EXCEEDED:", "").trim();
+            }
         }
         try {
             this.logger.error(`[${request.method}] ${request.url} - ${status} - ${JSON.stringify(message)}`);

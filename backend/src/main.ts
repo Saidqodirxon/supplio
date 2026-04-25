@@ -6,6 +6,7 @@ import { GlobalExceptionFilter } from "./common/filters/global-exception.filter"
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { join } from "path";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import * as express from "express";
 
 async function bootstrap() {
   // Required Env Validation
@@ -20,12 +21,20 @@ async function bootstrap() {
   const logger = new Logger("Bootstrap");
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
     logger: ["error", "warn", "log"],
   });
 
-  // Static assets — __dirname is dist/src, so go up two levels to reach backend/uploads
+  // Body parsers with increased limits (must come before other middleware)
+  app.use(express.json({ limit: "10mb" }));
+  app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+  // Static assets — __dirname is dist/src, so go up two levels
   app.useStaticAssets(join(__dirname, "..", "..", "uploads"), {
     prefix: "/uploads/",
+  });
+  app.useStaticAssets(join(__dirname, "..", "..", "public"), {
+    prefix: "/public/",
   });
 
   // Security

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Injectable, BadRequestException, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { TelegramService } from "../telegram/telegram.service";
 import { CompanyNotifierService } from "../telegram/company-notifier.service";
@@ -326,7 +326,7 @@ export class OrdersService {
         branch: { select: { name: true } },
       },
     });
-    if (!order) return null;
+    if (!order) throw new NotFoundException("Order not found");
 
     const rawItems = order.items as any[];
     const productIdSet = new Set<string>();

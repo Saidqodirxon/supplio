@@ -24,8 +24,9 @@ let UploadController = class UploadController {
         if (!file) {
             throw new common_1.BadRequestException("File is required");
         }
+        const baseUrl = (process.env.APP_URL || "http://localhost:5000").replace(/\/+$/, "");
         return {
-            url: `/uploads/${file.filename}`,
+            url: `${baseUrl}/uploads/${file.filename}`,
         };
     }
 };
@@ -48,7 +49,7 @@ __decorate([
             cb(null, true);
         },
         limits: {
-            fileSize: 5 * 1024 * 1024,
+            fileSize: 10 * 1024 * 1024,
         },
     })),
     __param(0, (0, common_1.UploadedFile)()),

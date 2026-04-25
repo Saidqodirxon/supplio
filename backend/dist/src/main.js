@@ -7,6 +7,7 @@ const common_1 = require("@nestjs/common");
 const global_exception_filter_1 = require("./common/filters/global-exception.filter");
 const path_1 = require("path");
 const swagger_1 = require("@nestjs/swagger");
+const express = require("express");
 async function bootstrap() {
     const requiredEnvs = ["DATABASE_URL", "JWT_SECRET"];
     requiredEnvs.forEach((envName) => {
@@ -17,10 +18,16 @@ async function bootstrap() {
     });
     const logger = new common_1.Logger("Bootstrap");
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
+        bodyParser: false,
         logger: ["error", "warn", "log"],
     });
+    app.use(express.json({ limit: "10mb" }));
+    app.use(express.urlencoded({ extended: true, limit: "10mb" }));
     app.useStaticAssets((0, path_1.join)(__dirname, "..", "..", "uploads"), {
         prefix: "/uploads/",
+    });
+    app.useStaticAssets((0, path_1.join)(__dirname, "..", "..", "public"), {
+        prefix: "/public/",
     });
     app.use((0, helmet_1.default)());
     app.enableCors({ origin: "*" });

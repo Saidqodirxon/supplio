@@ -971,467 +971,224 @@ export default function TelegramBots() {
         </button>
       </div>
 
+
       {/* Group Notifications */}
-      <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/10 p-8 space-y-7">
+      <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/10 p-8 space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-              <Bot className="w-5 h-5 text-emerald-600" />
+            <div className="w-10 h-10 rounded-2xl bg-violet-500/10 flex items-center justify-center">
+              <Bot className="w-5 h-5 text-violet-600" />
             </div>
             <div>
               <h3 className="font-black text-slate-900 dark:text-white">
-                {lang === "ru"
-                  ? "Telegram гурухлари"
-                  : lang === "en"
-                    ? "Telegram Groups"
-                    : "Telegram guruhlari"}
+                {lang === "ru" ? "Группы уведомлений" : lang === "en" ? "Group Notifications" : "Guruh bildirishnomalari"}
               </h3>
               <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                {lang === "ru"
-                  ? "2 guruh: log + buyurtmalar"
-                  : lang === "en"
-                    ? "2 groups: logs + orders"
-                    : "2 guruh: loglar + buyurtmalar"}
+                {lang === "ru" ? "Уведомления в Telegram группах" : lang === "en" ? "Telegram group notifications" : "Telegram guruhlarga bildirishnomalar"}
               </p>
             </div>
           </div>
           <button
-            onClick={sendManualReport}
-            disabled={sendingReport || !logGroupChatId.trim()}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all disabled:opacity-40"
+            disabled={sendingReport}
+            onClick={async () => {
+              setSendingReport(true);
+              try {
+                await api.post("/telegram/groups/report");
+                toast.success(t.reportSent);
+              } catch (e) {
+                toast.error(errorText(e, "Error"));
+              } finally {
+                setSendingReport(false);
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all disabled:opacity-40"
           >
-            {sendingReport ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <CalendarClock className="w-3.5 h-3.5" />
-            )}
-            {lang === "ru"
-              ? "Hisobot yuborish"
-              : lang === "en"
-                ? "Send report"
-                : "Hisobot yuborish"}
+            {sendingReport ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+            {t.dailyReportNow}
           </button>
         </div>
 
         {/* How-to */}
-        <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
-          <Info className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-          <div className="text-xs text-slate-500 dark:text-slate-400 font-medium space-y-1">
-            <p className="font-black text-slate-700 dark:text-slate-200">
-              {lang === "ru"
-                ? "Qanday ulash:"
-                : lang === "en"
-                  ? "How to connect:"
-                  : "Qanday ulash:"}
-            </p>
-            <p>
-              1.{" "}
-              {lang === "ru"
-                ? "Botingizni guruhga qo'shing (admin qilib)"
-                : lang === "en"
-                  ? "Add your bot to the group (as admin)"
-                  : "Botingizni guruhga qo'shing (admin sifatida)"}
-            </p>
-            <p>
-              2.{" "}
-              {lang === "ru"
-                ? "Guruhda /chatid yozing"
-                : lang === "en"
-                  ? "Type /chatid in the group"
-                  : "Guruhda /chatid yozing"}
-            </p>
-            <p>
-              3.{" "}
-              {lang === "ru"
-                ? "Chat ID ni quyidagi maydonga kiriting"
-                : lang === "en"
-                  ? "Paste the Chat ID below"
-                  : "Chat ID ni quyidagi maydonga kiriting"}
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Log group */}
-          <div className="space-y-3 p-5 rounded-2xl border-2 border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-white/3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-violet-600" />
-              </div>
-              <div>
-                <p className="font-black text-sm text-slate-800 dark:text-white">
-                  {t.logGroupTitle}
-                </p>
-                <p className="text-[10px] text-slate-400 font-medium">
-                  {t.logGroupDesc}
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={logGroupChatId}
-                onChange={(e) => setLogGroupChatId(e.target.value)}
-                placeholder="-100123456789"
-                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
-              />
-              <button
-                onClick={() => testGroup("log")}
-                disabled={!logGroupChatId.trim() || testingGroup === "log"}
-                className="px-3 py-2 text-xs font-bold bg-violet-50 dark:bg-violet-900/20 text-violet-600 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-all disabled:opacity-40 shrink-0"
-              >
-                {testingGroup === "log" ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  "Test"
-                )}
-              </button>
-            </div>
-            <ul className="text-[11px] text-slate-400 space-y-0.5 pl-1">
-              <li>
-                •{" "}
-                {lang === "ru"
-                  ? "Yangi buyurtma log"
-                  : lang === "en"
-                    ? "New order log"
-                    : "Yangi buyurtma logi"}
-              </li>
-              <li>
-                •{" "}
-                {lang === "ru"
-                  ? "Mahsulot/diler o'zgarishlari"
-                  : lang === "en"
-                    ? "Product/dealer changes"
-                    : "Mahsulot/diler o'zgarishlari"}
-              </li>
-              <li>
-                •{" "}
-                {lang === "ru"
-                  ? "Kunlik omborxona holati"
-                  : lang === "en"
-                    ? "Daily inventory snapshot"
-                    : "Kunlik omborxona holati"}
-              </li>
-              <li>
-                •{" "}
-                {lang === "ru"
-                  ? "Avtomatik kunlik hisobot (01:30)"
-                  : lang === "en"
-                    ? "Auto daily report (01:30)"
-                    : "Avto kunlik hisobot (01:30)"}
-              </li>
-            </ul>
-          </div>
-
-          {/* Orders group */}
-          <div className="space-y-3 p-5 rounded-2xl border-2 border-slate-100 dark:border-white/10 bg-slate-50/50 dark:bg-white/3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-emerald-600" />
-              </div>
-              <div>
-                <p className="font-black text-sm text-slate-800 dark:text-white">
-                  {lang === "ru"
-                    ? "Buyurtmalar guruh"
-                    : lang === "en"
-                      ? "Orders group"
-                      : "Buyurtmalar guruh"}
-                </p>
-                <p className="text-[10px] text-slate-400 font-medium">
-                  {lang === "ru"
-                    ? "Faqat yangi buyurtmalar"
-                    : lang === "en"
-                      ? "New orders only"
-                      : "Faqat yangi buyurtmalar"}
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={orderGroupChatId}
-                onChange={(e) => setOrderGroupChatId(e.target.value)}
-                placeholder="-100987654321"
-                className="flex-1 px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-              />
-              <button
-                onClick={() => testGroup("order")}
-                disabled={!orderGroupChatId.trim() || testingGroup === "order"}
-                className="px-3 py-2 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all disabled:opacity-40 shrink-0"
-              >
-                {testingGroup === "order" ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : lang === "en" ? (
-                  "Test"
-                ) : (
-                  "Test"
-                )}
-              </button>
-            </div>
-            <ul className="text-[11px] text-slate-400 space-y-0.5 pl-1">
-              <li>
-                •{" "}
-                {lang === "ru"
-                  ? "Har bir yangi buyurtma to'liq ma'lumoti"
-                  : lang === "en"
-                    ? "Full details of each new order"
-                    : "Har bir yangi buyurtma to'liq ma'lumoti"}
-              </li>
-              <li>
-                •{" "}
-                {lang === "ru"
-                  ? "Diler nomi, telefon, filial"
-                  : lang === "en"
-                    ? "Dealer name, phone, branch"
-                    : "Diler ismi, telefon, filial"}
-              </li>
-              <li>
-                •{" "}
-                {lang === "ru"
-                  ? "Mahsulotlar ro'yxati va summa"
-                  : lang === "en"
-                    ? "Product list and total"
-                    : "Mahsulotlar ro'yxati va summa"}
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        {/* Save */}
-        <button
-          onClick={saveSettings}
-          disabled={savingSettings}
-          className="flex items-center gap-2 px-6 py-3.5 bg-emerald-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-emerald-600/20 active:scale-95 transition-all disabled:opacity-50"
-        >
-          {savingSettings ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Check className="w-4 h-4" />
-          )}
-          {lang === "ru" ? "Saqlash" : lang === "en" ? "Save" : "Saqlash"}
-        </button>
-      </div>
-
-      {/* Group Notifications */}
-      <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/10 p-8 space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
-            <Bot className="w-5 h-5 text-emerald-600" />
-          </div>
-          <div>
-            <h3 className="font-black text-slate-900 dark:text-white">
-              {lang === "ru"
-                ? "Уведомления в группы"
-                : lang === "en"
-                  ? "Group Notifications"
-                  : "Guruh bildirishnomalari"}
-            </h3>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-              {lang === "ru"
-                ? "Подключите 2 Telegram-группы"
-                : lang === "en"
-                  ? "Connect 2 Telegram groups"
-                  : "2 ta Telegram guruh ulang"}
-            </p>
-          </div>
-        </div>
-
-        {/* How-to hint */}
         <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10">
           <Info className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-            {lang === "ru"
-              ? "Добавьте бота в группу → напишите /start → скопируйте Chat ID из ответа и вставьте ниже."
-              : lang === "en"
-                ? "Add your bot to the group → send /start → copy the Chat ID from the reply and paste below."
-                : "Botni guruhga qo'shing → /start yozing → javobdagi Chat ID ni nusxalab quyida joylashtiring."}
-          </p>
+          <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
+            <p className="font-black text-slate-700 dark:text-slate-200">
+              {lang === "ru" ? "Qanday ulash:" : lang === "en" ? "How to connect:" : "Qanday ulash:"}
+            </p>
+            <p>1. {lang === "ru" ? "Botingizni guruhga admin sifatida qo'shing" : lang === "en" ? "Add your bot to the group as admin" : "Botingizni guruhga admin sifatida qo'shing"}</p>
+            <p>2. {lang === "ru" ? "Guruhda /chatid yozing" : lang === "en" ? "Send /chatid in the group" : "Guruhda /chatid yozing"}</p>
+            <p>3. {lang === "ru" ? "Chat ID ni quyidagi maydonga kiriting" : lang === "en" ? "Paste the Chat ID below" : "Chat ID ni quyidagi maydonga kiriting"}</p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Two group cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Log group */}
-          <div className="rounded-2xl border-2 border-slate-100 dark:border-white/10 p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                <Clock className="w-4 h-4 text-indigo-600" />
+          <div className={clsx(
+            "rounded-2xl border-2 p-5 space-y-4 transition-all",
+            logGroupChatId.trim()
+              ? "border-violet-200 dark:border-violet-700/40 bg-violet-50/30 dark:bg-violet-900/10"
+              : "border-slate-100 dark:border-white/10"
+          )}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                  <Clock className="w-4 h-4 text-violet-600" />
+                </div>
+                <div>
+                  <p className="font-black text-sm text-slate-800 dark:text-white">
+                    {lang === "ru" ? "Группа логов и бэкапов" : lang === "en" ? "Log & Backup Group" : "Log va backup guruhi"}
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    {lang === "ru" ? "Активность, отчёты, резервные копии" : lang === "en" ? "Activity, reports, backups" : "Faoliyat, hisobotlar, backuplar"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-black text-sm text-slate-800 dark:text-white">
-                  {lang === "ru"
-                    ? "Группа логов и бэкапов"
-                    : lang === "en"
-                      ? "Logs & Backup Group"
-                      : "Log va backup guruhi"}
-                </p>
-                <p className="text-[10px] text-slate-400 font-medium">
-                  {lang === "ru"
-                    ? "Активность, отчёты, резервные копии"
-                    : lang === "en"
-                      ? "Activity, reports, backups"
-                      : "Faoliyat, hisobotlar, backuplar"}
-                </p>
-              </div>
+              <span className={clsx(
+                "text-[10px] font-black px-2 py-0.5 rounded-full",
+                logGroupChatId.trim()
+                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                  : "bg-slate-100 dark:bg-white/10 text-slate-400"
+              )}>
+                {logGroupChatId.trim()
+                  ? (lang === "ru" ? "Aktiv" : lang === "en" ? "Active" : "Aktiv")
+                  : (lang === "ru" ? "Ulangan emas" : lang === "en" ? "Not connected" : "Ulanmagan")}
+              </span>
             </div>
+
             <input
               type="text"
               value={logGroupChatId}
               onChange={(e) => setLogGroupChatId(e.target.value)}
               placeholder="-100123456789"
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-violet-500 transition-all"
             />
+
             <div className="flex gap-2">
               <button
-                onClick={async () => {
-                  await saveSettings();
-                }}
-                className="flex-1 px-3 py-2 text-xs font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
+                onClick={saveSettings}
+                disabled={savingSettings}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold bg-violet-600 text-white rounded-xl hover:bg-violet-700 active:scale-95 transition-all disabled:opacity-50"
               >
-                {lang === "ru"
-                  ? "Сохранить"
-                  : lang === "en"
-                    ? "Save"
-                    : "Saqlash"}
+                {savingSettings ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                {lang === "ru" ? "Saqlash" : lang === "en" ? "Save" : "Saqlash"}
               </button>
               <button
-                disabled={testingGroup === "log" || !logGroupChatId.trim()}
-                onClick={async () => {
-                  setTestingGroup("log");
-                  try {
-                    await saveSettings();
-                    await api.post("/telegram/groups/test/log");
-                    toast.success(
-                      lang === "ru"
-                        ? "Тест отправлен!"
-                        : lang === "en"
-                          ? "Test sent!"
-                          : "Test yuborildi!"
-                    );
-                  } catch (e) {
-                    toast.error(errorText(e, "Error"));
-                  } finally {
-                    setTestingGroup(null);
-                  }
-                }}
-                className="flex-1 px-3 py-2 text-xs font-bold bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-xl hover:bg-indigo-100 dark:hover:bg-indigo-900/40 transition-all disabled:opacity-50"
+                onClick={() => testGroup("log")}
+                disabled={!logGroupChatId.trim() || testingGroup === "log"}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold bg-violet-50 dark:bg-violet-900/20 text-violet-600 rounded-xl hover:bg-violet-100 dark:hover:bg-violet-900/40 transition-all disabled:opacity-40"
               >
-                {testingGroup === "log" ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" />
-                ) : lang === "ru" ? (
-                  "Тест"
-                ) : lang === "en" ? (
-                  "Test"
-                ) : (
-                  "Test"
-                )}
+                {testingGroup === "log" ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                Test
               </button>
+              {logGroupChatId.trim() && (
+                <button
+                  onClick={() => { setLogGroupChatId(""); saveSettings(); }}
+                  title={lang === "en" ? "Remove" : "O'chirish"}
+                  className="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-500 rounded-xl hover:bg-rose-100 transition-all"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-white/10 pt-3 space-y-1">
+              <p className="text-[10px] font-black text-slate-500 dark:text-slate-300">
+                {lang === "ru" ? "Bu guruhga yuboriladi:" : lang === "en" ? "This group receives:" : "Bu guruhga yuboriladi:"}
+              </p>
+              <ul className="text-[11px] text-slate-400 space-y-0.5 pl-1">
+                <li>• {lang === "ru" ? "Yangi buyurtma logi" : lang === "en" ? "New order log" : "Yangi buyurtma logi"}</li>
+                <li>• {lang === "ru" ? "Mahsulot/diler o'zgarishlari" : lang === "en" ? "Product/dealer changes" : "Mahsulot/diler o'zgarishlari"}</li>
+                <li>• {lang === "ru" ? "Kunlik omborxona holati (01:30)" : lang === "en" ? "Daily inventory (01:30)" : "Kunlik omborxona holati (01:30)"}</li>
+                <li>• {lang === "ru" ? "Haftalik backup hisobot" : lang === "en" ? "Weekly backup report" : "Haftalik backup hisoboti"}</li>
+              </ul>
             </div>
           </div>
 
-          {/* Order group */}
-          <div className="rounded-2xl border-2 border-slate-100 dark:border-white/10 p-5 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-                <Phone className="w-4 h-4 text-emerald-600" />
+          {/* Orders group */}
+          <div className={clsx(
+            "rounded-2xl border-2 p-5 space-y-4 transition-all",
+            orderGroupChatId.trim()
+              ? "border-emerald-200 dark:border-emerald-700/40 bg-emerald-50/30 dark:bg-emerald-900/10"
+              : "border-slate-100 dark:border-white/10"
+          )}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <Phone className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="font-black text-sm text-slate-800 dark:text-white">
+                    {lang === "ru" ? "Группа заказов" : lang === "en" ? "Orders Group" : "Buyurtmalar guruhi"}
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    {lang === "ru" ? "Только новые заказы" : lang === "en" ? "New orders only" : "Faqat yangi buyurtmalar"}
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="font-black text-sm text-slate-800 dark:text-white">
-                  {lang === "ru"
-                    ? "Группа заказов"
-                    : lang === "en"
-                      ? "Orders Group"
-                      : "Buyurtmalar guruhi"}
-                </p>
-                <p className="text-[10px] text-slate-400 font-medium">
-                  {lang === "ru"
-                    ? "Только новые заказы"
-                    : lang === "en"
-                      ? "New orders only"
-                      : "Faqat yangi buyurtmalar"}
-                </p>
-              </div>
+              <span className={clsx(
+                "text-[10px] font-black px-2 py-0.5 rounded-full",
+                orderGroupChatId.trim()
+                  ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600"
+                  : "bg-slate-100 dark:bg-white/10 text-slate-400"
+              )}>
+                {orderGroupChatId.trim()
+                  ? (lang === "ru" ? "Aktiv" : lang === "en" ? "Active" : "Aktiv")
+                  : (lang === "ru" ? "Ulangan emas" : lang === "en" ? "Not connected" : "Ulanmagan")}
+              </span>
             </div>
+
             <input
               type="text"
               value={orderGroupChatId}
               onChange={(e) => setOrderGroupChatId(e.target.value)}
               placeholder="-100987654321"
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-mono text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
             />
+
             <div className="flex gap-2">
               <button
-                onClick={async () => {
-                  await saveSettings();
-                }}
-                className="flex-1 px-3 py-2 text-xs font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all"
+                onClick={saveSettings}
+                disabled={savingSettings}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 active:scale-95 transition-all disabled:opacity-50"
               >
-                {lang === "ru"
-                  ? "Сохранить"
-                  : lang === "en"
-                    ? "Save"
-                    : "Saqlash"}
+                {savingSettings ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                {lang === "ru" ? "Saqlash" : lang === "en" ? "Save" : "Saqlash"}
               </button>
               <button
-                disabled={testingGroup === "order" || !orderGroupChatId.trim()}
-                onClick={async () => {
-                  setTestingGroup("order");
-                  try {
-                    await saveSettings();
-                    await api.post("/telegram/groups/test/order");
-                    toast.success(
-                      lang === "ru"
-                        ? "Тест отправлен!"
-                        : lang === "en"
-                          ? "Test sent!"
-                          : "Test yuborildi!"
-                    );
-                  } catch (e) {
-                    toast.error(errorText(e, "Error"));
-                  } finally {
-                    setTestingGroup(null);
-                  }
-                }}
-                className="flex-1 px-3 py-2 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all disabled:opacity-50"
+                onClick={() => testGroup("order")}
+                disabled={!orderGroupChatId.trim() || testingGroup === "order"}
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 rounded-xl hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-all disabled:opacity-40"
               >
-                {testingGroup === "order" ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin mx-auto" />
-                ) : lang === "ru" ? (
-                  "Тест"
-                ) : lang === "en" ? (
-                  "Test"
-                ) : (
-                  "Test"
-                )}
+                {testingGroup === "order" ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                Test
               </button>
+              {orderGroupChatId.trim() && (
+                <button
+                  onClick={() => { setOrderGroupChatId(""); saveSettings(); }}
+                  title={lang === "en" ? "Remove" : "O'chirish"}
+                  className="p-2 bg-rose-50 dark:bg-rose-900/20 text-rose-500 rounded-xl hover:bg-rose-100 transition-all"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-white/10 pt-3 space-y-1">
+              <p className="text-[10px] font-black text-slate-500 dark:text-slate-300">
+                {lang === "ru" ? "Bu guruhga yuboriladi:" : lang === "en" ? "This group receives:" : "Bu guruhga yuboriladi:"}
+              </p>
+              <ul className="text-[11px] text-slate-400 space-y-0.5 pl-1">
+                <li>• {lang === "ru" ? "Har bir yangi buyurtma to'liq ma'lumoti" : lang === "en" ? "Full details of each new order" : "Har bir yangi buyurtma to'liq ma'lumoti"}</li>
+                <li>• {lang === "ru" ? "Diler ismi, telefon, filial" : lang === "en" ? "Dealer name, phone, branch" : "Diler ismi, telefon, filial"}</li>
+                <li>• {lang === "ru" ? "Mahsulotlar va jami summa" : lang === "en" ? "Product list and total amount" : "Mahsulotlar va jami summa"}</li>
+                <li>• {lang === "ru" ? "Faqat ushbu kompaniya ma'lumotlari" : lang === "en" ? "Only this company's data" : "Faqat ushbu kompaniya ma'lumotlari"}</li>
+              </ul>
             </div>
           </div>
         </div>
-
-        {/* Manual daily report button */}
-        <button
-          disabled={sendingReport}
-          onClick={async () => {
-            setSendingReport(true);
-            try {
-              await api.post("/telegram/groups/report");
-              toast.success(t.reportSent);
-            } catch (e) {
-              toast.error(errorText(e, "Error"));
-            } finally {
-              setSendingReport(false);
-            }
-          }}
-          className="flex items-center gap-2 px-5 py-3 bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 rounded-2xl text-xs font-black hover:bg-slate-200 dark:hover:bg-white/20 transition-all disabled:opacity-50"
-        >
-          {sendingReport ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <RefreshCw className="w-4 h-4" />
-          )}
-          {t.dailyReportNow}
-        </button>
       </div>
-
       {/* Broadcast Section */}
       <div className="bg-white dark:bg-white/5 rounded-3xl border border-slate-100 dark:border-white/10 p-8 space-y-6">
         <div className="flex items-center gap-3">

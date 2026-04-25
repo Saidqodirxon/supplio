@@ -1,5 +1,8 @@
-import { Controller, Post, Get, Body, Logger } from "@nestjs/common";
+import { Controller, Post, Get, Body, Logger, UseGuards } from "@nestjs/common";
 import { DemoService } from "./demo.service";
+import { JwtAuthGuard } from "../auth/jwt-auth.guard";
+import { RolesGuard } from "../common/middleware/roles.guard";
+import { Roles } from "../common/decorators/roles.decorator";
 
 @Controller("demo")
 export class DemoController {
@@ -7,8 +10,10 @@ export class DemoController {
 
   constructor(private readonly demoService: DemoService) {}
 
-  /** Trigger manual demo reset (for super admin) */
+  /** Trigger manual demo reset — SUPER_ADMIN only */
   @Post("reset")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles("SUPER_ADMIN")
   async triggerReset() {
     this.logger.log("Manual demo reset triggered");
     await this.demoService.handleDailyReset();

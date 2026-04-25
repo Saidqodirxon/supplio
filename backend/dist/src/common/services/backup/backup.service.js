@@ -143,7 +143,7 @@ let BackupService = BackupService_1 = class BackupService {
         const systemSqlPath = path.join(sessionDir, "system_full.sql");
         const dbUrl = process.env.DATABASE_URL;
         if (!dbUrl)
-            throw new Error("DATABASE_URL not set");
+            throw new common_1.BadRequestException("DATABASE_URL muhit o'zgaruvchisi sozlanmagan.");
         this.logger.log("Running pg_dump for full system backup...");
         await execPromise(buildPgDumpCommand(systemSqlPath, dbUrl));
         this.logger.log(`System dump done: ${(fs.statSync(systemSqlPath).size / 1024).toFixed(1)} KB`);
@@ -221,7 +221,7 @@ let BackupService = BackupService_1 = class BackupService {
             select: { id: true, name: true, slug: true, dbConnectionUrl: true },
         });
         if (!company)
-            throw new Error("Company not found");
+            throw new common_1.NotFoundException("Company not found");
         const fileName = this.buildCompanyBackupFileName(company.name, company.slug);
         const filePath = path.join(this.backupDir, fileName);
         if (company.dbConnectionUrl) {
@@ -245,7 +245,7 @@ let BackupService = BackupService_1 = class BackupService {
         const filePath = path.join(this.backupDir, fileName);
         const dbUrl = process.env.DATABASE_URL;
         if (!dbUrl)
-            throw new Error("DATABASE_URL not found");
+            throw new common_1.BadRequestException("DATABASE_URL muhit o'zgaruvchisi sozlanmagan.");
         await execPromise(buildPgDumpCommand(filePath, dbUrl));
         return { name: fileName, path: filePath, createdAt: new Date() };
     }
@@ -310,7 +310,7 @@ let BackupService = BackupService_1 = class BackupService {
         const safeName = path.basename(name);
         const fullPath = path.join(this.backupDir, safeName);
         if (!fs.existsSync(fullPath)) {
-            throw new Error("Backup file not found");
+            throw new common_1.NotFoundException("Backup file not found");
         }
         return fullPath;
     }

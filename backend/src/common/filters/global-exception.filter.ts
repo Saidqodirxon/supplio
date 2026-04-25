@@ -23,13 +23,22 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      message =
+      const raw =
         typeof exceptionResponse === "string"
           ? exceptionResponse
-          : ((exceptionResponse as Record<string, unknown>)
-              .message as string) || exception.message;
+          : ((exceptionResponse as Record<string, unknown>).message as string) ||
+            exception.message;
+      message = Array.isArray(raw) ? raw[0] : raw;
     } else if (exception instanceof Error) {
       message = exception.message;
+      // Map well-known internal error prefixes to proper HTTP status codes
+      if (message.startsWith("DEMO_LIMIT:")) {
+        status = HttpStatus.PAYMENT_REQUIRED;
+        message = message.replace("DEMO_LIMIT:", "").trim();
+      } else if (message.startsWith("FREE_QUOTA_EXCEEDED:")) {
+        status = HttpStatus.PAYMENT_REQUIRED;
+        message = message.replace("FREE_QUOTA_EXCEEDED:", "").trim();
+      }
     }
 
     // Try-catch logging to prevent filter itself from crashing

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, BadRequestException, NotFoundException } from "@nestjs/common";
 import { exec } from "child_process";
 import { promisify } from "util";
 import * as fs from "fs";
@@ -155,7 +155,7 @@ export class BackupService {
     // 1. Full system pg_dump
     const systemSqlPath = path.join(sessionDir, "system_full.sql");
     const dbUrl = process.env.DATABASE_URL;
-    if (!dbUrl) throw new Error("DATABASE_URL not set");
+    if (!dbUrl) throw new BadRequestException("DATABASE_URL muhit o'zgaruvchisi sozlanmagan.");
     this.logger.log("Running pg_dump for full system backup...");
     await execPromise(buildPgDumpCommand(systemSqlPath, dbUrl));
     this.logger.log(`System dump done: ${(fs.statSync(systemSqlPath).size / 1024).toFixed(1)} KB`);
@@ -259,7 +259,7 @@ export class BackupService {
       where: { id: companyId },
       select: { id: true, name: true, slug: true, dbConnectionUrl: true },
     });
-    if (!company) throw new Error("Company not found");
+    if (!company) throw new NotFoundException("Company not found");
 
     const fileName = this.buildCompanyBackupFileName(company.name, company.slug);
     const filePath = path.join(this.backupDir, fileName);
@@ -293,7 +293,7 @@ export class BackupService {
     const fileName = `backup-${timestamp}.sql`;
     const filePath = path.join(this.backupDir, fileName);
     const dbUrl = process.env.DATABASE_URL;
-    if (!dbUrl) throw new Error("DATABASE_URL not found");
+    if (!dbUrl) throw new BadRequestException("DATABASE_URL muhit o'zgaruvchisi sozlanmagan.");
     await execPromise(buildPgDumpCommand(filePath, dbUrl));
     return { name: fileName, path: filePath, createdAt: new Date() };
   }
@@ -370,7 +370,7 @@ export class BackupService {
     const safeName = path.basename(name);
     const fullPath = path.join(this.backupDir, safeName);
     if (!fs.existsSync(fullPath)) {
-      throw new Error("Backup file not found");
+      throw new NotFoundException("Backup file not found");
     }
     return fullPath;
   }

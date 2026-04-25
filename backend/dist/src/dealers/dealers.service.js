@@ -63,9 +63,8 @@ let DealersService = class DealersService {
         const dealers = await this.prisma.dealer.findMany({
             where: whereClause,
             include: {
-                branch: {
-                    select: { name: true },
-                },
+                branch: { select: { name: true } },
+                _count: { select: { orders: { where: { deletedAt: null } } } },
             },
         });
         const result = await Promise.all(dealers.map(async (dealer) => {
@@ -86,6 +85,7 @@ let DealersService = class DealersService {
             return {
                 ...dealer,
                 currentDebt,
+                ordersCount: dealer._count?.orders ?? 0,
                 status: currentDebt >= dealer.creditLimit
                     ? "LIMIT_REACHED"
                     : currentDebt > 0

@@ -89,14 +89,11 @@ export class DealersService {
     const dealers = await this.prisma.dealer.findMany({
       where: whereClause,
       include: {
-        branch: {
-          select: { name: true },
-        },
+        branch: { select: { name: true } },
+        _count: { select: { orders: { where: { deletedAt: null } } } },
       },
     });
 
-    // Calculate dynamic debts for list view without N+1 problem efficiently via Promise.all
-    // For large scale, raw query aggregation is better, but this demonstrates the spec's requirement
     const result = await Promise.all(
       dealers.map(async (dealer) => {
         const debtAggregation = await (
@@ -121,6 +118,7 @@ export class DealersService {
         return {
           ...dealer,
           currentDebt,
+          ordersCount: (dealer as any)._count?.orders ?? 0,
           status:
             currentDebt >= dealer.creditLimit
               ? "LIMIT_REACHED"

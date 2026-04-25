@@ -24,7 +24,6 @@ let PrismaService = class PrismaService extends client_1.PrismaClient {
                 "LedgerTransaction",
                 "Payment",
                 "Expense",
-                "CustomBot",
                 "FeatureFlag",
                 "Notification",
                 "Lead",
@@ -46,7 +45,7 @@ let PrismaService = class PrismaService extends client_1.PrismaClient {
                             const msg = company.isDemo
                                 ? "DEMO_LIMIT: Demo environments are restricted to 30 records for testing."
                                 : "FREE_QUOTA_EXCEEDED: Trial accounts are limited to 50 records per type. Please upgrade.";
-                            throw new Error(msg);
+                            throw new common_1.BadRequestException(msg);
                         }
                     }
                 }

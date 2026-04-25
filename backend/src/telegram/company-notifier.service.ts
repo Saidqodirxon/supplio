@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnModuleInit, BadRequestException } from "@nestjs/common";
 import * as fs from "fs";
 import { Cron } from "@nestjs/schedule";
 import { Telegraf } from "telegraf";
@@ -261,9 +261,9 @@ export class CompanyNotifierService implements OnModuleInit {
   /** Send a test ping to verify the group works */
   async testGroup(companyId: string, type: "log" | "order") {
     const info = await this.getInfo(companyId);
-    if (!info) throw new Error("No active bot found for this company");
+    if (!info) throw new BadRequestException("No active bot found for this company");
     const chatId = type === "log" ? info.logChatId : info.orderChatId;
-    if (!chatId) throw new Error(`${type}GroupChatId not configured`);
+    if (!chatId) throw new BadRequestException(`${type === "log" ? "Log" : "Order"} guruh Chat ID sozlanmagan. Bot sozlamalari sahifasida Chat ID kiriting.`);
     await this.getBot(info.token).telegram.sendMessage(
       chatId,
       `✅ *Test xabari* — ${type === "log" ? "Admin/Log guruh" : "Buyurtmalar guruh"} ${this.tag(info.slug, type === "log" ? "LOG" : "ORDER")}\n🕐 ${new Date().toLocaleString("uz-UZ")}`,
