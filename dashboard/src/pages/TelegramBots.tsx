@@ -991,17 +991,7 @@ export default function TelegramBots() {
           </div>
           <button
             disabled={sendingReport}
-            onClick={async () => {
-              setSendingReport(true);
-              try {
-                await api.post("/telegram/groups/report");
-                toast.success(t.reportSent);
-              } catch (e) {
-                toast.error(errorText(e, "Error"));
-              } finally {
-                setSendingReport(false);
-              }
-            }}
+            onClick={sendManualReport}
             className="flex items-center gap-2 px-4 py-2 text-xs font-bold bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-white/20 transition-all disabled:opacity-40"
           >
             {sendingReport ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
