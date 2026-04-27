@@ -110,7 +110,7 @@ export default function SubscriptionPaymentModal({ isOpen, onClose, tariff, bill
   const displayName = lang === 'uz' ? tariff.nameUz : lang === 'ru' ? tariff.nameRu : tariff.nameEn;
 
   const [step, setStep] = useState<ModalStep>('method');
-  const [method, setMethod] = useState<PaymentMethod | null>(null);
+  const [, setMethod] = useState<PaymentMethod | null>(null);
   const [cards, setCards] = useState<SavedCard[]>([]);
   const [cardsLoading, setCardsLoading] = useState(false);
   const [selectedCard, setSelectedCard] = useState<string>('');
