@@ -3,7 +3,7 @@ import {
   ForbiddenException, Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ClickService } from './click.service';
+import { ClickService, CLICK_ERROR } from './click.service';
 import { PaylovService } from './paylov.service';
 import { randomUUID } from 'crypto';
 
@@ -191,49 +191,82 @@ export class SaasPaymentService {
   }
 
   async handleClickCallback(body: Record<string, any>) {
-    const { merchant_trans_id, click_trans_id, amount, action, error } = body;
+    const {
+      merchant_trans_id,
+      click_trans_id,
+      amount:    rawAmount,
+      action:    rawAction,
+      error:     clickError,
+    } = body;
 
+    const action     = Number(rawAction);
+    const paidAmount = Number(rawAmount);
+
+    // 1 — Verify signature and service_id
     if (!this.click.verifyCallback(body)) {
-      return this.click.buildErrorResponse(click_trans_id, merchant_trans_id, -1, 'Invalid signature');
+      return this.click.buildError(click_trans_id, merchant_trans_id, CLICK_ERROR.SIGN_FAILED, 'Invalid signature');
     }
 
+    // 2 — Find transaction
     const txRows = await this.prisma.$queryRaw<SaasTransaction[]>`
       SELECT * FROM "SaasTransaction" WHERE id = ${merchant_trans_id}
     `;
     if (txRows.length === 0) {
-      return this.click.buildErrorResponse(click_trans_id, merchant_trans_id, -5, 'Transaction not found');
+      return this.click.buildError(click_trans_id, merchant_trans_id, CLICK_ERROR.ORDER_NOT_FOUND, 'Transaction not found');
     }
     const tx = txRows[0];
 
-    if (action === ClickService.ACTION_PREPARE) {
-      if (tx.status !== 'PENDING') {
-        return this.click.buildErrorResponse(click_trans_id, merchant_trans_id, -4, 'Already processed');
-      }
-      return this.click.buildSuccessResponse(click_trans_id, merchant_trans_id);
+    // 3 — Verify amount matches (tolerance ±1 tiyin for float rounding)
+    if (Math.abs(paidAmount - tx.amount) > 1) {
+      this.logger.warn(`Click amount mismatch: expected=${tx.amount} got=${paidAmount} txId=${merchant_trans_id}`);
+      return this.click.buildError(click_trans_id, merchant_trans_id, CLICK_ERROR.AMOUNT_INCORRECT,
+        `Amount mismatch: expected ${tx.amount}, got ${paidAmount}`);
     }
 
+    // ── PREPARE ────────────────────────────────────────────────────────────
+    if (action === ClickService.ACTION_PREPARE) {
+      if (tx.status === 'PAID') {
+        return this.click.buildError(click_trans_id, merchant_trans_id, CLICK_ERROR.ALREADY_PAID, 'Already paid');
+      }
+      if (tx.status === 'FAILED' || tx.status === 'CANCELLED') {
+        return this.click.buildError(click_trans_id, merchant_trans_id, CLICK_ERROR.ORDER_CANCELLED, 'Order cancelled');
+      }
+      // Returns merchant_prepare_id as required by Click spec
+      return this.click.buildPrepareSuccess(click_trans_id, merchant_trans_id);
+    }
+
+    // ── COMPLETE ───────────────────────────────────────────────────────────
     if (action === ClickService.ACTION_COMPLETE) {
-      if (error < 0) {
+      // Click signals user cancellation via negative error code
+      if (Number(clickError) < 0) {
         await this.prisma.$executeRaw`
           UPDATE "SaasTransaction" SET status = 'FAILED', "updatedAt" = NOW()
-          WHERE id = ${merchant_trans_id}
+          WHERE id = ${merchant_trans_id} AND status = 'PENDING'
         `;
-        return this.click.buildErrorResponse(click_trans_id, merchant_trans_id, error, 'Payment failed');
+        return this.click.buildError(click_trans_id, merchant_trans_id,
+          CLICK_ERROR.TRANSACTION_FAILED, 'Payment cancelled');
       }
+
+      // Idempotency — Click may retry COMPLETE; return success if already processed
       if (tx.status === 'PAID') {
-        return this.click.buildSuccessResponse(click_trans_id, merchant_trans_id);
+        return this.click.buildCompleteSuccess(click_trans_id, merchant_trans_id);
       }
+
       await this.prisma.$executeRaw`
         UPDATE "SaasTransaction"
-        SET status = 'PAID', "externalId" = ${String(click_trans_id)}, "paidAt" = NOW(), "updatedAt" = NOW()
+        SET status = 'PAID',
+            "externalId" = ${String(click_trans_id)},
+            "paidAt" = NOW(),
+            "updatedAt" = NOW()
         WHERE id = ${merchant_trans_id}
       `;
       await this.activateSubscription(tx.companyId, tx.planKey);
-      this.logger.log(`Click payment completed: txId=${merchant_trans_id}`);
-      return this.click.buildSuccessResponse(click_trans_id, merchant_trans_id);
+      this.logger.log(`Click COMPLETE: txId=${merchant_trans_id} clickId=${click_trans_id} amount=${paidAmount}`);
+      // Returns merchant_prepare_id + merchant_confirm_id as required by Click spec
+      return this.click.buildCompleteSuccess(click_trans_id, merchant_trans_id);
     }
 
-    return this.click.buildErrorResponse(click_trans_id, merchant_trans_id, -8, 'Unknown action');
+    return this.click.buildError(click_trans_id, merchant_trans_id, CLICK_ERROR.ACTION_NOT_FOUND, 'Unknown action');
   }
 
   // ─── Paylov Direct ────────────────────────────────────────────────────────

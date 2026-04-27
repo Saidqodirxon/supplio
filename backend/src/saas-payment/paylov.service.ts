@@ -81,18 +81,35 @@ export class PaylovService {
         });
         return (res.data?.result ?? res.data) as T;
       }
-      const detail = err.response?.data?.error?.message || err.response?.data?.message || err.message;
-      this.logger.error(`Paylov API error [${path}]`, { status: err.response?.status, detail });
+      const detail =
+        err.response?.data?.error?.message ||
+        err.response?.data?.message ||
+        err.response?.data?.detail ||
+        err.message;
+      this.logger.error(
+        `Paylov API error [${method} ${path}]`,
+        { status: err.response?.status, body: JSON.stringify(err.response?.data), detail },
+      );
       throw new BadRequestException(detail || 'Paylov API error');
     }
   }
 
   async createCard(userId: string, cardNumber: string, expireDate: string, phoneNumber: string) {
-    if (cardNumber.length !== 16) throw new BadRequestException('Card number must be 16 digits');
-    if (!/^\d{4}$/.test(expireDate)) throw new BadRequestException('Expire date must be 4 digits');
-    const masked = cardNumber.slice(0, 4) + '********' + cardNumber.slice(-4);
-    this.logger.log(`Creating card [${masked}] for userId=${userId}`);
-    return this.request('POST', '/merchant/userCard/createUserCard/', { userId, cardNumber, expireDate, phoneNumber });
+    if (!userId) throw new BadRequestException('userId is required');
+    if (!cardNumber || cardNumber.length !== 16 || !/^\d{16}$/.test(cardNumber))
+      throw new BadRequestException('cardNumber must be exactly 16 digits');
+    if (!expireDate || !/^\d{4}$/.test(expireDate))
+      throw new BadRequestException('expireDate must be exactly 4 digits (MMYY)');
+    if (!phoneNumber)
+      throw new BadRequestException('phoneNumber is required');
+
+    const masked = `${cardNumber.slice(0, 4)}********${cardNumber.slice(-4)}`;
+    const payload = { userId, cardNumber, expireDate, phoneNumber };
+    this.logger.log(`Paylov createCard → ${JSON.stringify({ userId, cardNumber: masked, expireDate, phoneNumber })}`);
+
+    const result: any = await this.request('POST', '/merchant/userCard/createUserCard/', payload);
+    this.logger.log(`Paylov createCard ← ${JSON.stringify(result)}`);
+    return result;
   }
 
   async confirmCard(cid: string, otp: string, cardName = 'My Card') {
@@ -121,9 +138,19 @@ export class PaylovService {
   generateCheckoutLink(amount: number, returnUrl: string, orderId: string): string {
     if (!this.merchantId) throw new InternalServerErrorException('PAYLOV_MERCHANT_ID not configured');
     const numAmount = Number(amount);
-    if (!numAmount || numAmount <= 0) throw new BadRequestException('Amount must be positive');
-    const payload = { merchant_id: this.merchantId, amount: numAmount, return_url: returnUrl, account: { order_id: orderId } };
-    const encoded = Buffer.from(JSON.stringify(payload)).toString('base64');
-    return `${this.checkoutUrl}/checkout/create/${encoded}`;
+    if (!numAmount || isNaN(numAmount) || numAmount <= 0)
+      throw new BadRequestException(`Invalid amount: ${amount}`);
+
+    // Paylov expects a URL query string (not JSON) encoded as base64
+    const params = new URLSearchParams({
+      merchant_id: this.merchantId,
+      amount: String(numAmount),
+      return_url: returnUrl,
+      'account.order_id': orderId,
+    });
+    const encoded = Buffer.from(params.toString()).toString('base64');
+    const link = `${this.checkoutUrl}/checkout/create/${encoded}`;
+    this.logger.log(`Paylov checkout link → orderId=${orderId} amount=${numAmount} link=${link}`);
+    return link;
   }
 }
