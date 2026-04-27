@@ -17,7 +17,13 @@ export declare class DealersController {
     constructor(dealersService: DealersService, telegramService: TelegramService);
     create(req: AuthenticatedRequest, body: any): Promise<{
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        branchId: string;
         phone: string;
         address: string | null;
         region: string | null;
@@ -26,30 +32,30 @@ export declare class DealersController {
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         isApproved: boolean;
         approvedAt: Date | null;
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        companyId: string;
-        branchId: string;
     }>;
     findAll(req: AuthenticatedRequest): Promise<{
         currentDebt: number;
         ordersCount: any;
         status: string;
-        branch: {
-            name: string;
-        };
         _count: {
             orders: number;
         };
+        branch: {
+            name: string;
+        };
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        branchId: string;
         phone: string;
         address: string | null;
         region: string | null;
@@ -57,17 +63,11 @@ export declare class DealersController {
         contactPhone: string | null;
         creditLimit: number;
         telegramChatId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         isApproved: boolean;
         approvedAt: Date | null;
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        companyId: string;
-        branchId: string;
     }[]>;
     getPendingApprovals(req: AuthenticatedRequest): Promise<({
         branch: {
@@ -75,7 +75,13 @@ export declare class DealersController {
         };
     } & {
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        branchId: string;
         phone: string;
         address: string | null;
         region: string | null;
@@ -84,17 +90,11 @@ export declare class DealersController {
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         isApproved: boolean;
         approvedAt: Date | null;
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        companyId: string;
-        branchId: string;
     })[]>;
     update(req: AuthenticatedRequest, id: string, body: any): Promise<{
         branch: {
@@ -102,7 +102,13 @@ export declare class DealersController {
         };
     } & {
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        branchId: string;
         phone: string;
         address: string | null;
         region: string | null;
@@ -111,21 +117,21 @@ export declare class DealersController {
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         isApproved: boolean;
         approvedAt: Date | null;
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        companyId: string;
-        branchId: string;
     }>;
     remove(req: AuthenticatedRequest, id: string): Promise<{
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        branchId: string;
         phone: string;
         address: string | null;
         region: string | null;
@@ -134,23 +140,23 @@ export declare class DealersController {
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         isApproved: boolean;
         approvedAt: Date | null;
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        companyId: string;
-        branchId: string;
     }>;
     approve(req: AuthenticatedRequest, id: string, body: {
         creditLimit?: number;
     }): Promise<{
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        branchId: string;
         phone: string;
         address: string | null;
         region: string | null;
@@ -159,24 +165,24 @@ export declare class DealersController {
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         isApproved: boolean;
         approvedAt: Date | null;
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        companyId: string;
-        branchId: string;
     }>;
     reject(req: AuthenticatedRequest, id: string): Promise<{
         success: boolean;
     }>;
     block(req: AuthenticatedRequest, id: string): Promise<{
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        branchId: string;
         phone: string;
         address: string | null;
         region: string | null;
@@ -185,21 +191,21 @@ export declare class DealersController {
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         isApproved: boolean;
         approvedAt: Date | null;
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
-        companyId: string;
-        branchId: string;
     }>;
     unblock(req: AuthenticatedRequest, id: string): Promise<{
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
         name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
+        branchId: string;
         phone: string;
         address: string | null;
         region: string | null;
@@ -208,17 +214,43 @@ export declare class DealersController {
         creditLimit: number;
         currentDebt: number;
         telegramChatId: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         isApproved: boolean;
         approvedAt: Date | null;
         approvedBy: string | null;
         isBlocked: boolean;
         cashbackBalance: number;
+    }>;
+    resetCashback(req: AuthenticatedRequest, id: string): Promise<{
+        id: string;
         companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        name: string;
+        updatedAt: Date;
+        deletedBy: string | null;
         branchId: string;
+        phone: string;
+        address: string | null;
+        region: string | null;
+        district: string | null;
+        contactPhone: string | null;
+        creditLimit: number;
+        currentDebt: number;
+        telegramChatId: string | null;
+        isApproved: boolean;
+        approvedAt: Date | null;
+        approvedBy: string | null;
+        isBlocked: boolean;
+        cashbackBalance: number;
+    }>;
+    getCashbackSummary(req: AuthenticatedRequest): Promise<{
+        dealers: {
+            id: string;
+            name: string;
+            phone: string;
+            cashbackBalance: number;
+        }[];
+        total: number;
     }>;
 }
 export {};

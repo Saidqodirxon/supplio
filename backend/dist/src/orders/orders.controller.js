@@ -26,8 +26,12 @@ let OrdersController = class OrdersController {
     async create(req, body) {
         return this.ordersService.create(req.companyId, body);
     }
-    async findAll(req) {
-        return this.ordersService.findAll(req.companyId);
+    async findAll(req, page, limit, status) {
+        return this.ordersService.findAll(req.companyId, {
+            page: page ? parseInt(page, 10) : undefined,
+            limit: limit ? parseInt(limit, 10) : undefined,
+            status,
+        });
     }
     async findByDealer(req, dealerId) {
         return this.ordersService.findByDealer(req.companyId, dealerId);
@@ -57,8 +61,11 @@ __decorate([
     (0, common_1.Get)(),
     (0, roles_decorator_1.Roles)("SUPER_ADMIN", "OWNER", "MANAGER", "SALES", "DELIVERY", "SELLER"),
     __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Query)("page")),
+    __param(2, (0, common_1.Query)("limit")),
+    __param(3, (0, common_1.Query)("status")),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [Object, String, String, String]),
     __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "findAll", null);
 __decorate([

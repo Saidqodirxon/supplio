@@ -165,6 +165,26 @@ let DealersService = class DealersService {
             data: { deletedAt: new Date(), deletedBy: userId },
         });
     }
+    async resetCashback(id, companyId) {
+        const dealer = await this.prisma.dealer.findFirst({
+            where: { id, companyId, deletedAt: null },
+        });
+        if (!dealer)
+            throw new common_1.NotFoundException("Dealer not found");
+        return this.prisma.dealer.update({
+            where: { id },
+            data: { cashbackBalance: 0 },
+        });
+    }
+    async getCashbackSummary(companyId) {
+        const dealers = await this.prisma.dealer.findMany({
+            where: { companyId, deletedAt: null, cashbackBalance: { gt: 0 } },
+            select: { id: true, name: true, phone: true, cashbackBalance: true },
+            orderBy: { cashbackBalance: "desc" },
+        });
+        const total = dealers.reduce((s, d) => s + (d.cashbackBalance ?? 0), 0);
+        return { dealers, total };
+    }
     async rejectDealer(id, companyId, userId) {
         const dealer = await this.prisma.dealer.findFirst({
             where: { id, companyId, deletedAt: null },

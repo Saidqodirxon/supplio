@@ -918,6 +918,22 @@ let SuperAdminService = SuperAdminService_1 = class SuperAdminService {
         await this.prisma.$executeRawUnsafe(`DELETE FROM "TeamMember" WHERE id = $1`, id);
         return { id };
     }
+    async getSaasTransactions(page = 1, limit = 50) {
+        const offset = (page - 1) * limit;
+        const rows = await this.prisma.$queryRaw `
+      SELECT t.id, t."companyId", c.name as "companyName",
+             t."planKey", t.amount, t.provider, t.status,
+             t."externalId", t."paidAt", t."createdAt"
+      FROM "SaasTransaction" t
+      JOIN "Company" c ON c.id = t."companyId"
+      ORDER BY t."createdAt" DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+        const countRes = await this.prisma.$queryRaw `
+      SELECT COUNT(*) as count FROM "SaasTransaction"
+    `;
+        return { data: rows, total: Number(countRes[0].count), page, limit };
+    }
 };
 exports.SuperAdminService = SuperAdminService;
 __decorate([

@@ -6,9 +6,15 @@ const helmet_1 = require("helmet");
 const common_1 = require("@nestjs/common");
 const global_exception_filter_1 = require("./common/filters/global-exception.filter");
 const path_1 = require("path");
+const fs_1 = require("fs");
 const swagger_1 = require("@nestjs/swagger");
 const express = require("express");
 async function bootstrap() {
+    ["uploads", "public"].forEach((dir) => {
+        const p = (0, path_1.join)(process.cwd(), dir);
+        if (!(0, fs_1.existsSync)(p))
+            (0, fs_1.mkdirSync)(p, { recursive: true });
+    });
     const requiredEnvs = ["DATABASE_URL", "JWT_SECRET"];
     requiredEnvs.forEach((envName) => {
         if (!process.env[envName]) {
@@ -23,10 +29,10 @@ async function bootstrap() {
     });
     app.use(express.json({ limit: "10mb" }));
     app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-    app.useStaticAssets((0, path_1.join)(__dirname, "..", "..", "uploads"), {
+    app.useStaticAssets((0, path_1.join)(process.cwd(), "uploads"), {
         prefix: "/uploads/",
     });
-    app.useStaticAssets((0, path_1.join)(__dirname, "..", "..", "public"), {
+    app.useStaticAssets((0, path_1.join)(process.cwd(), "public"), {
         prefix: "/public/",
     });
     app.use((0, helmet_1.default)());

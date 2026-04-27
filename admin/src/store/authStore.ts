@@ -75,6 +75,8 @@ export const useAuthStore = create<AuthState>((set, get) => {
       localStorage.removeItem("token");
       localStorage.removeItem("activeCompanyId");
       localStorage.removeItem("demoSelectedRole");
+      localStorage.removeItem("supplio_demo_mode");
+      localStorage.removeItem("supplio_demo_full_access");
       set({
         user: null,
         token: null,

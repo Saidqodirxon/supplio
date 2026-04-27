@@ -1230,4 +1230,21 @@ export class SuperAdminService {
     );
     return { id };
   }
+
+  async getSaasTransactions(page = 1, limit = 50) {
+    const offset = (page - 1) * limit;
+    const rows = await this.prisma.$queryRaw<any[]>`
+      SELECT t.id, t."companyId", c.name as "companyName",
+             t."planKey", t.amount, t.provider, t.status,
+             t."externalId", t."paidAt", t."createdAt"
+      FROM "SaasTransaction" t
+      JOIN "Company" c ON c.id = t."companyId"
+      ORDER BY t."createdAt" DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+    const countRes = await this.prisma.$queryRaw<{ count: bigint }[]>`
+      SELECT COUNT(*) as count FROM "SaasTransaction"
+    `;
+    return { data: rows, total: Number(countRes[0].count), page, limit };
+  }
 }

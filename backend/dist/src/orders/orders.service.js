@@ -129,15 +129,25 @@ let OrdersService = class OrdersService {
             .catch(() => { });
         return createdOrder;
     }
-    async findAll(companyId) {
-        const orders = await this.prisma.order.findMany({
-            where: { companyId, deletedAt: null },
-            orderBy: { createdAt: "desc" },
-            include: {
-                dealer: { select: { name: true, phone: true } },
-                branch: { select: { name: true } },
-            },
-        });
+    async findAll(companyId, opts) {
+        const pageSize = Math.min(opts?.limit ?? 200, 500);
+        const skip = opts?.page && opts.page > 1 ? (opts.page - 1) * pageSize : 0;
+        const where = { companyId, deletedAt: null };
+        if (opts?.status && opts.status !== "ALL")
+            where.status = opts.status;
+        const [orders, total] = await Promise.all([
+            this.prisma.order.findMany({
+                where,
+                orderBy: { createdAt: "desc" },
+                skip,
+                take: pageSize,
+                include: {
+                    dealer: { select: { name: true, phone: true } },
+                    branch: { select: { name: true } },
+                },
+            }),
+            this.prisma.order.count({ where }),
+        ]);
         const productIdSet = new Set();
         for (const order of orders) {
             const items = order.items;
@@ -156,7 +166,7 @@ let OrdersService = class OrdersService {
             });
             products.forEach((p) => productMap.set(p.id, p.name));
         }
-        return orders.map((order) => {
+        const normalised = orders.map((order) => {
             const rawItems = order.items;
             const items = Array.isArray(rawItems)
                 ? rawItems.map((item) => ({
@@ -174,6 +184,7 @@ let OrdersService = class OrdersService {
                 : [];
             return { ...order, items };
         });
+        return { items: normalised, total, page: opts?.page ?? 1, pageSize };
     }
     async findByDealer(companyId, dealerId) {
         const orders = await this.prisma.order.findMany({

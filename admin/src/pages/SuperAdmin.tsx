@@ -61,6 +61,7 @@ import type { Locale } from "date-fns";
 import { formatPhoneNumber, unformatPhoneNumber } from "../utils/formatters";
 import ImageUploader from "../components/ImageUploader";
 import BotsTab from "./SuperAdmin/components/BotsTab";
+import SaasTransactionsTab from "./SuperAdmin/components/SaasTransactionsTab";
 
 const BACKEND = BACKEND_BASE_URL;
 const LANDING_PREVIEW_URL =
@@ -113,7 +114,8 @@ type TabId =
   | "upgrades"
   | "support"
   | "bots"
-  | "team";
+  | "team"
+  | "saas-transactions";
 
 const validTabs: TabId[] = [
   "overview",
@@ -131,6 +133,7 @@ const validTabs: TabId[] = [
   "notify",
   "upgrades",
   "bots",
+  "saas-transactions",
 ];
 
 const LEAD_STATUS_COLORS: Record<string, string> = {
@@ -749,6 +752,18 @@ export default function SuperAdmin() {
           color: "text-sky-600",
           bg: "bg-sky-50 dark:bg-sky-900/20",
           badge: adminBots.filter((b) => b.isActive).length || 0,
+        },
+        {
+          id: "saas-transactions",
+          label:
+            language === "ru"
+              ? "Транзакции"
+              : language === "en"
+                ? "Transactions"
+                : "Tranzaksiyalar",
+          icon: CreditCard,
+          color: "text-emerald-600",
+          bg: "bg-emerald-50 dark:bg-emerald-900/20",
         },
       ],
     },
@@ -4111,6 +4126,8 @@ export default function SuperAdmin() {
                 botsReloadingAll={botsReloadingAll}
                 setBotsReloadingAll={setBotsReloadingAll}
               />
+
+              {activeTab === "saas-transactions" && <SaasTransactionsTab />}
             </motion.div>
           </AnimatePresence>
         </div>

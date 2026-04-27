@@ -20,6 +20,8 @@ import { dashboardTranslations } from '../i18n/translations';
 import clsx from 'clsx';
 import { motion } from 'framer-motion';
 import UpgradeModal from '../components/UpgradeModal';
+import SubscriptionPaymentModal from '../components/SubscriptionPaymentModal';
+import CardManager from '../components/CardManager';
 import { usePlanLimits } from '../hooks/usePlanLimits';
 
 interface TariffPlan {
@@ -208,6 +210,7 @@ export default function Subscription() {
   const [tariffs, setTariffs] = useState<TariffPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [billingYearly, setBillingYearly] = useState(false);
+  const [paymentTariff, setPaymentTariff] = useState<TariffPlan | null>(null);
   const { language } = useAuthStore();
   const { showUpgrade, setShowUpgrade, upgradeReason, triggerUpgrade } = usePlanLimits();
   const t = dashboardTranslations[language];
@@ -585,7 +588,7 @@ export default function Subscription() {
                     </div>
                   ) : isUpgrade ? (
                     <button
-                      onClick={() => triggerUpgrade()}
+                      onClick={() => setPaymentTariff(tariff)}
                       className={clsx("w-full py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all bg-gradient-to-r text-white active:scale-95", gradient)}
                     >
                       <Zap className="w-3 h-3 inline mr-1" />
@@ -639,6 +642,8 @@ export default function Subscription() {
         </div>
       )}
 
+      <CardManager language={language} />
+
       <UpgradeModal
         isOpen={showUpgrade}
         onClose={() => setShowUpgrade(false)}
@@ -646,6 +651,17 @@ export default function Subscription() {
         currentPlan={info?.plan}
         language={language}
       />
+
+      {paymentTariff && (
+        <SubscriptionPaymentModal
+          isOpen={true}
+          onClose={() => setPaymentTariff(null)}
+          tariff={paymentTariff}
+          billingYearly={billingYearly}
+          language={language}
+          onSuccess={() => { setPaymentTariff(null); void (async () => { const res = await api.get<SubscriptionInfo>('/company/subscription'); setInfo(res.data); })(); }}
+        />
+      )}
     </div>
   );
 }

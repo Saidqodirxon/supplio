@@ -33,6 +33,7 @@ const store_module_1 = require("./store/store.module");
 const upload_module_1 = require("./upload/upload.module");
 const public_module_1 = require("./public/public.module");
 const support_module_1 = require("./support/support.module");
+const saas_payment_module_1 = require("./saas-payment/saas-payment.module");
 const app_controller_1 = require("./app.controller");
 const demo_readonly_middleware_1 = require("./common/middleware/demo-readonly.middleware");
 let AppModule = class AppModule {
@@ -69,6 +70,7 @@ exports.AppModule = AppModule = __decorate([
             upload_module_1.UploadModule,
             public_module_1.PublicModule,
             support_module_1.SupportModule,
+            saas_payment_module_1.SaasPaymentModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [demo_readonly_middleware_1.DemoReadonlyMiddleware],

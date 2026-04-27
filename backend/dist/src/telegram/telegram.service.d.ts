@@ -11,11 +11,11 @@ export declare class TelegramService implements OnModuleInit {
     private bots;
     private carts;
     private chatLangPrefs;
+    private navStack;
     constructor(prisma: PrismaService, loggerBot: TelegramLoggerService, planLimits: PlanLimitsService);
     onModuleInit(): Promise<void>;
     initializeBots(): Promise<void>;
     private translations;
-    private getT;
     private getPublicStoreBaseUrl;
     private isCompanyAccessBlocked;
     sendToAdmins(companyId: string, message: string): Promise<void>;
@@ -29,6 +29,10 @@ export declare class TelegramService implements OnModuleInit {
     initBot(botId: string, companyId: string, token: string, companyName: string): Promise<void>;
     private handleDebt;
     private handleProducts;
+    private handleCategoryList;
+    private handleSubcategoryList;
+    private handleProductList;
+    private handleProductDetail;
     private handleOrders;
     private handlePayments;
     private getCart;
@@ -42,6 +46,7 @@ export declare class TelegramService implements OnModuleInit {
         sent: number;
         failed: number;
     }>;
+    private resolveStatusLabel;
     sendOrderStatusUpdate(companyId: string, orderId: string, newStatus: string, dealerId: string, subStatus?: string): Promise<void>;
     private handleHelp;
     private resolveChatId;
@@ -181,4 +186,8 @@ export declare class TelegramService implements OnModuleInit {
         deleted: number;
     }>;
     stopAll(): Promise<void>;
+    private handlePendingDealersList;
+    private handleDealerApprovalAction;
+    notifyDealerPayment(companyId: string, dealerId: string, amount: number, type: "PAYMENT" | "ADJUSTMENT", note?: string): Promise<void>;
+    private notifyDealerWithLimit;
 }

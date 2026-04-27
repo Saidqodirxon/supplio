@@ -56,6 +56,12 @@ let DealersController = class DealersController {
     async unblock(req, id) {
         return this.dealersService.unblock(id, req.companyId);
     }
+    async resetCashback(req, id) {
+        return this.dealersService.resetCashback(id, req.companyId);
+    }
+    async getCashbackSummary(req) {
+        return this.dealersService.getCashbackSummary(req.companyId);
+    }
 };
 exports.DealersController = DealersController;
 __decorate([
@@ -139,6 +145,23 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], DealersController.prototype, "unblock", null);
+__decorate([
+    (0, common_1.Post)(":id/cashback/reset"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN", "OWNER", "MANAGER"),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)("id")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], DealersController.prototype, "resetCashback", null);
+__decorate([
+    (0, common_1.Get)("cashback/summary"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN", "OWNER", "MANAGER"),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], DealersController.prototype, "getCashbackSummary", null);
 exports.DealersController = DealersController = __decorate([
     (0, common_1.Controller)("dealers"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, tenant_guard_1.TenantGuard, roles_guard_1.RolesGuard),

@@ -15,50 +15,55 @@ export declare class OrdersController {
     constructor(ordersService: OrdersService);
     create(req: AuthenticatedRequest, body: any): Promise<{
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        branchId: string;
+        dealerId: string;
         totalAmount: number;
         totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
         subStatus: string | null;
         items: import("@prisma/client/runtime/library").JsonValue;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         note: string | null;
-        companyId: string;
-        dealerId: string;
-        branchId: string;
     }>;
-    findAll(req: AuthenticatedRequest): Promise<{
+    findAll(req: AuthenticatedRequest, page?: string, limit?: string, status?: string): Promise<{
         items: {
-            productId: any;
-            name: any;
-            qty: any;
-            unit: any;
-            price: any;
-            total: any;
+            items: {
+                productId: any;
+                name: any;
+                qty: any;
+                unit: any;
+                price: any;
+                total: any;
+            }[];
+            branch: {
+                name: string;
+            };
+            dealer: {
+                name: string;
+                phone: string;
+            };
+            id: string;
+            companyId: string;
+            createdAt: Date;
+            deletedAt: Date | null;
+            updatedAt: Date;
+            deletedBy: string | null;
+            status: import(".prisma/client").$Enums.OrderStatus;
+            branchId: string;
+            dealerId: string;
+            totalAmount: number;
+            totalCost: number;
+            subStatus: string | null;
+            note: string | null;
         }[];
-        branch: {
-            name: string;
-        };
-        dealer: {
-            name: string;
-            phone: string;
-        };
-        id: string;
-        totalAmount: number;
-        totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
-        subStatus: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
-        note: string | null;
-        companyId: string;
-        dealerId: string;
-        branchId: string;
-    }[]>;
+        total: number;
+        page: number;
+        pageSize: number;
+    }>;
     findByDealer(req: AuthenticatedRequest, dealerId: string): Promise<{
         items: {
             productId: any;
@@ -72,18 +77,18 @@ export declare class OrdersController {
             name: string;
         };
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        branchId: string;
+        dealerId: string;
         totalAmount: number;
         totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
         subStatus: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         note: string | null;
-        companyId: string;
-        dealerId: string;
-        branchId: string;
     }[]>;
     findOne(req: AuthenticatedRequest, id: string): Promise<{
         items: {
@@ -102,37 +107,37 @@ export declare class OrdersController {
             phone: string;
         };
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        branchId: string;
+        dealerId: string;
         totalAmount: number;
         totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
         subStatus: string | null;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         note: string | null;
-        companyId: string;
-        dealerId: string;
-        branchId: string;
     }>;
     updateStatus(req: AuthenticatedRequest, id: string, body: {
         status: string;
         subStatus?: string;
     }): Promise<{
         id: string;
+        companyId: string;
+        createdAt: Date;
+        deletedAt: Date | null;
+        updatedAt: Date;
+        deletedBy: string | null;
+        status: import(".prisma/client").$Enums.OrderStatus;
+        branchId: string;
+        dealerId: string;
         totalAmount: number;
         totalCost: number;
-        status: import(".prisma/client").$Enums.OrderStatus;
         subStatus: string | null;
         items: import("@prisma/client/runtime/library").JsonValue;
-        createdAt: Date;
-        updatedAt: Date;
-        deletedAt: Date | null;
-        deletedBy: string | null;
         note: string | null;
-        companyId: string;
-        dealerId: string;
-        branchId: string;
     }>;
 }
 export {};

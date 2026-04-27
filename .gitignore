@@ -6,4 +6,14 @@ build/
 node_modules/
 .env
 .env.local
+.env.production
 
+# Backups & generated SQL — never commit
+backend/backups/
+*.sql
+db_backup*.sql
+
+# Generated / local-only files
+dashboard/lint_output.json
+backend/tariffs-local.json
+mobile

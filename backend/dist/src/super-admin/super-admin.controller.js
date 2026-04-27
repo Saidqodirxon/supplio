@@ -247,6 +247,9 @@ let SuperAdminController = class SuperAdminController {
     async deleteTeamMember(id) {
         return this.superAdminService.deleteTeamMember(id);
     }
+    async getSaasTransactions(page = "1", limit = "50") {
+        return this.superAdminService.getSaasTransactions(Number(page), Number(limit));
+    }
 };
 exports.SuperAdminController = SuperAdminController;
 __decorate([
@@ -721,6 +724,15 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], SuperAdminController.prototype, "deleteTeamMember", null);
+__decorate([
+    (0, common_1.Get)("saas-transactions"),
+    (0, roles_decorator_1.Roles)("SUPER_ADMIN"),
+    __param(0, (0, common_1.Query)("page")),
+    __param(1, (0, common_1.Query)("limit")),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], SuperAdminController.prototype, "getSaasTransactions", null);
 exports.SuperAdminController = SuperAdminController = __decorate([
     (0, common_1.Controller)("super"),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

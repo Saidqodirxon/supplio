@@ -125,12 +125,7 @@ export default function Login() {
         password: password,
       });
 
-      let { user, token } = response.data;
-
-      // In demo mode, give full OWNER access regardless of actual role
-      if (isDemoMode && user) {
-        user.roleType = "OWNER";
-      }
+      const { user, token } = response.data;
 
       setAuth(user, token);
       navigate("/");

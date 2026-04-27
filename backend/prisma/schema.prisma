@@ -82,6 +82,8 @@ model Company {
   tiktok                String?
   youtube               String?
   supportTickets        SupportTicket[]
+  savedCards            SavedCard[]
+  saasTransactions      SaasTransaction[]
 }
 
 model SupportTicket {
@@ -592,6 +594,34 @@ model LandingContent {
   footerDescEn   String   @default("")
   footerDescTr   String   @default("")
   updatedAt      DateTime @updatedAt
+}
+
+model SavedCard {
+  id           String    @id @default(uuid())
+  companyId    String
+  paylovCardId String    @unique
+  last4        String
+  maskedExpire String
+  cardName     String    @default("My Card")
+  isDefault    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  deletedAt    DateTime?
+  company      Company   @relation(fields: [companyId], references: [id])
+}
+
+model SaasTransaction {
+  id         String    @id @default(uuid())
+  companyId  String
+  planKey    String
+  amount     Float
+  provider   String
+  status     String    @default("PENDING")
+  externalId String?
+  metadata   Json?
+  paidAt     DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  company    Company   @relation(fields: [companyId], references: [id])
 }
 
 model UpgradeRequest {

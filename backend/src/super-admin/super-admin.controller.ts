@@ -567,4 +567,13 @@ export class SuperAdminController {
   async deleteTeamMember(@Param("id") id: string) {
     return this.superAdminService.deleteTeamMember(id);
   }
+
+  @Get("saas-transactions")
+  @Roles("SUPER_ADMIN")
+  async getSaasTransactions(
+    @Query("page") page = "1",
+    @Query("limit") limit = "50",
+  ) {
+    return this.superAdminService.getSaasTransactions(Number(page), Number(limit));
+  }
 }

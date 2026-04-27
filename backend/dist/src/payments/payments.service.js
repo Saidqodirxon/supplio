@@ -12,19 +12,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const telegram_service_1 = require("../telegram/telegram.service");
 let PaymentsService = class PaymentsService {
-    constructor(prisma) {
+    constructor(prisma, telegram) {
         this.prisma = prisma;
+        this.telegram = telegram;
     }
     async create(companyId, data) {
-        return this.prisma.$transaction(async (tx) => {
+        const payment = await this.prisma.$transaction(async (tx) => {
             const dealer = await tx.dealer.findUnique({
                 where: { id: data.dealerId },
                 select: { branchId: true },
             });
             if (!dealer)
                 throw new common_1.BadRequestException("Dealer not found");
-            const payment = await tx.payment.create({
+            const p = await tx.payment.create({
                 data: {
                     companyId,
                     branchId: data.branchId ?? dealer.branchId,
@@ -50,11 +52,15 @@ let PaymentsService = class PaymentsService {
                 where: { id: data.dealerId },
                 data: { currentDebt: { decrement: data.amount } },
             });
-            return payment;
+            return p;
         });
+        this.telegram
+            .notifyDealerPayment(companyId, data.dealerId, data.amount, "PAYMENT", data.note)
+            .catch(() => { });
+        return payment;
     }
     async createAdjustment(companyId, data) {
-        return this.prisma.$transaction(async (tx) => {
+        const result = await this.prisma.$transaction(async (tx) => {
             const dealer = await tx.dealer.findUnique({
                 where: { id: data.dealerId },
                 select: { branchId: true },
@@ -77,6 +83,10 @@ let PaymentsService = class PaymentsService {
             });
             return { success: true, amount: data.amount, note: data.note };
         });
+        this.telegram
+            .notifyDealerPayment(companyId, data.dealerId, data.amount, "ADJUSTMENT", data.note)
+            .catch(() => { });
+        return result;
     }
     async findAll(companyId) {
         return this.prisma.payment.findMany({
@@ -119,6 +129,7 @@ let PaymentsService = class PaymentsService {
 exports.PaymentsService = PaymentsService;
 exports.PaymentsService = PaymentsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        telegram_service_1.TelegramService])
 ], PaymentsService);
 //# sourceMappingURL=payments.service.js.map

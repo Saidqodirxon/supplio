@@ -17,8 +17,13 @@ const common_1 = require("@nestjs/common");
 const platform_express_1 = require("@nestjs/platform-express");
 const multer_1 = require("multer");
 const path_1 = require("path");
+const fs_1 = require("fs");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const uuid_1 = require("uuid");
+const UPLOADS_DIR = (0, path_1.join)(process.cwd(), "uploads");
+if (!(0, fs_1.existsSync)(UPLOADS_DIR)) {
+    (0, fs_1.mkdirSync)(UPLOADS_DIR, { recursive: true });
+}
 let UploadController = class UploadController {
     uploadFile(file) {
         if (!file) {
@@ -36,15 +41,15 @@ __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.UseInterceptors)((0, platform_express_1.FileInterceptor)("file", {
         storage: (0, multer_1.diskStorage)({
-            destination: "./uploads",
+            destination: UPLOADS_DIR,
             filename: (req, file, cb) => {
                 const uniqueSuffix = (0, uuid_1.v4)();
                 cb(null, `${uniqueSuffix}${(0, path_1.extname)(file.originalname)}`);
             },
         }),
         fileFilter: (req, file, cb) => {
-            if (!file.mimetype.match(/\/(jpg|jpeg|png|gif)$/)) {
-                return cb(new common_1.BadRequestException("Only image files are allowed!"), false);
+            if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+                return cb(new common_1.BadRequestException("Only image files are allowed (jpg, png, gif, webp)"), false);
             }
             cb(null, true);
         },
