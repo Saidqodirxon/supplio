@@ -166,15 +166,26 @@ export class OrdersService {
     return createdOrder;
   }
 
-  async findAll(companyId: string) {
-    const orders = await this.prisma.order.findMany({
-      where: { companyId, deletedAt: null },
-      orderBy: { createdAt: "desc" },
-      include: {
-        dealer: { select: { name: true, phone: true } },
-        branch: { select: { name: true } },
-      },
-    });
+  async findAll(companyId: string, opts?: { page?: number; limit?: number; status?: string }) {
+    const pageSize = Math.min(opts?.limit ?? 200, 500);
+    const skip = opts?.page && opts.page > 1 ? (opts.page - 1) * pageSize : 0;
+
+    const where: any = { companyId, deletedAt: null };
+    if (opts?.status && opts.status !== "ALL") where.status = opts.status;
+
+    const [orders, total] = await Promise.all([
+      this.prisma.order.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: pageSize,
+        include: {
+          dealer: { select: { name: true, phone: true } },
+          branch: { select: { name: true } },
+        },
+      }),
+      this.prisma.order.count({ where }),
+    ]);
 
     // Collect all productIds referenced in items JSON so we can enrich with names in one query
     const productIdSet = new Set<string>();
@@ -197,7 +208,7 @@ export class OrdersService {
     }
 
     // Normalise items structure: qty vs quantity, add name if missing
-    return orders.map((order) => {
+    const normalised = orders.map((order) => {
       const rawItems = order.items as any[];
       const items = Array.isArray(rawItems)
         ? rawItems.map((item) => ({
@@ -217,6 +228,8 @@ export class OrdersService {
         : [];
       return { ...order, items };
     });
+
+    return { items: normalised, total, page: opts?.page ?? 1, pageSize };
   }
 
   async findByDealer(companyId: string, dealerId: string) {

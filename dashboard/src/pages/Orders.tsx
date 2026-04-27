@@ -12,6 +12,7 @@ import {
   Plus,
   Trash2,
   Loader2,
+  Printer,
 } from "lucide-react";
 import api from "../services/api";
 import type { Order, Dealer, Branch, Product } from "../types";
@@ -126,8 +127,16 @@ export default function Orders() {
     async (silent = false) => {
       try {
         if (!silent) setLoading(true);
-        const response = await api.get<Order[]>("/orders");
-        setOrders(Array.isArray(response.data) ? response.data : []);
+        const response = await api.get("/orders");
+        const data = response.data;
+        // Handle both old array format and new paginated format
+        if (Array.isArray(data)) {
+          setOrders(data);
+        } else if (data?.items) {
+          setOrders(Array.isArray(data.items) ? data.items : []);
+        } else {
+          setOrders([]);
+        }
       } catch (err: unknown) {
         if (!silent) {
           setError(t.common.error);
@@ -316,6 +325,59 @@ export default function Orders() {
       toast.error(e?.response?.data?.message ?? t.orders.failedToUpdateStatus);
     } finally {
       setUpdatingStatus(false);
+    }
+  };
+
+  const printReceipt = (order: Order) => {
+    const date = format(new Date(order.createdAt), "dd.MM.yyyy HH:mm");
+    const itemRows = (order.items ?? [])
+      .map(
+        (item) =>
+          `<tr>
+            <td style="padding:4px 8px;border-bottom:1px solid #eee">${item.name}</td>
+            <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:center">${item.qty} ${item.unit}</td>
+            <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right">${item.price.toLocaleString()}</td>
+            <td style="padding:4px 8px;border-bottom:1px solid #eee;text-align:right;font-weight:700">${(item.qty * item.price).toLocaleString()}</td>
+          </tr>`
+      )
+      .join("");
+
+    const html = `<!DOCTYPE html><html><head><meta charset="utf-8"/>
+      <title>Chek #${order.id.slice(0, 8).toUpperCase()}</title>
+      <style>
+        body{font-family:monospace;max-width:320px;margin:0 auto;padding:16px;font-size:13px}
+        h2{text-align:center;margin:0 0 4px}
+        .center{text-align:center}
+        .sep{border:none;border-top:1px dashed #000;margin:8px 0}
+        table{width:100%;border-collapse:collapse}
+        th{font-size:10px;text-transform:uppercase;padding:4px 8px;border-bottom:2px solid #000;text-align:left}
+        .total{font-size:16px;font-weight:900;text-align:right;padding:8px 8px 0}
+      </style></head><body>
+      <h2>SUPPLIO</h2>
+      <p class="center" style="margin:0;font-size:11px">Buyurtma kvitansiyasi</p>
+      <hr class="sep"/>
+      <p style="margin:2px 0"><b>№:</b> #${order.id.slice(0, 8).toUpperCase()}</p>
+      <p style="margin:2px 0"><b>Diler:</b> ${order.dealer?.name ?? "—"} ${order.dealer?.phone ? "(" + order.dealer.phone + ")" : ""}</p>
+      <p style="margin:2px 0"><b>Filial:</b> ${order.branch?.name ?? "—"}</p>
+      <p style="margin:2px 0"><b>Sana:</b> ${date}</p>
+      <hr class="sep"/>
+      <table>
+        <thead><tr>
+          <th>Mahsulot</th><th style="text-align:center">Miqdor</th><th style="text-align:right">Narx</th><th style="text-align:right">Jami</th>
+        </tr></thead>
+        <tbody>${itemRows}</tbody>
+      </table>
+      <hr class="sep"/>
+      <div class="total">JAMI: ${order.totalAmount.toLocaleString()} so'm</div>
+      <hr class="sep"/>
+      <p class="center" style="font-size:10px;margin:4px 0">supplio.uz</p>
+      <script>window.onload=()=>{window.print();}</script>
+      </body></html>`;
+
+    const win = window.open("", "_blank", "width=400,height=600");
+    if (win) {
+      win.document.write(html);
+      win.document.close();
     }
   };
 
@@ -748,12 +810,21 @@ export default function Orders() {
                     #{detailOrder.id.slice(0, 8).toUpperCase()}
                   </p>
                 </div>
-                <button
-                  onClick={() => setShowDetail(false)}
-                  className="p-2 rounded-xl hover:bg-slate-100 transition-all"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => printReceipt(detailOrder)}
+                    title="Chek chiqarish"
+                    className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-600 transition-all"
+                  >
+                    <Printer className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setShowDetail(false)}
+                    className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               <div className="p-10 space-y-8 flex-1">

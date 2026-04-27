@@ -17,6 +17,8 @@ export class TelegramService implements OnModuleInit {
   // carts[companyId][chatId][productId] = qty
   private carts: Map<string, Map<string, Map<string, number>>> = new Map();
   private chatLangPrefs: Map<string, string> = new Map();
+  // navStack[chatId] = last list callback_data (for "back" from product detail)
+  private navStack: Map<string, string> = new Map();
 
   constructor(
     private prisma: PrismaService,
@@ -97,6 +99,7 @@ export class TelegramService implements OnModuleInit {
       checkoutEmpty: "🛒 Savat bo'sh. Avval mahsulot tanlang.",
       limitExceeded: "⚠️ Kredit limiti yetarli emas! Avval qarzni to'lang.",
       kbdCart: "🛒 Savat",
+      kbdBack: "Menyu",
     },
     oz: {
       welcome:
@@ -149,6 +152,7 @@ export class TelegramService implements OnModuleInit {
       checkoutEmpty: "🛒 Сават бўш. Аввал маҳсулот танланг.",
       limitExceeded: "⚠️ Кредит лимити етарли эмас! Аввал қарзни тўланг.",
       kbdCart: "🛒 Сават",
+      kbdBack: "Менью",
     },
     ru: {
       welcome:
@@ -200,6 +204,7 @@ export class TelegramService implements OnModuleInit {
       limitExceeded:
         "⚠️ Недостаточно кредитного лимита! Сначала погасите долг.",
       kbdCart: "🛒 Корзина",
+      kbdBack: "Меню",
     },
     tr: {
       welcome: "Merhaba!\nSipariş vermek için telefon numaranızı gönderin.",
@@ -250,6 +255,7 @@ export class TelegramService implements OnModuleInit {
       checkoutEmpty: "🛒 Sepet boş. Önce ürün seçin.",
       limitExceeded: "⚠️ Kredi limiti yetersiz! Önce borcunuzu ödeyin.",
       kbdCart: "🛒 Sepet",
+      kbdBack: "Menü",
     },
     en: {
       welcome: "Hello!\nTo start ordering, please share your phone number.",
@@ -301,12 +307,10 @@ export class TelegramService implements OnModuleInit {
       limitExceeded:
         "⚠️ Insufficient credit limit! Please pay your debt first.",
       kbdCart: "🛒 Cart",
+      kbdBack: "Menu",
     },
   };
 
-  private getT(lang: string = "uz") {
-    return this.translations[lang] ?? this.translations["uz"];
-  }
 
   private getPublicStoreBaseUrl() {
     return (
@@ -1226,82 +1230,255 @@ export class TelegramService implements OnModuleInit {
     await ctx.reply(text, { parse_mode: "Markdown", reply_markup: backOpts });
   }
 
-  private async handleProducts(ctx: Context, companyId: string, page = 0) {
+  // ─── Product navigation helpers ───────────────────────────────────────────
+
+  private async handleProducts(ctx: Context, companyId: string) {
+    await this.handleCategoryList(ctx, companyId);
+  }
+
+  /** Step 1: Show category list (or flat list if no categories) */
+  private async handleCategoryList(ctx: Context, companyId: string) {
     const dealer = await this.getDealerByChatId(ctx, companyId);
     if (!dealer) return;
-
     const t = this.getLangFromCtx(ctx);
-    const PAGE_SIZE = 5;
 
-    const [products, total] = await Promise.all([
-      this.prisma.product.findMany({
-        where: { companyId, deletedAt: null, stock: { gt: 0 } },
-        orderBy: { name: "asc" },
-        skip: page * PAGE_SIZE,
-        take: PAGE_SIZE,
-      }),
-      this.prisma.product.count({
-        where: { companyId, deletedAt: null, stock: { gt: 0 } },
-      }),
-    ]);
+    const categories = await this.prisma.category.findMany({
+      where: { companyId, deletedAt: null },
+      orderBy: { name: "asc" },
+    });
 
-    const backOpts = {
-      inline_keyboard: [[{ text: "🔙 Menyu", callback_data: "menu:back" }]],
-    };
+    const backRow = [{ text: "🔙 " + (t.kbdBack ?? "Menyu"), callback_data: "menu:back" }];
 
-    if (total === 0) {
-      try {
-        await (ctx as any).editMessageText(t.noProducts, { reply_markup: backOpts });
-      } catch {
-        await ctx.reply(t.noProducts, { reply_markup: backOpts });
-      }
+    if (categories.length === 0) {
+      await this.handleProductList(ctx, companyId, {}, "menu:back");
       return;
     }
 
-    const totalPages = Math.ceil(total / PAGE_SIZE);
-    const from = page * PAGE_SIZE + 1;
-    const to = Math.min((page + 1) * PAGE_SIZE, total);
+    const catButtons = categories.map((c) => [
+      { text: `📂 ${c.name}`, callback_data: `cat:sel:${c.id}` },
+    ]);
 
-    let msg = `📦 *Mahsulotlar* (${from}–${to} / ${total}):\n\n`;
-    const productButtons: { text: string; callback_data: string }[][] = [];
-
-    products.forEach((p, i) => {
-      const num = page * PAGE_SIZE + i + 1;
-      const effectivePrice = (p as any).discountPrice ?? p.price;
-      const isPromo = (p as any).isPromo && (p as any).discountPrice;
-      msg += `*${num}. ${p.name}*${isPromo ? " 🔥" : ""}\n`;
-      msg += `   💵 ${effectivePrice.toLocaleString()} so'm / ${p.unit} | 📦 ${p.stock} ${p.unit}\n\n`;
-      productButtons.push([
-        { text: `${num}. ${t.addToCart} (+1)`, callback_data: `add:${p.id}:1` },
-        { text: "+5", callback_data: `add:${p.id}:5` },
-        { text: "+10", callback_data: `add:${p.id}:10` },
-      ]);
-    });
-
-    const navRow: { text: string; callback_data: string }[] = [];
-    if (page > 0) navRow.push({ text: "◀️ Oldingi", callback_data: `prod:page:${page - 1}` });
-    navRow.push({ text: `${page + 1}/${totalPages}`, callback_data: "noop" });
-    if (page < totalPages - 1) navRow.push({ text: "Keyingi ▶️", callback_data: `prod:page:${page + 1}` });
+    const lang = this.chatLangPrefs.get(this.resolveChatId(ctx)) ?? "uz";
+    const title = lang === "ru" ? "📦 *Категории:*" : lang === "en" ? "📦 *Categories:*" : "📦 *Kategoriyalar:*";
+    const allBtn = lang === "ru" ? "📦 Все товары" : lang === "en" ? "📦 All products" : "📦 Barcha mahsulotlar";
 
     const keyboard = [
-      ...productButtons,
-      navRow,
-      [
-        { text: t.kbdCart || "🛒 Savat", callback_data: "menu:cart" },
-        { text: "🔙 Menyu", callback_data: "menu:back" },
-      ],
+      ...catButtons,
+      [{ text: allBtn, callback_data: "prod:all:0" }],
+      backRow,
     ];
 
     const msgOpts = {
       parse_mode: "Markdown" as const,
       reply_markup: { inline_keyboard: keyboard },
     };
-
     try {
-      await (ctx as any).editMessageText(msg, msgOpts);
+      await (ctx as any).editMessageText(title, msgOpts);
     } catch {
-      await ctx.reply(msg, msgOpts);
+      await ctx.reply(title, msgOpts);
     }
+  }
+
+  /** Step 2: Show subcategory list for a category (or products if no subcats) */
+  private async handleSubcategoryList(ctx: Context, companyId: string, catId: string) {
+    const dealer = await this.getDealerByChatId(ctx, companyId);
+    if (!dealer) return;
+    const lang = this.chatLangPrefs.get(this.resolveChatId(ctx)) ?? "uz";
+
+    const [category, subcats] = await Promise.all([
+      this.prisma.category.findFirst({ where: { id: catId, companyId } }),
+      this.prisma.subcategory.findMany({
+        where: { categoryId: catId, companyId, deletedAt: null },
+        orderBy: { name: "asc" },
+      }),
+    ]);
+
+    const backLabel = lang === "ru" ? "◀️ Категории" : lang === "en" ? "◀️ Categories" : "◀️ Kategoriyalar";
+
+    if (subcats.length === 0) {
+      await this.handleProductList(ctx, companyId, { catId, page: 0 }, "cat:list");
+      return;
+    }
+
+    const allLabel = lang === "ru" ? `📦 Все в «${category?.name ?? ""}»` : lang === "en" ? `📦 All in «${category?.name ?? ""}»` : `📦 Barchasi «${category?.name ?? ""}»`;
+    const title = lang === "ru" ? `📂 *${category?.name ?? ""}*` : `📂 *${category?.name ?? ""}*`;
+
+    const keyboard = [
+      ...subcats.map((s) => [{ text: `📋 ${s.name}`, callback_data: `sub:sel:${s.id}` }]),
+      [{ text: allLabel, callback_data: `prod:cat:${catId}:0` }],
+      [{ text: backLabel, callback_data: "cat:list" }],
+    ];
+
+    const msgOpts = {
+      parse_mode: "Markdown" as const,
+      reply_markup: { inline_keyboard: keyboard },
+    };
+    try {
+      await (ctx as any).editMessageText(title, msgOpts);
+    } catch {
+      await ctx.reply(title, msgOpts);
+    }
+  }
+
+  /** Step 3: Show paginated product list (flat / by category / by subcategory) */
+  private async handleProductList(
+    ctx: Context,
+    companyId: string,
+    opts: { catId?: string; subcatId?: string; page?: number },
+    backCb = "cat:list"
+  ) {
+    const dealer = await this.getDealerByChatId(ctx, companyId);
+    if (!dealer) return;
+    const t = this.getLangFromCtx(ctx);
+    const chatId = this.resolveChatId(ctx);
+    const lang = this.chatLangPrefs.get(chatId) ?? "uz";
+    const page = opts.page ?? 0;
+    const PAGE_SIZE = 5;
+
+    const where: any = { companyId, deletedAt: null, isActive: true, stock: { gt: 0 } };
+    if (opts.subcatId) where.subcategoryId = opts.subcatId;
+    else if (opts.catId) where.categoryId = opts.catId;
+
+    const [products, total] = await Promise.all([
+      this.prisma.product.findMany({
+        where,
+        orderBy: { name: "asc" },
+        skip: page * PAGE_SIZE,
+        take: PAGE_SIZE,
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    const backRow = [{ text: "🔙 " + (lang === "ru" ? "Назад" : lang === "en" ? "Back" : "Orqaga"), callback_data: backCb }];
+
+    if (total === 0) {
+      const msgOpts = { parse_mode: "Markdown" as const, reply_markup: { inline_keyboard: [backRow] } };
+      try { await (ctx as any).editMessageText(t.noProducts, msgOpts); } catch { await ctx.reply(t.noProducts, msgOpts); }
+      return;
+    }
+
+    const totalPages = Math.ceil(total / PAGE_SIZE);
+    const from = page * PAGE_SIZE + 1;
+    const to = Math.min((page + 1) * PAGE_SIZE, total);
+    const titleLabel = lang === "ru" ? "Товары" : lang === "en" ? "Products" : "Mahsulotlar";
+    let msg = `📦 *${titleLabel}* (${from}–${to} / ${total}):\n\n`;
+
+    // Build this list's callback for navStack (so product detail can go back here)
+    let listCb: string;
+    if (opts.subcatId) listCb = `prod:sub:${opts.subcatId}:${page}`;
+    else if (opts.catId) listCb = `prod:cat:${opts.catId}:${page}`;
+    else listCb = `prod:all:${page}`;
+    this.navStack.set(chatId, listCb);
+
+    const keyboard: { text: string; callback_data: string }[][] = [];
+
+    products.forEach((p, i) => {
+      const num = page * PAGE_SIZE + i + 1;
+      const effectivePrice = (p as any).discountPrice ?? p.price;
+      const isPromo = (p as any).isPromo && (p as any).discountPrice;
+      msg += `*${num}. ${p.name}*${isPromo ? " 🔥" : ""}\n`;
+      msg += `   💵 ${effectivePrice.toLocaleString()} so'm / ${p.unit}`;
+      msg += `  |  📦 ${p.stock} ${p.unit}\n`;
+      if (p.description) msg += `   _${p.description.slice(0, 60)}_\n`;
+      msg += "\n";
+
+      const viewLabel = lang === "ru" ? "🔍 Подробнее" : lang === "en" ? "🔍 Details" : "🔍 Batafsil";
+      keyboard.push([
+        { text: viewLabel, callback_data: `pv:${p.id}` },
+        { text: `🛒 +1`, callback_data: `add:${p.id}:1` },
+        { text: "+5", callback_data: `add:${p.id}:5` },
+        { text: "+10", callback_data: `add:${p.id}:10` },
+      ]);
+    });
+
+    const navRow: { text: string; callback_data: string }[] = [];
+    let prevCb: string, nextCb: string;
+    if (opts.subcatId) {
+      prevCb = `prod:sub:${opts.subcatId}:${page - 1}`;
+      nextCb = `prod:sub:${opts.subcatId}:${page + 1}`;
+    } else if (opts.catId) {
+      prevCb = `prod:cat:${opts.catId}:${page - 1}`;
+      nextCb = `prod:cat:${opts.catId}:${page + 1}`;
+    } else {
+      prevCb = `prod:all:${page - 1}`;
+      nextCb = `prod:all:${page + 1}`;
+    }
+    if (page > 0) navRow.push({ text: "◀️", callback_data: prevCb });
+    navRow.push({ text: `${page + 1}/${totalPages}`, callback_data: "noop" });
+    if (page < totalPages - 1) navRow.push({ text: "▶️", callback_data: nextCb });
+
+    keyboard.push(navRow);
+    keyboard.push([
+      { text: t.kbdCart ?? "🛒 Savat", callback_data: "menu:cart" },
+      backRow[0],
+    ]);
+
+    const msgOpts = {
+      parse_mode: "Markdown" as const,
+      reply_markup: { inline_keyboard: keyboard },
+    };
+    try { await (ctx as any).editMessageText(msg, msgOpts); } catch { await ctx.reply(msg, msgOpts); }
+  }
+
+  /** Step 4: Show single product detail with image */
+  private async handleProductDetail(ctx: Context, companyId: string, productId: string) {
+    const dealer = await this.getDealerByChatId(ctx, companyId);
+    if (!dealer) return;
+    const chatId = this.resolveChatId(ctx);
+    const lang = this.chatLangPrefs.get(chatId) ?? "uz";
+    const backCb = this.navStack.get(chatId) ?? "cat:list";
+
+    const p = await this.prisma.product.findFirst({
+      where: { id: productId, companyId, deletedAt: null },
+    });
+    if (!p) return;
+
+    const effectivePrice = (p as any).discountPrice ?? p.price;
+    const isPromo = (p as any).isPromo && (p as any).discountPrice;
+
+    const backLabel = lang === "ru" ? "◀️ Назад" : lang === "en" ? "◀️ Back" : "◀️ Orqaga";
+    const addLabel = lang === "ru" ? "🛒 В корзину" : lang === "en" ? "🛒 Add to cart" : "🛒 Savatga";
+    const cartLabel = lang === "ru" ? "🛒 Корзина" : lang === "en" ? "🛒 Cart" : "🛒 Savat";
+
+    const priceLabel = lang === "ru" ? "Цена" : lang === "en" ? "Price" : "Narx";
+    const stockLabel = lang === "ru" ? "Склад" : lang === "en" ? "Stock" : "Ombor";
+    const skuLabel = "SKU";
+
+    let caption =
+      `📦 *${p.name}*${isPromo ? " 🔥" : ""}\n\n` +
+      `💵 *${priceLabel}:* ${effectivePrice.toLocaleString()} so'm / ${p.unit}\n`;
+    if (isPromo) caption += `~~${p.price.toLocaleString()}~~ → *${effectivePrice.toLocaleString()}* so'm\n`;
+    caption += `📦 *${stockLabel}:* ${p.stock} ${p.unit}\n`;
+    if (p.sku) caption += `${skuLabel}: \`${p.sku}\`\n`;
+    if (p.description) caption += `\n_${p.description}_`;
+
+    const keyboard = {
+      inline_keyboard: [
+        [
+          { text: `${addLabel} (+1)`, callback_data: `add:${p.id}:1` },
+          { text: "+5", callback_data: `add:${p.id}:5` },
+          { text: "+10", callback_data: `add:${p.id}:10` },
+        ],
+        [
+          { text: cartLabel, callback_data: "menu:cart" },
+          { text: backLabel, callback_data: backCb },
+        ],
+      ],
+    };
+
+    if (p.imageUrl) {
+      try {
+        await (ctx as any).replyWithPhoto(p.imageUrl, {
+          caption,
+          parse_mode: "Markdown",
+          reply_markup: keyboard,
+        });
+        return;
+      } catch {
+        // Fall through to text reply if image fails
+      }
+    }
+    await ctx.reply(caption, { parse_mode: "Markdown", reply_markup: keyboard });
   }
 
   private async handleOrders(ctx: Context, companyId: string, editMsg = false) {
@@ -1331,18 +1508,19 @@ export class TelegramService implements OnModuleInit {
       return ctx.reply(t.noOrders, { reply_markup: backOpts });
     }
 
+    const company = await this.prisma.company.findUnique({
+      where: { id: companyId },
+      select: { dealerStatusLabels: true },
+    });
+    const customLabels = (company?.dealerStatusLabels as Record<string, string> | null) ?? null;
+
     let msg = `${t.recentOrders}\n\n`;
     for (const order of orders) {
       const date = order.createdAt.toLocaleDateString("uz-UZ");
-      const statusIcon =
-        order.status === "DELIVERED"
-          ? "✅"
-          : order.status === "PENDING"
-            ? "⏳"
-            : "📦";
-      msg += `${statusIcon} *#${order.id.slice(-6).toUpperCase()}*\n`;
+      const statusText = this.resolveStatusLabel(String(order.status), customLabels);
+      msg += `*#${order.id.slice(-6).toUpperCase()}*\n`;
       msg += `   📅 ${date} | 💰 ${order.totalAmount.toLocaleString()} so'm\n`;
-      msg += `   📊 ${order.status}\n\n`;
+      msg += `   📊 ${statusText}\n\n`;
     }
 
     if (editMsg) {
@@ -1575,10 +1753,78 @@ export class TelegramService implements OnModuleInit {
         return;
       }
 
+      // Legacy compat
       if (data.startsWith("prod:page:")) {
         await safeAnswer();
         const pageNum = parseInt(data.split(":")[2], 10) || 0;
-        await this.handleProducts(ctx, companyId, pageNum);
+        await this.handleProductList(ctx, companyId, { page: pageNum }, "cat:list");
+        return;
+      }
+
+      // Category list
+      if (data === "cat:list") {
+        await safeAnswer();
+        await this.handleCategoryList(ctx, companyId);
+        return;
+      }
+
+      // Select category → show subcategories
+      if (data.startsWith("cat:sel:")) {
+        await safeAnswer();
+        const catId = data.slice("cat:sel:".length);
+        await this.handleSubcategoryList(ctx, companyId, catId);
+        return;
+      }
+
+      // Select subcategory → show products
+      if (data.startsWith("sub:sel:")) {
+        await safeAnswer();
+        const subcatId = data.slice("sub:sel:".length);
+        const subcat = await this.prisma.subcategory.findFirst({
+          where: { id: subcatId, companyId },
+          select: { categoryId: true },
+        });
+        await this.handleProductList(ctx, companyId, { subcatId, page: 0 }, subcat ? `cat:sel:${subcat.categoryId}` : "cat:list");
+        return;
+      }
+
+      // Product list: flat all
+      if (data.startsWith("prod:all:")) {
+        await safeAnswer();
+        const page = parseInt(data.split(":")[2], 10) || 0;
+        await this.handleProductList(ctx, companyId, { page }, "cat:list");
+        return;
+      }
+
+      // Product list: by category
+      if (data.startsWith("prod:cat:")) {
+        await safeAnswer();
+        const parts = data.split(":");
+        const catId = parts[2];
+        const page = parseInt(parts[3], 10) || 0;
+        await this.handleProductList(ctx, companyId, { catId, page }, `cat:sel:${catId}`);
+        return;
+      }
+
+      // Product list: by subcategory
+      if (data.startsWith("prod:sub:")) {
+        await safeAnswer();
+        const parts = data.split(":");
+        const subcatId = parts[2];
+        const page = parseInt(parts[3], 10) || 0;
+        const subcat = await this.prisma.subcategory.findFirst({
+          where: { id: subcatId, companyId },
+          select: { categoryId: true },
+        });
+        await this.handleProductList(ctx, companyId, { subcatId, page }, subcat ? `cat:sel:${subcat.categoryId}` : "cat:list");
+        return;
+      }
+
+      // Product detail
+      if (data.startsWith("pv:")) {
+        await safeAnswer();
+        const productId = data.slice("pv:".length);
+        await this.handleProductDetail(ctx, companyId, productId);
         return;
       }
 
@@ -1617,25 +1863,19 @@ export class TelegramService implements OnModuleInit {
           });
         }
         if (action === "dealers") {
-          const pending = await (
-            this.prisma as any
-          ).dealerApprovalRequest.findMany({
-            where: { companyId, status: "PENDING" },
-            include: { dealer: true }, // Assuming relation includes dealer
-          });
-          if (!pending || pending.length === 0) {
-            await (ctx as any).reply(
-              `✅ Hozirda tasdiqlash uchun yangi dilerlar yo'q.`
-            );
-          } else {
-            let msg = `👥 Kutilayotgan dilerlar:\n`;
-            for (const req of pending) {
-              msg += `• ${req.dealer.name} (${req.dealer.phone})\n`;
-            }
-            msg += `\nUshbu dilerlarni Admin Paneldan tasdiqlashingiz mumkin.`;
-            await (ctx as any).reply(msg);
-          }
+          await this.handlePendingDealersList(ctx, companyId);
         }
+        return;
+      }
+
+      // Dealer approval/rejection from admin bot
+      if (data.startsWith("dap:")) {
+        await safeAnswer();
+        const parts = data.split(":");
+        const act = parts[1]; // approve | reject
+        const dealerId = parts[2];
+        const limitStr = parts[3]; // credit limit (may be "0")
+        await this.handleDealerApprovalAction(ctx, companyId, act, dealerId, parseInt(limitStr ?? "0", 10));
         return;
       }
 
@@ -2054,6 +2294,22 @@ export class TelegramService implements OnModuleInit {
     return { sent, failed };
   }
 
+  /** Resolve human-readable status label, using company custom labels if set */
+  private resolveStatusLabel(status: string, customLabels: Record<string, string> | null): string {
+    if (customLabels?.[status]) return customLabels[status];
+    const defaults: Record<string, string> = {
+      PENDING: "⏳ Kutilmoqda",
+      ACCEPTED: "✅ Qabul qilindi",
+      PREPARING: "🔧 Tayyorlanmoqda",
+      SHIPPED: "🚚 Yuborildi",
+      DELIVERED: "📦 Yetkazildi",
+      COMPLETED: "✅ Yakunlandi",
+      CANCELLED: "❌ Bekor qilindi",
+      RETURNED: "↩️ Qaytarildi",
+    };
+    return defaults[String(status).toUpperCase()] ?? status;
+  }
+
   /** Send order status update notification to the dealer */
   async sendOrderStatusUpdate(
     companyId: string,
@@ -2062,9 +2318,10 @@ export class TelegramService implements OnModuleInit {
     dealerId: string,
     subStatus?: string
   ) {
-    const botRecord = await this.prisma.customBot.findFirst({
-      where: { companyId, isActive: true, deletedAt: null },
-    });
+    const [botRecord, company] = await Promise.all([
+      this.prisma.customBot.findFirst({ where: { companyId, isActive: true, deletedAt: null } }),
+      this.prisma.company.findUnique({ where: { id: companyId }, select: { dealerStatusLabels: true } }),
+    ]);
     if (!botRecord) return;
 
     const bot = this.bots.get(botRecord.id);
@@ -2076,36 +2333,27 @@ export class TelegramService implements OnModuleInit {
     });
     if (!dealer?.telegramChatId) return;
 
-    const statusEmoji: Record<string, string> = {
-      PENDING: "⏳",
-      ACCEPTED: "✅",
-      PREPARING: "🔧",
-      SHIPPED: "🚚",
-      DELIVERED: "📦",
-      COMPLETED: "✅",
-      CANCELLED: "❌",
-      RETURNED: "↩️",
-    };
+    const customLabels = (company?.dealerStatusLabels as Record<string, string> | null) ?? null;
+    const statusText = this.resolveStatusLabel(newStatus, customLabels);
 
+    const statusEmoji: Record<string, string> = {
+      PENDING: "⏳", ACCEPTED: "✅", PREPARING: "🔧",
+      SHIPPED: "🚚", DELIVERED: "📦", COMPLETED: "✅",
+      CANCELLED: "❌", RETURNED: "↩️",
+    };
     const emoji = statusEmoji[newStatus] ?? "📋";
+
     let msg =
       `${emoji} *Buyurtma holati yangilandi*\n\n` +
       `📋 Buyurtma: *#${orderId.slice(-6).toUpperCase()}*\n` +
-      `📊 Yangi holat: *${newStatus}*`;
-
-    if (subStatus) {
-      msg += `\n📝 Izoh: *${subStatus}*`;
-    }
+      `📊 Yangi holat: *${statusText}*`;
+    if (subStatus) msg += `\n📝 Izoh: *${subStatus}*`;
 
     try {
-      await bot.telegram.sendMessage(dealer.telegramChatId, msg, {
-        parse_mode: "Markdown",
-      });
+      await bot.telegram.sendMessage(dealer.telegramChatId, msg, { parse_mode: "Markdown" });
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
-      this.logger.warn(
-        `Could not notify dealer ${dealerId} of status update: ${message}`
-      );
+      this.logger.warn(`Could not notify dealer ${dealerId} of status update: ${message}`);
     }
   }
 
@@ -2814,9 +3062,168 @@ export class TelegramService implements OnModuleInit {
   }
 
   async stopAll() {
-    for (const [id, bot] of this.bots) {
+    for (const [, bot] of this.bots) {
       bot.stop("shutdown");
     }
     this.bots.clear();
+  }
+
+  // ─── Dealer approval helpers ───────────────────────────────────────────────
+
+  /** Show list of pending dealers with per-dealer Approve / Reject buttons */
+  private async handlePendingDealersList(ctx: Context, companyId: string) {
+    const pending = await (this.prisma as any).dealerApprovalRequest.findMany({
+      where: { companyId, status: "PENDING" },
+      include: { dealer: true },
+    });
+
+    if (!pending || pending.length === 0) {
+      await (ctx as any).reply(`✅ Hozirda tasdiqlash kutilayotgan dilerlar yo'q.`);
+      return;
+    }
+
+    for (const req of pending) {
+      const d = req.dealer;
+      const msg =
+        `🔔 *Yangi diler so'rovi*\n\n` +
+        `👤 Ism: *${d.name}*\n` +
+        `📞 Tel: ${d.phone}\n` +
+        `🆔 ID: \`${d.id.slice(-8).toUpperCase()}\``;
+
+      await (ctx as any).reply(msg, {
+        parse_mode: "Markdown",
+        reply_markup: {
+          inline_keyboard: [
+            [
+              { text: "✅ Tasdiqlash (limsiz)", callback_data: `dap:approve:${d.id}:0` },
+            ],
+            [
+              { text: "✅ 1M limit", callback_data: `dap:approve:${d.id}:1000000` },
+              { text: "✅ 5M limit", callback_data: `dap:approve:${d.id}:5000000` },
+            ],
+            [
+              { text: "✅ 10M limit", callback_data: `dap:approve:${d.id}:10000000` },
+              { text: "✅ 20M limit", callback_data: `dap:approve:${d.id}:20000000` },
+            ],
+            [
+              { text: "❌ Rad etish", callback_data: `dap:reject:${d.id}:0` },
+            ],
+          ],
+        },
+      });
+    }
+  }
+
+  /** Approve or reject a dealer from the admin bot */
+  private async handleDealerApprovalAction(
+    ctx: Context,
+    companyId: string,
+    action: string,
+    dealerId: string,
+    creditLimit: number
+  ) {
+    const dealer = await this.prisma.dealer.findFirst({
+      where: { id: dealerId, companyId },
+    });
+    if (!dealer) {
+      await (ctx as any).reply("❌ Diler topilmadi.");
+      return;
+    }
+
+    if (action === "approve") {
+      await this.prisma.dealer.update({
+        where: { id: dealerId },
+        data: {
+          isApproved: true,
+          approvedAt: new Date(),
+          ...(creditLimit > 0 ? { creditLimit } : {}),
+        },
+      });
+      await (this.prisma as any).dealerApprovalRequest.updateMany({
+        where: { dealerId, status: "PENDING" },
+        data: { status: "APPROVED", reviewedAt: new Date() },
+      });
+
+      const limitText = creditLimit > 0 ? ` | Limit: ${creditLimit.toLocaleString()} so'm` : " | Limit: Cheksiz";
+      await (ctx as any).reply(
+        `✅ *${dealer.name}* tasdiqlandi!${limitText}`,
+        { parse_mode: "Markdown" }
+      );
+
+      await this.notifyDealerWithLimit(companyId, dealerId, true, creditLimit);
+    } else {
+      await this.prisma.dealer.update({
+        where: { id: dealerId },
+        data: { deletedAt: new Date() },
+      });
+      await (this.prisma as any).dealerApprovalRequest.updateMany({
+        where: { dealerId, status: "PENDING" },
+        data: { status: "REJECTED", reviewedAt: new Date() },
+      });
+
+      await (ctx as any).reply(
+        `❌ *${dealer.name}* rad etildi va o'chirildi.`,
+        { parse_mode: "Markdown" }
+      );
+
+      await this.notifyDealerWithLimit(companyId, dealerId, false, 0);
+    }
+  }
+
+  /** Notify dealer when a payment or adjustment is recorded */
+  async notifyDealerPayment(
+    companyId: string,
+    dealerId: string,
+    amount: number,
+    type: "PAYMENT" | "ADJUSTMENT",
+    note?: string
+  ) {
+    const botRecord = await this.prisma.customBot.findFirst({
+      where: { companyId, isActive: true, deletedAt: null },
+    });
+    if (!botRecord) return;
+    const bot = this.bots.get(botRecord.id);
+    if (!bot) return;
+
+    const dealer = await this.prisma.dealer.findFirst({
+      where: { id: dealerId, companyId },
+      select: { telegramChatId: true, name: true, currentDebt: true },
+    });
+    if (!dealer?.telegramChatId) return;
+
+    const isPositive = amount > 0;
+    const emoji = type === "PAYMENT" ? "💳" : isPositive ? "➕" : "➖";
+    const typeLabel = type === "PAYMENT" ? "To'lov qabul qilindi" : isPositive ? "Balans to'ldirildi" : "Balansdan ayirildi";
+    const amtStr = `${Math.abs(amount).toLocaleString()} so'm`;
+    const newDebt = Math.max(0, (dealer.currentDebt ?? 0) - amount);
+
+    let msg = `${emoji} *${typeLabel}*\n\n` +
+      `👤 ${dealer.name}\n` +
+      `💰 Miqdor: *${isPositive ? "+" : "-"}${amtStr}*\n` +
+      `📊 Joriy qarz: *${newDebt.toLocaleString()} so'm*`;
+    if (note) msg += `\n📝 Izoh: ${note}`;
+
+    await bot.telegram.sendMessage(dealer.telegramChatId, msg, { parse_mode: "Markdown" }).catch(() => {});
+  }
+
+  private async notifyDealerWithLimit(companyId: string, dealerId: string, approved: boolean, creditLimit: number) {
+    const botRecord = await this.prisma.customBot.findFirst({
+      where: { companyId, isActive: true, deletedAt: null },
+    });
+    if (!botRecord) return;
+    const bot = this.bots.get(botRecord.id);
+    if (!bot) return;
+    const dealer = await this.prisma.dealer.findFirst({
+      where: { id: dealerId, companyId },
+      select: { telegramChatId: true, name: true },
+    });
+    if (!dealer?.telegramChatId) return;
+
+    const limitLine = creditLimit > 0 ? `\n💳 Kredit limit: *${creditLimit.toLocaleString()} so'm*` : "";
+    const msg = approved
+      ? `✅ *${dealer.name}*, so'rovingiz tasdiqlandi!${limitLine}\n\nDavom etish uchun /start bosing.`
+      : `❌ *${dealer.name}*, so'rovingiz rad etildi.\nDistributor bilan bog'laning.`;
+
+    await bot.telegram.sendMessage(dealer.telegramChatId, msg, { parse_mode: "Markdown" }).catch(() => {});
   }
 }

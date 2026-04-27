@@ -6,6 +6,7 @@ import {
   Body,
   Req,
   Param,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { OrdersService } from "./orders.service";
@@ -40,8 +41,17 @@ export class OrdersController {
 
   @Get()
   @Roles("SUPER_ADMIN", "OWNER", "MANAGER", "SALES", "DELIVERY", "SELLER")
-  async findAll(@Req() req: AuthenticatedRequest) {
-    return this.ordersService.findAll(req.companyId);
+  async findAll(
+    @Req() req: AuthenticatedRequest,
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+    @Query("status") status?: string,
+  ) {
+    return this.ordersService.findAll(req.companyId, {
+      page: page ? parseInt(page, 10) : undefined,
+      limit: limit ? parseInt(limit, 10) : undefined,
+      status,
+    });
   }
 
   @Get("dealer/:dealerId")

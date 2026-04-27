@@ -1,22 +1,26 @@
 import { Injectable, BadRequestException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
+import { TelegramService } from "../telegram/telegram.service";
 
 @Injectable()
 export class PaymentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private telegram: TelegramService,
+  ) {}
 
   async create(
     companyId: string,
     data: { dealerId: string; amount: number; method: string; reference?: string; note?: string; branchId?: string }
   ) {
-    return this.prisma.$transaction(async (tx) => {
+    const payment = await this.prisma.$transaction(async (tx) => {
       const dealer = await tx.dealer.findUnique({
         where: { id: data.dealerId },
         select: { branchId: true },
       });
       if (!dealer) throw new BadRequestException("Dealer not found");
 
-      const payment = await tx.payment.create({
+      const p = await tx.payment.create({
         data: {
           companyId,
           branchId: data.branchId ?? dealer.branchId,
@@ -28,7 +32,6 @@ export class PaymentsService {
         },
       });
 
-      // Ledger: PAYMENT reduces debt
       await tx.ledgerTransaction.create({
         data: {
           companyId,
@@ -41,14 +44,20 @@ export class PaymentsService {
         },
       });
 
-      // Sync denormalised currentDebt (decrement by payment amount)
       await tx.dealer.update({
         where: { id: data.dealerId },
         data: { currentDebt: { decrement: data.amount } },
       });
 
-      return payment;
+      return p;
     });
+
+    // Notify dealer via Telegram (fire-and-forget)
+    this.telegram
+      .notifyDealerPayment(companyId, data.dealerId, data.amount, "PAYMENT", data.note)
+      .catch(() => {});
+
+    return payment;
   }
 
   /**
@@ -61,7 +70,7 @@ export class PaymentsService {
     companyId: string,
     data: { dealerId: string; amount: number; note: string; branchId?: string }
   ) {
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const dealer = await tx.dealer.findUnique({
         where: { id: data.dealerId },
         select: { branchId: true },
@@ -79,7 +88,6 @@ export class PaymentsService {
         },
       });
 
-      // For ADJUSTMENT: positive amount reduces debt (credit), negative increases debt
       await tx.dealer.update({
         where: { id: data.dealerId },
         data: { currentDebt: { decrement: data.amount } },
@@ -87,6 +95,13 @@ export class PaymentsService {
 
       return { success: true, amount: data.amount, note: data.note };
     });
+
+    // Notify dealer via Telegram
+    this.telegram
+      .notifyDealerPayment(companyId, data.dealerId, data.amount, "ADJUSTMENT", data.note)
+      .catch(() => {});
+
+    return result;
   }
 
   async findAll(companyId: string) {

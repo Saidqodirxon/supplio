@@ -5,10 +5,17 @@ import { ValidationPipe, Logger } from "@nestjs/common";
 import { GlobalExceptionFilter } from "./common/filters/global-exception.filter";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { join } from "path";
+import { existsSync, mkdirSync } from "fs";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import * as express from "express";
 
 async function bootstrap() {
+  // Ensure upload directories exist
+  ["uploads", "public"].forEach((dir) => {
+    const p = join(process.cwd(), dir);
+    if (!existsSync(p)) mkdirSync(p, { recursive: true });
+  });
+
   // Required Env Validation
   const requiredEnvs = ["DATABASE_URL", "JWT_SECRET"];
   requiredEnvs.forEach((envName) => {
@@ -29,11 +36,11 @@ async function bootstrap() {
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-  // Static assets — __dirname is dist/src, so go up two levels
-  app.useStaticAssets(join(__dirname, "..", "..", "uploads"), {
+  // Static assets served from CWD (works in both dev and prod/Docker)
+  app.useStaticAssets(join(process.cwd(), "uploads"), {
     prefix: "/uploads/",
   });
-  app.useStaticAssets(join(__dirname, "..", "..", "public"), {
+  app.useStaticAssets(join(process.cwd(), "public"), {
     prefix: "/public/",
   });
 

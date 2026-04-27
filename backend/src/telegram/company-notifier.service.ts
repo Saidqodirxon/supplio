@@ -66,7 +66,8 @@ export class CompanyNotifierService implements OnModuleInit {
     }
   }
 
-  private statusLabel(status: string) {
+  private statusLabel(status: string, customLabels?: Record<string, string> | null): string {
+    if (customLabels?.[status]) return customLabels[status];
     const map: Record<string, string> = {
       PENDING: "Kutilmoqda",
       ACCEPTED: "Qabul qilindi",
@@ -189,8 +190,13 @@ export class CompanyNotifierService implements OnModuleInit {
       changedAt?: Date;
     }
   ) {
-    const info = await this.getInfo(companyId);
+    const [info, company] = await Promise.all([
+      this.getInfo(companyId),
+      this.prisma.company.findUnique({ where: { id: companyId }, select: { dealerStatusLabels: true } }),
+    ]);
     if (!info) return;
+
+    const customLabels = (company?.dealerStatusLabels as Record<string, string> | null) ?? null;
 
     const editor = payload.editorId
       ? await this.prisma.user
@@ -212,7 +218,7 @@ export class CompanyNotifierService implements OnModuleInit {
     const text =
       `📌 *Buyurtma holati o'zgartirildi* ${this.tag(info.slug, "ORDER_STATUS")}\n` +
       `🆔 Buyurtma: \`${payload.orderId.slice(-8).toUpperCase()}\`\n` +
-      `🔄 Holat: *${this.statusLabel(payload.oldStatus)}* → *${this.statusLabel(payload.newStatus)}*\n` +
+      `🔄 Holat: *${this.statusLabel(payload.oldStatus, customLabels)}* → *${this.statusLabel(payload.newStatus, customLabels)}*\n` +
       `👤 O'zgartirgan: *${editorName}*\n` +
       `🛡 Rol: *${editorRole}*\n` +
       `⏱ Vaqt: ${changedAt.toLocaleString("uz-UZ")}`;

@@ -21,9 +21,12 @@ import { toast } from "../utils/toast";
 import clsx from "clsx";
 import { pageTranslations } from "../i18n/translations";
 
+interface CashbackDealer { id: string; name: string; phone: string; cashbackBalance: number }
+
 interface CompanyInfo {
   name: string;
   slug: string;
+  logo: string | null;
   website: string | null;
   instagram: string | null;
   telegram: string | null;
@@ -48,6 +51,7 @@ export default function Profile() {
   const [photoUrl, setPhotoUrl] = useState(user?.photoUrl || "");
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Password
   const [pwForm, setPwForm] = useState({ current: "", next: "", confirm: "" });
@@ -63,6 +67,10 @@ export default function Profile() {
   const [loadingCompany, setLoadingCompany] = useState(isOwner);
   const [savingCompany, setSavingCompany] = useState(false);
 
+  // Cashback
+  const [cashbackData, setCashbackData] = useState<{ dealers: CashbackDealer[]; total: number } | null>(null);
+  const [resettingCashback, setResettingCashback] = useState<string | null>(null);
+
   useEffect(() => {
     setFullName(user?.fullName || "");
     setPhotoUrl(user?.photoUrl || "");
@@ -75,19 +83,60 @@ export default function Profile() {
       .then((r) => setCompany(r.data))
       .catch(() => {})
       .finally(() => setLoadingCompany(false));
+    api
+      .get("/dealers/cashback/summary")
+      .then((r) => setCashbackData(r.data))
+      .catch(() => {});
   }, [isOwner]);
+
+  const handleResetCashback = async (dealerId: string) => {
+    try {
+      setResettingCashback(dealerId);
+      await api.post(`/dealers/${dealerId}/cashback/reset`);
+      setCashbackData((prev) =>
+        prev
+          ? {
+              dealers: prev.dealers.filter((d) => d.id !== dealerId),
+              total: prev.dealers.filter((d) => d.id !== dealerId).reduce((s, d) => s + d.cashbackBalance, 0),
+            }
+          : prev
+      );
+      toast.success(t.cashbackReset ?? "Cashback reset");
+    } catch {
+      toast.error(t.error);
+    } finally {
+      setResettingCashback(null);
+    }
+  };
+
+  const handleToggleCashback = async () => {
+    if (!company) return;
+    const newPct = company.cashbackPercent > 0 ? 0 : 5;
+    try {
+      await api.patch("/company/me", { cashbackPercent: newPct });
+      setCompany({ ...company, cashbackPercent: newPct });
+      toast.success(t.saved);
+    } catch {
+      toast.error(t.error);
+    }
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await api.post("/upload/image", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data.url as string;
+  };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const form = new FormData();
-    form.append("file", file);
+    e.target.value = "";
     try {
       setUploadingPhoto(true);
-      const res = await api.post("/upload/image", form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      const url = res.data.url;
+      const url = await uploadImage(file);
       setPhotoUrl(url);
       await api.patch("/auth/profile", { photoUrl: url });
       updateUser({ photoUrl: url });
@@ -96,6 +145,23 @@ export default function Profile() {
       toast.error(t.error);
     } finally {
       setUploadingPhoto(false);
+    }
+  };
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !company) return;
+    e.target.value = "";
+    try {
+      setUploadingLogo(true);
+      const url = await uploadImage(file);
+      await api.patch("/company/me", { logo: url });
+      setCompany({ ...company, logo: url });
+      toast.success(t.logoUpdated);
+    } catch {
+      toast.error(t.error);
+    } finally {
+      setUploadingLogo(false);
     }
   };
 
@@ -282,6 +348,33 @@ export default function Profile() {
             </div>
           ) : company ? (
             <form onSubmit={handleSaveCompany} className="space-y-4">
+              {/* Company Logo */}
+              <div className="flex items-center gap-6 pb-2">
+                <div className="relative group shrink-0">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-lg">
+                    {uploadingLogo ? (
+                      <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+                    ) : company.logo ? (
+                      <img
+                        src={company.logo}
+                        alt="logo"
+                        className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                      />
+                    ) : (
+                      <Building2 className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+                    )}
+                    <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center cursor-pointer backdrop-blur-sm">
+                      <Camera className="w-5 h-5 text-white" />
+                      <input type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                    </label>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-black text-slate-900 dark:text-white">{t.companyLogo}</p>
+                  <p className="text-xs text-slate-400">{t.logoHint}</p>
+                </div>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
@@ -418,6 +511,102 @@ export default function Profile() {
             </form>
           ) : (
             <p className="text-sm text-slate-400">{t.notFound}</p>
+          )}
+        </div>
+      )}
+
+      {/* ── Cashback Management (OWNER only) ── */}
+      {isOwner && company !== null && (
+        <div className="glass-card p-8 border border-slate-100 dark:border-white/5 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                <span className="text-base">🎁</span>
+              </div>
+              <h2 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+                {t.cashbackTitle}
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={handleToggleCashback}
+              className={clsx(
+                "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all",
+                company.cashbackPercent > 0
+                  ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-300 text-emerald-700 dark:text-emerald-400"
+                  : "bg-slate-100 dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-500"
+              )}
+            >
+              {company.cashbackPercent > 0
+                ? `✅ ${t.cashbackPercent}: ${company.cashbackPercent}%`
+                : `⭕ ${t.cashbackToggleOff}`}
+            </button>
+          </div>
+
+          {company.cashbackPercent > 0 && (
+            <div className="flex items-center gap-3">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest w-28">
+                {t.cashbackPercent}
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={50}
+                step={0.5}
+                value={company.cashbackPercent}
+                onChange={(e) => setCompany({ ...company, cashbackPercent: parseFloat(e.target.value) || 0 })}
+                className="input-field w-28"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  api.patch("/company/me", { cashbackPercent: company.cashbackPercent })
+                    .then(() => toast.success(t.saved))
+                    .catch(() => toast.error(t.error))
+                }
+                className="px-4 py-2 premium-gradient text-white rounded-xl font-black text-[10px] uppercase tracking-widest"
+              >
+                {t.save}
+              </button>
+            </div>
+          )}
+
+          {/* Dealer cashback balances */}
+          {cashbackData && cashbackData.dealers.length > 0 ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-xs font-black text-slate-500 uppercase tracking-widest">{t.cashbackTotal}</span>
+                <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                  {cashbackData.total.toLocaleString()} so'm
+                </span>
+              </div>
+              {cashbackData.dealers.map((d) => (
+                <div
+                  key={d.id}
+                  className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl"
+                >
+                  <div>
+                    <p className="text-sm font-black text-slate-900 dark:text-white">{d.name}</p>
+                    <p className="text-xs text-slate-400">{d.phone}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                      {d.cashbackBalance.toLocaleString()} so'm
+                    </span>
+                    <button
+                      type="button"
+                      disabled={resettingCashback === d.id}
+                      onClick={() => handleResetCashback(d.id)}
+                      className="px-3 py-1.5 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 rounded-xl text-[10px] font-black uppercase tracking-widest disabled:opacity-50"
+                    >
+                      {resettingCashback === d.id ? <Loader2 className="w-3 h-3 animate-spin" /> : t.cashbackResetBtn}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-slate-400">{t.cashbackEmpty}</p>
           )}
         </div>
       )}

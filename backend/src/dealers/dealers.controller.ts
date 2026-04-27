@@ -87,4 +87,16 @@ export class DealersController {
   async unblock(@Req() req: AuthenticatedRequest, @Param("id") id: string) {
     return this.dealersService.unblock(id, req.companyId);
   }
+
+  @Post(":id/cashback/reset")
+  @Roles("SUPER_ADMIN", "OWNER", "MANAGER")
+  async resetCashback(@Req() req: AuthenticatedRequest, @Param("id") id: string) {
+    return this.dealersService.resetCashback(id, req.companyId);
+  }
+
+  @Get("cashback/summary")
+  @Roles("SUPER_ADMIN", "OWNER", "MANAGER")
+  async getCashbackSummary(@Req() req: AuthenticatedRequest) {
+    return this.dealersService.getCashbackSummary(req.companyId);
+  }
 }
