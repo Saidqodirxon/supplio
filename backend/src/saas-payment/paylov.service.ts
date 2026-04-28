@@ -19,6 +19,7 @@ export class PaylovService {
   private readonly consumerSecret = process.env.PAYLOV_CONSUMER_SECRET;
   readonly merchantId = process.env.PAYLOV_MERCHANT_ID;
   private readonly checkoutUrl = process.env.PAYLOV_CHECKOUT_URL || 'https://my.paylov.uz';
+  private readonly currency = process.env.PAYLOV_CURRENCY || 'UZS';
 
   constructor() {
     this.client = axios.create({ baseURL: this.baseUrl, timeout: 15000 });
@@ -86,9 +87,18 @@ export class PaylovService {
         err.response?.data?.message ||
         err.response?.data?.detail ||
         err.message;
+      // Sanitize outgoing request body before logging (mask card numbers).
+      const safeRequest = (() => {
+        if (!data || typeof data !== 'object') return data;
+        const clone: any = { ...data };
+        if (typeof clone.cardNumber === 'string' && clone.cardNumber.length === 16) {
+          clone.cardNumber = `${clone.cardNumber.slice(0, 4)}********${clone.cardNumber.slice(-4)}`;
+        }
+        return clone;
+      })();
       this.logger.error(
-        `Paylov API error [${method} ${path}]`,
-        { status: err.response?.status, body: JSON.stringify(err.response?.data), detail },
+        `Paylov API error [${method} ${path}] status=${err.response?.status} detail=${detail} ` +
+        `request=${JSON.stringify(safeRequest)} response=${JSON.stringify(err.response?.data)}`,
       );
       throw new BadRequestException(detail || 'Paylov API error');
     }
@@ -137,20 +147,29 @@ export class PaylovService {
 
   generateCheckoutLink(amount: number, returnUrl: string, orderId: string): string {
     if (!this.merchantId) throw new InternalServerErrorException('PAYLOV_MERCHANT_ID not configured');
+    if (!returnUrl) throw new BadRequestException('returnUrl is required');
+    if (!orderId) throw new BadRequestException('orderId is required');
+
     const numAmount = Number(amount);
-    if (!numAmount || isNaN(numAmount) || numAmount <= 0)
+    if (!Number.isFinite(numAmount) || numAmount <= 0)
       throw new BadRequestException(`Invalid amount: ${amount}`);
 
-    // Paylov expects a URL query string (not JSON) encoded as base64
-    const params = new URLSearchParams({
+    // Paylov checkout expects base64-encoded JSON.
+    // `currency` is required — its absence is what causes the checkout
+    // page to render "0 undefined".
+    const payload = {
       merchant_id: this.merchantId,
-      amount: String(numAmount),
-      return_url: returnUrl,
-      'account.order_id': orderId,
-    });
-    const encoded = Buffer.from(params.toString()).toString('base64');
+      amount:      numAmount,
+      currency:    this.currency,
+      return_url:  returnUrl,
+      account:     { order_id: orderId },
+    };
+    const encoded = Buffer.from(JSON.stringify(payload)).toString('base64');
     const link = `${this.checkoutUrl}/checkout/create/${encoded}`;
-    this.logger.log(`Paylov checkout link → orderId=${orderId} amount=${numAmount} link=${link}`);
+    this.logger.log(
+      `Paylov checkout link → orderId=${orderId} amount=${numAmount} ` +
+      `currency=${this.currency} link=${link}`,
+    );
     return link;
   }
 }

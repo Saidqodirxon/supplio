@@ -84,6 +84,7 @@ model Company {
   supportTickets        SupportTicket[]
   savedCards            SavedCard[]
   saasTransactions      SaasTransaction[]
+  clickOrders           ClickOrder[]
 }
 
 model SupportTicket {
@@ -233,6 +234,7 @@ model Dealer {
   notificationLogs NotificationLog[]
   orders           Order[]
   payments         Payment[]
+  clickOrders      ClickOrder[]
 
   @@unique([companyId, phone])
 }
@@ -594,6 +596,41 @@ model LandingContent {
   footerDescEn   String   @default("")
   footerDescTr   String   @default("")
   updatedAt      DateTime @updatedAt
+}
+
+// ─── Click Payment ────────────────────────────────────────────────────────────
+// Covers all 3 integration types: URL redirect, Shop API, Service/Billing API.
+
+model ClickOrder {
+  id           String        @id @default(uuid())
+  companyId    String
+  dealerId     String?
+  provider     ClickProvider
+  amount       Float
+  status       ClickStatus   @default(PENDING)
+  clickTransId String?       @unique
+  prepareId    String?       // merchant_prepare_id returned on Prepare step
+  description  String?
+  returnUrl    String?
+  metadata     Json?
+  paidAt       DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  company      Company       @relation(fields: [companyId], references: [id])
+  dealer       Dealer?       @relation(fields: [dealerId], references: [id])
+}
+
+enum ClickProvider {
+  CLICK_URL
+  CLICK_SHOP
+  CLICK_SERVICE
+}
+
+enum ClickStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
 }
 
 model SavedCard {

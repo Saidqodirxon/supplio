@@ -49,14 +49,19 @@ export class ClickService {
   }
 
   // ─── Signature verification ───────────────────────────────────────────────
-  // Formula: MD5(click_trans_id + service_id + secret_key + merchant_trans_id
-  //              + amount + action + sign_time)
+  // Click uses different sign_string formulas per action (per Click Merchant API spec):
+  //   PREPARE  (action=0): MD5(click_trans_id + service_id + secret_key
+  //                        + merchant_trans_id + amount + action + sign_time)
+  //   COMPLETE (action=1): MD5(click_trans_id + service_id + secret_key
+  //                        + merchant_trans_id + merchant_prepare_id + amount
+  //                        + action + sign_time)
 
   verifyCallback(body: Record<string, any>): boolean {
     const {
       click_trans_id,
       service_id,
       merchant_trans_id,
+      merchant_prepare_id,
       amount,
       action,
       sign_time,
@@ -69,12 +74,22 @@ export class ClickService {
       return false;
     }
 
-    const raw      = `${click_trans_id}${service_id}${this.secretKey}${merchant_trans_id}${amount}${action}${sign_time}`;
+    const actionNum = Number(action);
+    let raw: string;
+    if (actionNum === ClickService.ACTION_PREPARE) {
+      raw = `${click_trans_id}${service_id}${this.secretKey}${merchant_trans_id}${amount}${action}${sign_time}`;
+    } else if (actionNum === ClickService.ACTION_COMPLETE) {
+      raw = `${click_trans_id}${service_id}${this.secretKey}${merchant_trans_id}${merchant_prepare_id}${amount}${action}${sign_time}`;
+    } else {
+      this.logger.warn(`Click: unknown action ${action}`);
+      return false;
+    }
+
     const expected = crypto.createHash('md5').update(raw).digest('hex');
-    const ok       = expected === sign_string;
+    const ok       = expected === String(sign_string).toLowerCase();
 
     if (!ok) {
-      this.logger.warn(`Click: signature mismatch for txId=${merchant_trans_id}`);
+      this.logger.warn(`Click: signature mismatch for txId=${merchant_trans_id} action=${actionNum}`);
     }
     return ok;
   }
